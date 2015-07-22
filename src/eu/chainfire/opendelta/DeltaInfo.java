@@ -1,6 +1,6 @@
 /* 
  * Copyright (C) 2013-2014 Jorrit "Chainfire" Jongma
- * Copyright (C) 2013-2014 The OmniROM Project
+ * Copyright (C) 2013-2015 The OmniROM Project
  */
 /* 
  * This file is part of OpenDelta.
@@ -151,6 +151,20 @@ public class DeltaInfo {
                         return getStoreSigned();
             }
             return null;
+        }
+
+        public boolean isOfficialFile(File f) {
+            if (f.exists()) {
+                return f.length() == getOfficial().getSize();
+            }
+            return false;
+        }
+
+        public boolean isSignedFile(File f) {
+            if (f.exists()) {
+                return f.length() == getStoreSigned().getSize();
+            }
+            return false;
         }
     }
 

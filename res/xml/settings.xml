@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (C) 2015 The OmniROM Project
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+	<PreferenceCategory
+		android:key="category_flashing"
+		android:title="@string/category_flashing" >
+		<CheckBoxPreference
+			android:defaultValue="true"
+			android:key="secure_mode"
+			android:persistent="false"
+			android:title="@string/secure_mode_title" />
+	</PreferenceCategory>
+	<PreferenceCategory
+		android:key="category_scheduler"
+		android:title="@string/category_scheduler" >
+		<ListPreference
+			android:defaultValue="1"
+			android:entries="@array/scheduler_actions_keys"
+			android:entryValues="@array/scheduler_actions_values"
+			android:key="auto_download_actions"
+			android:title="@string/auto_download_title" />
+		<ListPreference
+			android:defaultValue="0"
+			android:entries="@array/scheduler_mode_keys"
+			android:entryValues="@array/scheduler_mode_values"
+			android:key="scheduler_mode"
+			android:title="@string/scheduler_mode_title" />
+
+		<Preference
+			android:key="scheduler_daily_time"
+			android:persistent="false"
+			android:title="@string/scheduler_daily_time" />
+	</PreferenceCategory>
+	<PreferenceCategory
+		android:key="category_download"
+		android:title="@string/category_download" >
+		<Preference
+			android:key="networks_config"
+			android:persistent="false"
+			android:summary="@string/networks_message"
+			android:title="@string/networks_title" />
+
+		<CheckBoxPreference
+			android:defaultValue="true"
+			android:key="screen_state_off"
+			android:summary="@string/screen_state_message"
+			android:title="@string/screen_state_title" />
+		<CheckBoxPreference
+			android:defaultValue="true"
+			android:key="charge_only"
+			android:summary="@string/charge_only_message"
+			android:title="@string/charge_only_title" />
+
+		<ListPreference
+			android:defaultValue="50"
+			android:entries="@array/battery_level_keys"
+			android:entryValues="@array/battery_level_values"
+			android:key="battery_level_string"
+			android:title="@string/battery_level_title" />
+	</PreferenceCategory>
+
+</PreferenceScreen>

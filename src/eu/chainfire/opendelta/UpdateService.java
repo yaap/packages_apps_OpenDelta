@@ -1,6 +1,6 @@
 /* 
  * Copyright (C) 2013-2014 Jorrit "Chainfire" Jongma
- * Copyright (C) 2013-2014 The OmniROM Project
+ * Copyright (C) 2013-2015 The OmniROM Project
  */
 /* 
  * This file is part of OpenDelta.
@@ -20,6 +20,38 @@
  */
 
 package eu.chainfire.opendelta;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
+import java.math.BigInteger;
+import java.net.UnknownHostException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
@@ -43,45 +75,18 @@ import android.os.StatFs;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
-
 import eu.chainfire.opendelta.BatteryState.OnBatteryStateListener;
+import eu.chainfire.opendelta.DeltaInfo.ProgressListener;
 import eu.chainfire.opendelta.NetworkState.OnNetworkStateListener;
 import eu.chainfire.opendelta.Scheduler.OnWantUpdateCheckListener;
 import eu.chainfire.opendelta.ScreenState.OnScreenStateListener;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.json.JSONException;
+public class UpdateService extends Service implements OnNetworkStateListener,
+OnBatteryStateListener, OnScreenStateListener,
+OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
+    private static final int HTTP_SOCKET_TIMEOUT = 30000;
+    private static final int HTTP_CONNECTION_TIMEOUT = 30000;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
-public class UpdateService
-        extends
-        Service
-        implements
-        OnNetworkStateListener,
-        OnBatteryStateListener,
-        OnScreenStateListener,
-        OnWantUpdateCheckListener,
-        OnSharedPreferenceChangeListener
-{
     public static void start(Context context) {
         start(context, null);
     }
@@ -92,6 +97,14 @@ public class UpdateService
 
     public static void startFlash(Context context) {
         start(context, ACTION_FLASH);
+    }
+
+    public static void startBuild(Context context) {
+        start(context, ACTION_BUILD);
+    }
+
+    public static void startUpdate(Context context) {
+        start(context, ACTION_UPDATE);
     }
 
     private static void start(Context context, String action) {
@@ -132,24 +145,32 @@ public class UpdateService
     public static final String STATE_ACTION_READY = "action_ready";
     public static final String STATE_ERROR_DISK_SPACE = "error_disk_space";
     public static final String STATE_ERROR_UNKNOWN = "error_unknown";
+    public static final String STATE_ERROR_UNOFFICIAL = "error_unofficial";
+    public static final String STATE_ACTION_BUILD = "action_build";
+    public static final String STATE_ERROR_DOWNLOAD = "error_download";
 
     private static final String ACTION_CHECK = "eu.chainfire.opendelta.action.CHECK";
     private static final String ACTION_FLASH = "eu.chainfire.opendelta.action.FLASH";
     private static final String ACTION_ALARM = "eu.chainfire.opendelta.action.ALARM";
     private static final String EXTRA_ALARM_ID = "eu.chainfire.opendelta.extra.ALARM_ID";
     private static final String ACTION_NOTIFICATION_DELETED = "eu.chainfire.opendelta.action.NOTIFICATION_DELETED";
+    private static final String ACTION_BUILD = "eu.chainfire.opendelta.action.BUILD";
+    private static final String ACTION_UPDATE = "eu.chainfire.opendelta.action.UPDATE";
 
     private static final int NOTIFICATION_BUSY = 1;
     private static final int NOTIFICATION_UPDATE = 2;
+    private static final int NOTIFICATION_ERROR = 3;
 
-    private static final String PREF_READY_FILENAME_NAME = "ready_filename";
-    private static final String PREF_READY_FILENAME_DEFAULT = null;
+    public static final String PREF_READY_FILENAME_NAME = "ready_filename";
+    public static final String PREF_READY_FILENAME_DEFAULT = null;
 
     private static final String PREF_LAST_CHECK_TIME_NAME = "last_check_time";
     private static final long PREF_LAST_CHECK_TIME_DEFAULT = 0L;
 
     private static final String PREF_LAST_SNOOZE_TIME_NAME = "last_snooze_time";
     private static final long PREF_LAST_SNOOZE_TIME_DEFAULT = 0L;
+    // we only snooze until a new build
+    private static final String PREF_SNOOZE_UPDATE_NAME = "last_snooze_update";
 
     private static final long SNOOZE_MS = 24 * AlarmManager.INTERVAL_HOUR;
 
@@ -157,11 +178,18 @@ public class UpdateService
     public static final int PREF_AUTO_UPDATE_NETWORKS_DEFAULT = NetworkState.ALLOW_WIFI
             | NetworkState.ALLOW_ETHERNET;
 
-    public static boolean isStateBusy(String state) {
-        return !(state.equals(STATE_ACTION_NONE) ||
-                state.equals(STATE_ACTION_READY) ||
-                state.equals(STATE_ERROR_UNKNOWN) || state.equals(STATE_ERROR_DISK_SPACE));
-    }
+    public static final String PREF_LATEST_FULL_NAME = "latest_full_name";
+    public static final String PREF_LATEST_DELTA_NAME = "latest_delta_name";
+    public static final String PREF_STOP_DOWNLOAD = "stop_download";
+    public static final String PREF_DOWNLOAD_SIZE = "download_size";
+    public static final String PREF_DELTA_SIGNATURE = "delta_signature";
+
+    public static final int PREF_AUTO_DOWNLOAD_DISABLED = 0;
+    public static final String PREF_AUTO_DOWNLOAD_DISABLED_STRING = String.valueOf(PREF_AUTO_DOWNLOAD_DISABLED);
+    public static final int PREF_AUTO_DOWNLOAD_CHECK = 1;
+    public static final String PREF_AUTO_DOWNLOAD_CHECK_STRING = String.valueOf(PREF_AUTO_DOWNLOAD_CHECK);
+    public static final int PREF_AUTO_DOWNLOAD_DELTA = 2;
+    public static final int PREF_AUTO_DOWNLOAD_FULL = 3;
 
     private Config config;
 
@@ -180,6 +208,8 @@ public class UpdateService
     private WifiManager.WifiLock wifiLock = null;
 
     private NotificationManager notificationManager = null;
+    private boolean stopDownload;
+    private boolean updateRunning;
     private SharedPreferences prefs = null;
 
     /*
@@ -188,13 +218,15 @@ public class UpdateService
      */
     private boolean setPermissions(String path, int mode, int uid, int gid) {
         try {
-            Class<?> FileUtils = getClassLoader().loadClass("android.os.FileUtils");
-            Method setPermissions = FileUtils.getDeclaredMethod("setPermissions", new Class[] {
-                    String.class, int.class, int.class, int.class
-            });
-            return ((Integer) setPermissions.invoke(null, new Object[] {
-                    path, Integer.valueOf(mode), Integer.valueOf(uid), Integer.valueOf(gid)
-            }) == 0);
+            Class<?> FileUtils = getClassLoader().loadClass(
+                    "android.os.FileUtils");
+            Method setPermissions = FileUtils.getDeclaredMethod(
+                    "setPermissions", new Class[] { String.class, int.class,
+                            int.class, int.class });
+            return ((Integer) setPermissions.invoke(
+                    null,
+                    new Object[] { path, Integer.valueOf(mode),
+                            Integer.valueOf(uid), Integer.valueOf(gid) }) == 0);
         } catch (Exception e) {
             // A lot of voodoo could go wrong here, return failure instead of
             // crash
@@ -215,13 +247,15 @@ public class UpdateService
 
         config = Config.getInstance(this);
 
-        wakeLock = ((PowerManager) getSystemService(POWER_SERVICE)).newWakeLock(
-                config.getKeepScreenOn() ?
-                        PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP :
-                        PowerManager.PARTIAL_WAKE_LOCK,
-                "OpenDelta WakeLock");
-        wifiLock = ((WifiManager) getSystemService(WIFI_SERVICE)).createWifiLock(
-                WifiManager.WIFI_MODE_FULL, "OpenDelta WifiLock");
+        wakeLock = ((PowerManager) getSystemService(POWER_SERVICE))
+                .newWakeLock(
+                        config.getKeepScreenOn() ? PowerManager.SCREEN_DIM_WAKE_LOCK
+                                | PowerManager.ACQUIRE_CAUSES_WAKEUP
+                                : PowerManager.PARTIAL_WAKE_LOCK,
+                        "OpenDelta WakeLock");
+        wifiLock = ((WifiManager) getSystemService(WIFI_SERVICE))
+                .createWifiLock(WifiManager.WIFI_MODE_FULL,
+                        "OpenDelta WifiLock");
 
         handlerThread = new HandlerThread("OpenDelta Service Thread");
         handlerThread.start();
@@ -231,20 +265,26 @@ public class UpdateService
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         scheduler = new Scheduler(this, this);
-
+        int autoDownload = getAutoDownloadValue();
+        if (autoDownload != PREF_AUTO_DOWNLOAD_DISABLED) {
+            scheduler.start();
+        }
         networkState = new NetworkState();
-        networkState.start(this, this,
-                prefs.getInt(PREF_AUTO_UPDATE_NETWORKS_NAME, PREF_AUTO_UPDATE_NETWORKS_DEFAULT));
+        networkState.start(this, this, prefs.getInt(
+                PREF_AUTO_UPDATE_NETWORKS_NAME,
+                PREF_AUTO_UPDATE_NETWORKS_DEFAULT));
 
         batteryState = new BatteryState();
-        batteryState.start(this, this, 50, true);
+        batteryState.start(this, this,
+                Integer.valueOf(prefs.getString(SettingsActivity.PREF_BATTERY_LEVEL, "50")).intValue(),
+                prefs.getBoolean(SettingsActivity.PREF_CHARGE_ONLY, true));
 
         screenState = new ScreenState();
         screenState.start(this, this);
 
         prefs.registerOnSharedPreferenceChangeListener(this);
 
-        autoState();
+        autoState(false, PREF_AUTO_DOWNLOAD_CHECK);
     }
 
     @Override
@@ -262,25 +302,33 @@ public class UpdateService
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             if (ACTION_CHECK.equals(intent.getAction())) {
-                checkForUpdates(true);
+                checkForUpdates(true, PREF_AUTO_DOWNLOAD_CHECK);
             } else if (ACTION_FLASH.equals(intent.getAction())) {
                 flashUpdate();
             } else if (ACTION_ALARM.equals(intent.getAction())) {
                 scheduler.alarm(intent.getIntExtra(EXTRA_ALARM_ID, -1));
-                autoState();
+                autoState(false, PREF_AUTO_DOWNLOAD_CHECK);
             } else if (ACTION_NOTIFICATION_DELETED.equals(intent.getAction())) {
-                Logger.i("Snoozing for 24 hours");
-                prefs.edit().putLong(PREF_LAST_SNOOZE_TIME_NAME, System.currentTimeMillis())
-                        .commit();
-                autoState();
+                prefs.edit().putLong(PREF_LAST_SNOOZE_TIME_NAME,
+                        System.currentTimeMillis()).commit();
+                String lastBuild = prefs.getString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT);
+                if (lastBuild != PREF_READY_FILENAME_DEFAULT) {
+                    // only snooze until no newer build is available
+                    Logger.i("Snoozing notification for " + lastBuild);
+                    prefs.edit().putString(PREF_SNOOZE_UPDATE_NAME, lastBuild).commit();
+                }
+            } else if (ACTION_BUILD.equals(intent.getAction())) {
+                checkForUpdates(true, PREF_AUTO_DOWNLOAD_FULL);
+            } else if (ACTION_UPDATE.equals(intent.getAction())) {
+                autoState(true, PREF_AUTO_DOWNLOAD_CHECK);
             }
         }
 
         return START_STICKY;
     }
 
-    private synchronized void updateState(String state, Float progress, Long current, Long total,
-            String filename, Long ms) {
+    private synchronized void updateState(String state, Float progress,
+            Long current, Long total, String filename, Long ms) {
         this.state = state;
 
         Intent i = new Intent(BROADCAST_INTENT);
@@ -295,6 +343,7 @@ public class UpdateService
             i.putExtra(EXTRA_FILENAME, filename);
         if (ms != null)
             i.putExtra(EXTRA_MS, ms);
+
         sendStickyBroadcast(i);
     }
 
@@ -317,43 +366,117 @@ public class UpdateService
     @Override
     public boolean onWantUpdateCheck() {
         Logger.i("Scheduler requests check for updates");
-        return checkForUpdates(false);
+        int autoDownload = getAutoDownloadValue();
+        if (autoDownload != PREF_AUTO_DOWNLOAD_DISABLED) {
+            return checkForUpdates(false, autoDownload);
+        }
+        return false;
     }
 
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+            String key) {
+        Logger.d("onSharedPreferenceChanged " + key);
+
         if (PREF_AUTO_UPDATE_NETWORKS_NAME.equals(key)) {
-            networkState.updateFlags(sharedPreferences.getInt(PREF_AUTO_UPDATE_NETWORKS_NAME,
+            networkState.updateFlags(sharedPreferences.getInt(
+                    PREF_AUTO_UPDATE_NETWORKS_NAME,
                     PREF_AUTO_UPDATE_NETWORKS_DEFAULT));
+        }
+        if (PREF_STOP_DOWNLOAD.equals(key)) {
+            stopDownload = true;
+        }
+        if (SettingsActivity.PREF_AUTO_DOWNLOAD.equals(key)) {
+            int autoDownload = getAutoDownloadValue();
+            if (autoDownload == PREF_AUTO_DOWNLOAD_DISABLED) {
+                scheduler.stop();
+            } else {
+                scheduler.start();
+            }
+        }
+        if (batteryState != null) {
+            batteryState.onSharedPreferenceChanged(sharedPreferences, key);
+        }
+        if (scheduler != null) {
+        	scheduler.onSharedPreferenceChanged(sharedPreferences, key);
         }
     }
 
-    private void autoState() {
-        String filename = prefs.getString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
+    private void autoState(boolean userInitiated, int checkOnly) {
+        Logger.d("autoState state = " + this.state + " userInitiated = " + userInitiated + " checkOnly = " + checkOnly);
+
+        String filename = prefs.getString(PREF_READY_FILENAME_NAME,
+                PREF_READY_FILENAME_DEFAULT);
 
         if (filename != null) {
             if (!(new File(filename)).exists()) {
                 filename = null;
-                prefs.edit().putString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT)
-                        .commit();
+                prefs.edit()
+                .putString(PREF_READY_FILENAME_NAME,
+                        PREF_READY_FILENAME_DEFAULT).commit();
             }
+        }
+        if (isErrorState(this.state)) {
+            // in that case we can be sure we have presesnted the error to the user
+            if (userInitiated) {
+                return;
+            }
+            // if from scheduler show a notification
+            // but not for the unoffical error - we dont want to bother homemade builds by default
+            if (!state.equals(UpdateService.STATE_ERROR_UNOFFICIAL)) {
+                startErrorNotification();
+            }
+        }
+        if (stopDownload) {
+            // stop download is only possible in the download step
+            // that means must have done a check step before 
+            // so just fall back to this instead to show none state
+            // which is just confusing
+            checkOnly = PREF_AUTO_DOWNLOAD_CHECK;
+        }
+        boolean updateAvilable = updateAvailable();
+        // if the file has been downloaded or creates anytime before
+        // this will aways be more important
+        if (checkOnly == PREF_AUTO_DOWNLOAD_CHECK && filename == null) {
+            Logger.d("Checking step done");
+            if (!updateAvilable) {
+                Logger.d("System up to date");
+                stopNotification();
+                updateState(STATE_ACTION_NONE, null, null, null, null,
+                        prefs.getLong(PREF_LAST_CHECK_TIME_NAME,
+                                PREF_LAST_CHECK_TIME_DEFAULT));
+            } else {
+                Logger.d("Update available");
+                updateState(STATE_ACTION_BUILD, null, null, null, null,
+                        prefs.getLong(PREF_LAST_CHECK_TIME_NAME,
+                                PREF_LAST_CHECK_TIME_DEFAULT));
+                if (!isSnoozeNotification()) {
+                    startNotification(checkOnly);
+                } else {
+                	Logger.d("notification snoozed");
+                    stopNotification();
+                }
+            }
+            return;
         }
 
         if (filename == null) {
-            Logger.i("System up to date");
+            Logger.d("System up to date");
             stopNotification();
             updateState(STATE_ACTION_NONE, null, null, null, null,
-                    prefs.getLong(PREF_LAST_CHECK_TIME_NAME, PREF_LAST_CHECK_TIME_DEFAULT));
+                    prefs.getLong(PREF_LAST_CHECK_TIME_NAME,
+                            PREF_LAST_CHECK_TIME_DEFAULT));
         } else {
-            Logger.i("Update found: %s", filename);
-            updateState(STATE_ACTION_READY, null, null, null, (new File(filename)).getName(),
-                    prefs.getLong(PREF_LAST_CHECK_TIME_NAME, PREF_LAST_CHECK_TIME_DEFAULT));
+            Logger.d("Update found: %s", filename);
+            updateState(STATE_ACTION_READY, null, null, null, (new File(
+                    filename)).getName(), prefs.getLong(
+                            PREF_LAST_CHECK_TIME_NAME, PREF_LAST_CHECK_TIME_DEFAULT));
 
             // check if we're snoozed, using abs for clock changes
-            if (Math.abs(System.currentTimeMillis()
-                    - prefs.getLong(PREF_LAST_SNOOZE_TIME_NAME, PREF_LAST_SNOOZE_TIME_DEFAULT)) > SNOOZE_MS) {
-                startNotification();
+            if (!isSnoozeNotification()) {
+                startNotification(checkOnly);
             } else {
+            	Logger.d("notification snoozed");
                 stopNotification();
             }
         }
@@ -371,35 +494,74 @@ public class UpdateService
         }
     }
 
-    private void startNotification() {
-        notificationManager.
-                notify(
-                        NOTIFICATION_UPDATE,
-                        (new Notification.Builder(this)).
-                                setSmallIcon(R.drawable.stat_notify_update).
-                                setContentTitle(getString(R.string.title)).
-                                setContentText(getString(R.string.notify_update_available)).
-                                setTicker(getString(R.string.notify_update_available)).
-                                setShowWhen(false).
-                                setContentIntent(getNotificationIntent(false)).
-                                setDeleteIntent(getNotificationIntent(true)).
-                                build()
-                );
+    private void startNotification(int checkOnly) {
+        final String latestFull = prefs.getString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT);
+        if (latestFull == PREF_READY_FILENAME_DEFAULT) {
+            return;
+        }
+        String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
+        final boolean readyToFlash = flashFilename != PREF_READY_FILENAME_DEFAULT;
+        if (readyToFlash) {
+            flashFilename = new File(flashFilename).getName();
+            flashFilename.substring(0, flashFilename.lastIndexOf('.'));
+        }
+
+        String notifyFileName = readyToFlash ? flashFilename : latestFull.substring(0, latestFull.lastIndexOf('.'));
+
+        notificationManager.notify(
+                NOTIFICATION_UPDATE,
+                (new Notification.Builder(this))
+                .setSmallIcon(R.drawable.stat_notify_update)
+                .setContentTitle(readyToFlash ? getString(R.string.notify_title_flash) : getString(R.string.notify_title_download))
+                .setShowWhen(false)
+                .setContentIntent(getNotificationIntent(false))
+                .setDeleteIntent(getNotificationIntent(true))
+                .setContentText(notifyFileName).build());
     }
 
     private void stopNotification() {
         notificationManager.cancel(NOTIFICATION_UPDATE);
     }
 
+    private void startErrorNotification() {
+        String errorStateString = null;
+        try {
+            errorStateString = getString(getResources().getIdentifier(
+                    "state_" + state, "string", getPackageName()));
+        } catch (Exception e) {
+            // String for this state could not be found (displays empty string)
+            Logger.ex(e);
+        }
+        if (errorStateString != null) {
+            notificationManager.notify(
+                    NOTIFICATION_ERROR,
+                    (new Notification.Builder(this))
+                    .setSmallIcon(R.drawable.stat_notify_error)
+                    .setContentTitle(getString(R.string.notify_title_error))
+                    .setContentText(errorStateString)
+                    .setShowWhen(false)
+                    .setContentIntent(getNotificationIntent(false)).build());
+        }
+    }
+
+    private void stopErrorNotification() {
+        notificationManager.cancel(NOTIFICATION_ERROR);
+    }
+
     private byte[] downloadUrlMemory(String url) {
         Logger.d("download: %s", url);
         try {
             HttpParams params = new BasicHttpParams();
-            HttpConnectionParams.setConnectionTimeout(params, 10000);
-            HttpConnectionParams.setSoTimeout(params, 10000);
+            HttpConnectionParams.setConnectionTimeout(params, HTTP_CONNECTION_TIMEOUT);
+            HttpConnectionParams.setSoTimeout(params, HTTP_SOCKET_TIMEOUT);
             HttpClient client = new DefaultHttpClient(params);
             HttpGet request = new HttpGet(url);
             HttpResponse response = client.execute(request);
+            int code = response.getStatusLine().getStatusCode();
+            if (code != HttpStatus.SC_OK) {
+                Logger.d("response: %d", code);
+                return null;
+            }
             int len = (int) response.getEntity().getContentLength();
             if ((len >= 0) && (len < 1024 * 1024)) {
                 byte[] ret = new byte[len];
@@ -413,6 +575,34 @@ public class UpdateService
                 }
                 return ret;
             }
+            return null;
+        } catch (Exception e) {
+            // Download failed for any number of reasons, timeouts, connection
+            // drops, etc. Just log it in debugging mode.
+            Logger.ex(e);
+            return null;
+        }
+    }
+
+    private String downloadUrlMemoryAsString(String url) {
+        Logger.d("download: %s", url);
+        try {
+            HttpParams params = new BasicHttpParams();
+            HttpConnectionParams.setConnectionTimeout(params, HTTP_CONNECTION_TIMEOUT);
+            HttpConnectionParams.setSoTimeout(params, HTTP_SOCKET_TIMEOUT);
+            HttpClient client = new DefaultHttpClient(params);
+            HttpGet request = new HttpGet(url);
+            HttpResponse response = client.execute(request);
+            int code = response.getStatusLine().getStatusCode();
+            if (code != HttpStatus.SC_OK) {
+                Logger.d("response: %d", code);
+                return null;
+            }
+            String responseBody = EntityUtils.toString(response.getEntity(),
+                    HTTP.UTF_8);
+            return responseBody;
+        } catch (UnknownHostException e) {
+            Logger.i("Failed to connect to download server");
             return null;
         } catch (Exception e) {
             // Download failed for any number of reasons, timeouts, connection
@@ -440,11 +630,16 @@ public class UpdateService
             f.delete();
         try {
             HttpParams params = new BasicHttpParams();
-            HttpConnectionParams.setConnectionTimeout(params, 10000);
-            HttpConnectionParams.setSoTimeout(params, 10000);
+            HttpConnectionParams.setConnectionTimeout(params, HTTP_CONNECTION_TIMEOUT);
+            HttpConnectionParams.setSoTimeout(params, HTTP_SOCKET_TIMEOUT);
             HttpClient client = new DefaultHttpClient(params);
             HttpGet request = new HttpGet(url);
             HttpResponse response = client.execute(request);
+            int code = response.getStatusLine().getStatusCode();
+            if (code != HttpStatus.SC_OK) {
+                Logger.d("response: %d", code);
+                return false;
+            }
             long len = (int) response.getEntity().getContentLength();
             long recv = 0;
             if ((len > 0) && (len < 4L * 1024L * 1024L * 1024L)) {
@@ -455,13 +650,17 @@ public class UpdateService
                 try {
                     int r;
                     while ((r = is.read(buffer)) > 0) {
+                        if (stopDownload) {
+                            return false;
+                        }
                         os.write(buffer, 0, r);
                         if (digest != null)
                             digest.update(buffer, 0, r);
 
                         recv += (long) r;
                         if (progressListener != null)
-                            progressListener.onProgress(((float) recv / (float) len) * 100f, recv,
+                            progressListener.onProgress(
+                                    ((float) recv / (float) len) * 100f, recv,
                                     len);
                     }
                 } finally {
@@ -469,11 +668,15 @@ public class UpdateService
                 }
 
                 if (digest != null) {
-                    String MD5 = new BigInteger(1, digest.digest()).toString(16).toLowerCase(
-                            Locale.ENGLISH);
+                    String MD5 = new BigInteger(1, digest.digest())
+                    .toString(16).toLowerCase(Locale.ENGLISH);
                     while (MD5.length() < 32)
                         MD5 = "0" + MD5;
-                    return MD5.equals(matchMD5);
+                    boolean md5Check = MD5.equals(matchMD5);
+                    if (!md5Check) {
+                        Logger.i("MD5 check failed for " + url);
+                    }
+                    return md5Check;
                 }
                 return true;
             }
@@ -486,10 +689,184 @@ public class UpdateService
         }
     }
 
-    private DeltaInfo.ProgressListener getMD5Progress(String state, String filename) {
-        final long[] last = new long[] {
-                0, SystemClock.elapsedRealtime()
-        };
+    private boolean downloadUrlFileUnknownSize(String url, final File f,
+            String matchMD5) {
+        Logger.d("download: %s", url);
+
+        MessageDigest digest = null;
+        long len = 0;
+        if (matchMD5 != null) {
+            try {
+                digest = MessageDigest.getInstance("MD5");
+            } catch (NoSuchAlgorithmException e) {
+                // No MD5 algorithm support
+                Logger.ex(e);
+            }
+        }
+
+        if (f.exists())
+            f.delete();
+        try {
+            updateState(STATE_ACTION_DOWNLOADING, 0f, 0L, 0L, f.getName(), null);
+
+            HttpParams params = new BasicHttpParams();
+            HttpConnectionParams.setConnectionTimeout(params, HTTP_CONNECTION_TIMEOUT);
+            HttpConnectionParams.setSoTimeout(params, HTTP_SOCKET_TIMEOUT);
+            HttpClient client = new DefaultHttpClient(params);
+            HttpGet request = new HttpGet(url);
+            HttpResponse response = client.execute(request);
+            int code = response.getStatusLine().getStatusCode();
+            if (code != HttpStatus.SC_OK) {
+                Logger.d("response: %d", code);
+                return false;
+            }
+            len = (int) response.getEntity().getContentLength();
+
+            updateState(STATE_ACTION_DOWNLOADING, 0f, 0L, len, f.getName(), null);
+
+            long freeSpace = (new StatFs(config.getPathBase()))
+                    .getAvailableBytes();
+            if (freeSpace < len) {
+                updateState(STATE_ERROR_DISK_SPACE, null, freeSpace, len, null,
+                        null);
+                Logger.d("not enough space!");
+                return false;
+            }
+
+            final long[] last = new long[] { 0, len, 0,
+                    SystemClock.elapsedRealtime() };
+            DeltaInfo.ProgressListener progressListener = new DeltaInfo.ProgressListener() {
+                @Override
+                public void onProgress(float progress, long current, long total) {
+                    current += last[0];
+                    total = last[1];
+                    progress = ((float) current / (float) total) * 100f;
+                    long now = SystemClock.elapsedRealtime();
+                    if (now >= last[2] + 16L) {
+                        updateState(STATE_ACTION_DOWNLOADING, progress,
+                                current, total, f.getName(),
+                                SystemClock.elapsedRealtime() - last[3]);
+                        last[2] = now;
+                    }
+                }
+            };
+
+            long recv = 0;
+            if ((len > 0) && (len < 4L * 1024L * 1024L * 1024L)) {
+                byte[] buffer = new byte[262144];
+
+                InputStream is = response.getEntity().getContent();
+                FileOutputStream os = new FileOutputStream(f, false);
+                try {
+                    int r;
+                    while ((r = is.read(buffer)) > 0) {
+                        if (stopDownload) {
+                            return false;
+                        }
+                        os.write(buffer, 0, r);
+                        if (digest != null)
+                            digest.update(buffer, 0, r);
+
+                        recv += (long) r;
+                        if (progressListener != null)
+                            progressListener.onProgress(
+                                    ((float) recv / (float) len) * 100f, recv,
+                                    len);
+                    }
+                } finally {
+                    os.close();
+                }
+
+                if (digest != null) {
+                    String MD5 = new BigInteger(1, digest.digest())
+                    .toString(16).toLowerCase(Locale.ENGLISH);
+                    while (MD5.length() < 32)
+                        MD5 = "0" + MD5;
+                    boolean md5Check = MD5.equals(matchMD5);
+                    if (!md5Check) {
+                        Logger.i("MD5 check failed for " + url);
+                    }
+                    return md5Check;
+                }
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            // Download failed for any number of reasons, timeouts, connection
+            // drops, etc. Just log it in debugging mode.
+            Logger.ex(e);
+            return false;
+        } finally {
+            updateState(STATE_ACTION_DOWNLOADING, 100f, len, len, null, null);
+        }
+    }
+
+    private long getUrlDownloadSize(String url) {
+        Logger.d("getUrlDownloadSize: %s", url);
+
+        try {
+            HttpParams params = new BasicHttpParams();
+            HttpConnectionParams.setConnectionTimeout(params, HTTP_CONNECTION_TIMEOUT);
+            HttpConnectionParams.setSoTimeout(params, HTTP_SOCKET_TIMEOUT);
+            HttpClient client = new DefaultHttpClient(params);
+            HttpGet request = new HttpGet(url);
+            HttpResponse response = client.execute(request);
+            int code = response.getStatusLine().getStatusCode();
+            if (code != HttpStatus.SC_OK) {
+                Logger.d("response: %d", code);
+                return 0;
+            }
+            return response.getEntity().getContentLength();
+        } catch (Exception e) {
+            // Download failed for any number of reasons, timeouts, connection
+            // drops, etc. Just log it in debugging mode.
+            Logger.ex(e);
+        }
+        return 0;
+    }
+
+    private String getNewestFullBuild() {
+        Logger.d("Checking for latest full build");
+
+        String url = config.getUrlBaseJson();
+
+        String buildData = downloadUrlMemoryAsString(url);
+        if (buildData == null || buildData.length() == 0) {
+            updateState(STATE_ERROR_DOWNLOAD, null, null, null, url, null);
+            return null;
+        }
+        JSONObject object = null;
+        try {
+            object = new JSONObject(buildData);
+
+            Iterator<String> nextKey = object.keys();
+            List<String> buildNames = new ArrayList<String>();
+            while (nextKey.hasNext()) {
+                String key = nextKey.next();
+                if (key.equals("./" + config.getDevice())) {
+                    JSONArray builds = object.getJSONArray(key);
+                    for (int i = 0; i < builds.length(); i++) {
+                        JSONObject build = builds.getJSONObject(i);
+                        String file = build.getString("filename");
+                        if (file.endsWith(".zip")) {
+                            buildNames.add(new File(file).getName());
+                        }
+                    }
+                }
+            }
+            // assumed its always sorted
+            if (buildNames.size() > 0) {
+                return buildNames.get(buildNames.size() - 1);
+            }
+        } catch (Exception e) {
+        }
+        updateState(STATE_ERROR_UNOFFICIAL, null, null, null, config.getVersion(), null);
+        return null;
+    }
+
+    private DeltaInfo.ProgressListener getMD5Progress(String state,
+            String filename) {
+        final long[] last = new long[] { 0, SystemClock.elapsedRealtime() };
         final String _state = state;
         final String _filename = filename;
 
@@ -507,16 +884,23 @@ public class UpdateService
     }
 
     private String findZIPOnSD(DeltaInfo.FileFull zip, File base) {
-        Logger.d("scanning: %s", base.getAbsolutePath());
+        //Logger.d("scanning: %s", base.getAbsolutePath());
         File[] list = base.listFiles();
         if (list != null) {
             for (File f : list) {
-                if (!f.isDirectory() && f.getName().endsWith(".zip")) {
+                if (!f.isDirectory()
+                        && f.getName().endsWith(".zip")
+                        && f.getName().startsWith(
+                                config.getFileBaseNamePrefix())) {
                     Logger.d("checking: %s", f.getAbsolutePath());
 
-                    boolean ok = (zip.match(f, true,
-                            getMD5Progress(STATE_ACTION_SEARCHING_MD5, f.getName())) != null);
-                    updateState(STATE_ACTION_SEARCHING, null, null, null, null, null);
+                    boolean ok = (zip.match(
+                            f,
+                            true,
+                            getMD5Progress(STATE_ACTION_SEARCHING_MD5,
+                                    f.getName())) != null);
+                    updateState(STATE_ACTION_SEARCHING, null, null, null, null,
+                            null);
 
                     if (ok)
                         return f.getAbsolutePath();
@@ -542,8 +926,9 @@ public class UpdateService
         return blocks * 262144L;
     }
 
-    private boolean downloadDeltaFile(String url_base, DeltaInfo.FileBase fileBase,
-            DeltaInfo.FileSizeMD5 match, DeltaInfo.ProgressListener progressListener, boolean force) {
+    private boolean downloadDeltaFile(String url_base,
+            DeltaInfo.FileBase fileBase, DeltaInfo.FileSizeMD5 match,
+            DeltaInfo.ProgressListener progressListener, boolean force) {
         if (fileBase.getTag() == null) {
             if (force || networkState.getState()) {
                 String url = url_base + fileBase.getName();
@@ -557,7 +942,13 @@ public class UpdateService
                     return true;
                 } else {
                     f.delete();
-                    Logger.d("download error");
+                    if (stopDownload) {
+                        Logger.d("download stopped");
+                    } else {
+                        updateState(STATE_ERROR_DOWNLOAD, null, null, null,
+                                fn, null);
+                        Logger.d("download error");
+                    }
                     return false;
                 }
             } else {
@@ -570,8 +961,8 @@ public class UpdateService
         }
     }
 
-    private Thread getThreadedProgress(String filename, String display, long start,
-            long currentOut, long totalOut) {
+    private Thread getThreadedProgress(String filename, String display,
+            long start, long currentOut, long totalOut) {
         final File _file = new File(filename);
         final String _display = display;
         final long _currentOut = currentOut;
@@ -585,8 +976,9 @@ public class UpdateService
                     try {
                         long current = _currentOut + _file.length();
                         updateState(STATE_ACTION_APPLYING_PATCH,
-                                ((float) current / (float) _totalOut) * 100f, current, _totalOut,
-                                _display, SystemClock.elapsedRealtime() - _start);
+                                ((float) current / (float) _totalOut) * 100f,
+                                current, _totalOut, _display,
+                                SystemClock.elapsedRealtime() - _start);
 
                         Thread.sleep(16);
                     } catch (InterruptedException e) {
@@ -598,8 +990,8 @@ public class UpdateService
         });
     }
 
-    private boolean zipadjust(String filenameIn, String filenameOut, long start, long currentOut,
-            long totalOut) {
+    private boolean zipadjust(String filenameIn, String filenameOut,
+            long start, long currentOut, long totalOut) {
         Logger.d("zipadjust [%s] --> [%s]", filenameIn, filenameOut);
 
         // checking filesizes in the background as progress, because these
@@ -607,8 +999,8 @@ public class UpdateService
 
         (new File(filenameOut)).delete();
 
-        Thread progress = getThreadedProgress(filenameOut, (new File(filenameIn)).getName(), start,
-                currentOut, totalOut);
+        Thread progress = getThreadedProgress(filenameOut,
+                (new File(filenameIn)).getName(), start, currentOut, totalOut);
         progress.start();
 
         int ok = Native.zipadjust(filenameIn, filenameOut, 1);
@@ -627,17 +1019,18 @@ public class UpdateService
         return (ok == 1);
     }
 
-    private boolean dedelta(String filenameSource, String filenameDelta, String filenameOut,
-            long start, long currentOut, long totalOut) {
-        Logger.d("dedelta [%s] --> [%s] --> [%s]", filenameSource, filenameDelta, filenameOut);
+    private boolean dedelta(String filenameSource, String filenameDelta,
+            String filenameOut, long start, long currentOut, long totalOut) {
+        Logger.d("dedelta [%s] --> [%s] --> [%s]", filenameSource,
+                filenameDelta, filenameOut);
 
         // checking filesizes in the background as progress, because these
         // native functions don't have callbacks (yet) to do this
 
         (new File(filenameOut)).delete();
 
-        Thread progress = getThreadedProgress(filenameOut, (new File(filenameDelta)).getName(),
-                start, currentOut, totalOut);
+        Thread progress = getThreadedProgress(filenameOut, (new File(
+                filenameDelta)).getName(), start, currentOut, totalOut);
         progress.start();
 
         int ok = Native.dedelta(filenameSource, filenameDelta, filenameOut);
@@ -656,28 +1049,55 @@ public class UpdateService
         return (ok == 1);
     }
 
-    private boolean checkForUpdates(boolean userInitiated) {
+    private boolean checkForUpdates(boolean userInitiated, int checkOnly) {
         /*
          * Unless the user is specifically asking to check for updates, we only
          * check for them if we have a connection matching the user's set
-         * preferences, we're charging and/or have juice aplenty, and the screen
+         * preferences, we're charging and/or have juice aplenty (>50), and the screen
          * is off
+         *
+         * if user has enabled checking only we only check the screen state
+         * cause the amount of data transferred for checking is not very large
          */
 
-        if ((networkState == null) ||
-                (batteryState == null) ||
-                (screenState == null))
+        if ((networkState == null) || (batteryState == null)
+                || (screenState == null))
             return false;
 
-        if (!isStateBusy(state) &&
-                (userInitiated || (
-                networkState.getState() &&
-                        batteryState.getState() &&
-                !screenState.getState()
-                )
-                )) {
+        Logger.d("checkForUpdates checkOnly = " + checkOnly + " updateRunning = " + updateRunning + " userInitiated = " + userInitiated +
+                " networkState.getState() = " + networkState.getState() + " batteryState.getState() = " + batteryState.getState() +
+                " screenState.getState() = " + screenState.getState());
+
+        if (updateRunning) {
+            Logger.i("Ignoring request to check for updates - busy");
+            return false;
+        }
+        if (!isSupportedVersion()) {
+            // TODO - to be more generic this should maybe use the info from getNewestFullBuild
+            updateState(STATE_ERROR_UNOFFICIAL, null, null, null, config.getVersion(), null);
+            Logger.i("Ignoring request to check for updates - not compatible for update! " + config.getVersion());
+            return false;
+        }
+
+        boolean updateAllowed = false;
+        if (!userInitiated) {
+            updateAllowed = checkOnly >= PREF_AUTO_DOWNLOAD_CHECK;
+            if (checkOnly > PREF_AUTO_DOWNLOAD_CHECK) {
+                // must confirm to all if we may auto download
+                updateAllowed = networkState.getState()
+                        && batteryState.getState() && isScreenStateEnabled();
+                if (!updateAllowed) {
+                    // fallback to check only
+                    checkOnly = PREF_AUTO_DOWNLOAD_CHECK;
+                    updateAllowed = true;
+                    Logger.i("Auto-dwonload not possible - fallback to check only");
+                }
+            }
+        }
+
+        if (userInitiated || updateAllowed) {
             Logger.i("Starting check for updates");
-            checkForUpdatesAsync(userInitiated);
+            checkForUpdatesAsync(userInitiated, checkOnly);
             return true;
         } else {
             Logger.i("Ignoring request to check for updates");
@@ -691,9 +1111,11 @@ public class UpdateService
         long deltaDownloadSize = 0L;
         for (DeltaInfo di : deltas) {
             String fn = config.getPathBase() + di.getUpdate().getName();
-            if (di.getUpdate().match(new File(fn), true,
-                    getMD5Progress(STATE_ACTION_CHECKING_MD5, di.getUpdate().getName())) == di
-                    .getUpdate().getUpdate()) {
+            if (di.getUpdate().match(
+                    new File(fn),
+                    true,
+                    getMD5Progress(STATE_ACTION_CHECKING_MD5, di.getUpdate()
+                            .getName())) == di.getUpdate().getUpdate()) {
                 di.getUpdate().setTag(fn);
             } else {
                 deltaDownloadSize += di.getUpdate().getUpdate().getSize();
@@ -703,15 +1125,18 @@ public class UpdateService
         DeltaInfo lastDelta = deltas.get(deltas.size() - 1);
         {
             if (config.getApplySignature()) {
-                String fn = config.getPathBase() + lastDelta.getSignature().getName();
+                String fn = config.getPathBase()
+                        + lastDelta.getSignature().getName();
                 if (lastDelta.getSignature().match(
                         new File(fn),
                         true,
-                        getMD5Progress(STATE_ACTION_CHECKING_MD5, lastDelta.getSignature()
-                                .getName())) == lastDelta.getSignature().getUpdate()) {
+                        getMD5Progress(STATE_ACTION_CHECKING_MD5, lastDelta
+                                .getSignature().getName())) == lastDelta
+                                .getSignature().getUpdate()) {
                     lastDelta.getSignature().setTag(fn);
                 } else {
-                    deltaDownloadSize += lastDelta.getSignature().getUpdate().getSize();
+                    deltaDownloadSize += lastDelta.getSignature().getUpdate()
+                            .getSize();
                 }
             }
         }
@@ -723,20 +1148,7 @@ public class UpdateService
 
     private long getFullDownloadSize(List<DeltaInfo> deltas) {
         DeltaInfo lastDelta = deltas.get(deltas.size() - 1);
-
-        long fullDownloadSize = 0;
-        {
-            String fn = config.getPathBase() + lastDelta.getOut().getName();
-            if (lastDelta.getOut().match(new File(fn), true,
-                    getMD5Progress(STATE_ACTION_CHECKING_MD5, lastDelta.getOut().getName())) == lastDelta
-                    .getOut().getOfficial()) {
-                lastDelta.getOut().setTag(fn);
-            } else {
-                fullDownloadSize += lastDelta.getOut().getOfficial().getSize();
-            }
-            updateState(STATE_ACTION_CHECKING, null, null, null, null, null);
-        }
-        return fullDownloadSize;
+        return lastDelta.getOut().getOfficial().getSize();
     }
 
     private long getRequiredSpace(List<DeltaInfo> deltas, boolean getFull) {
@@ -744,23 +1156,26 @@ public class UpdateService
 
         long requiredSpace = 0;
         if (getFull) {
-            requiredSpace += sizeOnDisk(lastDelta.getOut().getTag() != null ? 0 : lastDelta
-                    .getOut().getOfficial().getSize());
+            requiredSpace += sizeOnDisk(lastDelta.getOut().getTag() != null ? 0
+                    : lastDelta.getOut().getOfficial().getSize());
         } else {
             // The resulting number will be a tad more than worst case what we
             // actually need, but not dramatically so
 
             for (DeltaInfo di : deltas) {
                 if (di.getUpdate().getTag() == null)
-                    requiredSpace += sizeOnDisk(di.getUpdate().getUpdate().getSize());
+                    requiredSpace += sizeOnDisk(di.getUpdate().getUpdate()
+                            .getSize());
             }
             if (config.getApplySignature()) {
-                requiredSpace += sizeOnDisk(lastDelta.getSignature().getUpdate().getSize());
+                requiredSpace += sizeOnDisk(lastDelta.getSignature()
+                        .getUpdate().getSize());
             }
 
             long biggest = 0;
             for (DeltaInfo di : deltas)
-                biggest = Math.max(biggest, sizeOnDisk(di.getUpdate().getApplied().getSize()));
+                biggest = Math.max(biggest, sizeOnDisk(di.getUpdate()
+                        .getApplied().getSize()));
 
             requiredSpace += 2 * sizeOnDisk(biggest);
         }
@@ -768,9 +1183,9 @@ public class UpdateService
         return requiredSpace;
     }
 
-    private String findInitialFile(List<DeltaInfo> deltas, String possibleMatch,
-            boolean[] needsProcessing) {
-        // Find the currently flashed ZIP, or a newer one
+    private String findInitialFile(List<DeltaInfo> deltas,
+            String possibleMatch, boolean[] needsProcessing) {
+        // Find the currently flashed ZIP
 
         DeltaInfo firstDelta = deltas.get(0);
 
@@ -779,18 +1194,23 @@ public class UpdateService
         String initialFile = null;
 
         // Check if an original flashable ZIP is in our preferred location
-        String expectedLocation = config.getPathBase() + firstDelta.getIn().getName();
+        String expectedLocation = config.getPathBase()
+                + firstDelta.getIn().getName();
         DeltaInfo.FileSizeMD5 match = null;
         if (expectedLocation.equals(possibleMatch)) {
-            match = firstDelta.getIn().match(new File(expectedLocation), false, null);
+            match = firstDelta.getIn().match(new File(expectedLocation), false,
+                    null);
             if (match != null) {
                 initialFile = possibleMatch;
             }
         }
 
         if (match == null) {
-            match = firstDelta.getIn().match(new File(expectedLocation), true,
-                    getMD5Progress(STATE_ACTION_SEARCHING_MD5, firstDelta.getIn().getName()));
+            match = firstDelta.getIn().match(
+                    new File(expectedLocation),
+                    true,
+                    getMD5Progress(STATE_ACTION_SEARCHING_MD5, firstDelta
+                            .getIn().getName()));
             if (match != null) {
                 initialFile = expectedLocation;
             }
@@ -802,48 +1222,53 @@ public class UpdateService
         // the storages for it.
         if (initialFile == null) {
             // Primary external storage ( == internal storage)
-            initialFile = findZIPOnSD(firstDelta.getIn(), Environment.getExternalStorageDirectory());
-            
+            initialFile = findZIPOnSD(firstDelta.getIn(),
+                    Environment.getExternalStorageDirectory());
+
             if (initialFile == null) {
-                // Search secondary external storages ( == sdcards, OTG drives, etc)                 
+                // Search secondary external storages ( == sdcards, OTG drives,
+                // etc)
                 String secondaryStorages = System.getenv("SECONDARY_STORAGE");
-                if ((secondaryStorages != null) && (secondaryStorages.length() > 0)) {            
-                    String[] storages = TextUtils.split(secondaryStorages, File.pathSeparator);
+                if ((secondaryStorages != null)
+                        && (secondaryStorages.length() > 0)) {
+                    String[] storages = TextUtils.split(secondaryStorages,
+                            File.pathSeparator);
                     for (String storage : storages) {
-                        initialFile = findZIPOnSD(firstDelta.getIn(), new File(storage));
+                        initialFile = findZIPOnSD(firstDelta.getIn(), new File(
+                                storage));
                         if (initialFile != null) {
                             break;
                         }
                     }
                 }
             }
-            
+
             if (initialFile != null) {
-                match = firstDelta.getIn().match(new File(initialFile), false, null);
+                match = firstDelta.getIn().match(new File(initialFile), false,
+                        null);
             }
         }
 
         if ((needsProcessing != null) && (needsProcessing.length > 0)) {
-            needsProcessing[0] = (initialFile != null) && (match != firstDelta.getIn().getStore());
+            needsProcessing[0] = (initialFile != null)
+                    && (match != firstDelta.getIn().getStore());
         }
 
         return initialFile;
     }
 
-    private boolean downloadFiles(List<DeltaInfo> deltas, boolean getFull, long totalDownloadSize,
-            boolean force) {
+    private boolean downloadFiles(List<DeltaInfo> deltas, boolean getFull,
+            long totalDownloadSize, boolean force) {
         // Download all the files we do not have yet
 
         DeltaInfo lastDelta = deltas.get(deltas.size() - 1);
 
-        final String[] filename = new String[] {
-                null
-        };
-        updateState(STATE_ACTION_DOWNLOADING, 0f, 0L, totalDownloadSize, null, null);
+        final String[] filename = new String[] { null };
+        updateState(STATE_ACTION_DOWNLOADING, 0f, 0L, totalDownloadSize, null,
+                null);
 
-        final long[] last = new long[] {
-                0, totalDownloadSize, 0, SystemClock.elapsedRealtime()
-        };
+        final long[] last = new long[] { 0, totalDownloadSize, 0,
+                SystemClock.elapsedRealtime() };
         DeltaInfo.ProgressListener progressListener = new DeltaInfo.ProgressListener() {
             @Override
             public void onProgress(float progress, long current, long total) {
@@ -852,8 +1277,9 @@ public class UpdateService
                 progress = ((float) current / (float) total) * 100f;
                 long now = SystemClock.elapsedRealtime();
                 if (now >= last[2] + 16L) {
-                    updateState(STATE_ACTION_DOWNLOADING, progress, current, total, filename[0],
-                            SystemClock.elapsedRealtime() - last[3]);
+                    updateState(STATE_ACTION_DOWNLOADING, progress, current,
+                            total, filename[0], SystemClock.elapsedRealtime()
+                            - last[3]);
                     last[2] = now;
                 }
             }
@@ -861,20 +1287,16 @@ public class UpdateService
 
         if (getFull) {
             filename[0] = lastDelta.getOut().getName();
-            if (!downloadDeltaFile(config.getUrlBaseFull(), lastDelta.getOut(), lastDelta.getOut()
-                    .getOfficial(), progressListener, force)) {
-                updateState(STATE_ERROR_UNKNOWN, null, null, null, null, null);
-                Logger.d("download error");
+            if (!downloadDeltaFile(config.getUrlBaseFull(), lastDelta.getOut(),
+                    lastDelta.getOut().getOfficial(), progressListener, force)) {
                 return false;
             }
         } else {
             for (DeltaInfo di : deltas) {
                 filename[0] = di.getUpdate().getName();
-                if (!downloadDeltaFile(config.getUrlBaseUpdate(), di.getUpdate(), di.getUpdate()
-                        .getUpdate(),
+                if (!downloadDeltaFile(config.getUrlBaseUpdate(),
+                        di.getUpdate(), di.getUpdate().getUpdate(),
                         progressListener, force)) {
-                    updateState(STATE_ERROR_UNKNOWN, null, null, null, null, null);
-                    Logger.d("download error");
                     return false;
                 }
                 last[0] += di.getUpdate().getUpdate().getSize();
@@ -882,19 +1304,58 @@ public class UpdateService
 
             if (config.getApplySignature()) {
                 filename[0] = lastDelta.getSignature().getName();
-                if (!downloadDeltaFile(config.getUrlBaseUpdate(), lastDelta.getSignature(),
-                        lastDelta
-                                .getSignature().getUpdate(), progressListener, force)) {
-                    updateState(STATE_ERROR_UNKNOWN, null, null, null, null, null);
-                    Logger.d("download error");
+                if (!downloadDeltaFile(config.getUrlBaseUpdate(),
+                        lastDelta.getSignature(), lastDelta.getSignature()
+                        .getUpdate(), progressListener, force)) {
                     return false;
                 }
             }
         }
-        updateState(STATE_ACTION_DOWNLOADING, 100f, totalDownloadSize, totalDownloadSize, null,
-                null);
+        updateState(STATE_ACTION_DOWNLOADING, 100f, totalDownloadSize,
+                totalDownloadSize, null, null);
 
         return true;
+    }
+
+    private boolean downloadFullBuild(String url, String md5Sum,
+            String imageName) {
+        final String[] filename = new String[] { null };
+        filename[0] = imageName;
+        String fn = config.getPathBase() + imageName;
+        File f = new File(fn);
+        Logger.d("download: %s --> %s", url, fn);
+
+        if (downloadUrlFileUnknownSize(url, f, md5Sum)) {
+            Logger.d("success");
+            prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
+        } else {
+            f.delete();
+            if (stopDownload) {
+                Logger.d("download stopped");
+            } else {
+                Logger.d("download error");
+                updateState(STATE_ERROR_DOWNLOAD, null, null, null, url, null);
+            }
+        }
+
+        return true;
+    }
+
+    private boolean checkFullBuildMd5Sum(String url, String fn) {
+        String md5Url = url + ".md5sum";
+        String latestFullMd5 = downloadUrlMemoryAsString(md5Url);
+        if (latestFullMd5 != null){
+            try {
+                String md5Part = latestFullMd5.split("  ")[0];
+                String fileMd5 =getFileMD5(new File(fn), getMD5Progress(STATE_ACTION_CHECKING_MD5, new File(fn).getName()));
+                if (md5Part.equals(fileMd5)) {
+                    return true;
+                }
+            } catch(Exception e) {
+                // WTH knows what can comes from the server
+            }
+        }
+        return false;
     }
 
     private boolean applyPatches(List<DeltaInfo> deltas, String initialFile,
@@ -905,9 +1366,8 @@ public class UpdateService
         DeltaInfo lastDelta = deltas.get(deltas.size() - 1);
 
         int tempFile = 0;
-        String[] tempFiles = new String[] {
-                config.getPathBase() + "temp1", config.getPathBase() + "temp2"
-        };
+        String[] tempFiles = new String[] { config.getPathBase() + "temp1",
+                config.getPathBase() + "temp2" };
         try {
             long start = SystemClock.elapsedRealtime();
             long current = 0L;
@@ -921,8 +1381,10 @@ public class UpdateService
                 total += lastDelta.getSignature().getApplied().getSize();
 
             if (initialFileNeedsProcessing) {
-                if (!zipadjust(initialFile, tempFiles[tempFile], start, current, total)) {
-                    updateState(STATE_ERROR_UNKNOWN, null, null, null, null, null);
+                if (!zipadjust(initialFile, tempFiles[tempFile], start,
+                        current, total)) {
+                    updateState(STATE_ERROR_UNKNOWN, null, null, null, null,
+                            null);
                     Logger.d("zipadjust error");
                     return false;
                 }
@@ -936,12 +1398,14 @@ public class UpdateService
                     inFile = initialFile;
                 String outFile = tempFiles[tempFile];
                 if (!config.getApplySignature() && (di == lastDelta))
-                    outFile = config.getPathBase() + lastDelta.getOut().getName();
+                    outFile = config.getPathBase()
+                    + lastDelta.getOut().getName();
 
-                if (!dedelta(inFile, config.getPathBase() + di.getUpdate().getName(), outFile,
-                        start, current,
+                if (!dedelta(inFile, config.getPathBase()
+                        + di.getUpdate().getName(), outFile, start, current,
                         total)) {
-                    updateState(STATE_ERROR_UNKNOWN, null, null, null, null, null);
+                    updateState(STATE_ERROR_UNKNOWN, null, null, null, null,
+                            null);
                     Logger.d("dedelta error");
                     return false;
                 }
@@ -950,10 +1414,13 @@ public class UpdateService
             }
 
             if (config.getApplySignature()) {
-                if (!dedelta(tempFiles[(tempFile + 1) % 2], config.getPathBase()
-                        + lastDelta.getSignature().getName(), config.getPathBase()
-                        + lastDelta.getOut().getName(), start, current, total)) {
-                    updateState(STATE_ERROR_UNKNOWN, null, null, null, null, null);
+                if (!dedelta(tempFiles[(tempFile + 1) % 2],
+                        config.getPathBase()
+                        + lastDelta.getSignature().getName(),
+                        config.getPathBase() + lastDelta.getOut().getName(),
+                        start, current, total)) {
+                    updateState(STATE_ERROR_UNKNOWN, null, null, null, null,
+                            null);
                     Logger.d("dedelta error");
                     return false;
                 }
@@ -968,33 +1435,39 @@ public class UpdateService
         return true;
     }
 
-    private void writeString(OutputStream os, String s) throws UnsupportedEncodingException,
-            IOException {
+    private void writeString(OutputStream os, String s)
+            throws UnsupportedEncodingException, IOException {
         os.write((s + "\n").getBytes("UTF-8"));
     }
 
     @SuppressLint("SdCardPath")
     private void flashUpdate() {
-        if (getPackageManager().checkPermission(PERMISSION_ACCESS_CACHE_FILESYSTEM,
-                getPackageName()) != PackageManager.PERMISSION_GRANTED) {
-            Logger.d("[%s] required beyond this point", PERMISSION_ACCESS_CACHE_FILESYSTEM);
+        if (getPackageManager().checkPermission(
+                PERMISSION_ACCESS_CACHE_FILESYSTEM, getPackageName()) != PackageManager.PERMISSION_GRANTED) {
+            Logger.d("[%s] required beyond this point",
+                    PERMISSION_ACCESS_CACHE_FILESYSTEM);
             return;
         }
 
-        if (getPackageManager().checkPermission(PERMISSION_REBOOT, getPackageName()) != PackageManager.PERMISSION_GRANTED) {
+        if (getPackageManager().checkPermission(PERMISSION_REBOOT,
+                getPackageName()) != PackageManager.PERMISSION_GRANTED) {
             Logger.d("[%s] required beyond this point", PERMISSION_REBOOT);
             return;
         }
 
-        String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME,
-                PREF_READY_FILENAME_DEFAULT);
+        boolean deltaSignature = prefs.getBoolean(PREF_DELTA_SIGNATURE, false);
+        String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
         prefs.edit().putString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT).commit();
-        if ((flashFilename == null) || !flashFilename.startsWith(config.getPathBase()))
+        prefs.edit().putString(PREF_LATEST_DELTA_NAME, PREF_READY_FILENAME_DEFAULT).commit();
+        prefs.edit().putString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT).commit();
+        if ((flashFilename == null)
+                || !flashFilename.startsWith(config.getPathBase()))
             return;
 
         // Remove the path to the storage from the filename, so we get a path
         // relative to the root of the storage
-        String path_sd = Environment.getExternalStorageDirectory() + File.separator;
+        String path_sd = Environment.getExternalStorageDirectory()
+                + File.separator;
         flashFilename = flashFilename.substring(path_sd.length());
 
         // Find additional ZIPs to flash, strip path to sd
@@ -1015,30 +1488,35 @@ public class UpdateService
             // signature coming from a secure location would be a security
             // risk.
             {
-                if (config.getInjectSignatureEnable()) {
-                    FileOutputStream os = new FileOutputStream("/cache/recovery/keys", false);
+                if (config.getInjectSignatureEnable() && deltaSignature) {
+                    FileOutputStream os = new FileOutputStream(
+                            "/cache/recovery/keys", false);
                     try {
                         writeString(os, config.getInjectSignatureKeys());
                     } finally {
                         os.close();
                     }
-                    setPermissions("/cache/recovery/keys", 0644, Process.myUid(), 2001 /* AID_CACHE */);
+                    setPermissions("/cache/recovery/keys", 0644,
+                            Process.myUid(), 2001 /* AID_CACHE */);
                 }
 
-                FileOutputStream os = new FileOutputStream("/cache/recovery/openrecoveryscript",
-                        false);
+                FileOutputStream os = new FileOutputStream(
+                        "/cache/recovery/openrecoveryscript", false);
                 try {
-                    if (config.getInjectSignatureEnable()) {
+                    if (config.getInjectSignatureEnable() && deltaSignature) {
                         writeString(os, "cmd cat /res/keys > /res/keys_org");
-                        writeString(os, "cmd cat /cache/recovery/keys > /res/keys");
+                        writeString(os,
+                                "cmd cat /cache/recovery/keys > /res/keys");
                         writeString(os, "set tw_signed_zip_verify 1");
-                        writeString(os, String.format("install %s", flashFilename));
+                        writeString(os,
+                                String.format("install %s", flashFilename));
                         writeString(os, "set tw_signed_zip_verify 0");
                         writeString(os, "cmd cat /res/keys_org > /res/keys");
                         writeString(os, "cmd rm /res/keys_org");
                     } else {
                         writeString(os, "set tw_signed_zip_verify 0");
-                        writeString(os, String.format("install %s", flashFilename));
+                        writeString(os,
+                                String.format("install %s", flashFilename));
                     }
 
                     if (!config.getSecureModeCurrent()) {
@@ -1053,7 +1531,8 @@ public class UpdateService
                     os.close();
                 }
 
-                setPermissions("/cache/recovery/openrecoveryscript", 0644, Process.myUid(), 2001 /* AID_CACHE */);
+                setPermissions("/cache/recovery/openrecoveryscript", 0644,
+                        Process.myUid(), 2001 /* AID_CACHE */);
             }
 
             // CWM - ExtendedCommand - provide paths to both internal and
@@ -1068,15 +1547,18 @@ public class UpdateService
             // We don't generate a CWM script in secure mode, because it
             // doesn't support checking our custom signatures
             if (!config.getSecureModeCurrent()) {
-                FileOutputStream os = new FileOutputStream("/cache/recovery/extendedcommand", false);
+                FileOutputStream os = new FileOutputStream(
+                        "/cache/recovery/extendedcommand", false);
                 try {
-                    writeString(os,
-                            String.format("install_zip(\"%s%s\");", "/sdcard/", flashFilename));
-                    writeString(os,
-                            String.format("install_zip(\"%s%s\");", "/emmc/", flashFilename));
+                    writeString(os, String.format("install_zip(\"%s%s\");",
+                            "/sdcard/", flashFilename));
+                    writeString(os, String.format("install_zip(\"%s%s\");",
+                            "/emmc/", flashFilename));
                     for (String file : extras) {
-                        writeString(os, String.format("install_zip(\"%s%s\");", "/sdcard/", file));
-                        writeString(os, String.format("install_zip(\"%s%s\");", "/emmc/", file));
+                        writeString(os, String.format("install_zip(\"%s%s\");",
+                                "/sdcard/", file));
+                        writeString(os, String.format("install_zip(\"%s%s\");",
+                                "/emmc/", file));
                     }
                     writeString(os,
                             "run_program(\"/sbin/busybox\", \"rm\", \"-rf\", \"/cache/*\");");
@@ -1084,12 +1566,14 @@ public class UpdateService
                     os.close();
                 }
 
-                setPermissions("/cache/recovery/extendedcommand", 0644, Process.myUid(), 2001 /* AID_CACHE */);
+                setPermissions("/cache/recovery/extendedcommand", 0644,
+                        Process.myUid(), 2001 /* AID_CACHE */);
             } else {
                 (new File("/cache/recovery/extendedcommand")).delete();
             }
 
-            ((PowerManager) getSystemService(Context.POWER_SERVICE)).reboot("recovery");
+            ((PowerManager) getSystemService(Context.POWER_SERVICE))
+            .reboot("recovery");
         } catch (Exception e) {
             // We have failed to write something. There's not really anything
             // else to do at
@@ -1098,12 +1582,153 @@ public class UpdateService
         }
     }
 
-    private void checkForUpdatesAsync(boolean userInitiated) {
+    private boolean updateAvailable() {
+        final String latestFull = prefs.getString(UpdateService.PREF_LATEST_FULL_NAME, UpdateService.PREF_READY_FILENAME_DEFAULT);
+        final String latestDelta = prefs.getString(UpdateService.PREF_LATEST_DELTA_NAME, UpdateService.PREF_READY_FILENAME_DEFAULT);
+        return latestFull != PREF_READY_FILENAME_DEFAULT || latestDelta != PREF_READY_FILENAME_DEFAULT;
+    }
+
+    private String getLatestFullMd5Sum(String latestFullFetch) {
+        String md5Url = latestFullFetch + ".md5sum";
+        String latestFullMd5 = downloadUrlMemoryAsString(md5Url);
+        if (latestFullMd5 != null){
+            try {
+                String md5Part = latestFullMd5.split("  ")[0];
+                return md5Part;
+            } catch (Exception e) {
+            }
+        }
+        return null;
+    }
+
+    private float getProgress(long current, long total) {
+        if (total == 0)
+            return 0f;
+        return ((float) current / (float) total) * 100f;
+    }
+
+    // need to locally here for the deltas == 0 case
+    private String getFileMD5(File file, ProgressListener progressListener) {
+        String ret = null;
+
+        long current = 0;
+        long total = file.length();
+        if (progressListener != null)
+            progressListener.onProgress(getProgress(current, total), current, total);
+
+        try {
+            FileInputStream is = new FileInputStream(file);
+            try {
+                MessageDigest digest = MessageDigest.getInstance("MD5");
+                byte[] buffer = new byte[256 * 1024];
+                int r;
+
+                while ((r = is.read(buffer)) > 0) {
+                    digest.update(buffer, 0, r);
+                    current += (long) r;
+                    if (progressListener != null)
+                        progressListener.onProgress(getProgress(current, total), current, total);
+                }
+
+                String MD5 = new BigInteger(1, digest.digest()).
+                        toString(16).toLowerCase(Locale.ENGLISH);
+                while (MD5.length() < 32)
+                    MD5 = "0" + MD5;
+                ret = MD5;
+            } finally {
+                is.close();
+            }
+        } catch (NoSuchAlgorithmException e) {
+            // No MD5 support (returns null)
+            Logger.ex(e);
+        } catch (FileNotFoundException e) {
+            // The MD5 of a non-existing file is null
+            Logger.ex(e);
+        } catch (IOException e) {
+            // Read or close error (returns null)
+            Logger.ex(e);
+        }
+
+        if (progressListener != null)
+            progressListener.onProgress(getProgress(total, total), total, total);
+
+        return ret;
+    }
+
+    private boolean isSupportedVersion() {
+        if (config.getVersion().indexOf(getString(R.string.official_version_tag)) == -1) {
+            return false;
+        }
+        return true;
+    }
+
+    private int getAutoDownloadValue() {
+        String autoDownload = prefs.getString(SettingsActivity.PREF_AUTO_DOWNLOAD, UpdateService.PREF_AUTO_DOWNLOAD_CHECK_STRING);
+        return Integer.valueOf(autoDownload).intValue();
+    }
+
+    private boolean isScreenStateEnabled() {
+        if (screenState == null) {
+            return false;
+        }
+        boolean screenStateValue = screenState.getState();
+        boolean prefValue = prefs.getBoolean(SettingsActivity.PREF_SCREEN_STATE_OFF, true);
+        if (prefValue) {
+            // only when screen off
+            return !screenStateValue;
+        }
+        // always allow
+        return true;
+    }
+
+    public static boolean isProgressState(String state) {
+        if (state.equals(UpdateService.STATE_ACTION_DOWNLOADING) ||
+                state.equals(UpdateService.STATE_ACTION_SEARCHING) ||
+                state.equals(UpdateService.STATE_ACTION_SEARCHING_MD5) ||
+                state.equals(UpdateService.STATE_ACTION_CHECKING) ||
+                state.equals(UpdateService.STATE_ACTION_CHECKING_MD5) ||
+                state.equals(UpdateService.STATE_ACTION_APPLYING) ||
+                state.equals(UpdateService.STATE_ACTION_APPLYING_MD5) ||
+                state.equals(UpdateService.STATE_ACTION_APPLYING_PATCH)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isErrorState(String state) {
+        if (state.equals(UpdateService.STATE_ERROR_DOWNLOAD) ||
+                state.equals(UpdateService.STATE_ERROR_DISK_SPACE) ||
+                state.equals(UpdateService.STATE_ERROR_UNKNOWN) ||
+                state.equals(UpdateService.STATE_ERROR_UNOFFICIAL)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isSnoozeNotification() {
+        boolean timeSnooze = Math.abs(System.currentTimeMillis()
+                - prefs.getLong(PREF_LAST_SNOOZE_TIME_NAME,
+                        PREF_LAST_SNOOZE_TIME_DEFAULT)) <= SNOOZE_MS;
+        if (timeSnooze) {
+            String lastBuild = prefs.getString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT);
+            String snoozeBuild = prefs.getString(PREF_SNOOZE_UPDATE_NAME, PREF_READY_FILENAME_DEFAULT);
+            if (lastBuild != PREF_READY_FILENAME_DEFAULT && snoozeBuild != PREF_READY_FILENAME_DEFAULT) {
+                // only snooze if time snoozed and no newer update available
+                if (!lastBuild.equals(snoozeBuild)) {
+                    return false;
+                }
+            }
+        }
+        return timeSnooze;
+    }
+
+    private void checkForUpdatesAsync(final boolean userInitiated, final int checkOnly) {
         updateState(STATE_ACTION_CHECKING, null, null, null, null, null);
         wakeLock.acquire();
         wifiLock.acquire();
 
         stopNotification();
+        stopErrorNotification();
 
         Notification notification = (new Notification.Builder(this)).
                 setSmallIcon(R.drawable.stat_notify_update).
@@ -1113,13 +1738,18 @@ public class UpdateService
                 setShowWhen(false).
                 setContentIntent(getNotificationIntent(false)).
                 build();
+        // TODO update notification with current step
         startForeground(NOTIFICATION_BUSY, notification);
-
-        final boolean force = userInitiated;
 
         handler.post(new Runnable() {
             @Override
             public void run() {
+                boolean downloadFullBuild = false;
+                boolean force = userInitiated;
+
+                stopDownload = false;
+                updateRunning = true;
+
                 try {
                     List<DeltaInfo> deltas = new ArrayList<DeltaInfo>();
 
@@ -1127,39 +1757,68 @@ public class UpdateService
                     (new File(config.getPathBase())).mkdir();
                     (new File(config.getPathFlashAfterUpdate())).mkdir();
 
+                    prefs.edit().putString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT).commit();
+                    prefs.edit().putString(PREF_LATEST_DELTA_NAME, PREF_READY_FILENAME_DEFAULT).commit();
+                    prefs.edit().putString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT).commit();
+                    prefs.edit().putString(PREF_DOWNLOAD_SIZE, null).commit();
+                    prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, false).commit();
+
+                    String latestFullBuild = getNewestFullBuild();
+                    // if we dont even find a build on dl no sense to continue
+                    if (latestFullBuild == null) {
+                        Logger.d("no latest build found at " + config.getUrlBaseJson() + " for " + config.getDevice());
+                        return;
+                    }
+
+                    String latestFullFetch = String.format(Locale.ENGLISH, "%s%s",
+                            config.getUrlBaseFull(),
+                            latestFullBuild);
+                    Logger.d("latest full build for device " + config.getDevice() + " is " + latestFullFetch);
+                    prefs.edit().putString(PREF_LATEST_FULL_NAME, latestFullBuild).commit();
+
                     // Create a list of deltas to apply to get from our current
                     // version to the latest
                     String fetch = String.format(Locale.ENGLISH, "%s%s.delta",
                             config.getUrlBaseDelta(),
                             config.getFilenameBase());
+
                     while (true) {
                         DeltaInfo delta = null;
-
-                        try {
-                            delta = new DeltaInfo(downloadUrlMemory(fetch), false);
-                        } catch (JSONException e) {
-                            // There's an error in the JSON. Could be bad JSON,
-                            // could be a 404 text, etc
-                            Logger.ex(e);
-                        } catch (NullPointerException e) {
-                            // Download failed
-                            Logger.ex(e);
+                        byte[] data = downloadUrlMemory(fetch);
+                        if (data != null && data.length != 0) {
+                            try {
+                                delta = new DeltaInfo(data, false);
+                            } catch (JSONException e) {
+                                // There's an error in the JSON. Could be bad JSON,
+                                // could be a 404 text, etc
+                                Logger.ex(e);
+                                delta = null;
+                            } catch (NullPointerException e) {
+                                // Download failed
+                                Logger.ex(e);
+                                delta = null;
+                            }
                         }
 
                         if (delta == null) {
                             // See if we have a revoked version instead, we
                             // still need it for chaining future deltas, but
                             // will not allow flashing this one
-                            try {
-                                delta = new DeltaInfo(downloadUrlMemory(fetch.replace(".delta",
-                                        ".delta_revoked")), true);
-                            } catch (JSONException e) {
-                                // There's an error in the JSON. Could be bad
-                                // JSON, could be a 404 text, etc
-                                Logger.ex(e);
-                            } catch (NullPointerException e) {
-                                // Download failed
-                                Logger.ex(e);
+                            data = downloadUrlMemory(fetch.replace(".delta",
+                                    ".delta_revoked"));
+                            if (data != null && data.length != 0) {
+                                try {
+                                    delta = new DeltaInfo(data, true);
+                                } catch (JSONException e) {
+                                    // There's an error in the JSON. Could be bad
+                                    // JSON, could be a 404 text, etc
+                                    Logger.ex(e);
+                                    delta = null;
+                                } catch (NullPointerException e) {
+                                    // Download failed
+                                    Logger.ex(e);
+                                    delta = null;
+                                }
                             }
 
                             // We didn't get a delta or a delta_revoked - end of
@@ -1171,7 +1830,7 @@ public class UpdateService
                         Logger.d("delta --> [%s]", delta.getOut().getName());
                         fetch = String.format(Locale.ENGLISH, "%s%s.delta",
                                 config.getUrlBaseDelta(), delta
-                                        .getOut().getName().replace(".zip", ""));
+                                .getOut().getName().replace(".zip", ""));
                         deltas.add(delta);
                     }
 
@@ -1188,10 +1847,14 @@ public class UpdateService
                                             true,
                                             getMD5Progress(STATE_ACTION_CHECKING_MD5, di.getOut()
                                                     .getName())) != null) {
-                                Logger.d("match found: %s", di.getOut().getName());
-                                flashFilename = fn;
-                                last = i;
-                                break;
+                                if (latestFullBuild.equals(di.getOut().getName())) {
+                                    boolean signedFile = di.getOut().isSignedFile(new File(fn));
+                                    Logger.d("match found (%s): %s", signedFile ? "delta" : "full", di.getOut().getName());
+                                    flashFilename = fn;
+                                    last = i;
+                                    prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, signedFile).commit();
+                                    break;
+                                }
                             }
                         }
 
@@ -1207,8 +1870,56 @@ public class UpdateService
                         deltas.remove(deltas.size() - 1);
                     }
 
-                    if (deltas.size() > 0) {
+                    if (deltas.size() == 0) {
+                        // we found a matching zip created from deltas before
+                        if (flashFilename != null) {
+                            prefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
+                            return;
+                        }
+                        // only full download available
+                        final String latestFull = prefs.getString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT);
+                        String latestFullZip = latestFull !=  PREF_READY_FILENAME_DEFAULT ? latestFull : null;
+                        String currentVersionZip = config.getFilenameBase() +".zip";
+
+                        boolean updateAvilable = (latestFullZip != null && latestFullZip.compareTo(currentVersionZip) > 0);
+                        downloadFullBuild = updateAvilable;
+
+                        if (!updateAvilable) {
+                            prefs.edit().putString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT).commit();
+                        }
+
+                        if (downloadFullBuild) {
+                            String fn = config.getPathBase() + latestFullBuild;
+                            if (new File(fn).exists()) {
+                                if (checkFullBuildMd5Sum(latestFullFetch, fn)) {
+                                    Logger.d("match found (full): " + fn);
+                                    prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
+                                    downloadFullBuild = false;
+                                } else {
+                                    Logger.d("md5sum check failed : " + fn);
+                                }
+                            }
+                        }
+                        if (updateAvilable && downloadFullBuild) {
+                            long size = getUrlDownloadSize(latestFullFetch);
+                            if (size != 0) {
+                                prefs.edit().putString(PREF_DOWNLOAD_SIZE,
+                                                String.valueOf(size)).commit();
+                            } else {
+                                prefs.edit().putString(PREF_DOWNLOAD_SIZE,
+                                                getString(R.string.text_download_size_unknown))
+                                        .commit();
+                            }
+                        }
+                        Logger.d("check donne: latest full build available = " + prefs.getString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT) +
+                                " : updateAvilable = " + updateAvilable + " : downloadFullBuild = " + downloadFullBuild);
+
+                        if (checkOnly == PREF_AUTO_DOWNLOAD_CHECK) {
+                            return;
+                        }
+                    } else {
                         DeltaInfo lastDelta = deltas.get(deltas.size() - 1);
+                        flashFilename = config.getPathBase() + lastDelta.getOut().getName();
 
                         long deltaDownloadSize = getDeltaDownloadSize(deltas);
                         long fullDownloadSize = getFullDownloadSize(deltas);
@@ -1226,15 +1937,65 @@ public class UpdateService
                             initialFile = findInitialFile(deltas, flashFilename, needsProcessing);
                             initialFileNeedsProcessing = needsProcessing[0];
                         }
-                        flashFilename = null;
-
                         Logger.d("initial: %s", initialFile != null ? initialFile : "not found");
 
                         // If we don't have a file to start out with, or the
                         // combined deltas get big, just get the latest full ZIP
-                        boolean getFull = ((initialFile == null) || (deltaDownloadSize > fullDownloadSize));
+                        downloadFullBuild = ((initialFile == null) || (deltaDownloadSize > fullDownloadSize));
 
-                        long requiredSpace = getRequiredSpace(deltas, getFull);
+                        final String latestFull = prefs.getString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT);
+                        final String latestDelta = flashFilename;
+
+                        String latestDeltaZip = latestDelta != PREF_READY_FILENAME_DEFAULT ? new File(latestDelta).getName() : null;
+                        String latestFullZip = latestFull !=  PREF_READY_FILENAME_DEFAULT ? latestFull : null;
+                        String currentVersionZip = config.getFilenameBase() +".zip";
+                        boolean fullUpdatePossible = latestFullZip != null && latestFullZip.compareTo(currentVersionZip) > 0;
+                        boolean deltaUpdatePossible = !downloadFullBuild && latestDeltaZip != null && latestDeltaZip.compareTo(currentVersionZip) > 0 && latestDeltaZip.equals(latestFullZip);
+
+                        if (!deltaUpdatePossible && fullUpdatePossible) {
+                            downloadFullBuild = true;
+                        }
+                        boolean updateAvilable = fullUpdatePossible || deltaUpdatePossible;
+
+                        if (!updateAvilable) {
+                            prefs.edit().putString(PREF_LATEST_DELTA_NAME, PREF_READY_FILENAME_DEFAULT).commit();
+                            prefs.edit().putString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT).commit();
+                        } else {
+                            if (downloadFullBuild) {
+                                prefs.edit().putString(PREF_LATEST_DELTA_NAME, PREF_READY_FILENAME_DEFAULT).commit();
+                            } else {
+                                prefs.edit().putString(PREF_LATEST_DELTA_NAME, new File(flashFilename).getName()).commit();
+                            }
+                        }
+
+                        if (downloadFullBuild) {
+                            String fn = config.getPathBase() + latestFullBuild;
+                            if (new File(fn).exists()) {
+                                if (checkFullBuildMd5Sum(latestFullFetch, fn)) {
+                                    Logger.d("match found (full): " + fn);
+                                    prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
+                                    downloadFullBuild = false;
+                                } else {
+                                    Logger.d("md5sum check failed : " + fn);
+                                }
+                            }
+                        }
+                        if (updateAvilable) {
+                            if (deltaUpdatePossible) {
+                                prefs.edit().putString(PREF_DOWNLOAD_SIZE, String.valueOf(deltaDownloadSize)).commit();
+                            } else if (downloadFullBuild) {
+                                prefs.edit().putString(PREF_DOWNLOAD_SIZE, String.valueOf(fullDownloadSize)).commit();
+                            }
+                        }
+                        Logger.d("check donne: latest valid delta update = " + prefs.getString(PREF_LATEST_DELTA_NAME, PREF_READY_FILENAME_DEFAULT) +
+                                " : latest full build available = " + prefs.getString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT) +
+                                " : updateAvilable = " + updateAvilable + " : downloadFullBuild = " + downloadFullBuild);
+
+                        if (checkOnly == PREF_AUTO_DOWNLOAD_CHECK) {
+                            return;
+                        }
+
+                        long requiredSpace = getRequiredSpace(deltas, downloadFullBuild);
                         long freeSpace = (new StatFs(config.getPathBase())).getAvailableBytes();
                         if (freeSpace < requiredSpace) {
                             updateState(STATE_ERROR_DISK_SPACE, null, freeSpace, requiredSpace,
@@ -1243,55 +2004,64 @@ public class UpdateService
                             return;
                         }
 
-                        long downloadSize = getFull ? fullDownloadSize : deltaDownloadSize;
+                        long downloadSize = downloadFullBuild ? fullDownloadSize : deltaDownloadSize;
 
-                        // Download all the files we do not have yet
-                        if (!downloadFiles(deltas, getFull, downloadSize, force))
-                            return;
+                        if (!downloadFullBuild && checkOnly > PREF_AUTO_DOWNLOAD_CHECK) {
+                            // Download all the files we do not have yet
+                            // getFull = false since full download is handled below
+                            if (!downloadFiles(deltas, false, downloadSize, force))
+                                return;
 
-                        // Reconstruct flashable ZIP
-                        if (!getFull
-                                && !applyPatches(deltas, initialFile, initialFileNeedsProcessing))
-                            return;
+                            // Reconstruct flashable ZIP
+                            if (!applyPatches(deltas, initialFile, initialFileNeedsProcessing))
+                                return;
 
-                        // Verify using MD5
-                        if (lastDelta.getOut().match(
-                                new File(config.getPathBase() + lastDelta.getOut().getName()),
-                                true,
-                                getMD5Progress(STATE_ACTION_APPLYING_MD5, lastDelta.getOut()
-                                        .getName())) == null) {
-                            updateState(STATE_ERROR_UNKNOWN, null, null, null, null, null);
-                            Logger.d("final verification error");
-                            return;
+                            // Verify using MD5
+                            if (lastDelta.getOut().match(
+                                    new File(config.getPathBase() + lastDelta.getOut().getName()),
+                                    true,
+                                    getMD5Progress(STATE_ACTION_APPLYING_MD5, lastDelta.getOut()
+                                            .getName())) == null) {
+                                updateState(STATE_ERROR_UNKNOWN, null, null, null, null, null);
+                                Logger.d("final verification error");
+                                return;
+                            }
+                            Logger.d("final verification complete");
+
+                            // Cleanup
+                            for (DeltaInfo di : deltas) {
+                                (new File(config.getPathBase() + di.getUpdate().getName())).delete();
+                                (new File(config.getPathBase() + di.getSignature().getName())).delete();
+                                if (di != lastDelta)
+                                    (new File(config.getPathBase() + di.getOut().getName())).delete();
+                            }
+                            if (initialFile != null) {
+                                if (initialFile.startsWith(config.getPathBase()))
+                                    (new File(initialFile)).delete();
+                            }
+                            prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, true).commit();
+                            prefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
                         }
-                        Logger.d("final verification complete");
-
-                        // Cleanup
-                        for (DeltaInfo di : deltas) {
-                            (new File(config.getPathBase() + di.getUpdate().getName())).delete();
-                            (new File(config.getPathBase() + di.getSignature().getName())).delete();
-                            if (di != lastDelta)
-                                (new File(config.getPathBase() + di.getOut().getName())).delete();
-                        }
-                        if (initialFile != null) {
-                            if (initialFile.startsWith(config.getPathBase()))
-                                (new File(initialFile)).delete();
-                        }
-
-                        flashFilename = config.getPathBase() + lastDelta.getOut().getName();
                     }
-
-                    if (flashFilename != null) {
-                        prefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
+                    if (downloadFullBuild && checkOnly == PREF_AUTO_DOWNLOAD_FULL) {
+                        if (force || networkState.getState()) {
+                            String latestFullMd5 = getLatestFullMd5Sum(latestFullFetch);
+                            if (latestFullMd5 != null){
+                                downloadFullBuild(latestFullFetch, latestFullMd5, latestFullBuild);
+                            } else {
+                                Logger.d("aborting download due to md5sum not found");
+                            }
+                        } else {
+                            Logger.d("aborting download due to network state");
+                        }
                     }
-
-                    prefs.edit().putLong(PREF_LAST_CHECK_TIME_NAME, System.currentTimeMillis())
-                            .commit();
                 } finally {
+                    prefs.edit().putLong(PREF_LAST_CHECK_TIME_NAME, System.currentTimeMillis()).commit();
                     stopForeground(true);
                     if (wifiLock.isHeld()) wifiLock.release();
                     if (wakeLock.isHeld()) wakeLock.release();
-                    autoState();
+                    autoState(userInitiated, checkOnly);
+                    updateRunning = false;
                 }
             }
         });

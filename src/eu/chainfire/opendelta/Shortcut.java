@@ -13,7 +13,7 @@ public class Shortcut extends Activity {
         Intent intent = new Intent();
         intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, new Intent(this, MainActivity.class));
         intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, this.getResources().getString(R.string.title));
-        intent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(this, R.drawable.ic_launcher_settings));
+        intent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(this, R.mipmap.ic_launcher_settings));
         setResult(RESULT_OK, intent);
 
         finish();

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<string-array name="scheduler_actions_keys" translatable="false">
+		<item>@string/download_disabled</item>
+		<item>@string/check_only</item>
+		<item>@string/download_delta</item>
+		<item>@string/download_full</item>
+	</string-array>
+	<string-array name="scheduler_actions_values" translatable="false">
+		<item>0</item>
+		<item>1</item>
+		<item>2</item>
+		<item>3</item>
+	</string-array>
+	<string-array name="battery_level_keys" translatable="false">
+		<item>@string/twenty_five_percent</item>
+		<item>@string/fifty_percent</item>
+		<item>@string/seventy_five_percent</item>
+	</string-array>
+	<string-array name="battery_level_values" translatable="false">
+		<item>25</item>
+		<item>50</item>
+		<item>75</item>
+	</string-array>
+	<string-array name="scheduler_mode_keys" translatable="false">
+		<item>@string/scheduler_smart</item>
+		<item>@string/scheduler_daily</item>
+	</string-array>
+	<string-array name="scheduler_mode_values" translatable="false">
+		<item>0</item>
+		<item>1</item>
+	</string-array>
+
+</resources>

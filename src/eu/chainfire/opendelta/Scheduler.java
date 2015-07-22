@@ -1,6 +1,6 @@
 /* 
  * Copyright (C) 2013-2014 Jorrit "Chainfire" Jongma
- * Copyright (C) 2013-2014 The OmniROM Project
+ * Copyright (C) 2013-2015 The OmniROM Project
  */
 /* 
  * This file is part of OpenDelta.
@@ -48,19 +48,18 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-
 import eu.chainfire.opendelta.ScreenState.OnScreenStateListener;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-public class Scheduler
-        implements
-        OnScreenStateListener
-{
+public class Scheduler implements OnScreenStateListener,
+        OnSharedPreferenceChangeListener {
     public interface OnWantUpdateCheckListener {
         public boolean onWantUpdateCheck();
     }
@@ -82,65 +81,79 @@ public class Scheduler
     private PendingIntent alarmInterval = null;
     private PendingIntent alarmSecondaryWake = null;
     private PendingIntent alarmDetectSleep = null;
+    private PendingIntent alarmDaily = null;
 
-    private SimpleDateFormat sdfLog = (new SimpleDateFormat("HH:mm", Locale.ENGLISH));
+    private boolean stopped;
+    private boolean dailyAlarm;
 
-    public Scheduler(Context context, OnWantUpdateCheckListener onWantUpdateCheckListener) {
+    private SimpleDateFormat sdfLog = (new SimpleDateFormat("HH:mm",
+            Locale.ENGLISH));
+
+    public Scheduler(Context context,
+            OnWantUpdateCheckListener onWantUpdateCheckListener) {
         this.onWantUpdateCheckListener = onWantUpdateCheckListener;
-        alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager = (AlarmManager) context
+                .getSystemService(Context.ALARM_SERVICE);
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         alarmInterval = UpdateService.alarmPending(context, 1);
         alarmSecondaryWake = UpdateService.alarmPending(context, 2);
         alarmDetectSleep = UpdateService.alarmPending(context, 3);
+        alarmDaily = UpdateService.alarmPending(context, 4);
 
-        alarmManager.setInexactRepeating(
-                AlarmManager.ELAPSED_REALTIME,
-                SystemClock.elapsedRealtime() + ALARM_INTERVAL_START,
-                ALARM_INTERVAL_INTERVAL,
-                alarmInterval
-        );
-
-        setSecondaryWakeAlarm();
+        stopped = true;
     }
 
     private void setSecondaryWakeAlarm() {
-        Logger.i("Setting secondary alarm (inexact) for %s",
-                sdfLog.format(new Date(System.currentTimeMillis() + ALARM_SECONDARY_WAKEUP_TIME)));
-        alarmManager.set(
-                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+        Logger.d(
+                "Setting secondary alarm (inexact) for %s",
+                sdfLog.format(new Date(System.currentTimeMillis()
+                        + ALARM_SECONDARY_WAKEUP_TIME)));
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime() + ALARM_SECONDARY_WAKEUP_TIME,
-                alarmSecondaryWake
-        );
+                alarmSecondaryWake);
     }
 
     private void cancelSecondaryWakeAlarm() {
-        Logger.i("Cancelling secondary alarm");
+        Logger.d("Cancelling secondary alarm");
         alarmManager.cancel(alarmSecondaryWake);
     }
 
     private void setDetectSleepAlarm() {
-        Logger.i("Setting sleep detection alarm (exact) for %s",
-                sdfLog.format(new Date(System.currentTimeMillis() + ALARM_DETECT_SLEEP_TIME)));
-        alarmManager.setExact(
-                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+        Logger.i(
+                "Setting sleep detection alarm (exact) for %s",
+                sdfLog.format(new Date(System.currentTimeMillis()
+                        + ALARM_DETECT_SLEEP_TIME)));
+        alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime() + ALARM_DETECT_SLEEP_TIME,
-                alarmDetectSleep
-        );
+                alarmDetectSleep);
     }
 
     private void cancelDetectSleepAlarm() {
-        Logger.i("Cancelling sleep detection alarm");
+        Logger.d("Cancelling sleep detection alarm");
         alarmManager.cancel(alarmDetectSleep);
     }
 
     @Override
     public void onScreenState(boolean state) {
-        if (!state) {
-            setDetectSleepAlarm();
-        } else {
-            cancelDetectSleepAlarm();
+        if (!stopped && !dailyAlarm) {
+            Logger.d("isScreenStateEnabled = " + isScreenStateEnabled(state));
+            if (!state) {
+                setDetectSleepAlarm();
+            } else {
+                cancelDetectSleepAlarm();
+            }
         }
+    }
+
+    private boolean isScreenStateEnabled(boolean screenStateValue) {
+        boolean prefValue = prefs.getBoolean(
+                SettingsActivity.PREF_SCREEN_STATE_OFF, true);
+        if (prefValue) {
+            // only when screen off
+            return !screenStateValue;
+        }
+        return true;
     }
 
     private boolean checkForUpdates(boolean force) {
@@ -152,45 +165,120 @@ public class Scheduler
             if (onWantUpdateCheckListener != null) {
                 if (onWantUpdateCheckListener.onWantUpdateCheck()) {
                     prefs.edit()
-                            .putLong(PREF_LAST_CHECK_ATTEMPT_TIME_NAME, System.currentTimeMillis())
-                            .commit();
+                            .putLong(PREF_LAST_CHECK_ATTEMPT_TIME_NAME,
+                                    System.currentTimeMillis()).commit();
                 }
             }
+        } else {
+            Logger.i("Skip checkForUpdates");
         }
         return false;
     }
 
     public void alarm(int id) {
         switch (id) {
-            case 1:
-                // This is the interval alarm, called only if the device is
-                // already awake for some reason. Might as well see if
-                // conditions match to check for updates, right ?
-                Logger.i("Interval alarm fired");
-                checkForUpdates(false);
-                break;
+        case 1:
+            // This is the interval alarm, called only if the device is
+            // already awake for some reason. Might as well see if
+            // conditions match to check for updates, right ?
+            Logger.i("Interval alarm fired");
+            checkForUpdates(false);
+            break;
 
-            case 2:
-                // Fallback alarm. Our interval alarm has not been called for
-                // several hours. The device might have been woken up just
-                // for us. Let's see if conditions are good to check for
-                // updates.
-                Logger.i("Secondary alarm fired");
-                checkForUpdates(false);
-                break;
+        case 2:
+            // Fallback alarm. Our interval alarm has not been called for
+            // several hours. The device might have been woken up just
+            // for us. Let's see if conditions are good to check for
+            // updates.
+            Logger.i("Secondary alarm fired");
+            checkForUpdates(false);
+            break;
 
-            case 3:
-                // The screen has been off for 5:30 hours, with luck we've
-                // caught the user asleep and we'll have a fresh build waiting
-                // when (s)he wakes!
-                Logger.i("Sleep detection alarm fired");
-                checkForUpdates(true);
-                break;
+        case 3:
+            // The screen has been off for 5:30 hours, with luck we've
+            // caught the user asleep and we'll have a fresh build waiting
+            // when (s)he wakes!
+            Logger.i("Sleep detection alarm fired");
+            checkForUpdates(true);
+            break;
+
+        case 4:
+            // fixed daily alarm triggers
+            Logger.i("Daily alarm fired");
+            checkForUpdates(true);
+            break;
+
         }
 
         // Reset fallback wakeup command, we don't need to be called for another
         // few hours
+        if (!dailyAlarm) {
+            cancelSecondaryWakeAlarm();
+            setSecondaryWakeAlarm();
+        }
+    }
+
+    public void stop() {
+        Logger.i("Stopping scheduler");
         cancelSecondaryWakeAlarm();
-        setSecondaryWakeAlarm();
+        cancelDetectSleepAlarm();
+        alarmManager.cancel(alarmInterval);
+        alarmManager.cancel(alarmDaily);
+        stopped = true;
+    }
+
+    public void start() {
+        Logger.i("Starting scheduler");
+        dailyAlarm = prefs.getString(SettingsActivity.PREF_SCHEDULER_MODE, "0")
+                .equals("1");
+        if (dailyAlarm) {
+            setDailyAlarmFromPrefs();
+        } else {
+            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,
+                    SystemClock.elapsedRealtime() + ALARM_INTERVAL_START,
+                    ALARM_INTERVAL_INTERVAL, alarmInterval);
+
+            setSecondaryWakeAlarm();
+        }
+        stopped = false;
+    }
+
+    private void setDailyAlarmFromPrefs() {
+        if (dailyAlarm) {
+            String dailyAlarmTime = prefs.getString(
+                    SettingsActivity.PREF_SCHEDULER_DAILY_TIME, "00:00");
+            if (dailyAlarmTime != null) {
+                try {
+                    String[] timeParts = dailyAlarmTime.split(":");
+                    int hour = Integer.valueOf(timeParts[0]);
+                    int minute = Integer.valueOf(timeParts[1]);
+                    final Calendar c = Calendar.getInstance();
+                    c.set(Calendar.HOUR_OF_DAY, hour);
+                    c.set(Calendar.MINUTE, minute);
+
+                    Logger.i("Setting daily alarm to %s", dailyAlarmTime);
+
+                    alarmManager.cancel(alarmDaily);
+                    alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
+                            c.getTimeInMillis(), AlarmManager.INTERVAL_DAY,
+                            alarmDaily);
+                } catch (Exception e) {
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+            String key) {
+        if (key.equals(SettingsActivity.PREF_SCHEDULER_MODE)) {
+            if (!stopped) {
+                stop();
+                start();
+            }
+        }
+        if (key.equals(SettingsActivity.PREF_SCHEDULER_DAILY_TIME)) {
+            setDailyAlarmFromPrefs();
+        }
     }
 }

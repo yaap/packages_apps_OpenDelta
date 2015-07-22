@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="Theme.OpenDelta" parent="@android:style/Theme.Material.Settings">
-    </style>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<style name="Theme.OpenDelta" parent="@android:style/Theme.Material.Settings">
+		<item name="android:actionBarStyle">@style/ThemeActionBar</item>
+	</style>
+
+	<style name="Theme.OpenDelta.Settings" parent="@android:style/Theme.Material.Settings"></style>
+
+	<style name="ThemeActionBar" parent="@android:style/Widget.Material.ActionBar.Solid">
+		<item name="android:displayOptions"></item>
+	</style>
+
 </resources>

@@ -61,7 +61,7 @@ public class ScreenState {
             }
             if (state == null) {
                 state = ((PowerManager) context.getSystemService(Context.POWER_SERVICE))
-                        .isScreenOn();
+                        .isInteractive();
             }
 
             if ((stateLast == null) || (stateLast != state)) {
