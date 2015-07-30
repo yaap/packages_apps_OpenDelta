@@ -83,7 +83,7 @@
 	<string name="twenty_five_percent">25</string>
 	<string name="fifty_percent">50;</string>
 	<string name="seventy_five_percent">75</string>
-	<string name="notify_title_error">System update error</string>
+	<string name="notify_title_error">Problem checking for update</string>
 	<string name="notify_title_flash">Update ready to flash</string>
 	<string name="notify_title_download">Update ready to download</string>
 	<string name="last_checked_never_title">Press \'Check for update\'</string>
@@ -98,5 +98,6 @@
 	<string name="networks_message">Download only on networks types</string>
 	<string name="category_flashing">Flashing</string>
 	<string name="secure_mode_title">Secure mode</string>
+	<string name="state_error_connection">No data connection.</string>
 
 </resources>

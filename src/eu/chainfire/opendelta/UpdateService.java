@@ -148,6 +148,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     public static final String STATE_ERROR_UNOFFICIAL = "error_unofficial";
     public static final String STATE_ACTION_BUILD = "action_build";
     public static final String STATE_ERROR_DOWNLOAD = "error_download";
+    public static final String STATE_ERROR_CONNECTION = "error_connection";
 
     private static final String ACTION_CHECK = "eu.chainfire.opendelta.action.CHECK";
     private static final String ACTION_FLASH = "eu.chainfire.opendelta.action.FLASH";
@@ -185,11 +186,12 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     public static final String PREF_DELTA_SIGNATURE = "delta_signature";
 
     public static final int PREF_AUTO_DOWNLOAD_DISABLED = 0;
-    public static final String PREF_AUTO_DOWNLOAD_DISABLED_STRING = String.valueOf(PREF_AUTO_DOWNLOAD_DISABLED);
     public static final int PREF_AUTO_DOWNLOAD_CHECK = 1;
-    public static final String PREF_AUTO_DOWNLOAD_CHECK_STRING = String.valueOf(PREF_AUTO_DOWNLOAD_CHECK);
     public static final int PREF_AUTO_DOWNLOAD_DELTA = 2;
     public static final int PREF_AUTO_DOWNLOAD_FULL = 3;
+
+    public static final String PREF_AUTO_DOWNLOAD_CHECK_STRING = String.valueOf(PREF_AUTO_DOWNLOAD_CHECK);
+    public static final String PREF_AUTO_DOWNLOAD_DISABLED_STRING = String.valueOf(PREF_AUTO_DOWNLOAD_DISABLED);
 
     private Config config;
 
@@ -210,6 +212,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private NotificationManager notificationManager = null;
     private boolean stopDownload;
     private boolean updateRunning;
+    private int failedUpdateCount;
     private SharedPreferences prefs = null;
 
     /*
@@ -307,7 +310,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 flashUpdate();
             } else if (ACTION_ALARM.equals(intent.getAction())) {
                 scheduler.alarm(intent.getIntExtra(EXTRA_ALARM_ID, -1));
-                autoState(false, PREF_AUTO_DOWNLOAD_CHECK);
             } else if (ACTION_NOTIFICATION_DELETED.equals(intent.getAction())) {
                 prefs.edit().putLong(PREF_LAST_SNOOZE_TIME_NAME,
                         System.currentTimeMillis()).commit();
@@ -405,27 +407,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private void autoState(boolean userInitiated, int checkOnly) {
         Logger.d("autoState state = " + this.state + " userInitiated = " + userInitiated + " checkOnly = " + checkOnly);
 
-        String filename = prefs.getString(PREF_READY_FILENAME_NAME,
-                PREF_READY_FILENAME_DEFAULT);
-
-        if (filename != null) {
-            if (!(new File(filename)).exists()) {
-                filename = null;
-                prefs.edit()
-                .putString(PREF_READY_FILENAME_NAME,
-                        PREF_READY_FILENAME_DEFAULT).commit();
-            }
-        }
         if (isErrorState(this.state)) {
-            // in that case we can be sure we have presesnted the error to the user
-            if (userInitiated) {
-                return;
-            }
-            // if from scheduler show a notification
-            // but not for the unoffical error - we dont want to bother homemade builds by default
-            if (!state.equals(UpdateService.STATE_ERROR_UNOFFICIAL)) {
-                startErrorNotification();
-            }
+            return;
         }
         if (stopDownload) {
             // stop download is only possible in the download step
@@ -434,6 +417,15 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             // which is just confusing
             checkOnly = PREF_AUTO_DOWNLOAD_CHECK;
         }
+        String filename = prefs.getString(PREF_READY_FILENAME_NAME,
+                PREF_READY_FILENAME_DEFAULT);
+
+        if (filename != null) {
+            if (!(new File(filename)).exists()) {
+                filename = null;
+            }
+        }
+
         boolean updateAvilable = updateAvailable();
         // if the file has been downloaded or creates anytime before
         // this will aways be more important
@@ -441,7 +433,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             Logger.d("Checking step done");
             if (!updateAvilable) {
                 Logger.d("System up to date");
-                stopNotification();
                 updateState(STATE_ACTION_NONE, null, null, null, null,
                         prefs.getLong(PREF_LAST_CHECK_TIME_NAME,
                                 PREF_LAST_CHECK_TIME_DEFAULT));
@@ -450,11 +441,12 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 updateState(STATE_ACTION_BUILD, null, null, null, null,
                         prefs.getLong(PREF_LAST_CHECK_TIME_NAME,
                                 PREF_LAST_CHECK_TIME_DEFAULT));
-                if (!isSnoozeNotification()) {
-                    startNotification(checkOnly);
-                } else {
-                	Logger.d("notification snoozed");
-                    stopNotification();
+                if (!userInitiated) {
+                    if (!isSnoozeNotification()) {
+                        startNotification(checkOnly);
+                    } else {
+                        Logger.d("notification snoozed");
+                    }
                 }
             }
             return;
@@ -462,7 +454,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
         if (filename == null) {
             Logger.d("System up to date");
-            stopNotification();
             updateState(STATE_ACTION_NONE, null, null, null, null,
                     prefs.getLong(PREF_LAST_CHECK_TIME_NAME,
                             PREF_LAST_CHECK_TIME_DEFAULT));
@@ -472,12 +463,12 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     filename)).getName(), prefs.getLong(
                             PREF_LAST_CHECK_TIME_NAME, PREF_LAST_CHECK_TIME_DEFAULT));
 
-            // check if we're snoozed, using abs for clock changes
-            if (!isSnoozeNotification()) {
-                startNotification(checkOnly);
-            } else {
-            	Logger.d("notification snoozed");
-                stopNotification();
+            if (!userInitiated) {
+                if (!isSnoozeNotification()) {
+                    startNotification(checkOnly);
+                } else {
+                    Logger.d("notification snoozed");
+                }
             }
         }
     }
@@ -513,7 +504,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 (new Notification.Builder(this))
                 .setSmallIcon(R.drawable.stat_notify_update)
                 .setContentTitle(readyToFlash ? getString(R.string.notify_title_flash) : getString(R.string.notify_title_download))
-                .setShowWhen(false)
+                .setShowWhen(true)
                 .setContentIntent(getNotificationIntent(false))
                 .setDeleteIntent(getNotificationIntent(true))
                 .setContentText(notifyFileName).build());
@@ -539,7 +530,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     .setSmallIcon(R.drawable.stat_notify_error)
                     .setContentTitle(getString(R.string.notify_title_error))
                     .setContentText(errorStateString)
-                    .setShowWhen(false)
+                    .setShowWhen(true)
                     .setContentIntent(getNotificationIntent(false)).build());
         }
     }
@@ -1072,13 +1063,21 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             Logger.i("Ignoring request to check for updates - busy");
             return false;
         }
+
+        stopNotification();
+        stopErrorNotification();
+
         if (!isSupportedVersion()) {
             // TODO - to be more generic this should maybe use the info from getNewestFullBuild
             updateState(STATE_ERROR_UNOFFICIAL, null, null, null, config.getVersion(), null);
             Logger.i("Ignoring request to check for updates - not compatible for update! " + config.getVersion());
             return false;
         }
-
+        if (!networkState.isConnected()) {
+            updateState(STATE_ERROR_CONNECTION, null, null, null, null, null);
+            Logger.i("Ignoring request to check for updates - no data connection");
+            return false;
+        }
         boolean updateAllowed = false;
         if (!userInitiated) {
             updateAllowed = checkOnly >= PREF_AUTO_DOWNLOAD_CHECK;
@@ -1457,9 +1456,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
         boolean deltaSignature = prefs.getBoolean(PREF_DELTA_SIGNATURE, false);
         String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
-        prefs.edit().putString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT).commit();
-        prefs.edit().putString(PREF_LATEST_DELTA_NAME, PREF_READY_FILENAME_DEFAULT).commit();
-        prefs.edit().putString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT).commit();
+
+        clearState();
+
         if ((flashFilename == null)
                 || !flashFilename.startsWith(config.getPathBase()))
             return;
@@ -1663,8 +1662,12 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private int getAutoDownloadValue() {
-        String autoDownload = prefs.getString(SettingsActivity.PREF_AUTO_DOWNLOAD, UpdateService.PREF_AUTO_DOWNLOAD_CHECK_STRING);
+        String autoDownload = prefs.getString(SettingsActivity.PREF_AUTO_DOWNLOAD, getDefaultAutoDownloadValue());
         return Integer.valueOf(autoDownload).intValue();
+    }
+
+    private String getDefaultAutoDownloadValue() {
+        return isSupportedVersion() ? PREF_AUTO_DOWNLOAD_CHECK_STRING : PREF_AUTO_DOWNLOAD_DISABLED_STRING;
     }
 
     private boolean isScreenStateEnabled() {
@@ -1699,13 +1702,15 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         if (state.equals(UpdateService.STATE_ERROR_DOWNLOAD) ||
                 state.equals(UpdateService.STATE_ERROR_DISK_SPACE) ||
                 state.equals(UpdateService.STATE_ERROR_UNKNOWN) ||
-                state.equals(UpdateService.STATE_ERROR_UNOFFICIAL)) {
+                state.equals(UpdateService.STATE_ERROR_UNOFFICIAL) ||
+                state.equals(UpdateService.STATE_ERROR_CONNECTION)) {
             return true;
         }
         return false;
     }
 
     private boolean isSnoozeNotification() {
+        // check if we're snoozed, using abs for clock changes
         boolean timeSnooze = Math.abs(System.currentTimeMillis()
                 - prefs.getLong(PREF_LAST_SNOOZE_TIME_NAME,
                         PREF_LAST_SNOOZE_TIME_DEFAULT)) <= SNOOZE_MS;
@@ -1722,13 +1727,32 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         return timeSnooze;
     }
 
+    private void clearState() {
+        prefs.edit().putString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT).commit();
+        prefs.edit().putString(PREF_LATEST_DELTA_NAME, PREF_READY_FILENAME_DEFAULT).commit();
+        prefs.edit().putString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT).commit();
+        prefs.edit().putString(PREF_DOWNLOAD_SIZE, null).commit();
+        prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, false).commit();
+    }
+
+    private void shouldShowErrorNotification() {
+        boolean dailyAlarm = prefs.getString(SettingsActivity.PREF_SCHEDULER_MODE, SettingsActivity.PREF_SCHEDULER_MODE_SMART)
+                .equals(SettingsActivity.PREF_SCHEDULER_MODE_DAILY);
+
+        if (dailyAlarm || failedUpdateCount >= 4) {
+            // if from scheduler show a notification cause user should
+            // see that somwthing went wrong
+            // if we check only daily always show - if smart mode wait for 4
+            // consecutive failure - would be about 24h
+            startErrorNotification();
+            failedUpdateCount = 0;
+        }
+    }
+
     private void checkForUpdatesAsync(final boolean userInitiated, final int checkOnly) {
         updateState(STATE_ACTION_CHECKING, null, null, null, null, null);
         wakeLock.acquire();
         wifiLock.acquire();
-
-        stopNotification();
-        stopErrorNotification();
 
         Notification notification = (new Notification.Builder(this)).
                 setSmallIcon(R.drawable.stat_notify_update).
@@ -1757,11 +1781,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     (new File(config.getPathBase())).mkdir();
                     (new File(config.getPathFlashAfterUpdate())).mkdir();
 
-                    prefs.edit().putString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT).commit();
-                    prefs.edit().putString(PREF_LATEST_DELTA_NAME, PREF_READY_FILENAME_DEFAULT).commit();
-                    prefs.edit().putString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT).commit();
-                    prefs.edit().putString(PREF_DOWNLOAD_SIZE, null).commit();
-                    prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, false).commit();
+                    clearState();
 
                     String latestFullBuild = getNewestFullBuild();
                     // if we dont even find a build on dl no sense to continue
@@ -2060,7 +2080,17 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     stopForeground(true);
                     if (wifiLock.isHeld()) wifiLock.release();
                     if (wakeLock.isHeld()) wakeLock.release();
-                    autoState(userInitiated, checkOnly);
+
+                    if (isErrorState(state)) {
+                        failedUpdateCount++;
+                        clearState();
+                        if (!userInitiated) {
+                            shouldShowErrorNotification();
+                        }
+                    } else {
+                        failedUpdateCount = 0;
+                        autoState(userInitiated, checkOnly);
+                    }
                     updateRunning = false;
                 }
             }

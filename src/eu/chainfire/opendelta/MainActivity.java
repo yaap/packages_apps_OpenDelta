@@ -247,6 +247,9 @@ public class MainActivity extends Activity {
                 enableCheck = true;
                 progress.setIndeterminate(false);
                 extraText = intent.getStringExtra(UpdateService.EXTRA_FILENAME);
+            } else if (UpdateService.STATE_ERROR_CONNECTION.equals(state)) {
+                enableCheck = true;
+                progress.setIndeterminate(false);
             } else if (UpdateService.STATE_ACTION_NONE.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);

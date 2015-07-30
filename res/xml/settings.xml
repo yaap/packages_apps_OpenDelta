@@ -30,7 +30,6 @@
 		android:key="category_scheduler"
 		android:title="@string/category_scheduler" >
 		<ListPreference
-			android:defaultValue="1"
 			android:entries="@array/scheduler_actions_keys"
 			android:entryValues="@array/scheduler_actions_values"
 			android:key="auto_download_actions"

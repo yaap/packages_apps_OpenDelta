@@ -229,8 +229,8 @@ public class Scheduler implements OnScreenStateListener,
 
     public void start() {
         Logger.i("Starting scheduler");
-        dailyAlarm = prefs.getString(SettingsActivity.PREF_SCHEDULER_MODE, "0")
-                .equals("1");
+        dailyAlarm = prefs.getString(SettingsActivity.PREF_SCHEDULER_MODE, SettingsActivity.PREF_SCHEDULER_MODE_SMART)
+                .equals(SettingsActivity.PREF_SCHEDULER_MODE_DAILY);
         if (dailyAlarm) {
             setDailyAlarmFromPrefs();
         } else {

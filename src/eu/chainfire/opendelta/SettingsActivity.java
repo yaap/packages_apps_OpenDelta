@@ -50,7 +50,11 @@ public class SettingsActivity extends PreferenceActivity implements
     private static final String KEY_SECURE_MODE = "secure_mode";
     private static final String KEY_CATEGORY_DOWNLOAD = "category_download";
     public static final String PREF_SCREEN_STATE_OFF = "screen_state_off";
+
     public static final String PREF_SCHEDULER_MODE = "scheduler_mode";
+    public static final String PREF_SCHEDULER_MODE_SMART = String.valueOf(0);
+    public static final String PREF_SCHEDULER_MODE_DAILY = String.valueOf(1);
+
     public static final String PREF_SCHEDULER_DAILY_TIME = "scheduler_daily_time";
 
     private Preference mNetworksConfig;
@@ -85,9 +89,14 @@ public class SettingsActivity extends PreferenceActivity implements
 
         addPreferencesFromResource(R.xml.settings);
         mNetworksConfig = (Preference) findPreference(KEY_NETWORKS);
+
+        String autoDownload = prefs.getString(PREF_AUTO_DOWNLOAD, getDefaultAutoDownloadValue());
+        int autoDownloadValue = Integer.valueOf(autoDownload).intValue();
         mAutoDownload = (ListPreference) findPreference(PREF_AUTO_DOWNLOAD);
         mAutoDownload.setOnPreferenceChangeListener(this);
+        mAutoDownload.setValue(autoDownload);
         mAutoDownload.setSummary(mAutoDownload.getEntry());
+
         mBatteryLevel = (ListPreference) findPreference(PREF_BATTERY_LEVEL);
         mBatteryLevel.setOnPreferenceChangeListener(this);
         mBatteryLevel.setSummary(mBatteryLevel.getEntry());
@@ -98,9 +107,7 @@ public class SettingsActivity extends PreferenceActivity implements
         mSecureMode.setChecked(mConfig.getSecureModeCurrent());
         mAutoDownloadCategory = (PreferenceCategory) findPreference(KEY_CATEGORY_DOWNLOAD);
 
-        String autoDownload = prefs.getString(PREF_AUTO_DOWNLOAD,
-                UpdateService.PREF_AUTO_DOWNLOAD_CHECK_STRING);
-        int autoDownloadValue = Integer.valueOf(autoDownload).intValue();
+
         mAutoDownloadCategory
                 .setEnabled(autoDownloadValue > UpdateService.PREF_AUTO_DOWNLOAD_CHECK);
 
@@ -110,9 +117,9 @@ public class SettingsActivity extends PreferenceActivity implements
         mSchedulerMode
                 .setEnabled(autoDownloadValue > UpdateService.PREF_AUTO_DOWNLOAD_DISABLED);
 
-        String schedulerMode = prefs.getString(PREF_SCHEDULER_MODE, "0");
+        String schedulerMode = prefs.getString(PREF_SCHEDULER_MODE, PREF_SCHEDULER_MODE_SMART);
         mSchedulerDailyTime = (Preference) findPreference(PREF_SCHEDULER_DAILY_TIME);
-        mSchedulerDailyTime.setEnabled(!schedulerMode.equals("0"));
+        mSchedulerDailyTime.setEnabled(schedulerMode.equals(PREF_SCHEDULER_MODE_DAILY));
         mSchedulerDailyTime.setSummary(prefs.getString(
                 PREF_SCHEDULER_DAILY_TIME, "00:00"));
     }
@@ -261,5 +268,16 @@ public class SettingsActivity extends PreferenceActivity implements
 
         new TimePickerDialog(this, this, hour, minute,
                 DateFormat.is24HourFormat(this)).show();
+    }
+
+    private String getDefaultAutoDownloadValue() {
+        return isSupportedVersion() ? UpdateService.PREF_AUTO_DOWNLOAD_CHECK_STRING : UpdateService.PREF_AUTO_DOWNLOAD_DISABLED_STRING;
+    }
+
+    private boolean isSupportedVersion() {
+        if (mConfig.getVersion().indexOf(getString(R.string.official_version_tag)) == -1) {
+            return false;
+        }
+        return true;
     }
 }

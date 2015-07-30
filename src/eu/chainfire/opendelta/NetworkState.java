@@ -45,6 +45,7 @@ public class NetworkState {
     private OnNetworkStateListener onNetworkStateListener = null;
     private ConnectivityManager connectivityManager = null;
     private volatile Boolean stateLast = null;
+    private boolean connected;
 
     private int flags = ALLOW_WIFI | ALLOW_ETHERNET;
 
@@ -65,8 +66,8 @@ public class NetworkState {
             NetworkInfo info = connectivityManager.getActiveNetworkInfo();
 
             boolean state = false;
-            if ((info != null) &&
-                    info.isConnected()) {
+            connected = (info != null) && info.isConnected();
+            if (connected) {
                 // My definitions of 2G/3G/4G may not match yours... :)
                 // Speed estimates courtesy (c) 2013 the internets
                 switch (info.getType()) {
@@ -173,5 +174,9 @@ public class NetworkState {
         Logger.d("networkstate flags --> %d", newFlags);
         if (connectivityManager != null)
             updateState();
+    }
+
+    public boolean isConnected() {
+        return connected;
     }
 }
