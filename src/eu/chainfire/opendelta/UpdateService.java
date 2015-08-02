@@ -287,7 +287,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
         prefs.registerOnSharedPreferenceChangeListener(this);
 
-        autoState(false, PREF_AUTO_DOWNLOAD_CHECK);
+        autoState(false, PREF_AUTO_DOWNLOAD_CHECK, false);
     }
 
     @Override
@@ -322,7 +322,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             } else if (ACTION_BUILD.equals(intent.getAction())) {
                 checkForUpdates(true, PREF_AUTO_DOWNLOAD_FULL);
             } else if (ACTION_UPDATE.equals(intent.getAction())) {
-                autoState(true, PREF_AUTO_DOWNLOAD_CHECK);
+                autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
             }
         }
 
@@ -404,7 +404,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         }
     }
 
-    private void autoState(boolean userInitiated, int checkOnly) {
+    private void autoState(boolean userInitiated, int checkOnly, boolean notify) {
         Logger.d("autoState state = " + this.state + " userInitiated = " + userInitiated + " checkOnly = " + checkOnly);
 
         if (isErrorState(this.state)) {
@@ -441,7 +441,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 updateState(STATE_ACTION_BUILD, null, null, null, null,
                         prefs.getLong(PREF_LAST_CHECK_TIME_NAME,
                                 PREF_LAST_CHECK_TIME_DEFAULT));
-                if (!userInitiated) {
+                if (!userInitiated && notify) {
                     if (!isSnoozeNotification()) {
                         startNotification(checkOnly);
                     } else {
@@ -463,7 +463,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     filename)).getName(), prefs.getLong(
                             PREF_LAST_CHECK_TIME_NAME, PREF_LAST_CHECK_TIME_DEFAULT));
 
-            if (!userInitiated) {
+            if (!userInitiated && notify) {
                 if (!isSnoozeNotification()) {
                     startNotification(checkOnly);
                 } else {
@@ -1741,7 +1741,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
         if (dailyAlarm || failedUpdateCount >= 4) {
             // if from scheduler show a notification cause user should
-            // see that somwthing went wrong
+            // see that something went wrong
             // if we check only daily always show - if smart mode wait for 4
             // consecutive failure - would be about 24h
             startErrorNotification();
@@ -2089,7 +2089,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         }
                     } else {
                         failedUpdateCount = 0;
-                        autoState(userInitiated, checkOnly);
+                        autoState(userInitiated, checkOnly, true);
                     }
                     updateRunning = false;
                 }
