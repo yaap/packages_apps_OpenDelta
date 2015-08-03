@@ -4,7 +4,6 @@
   <string name="app_name">OpenDelta</string>
   <string name="title">Sistem Güncellemeleri</string>
   <string name="action_networks">AĞLAR</string>
-  <string name="title_networks">Oto Güncelleme Ağ Seçimi</string>
   <string name="network_2g">2G</string>
   <string name="network_3g">3G</string>
   <string name="network_4g">4G</string>
@@ -12,16 +11,6 @@
   <string name="network_ethernet">Eternet</string>
   <string name="network_unknown">Diğer</string>
   <string name="action_about">Hakkında</string>
-  <string name="about_content"><![CDATA[
-        Copyright &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>
-        <br>
-        Originally created for <b>The OmniROM Project</b><br>
-        <br>
-        Licensed under the terms of the <b>GNU General Public License, version 3.0 (GPLv3)</b><br>
-        <br>
-        Delta decoding based on <b>xdelta</b>, copyright &copy; _COPYRIGHT_XDELTA_ <b>Joshua MacDonald</b><br>
-    ]]></string>
-  <string name="state_action_none">Sisteminiz güncel!</string>
   <string name="state_action_checking">Güncellemeler kontrol ediliyor &#8230;</string>
   <string name="state_action_checking_md5">Dosya doğrulanıyor &#8230;</string>
   <string name="state_action_searching">Dosyalar aranıyor &#8230;</string>
@@ -30,14 +19,6 @@
   <string name="state_action_applying">Yama ekleniyor &#8230;</string>
   <string name="state_action_applying_patch">Yama ekleniyor &#8230;</string>
   <string name="state_action_applying_md5">Dosya doğrulanıyor &#8230;</string>
-  <string name="state_action_ready">Yeni bir güncelleme mevcut</string>
-  <string name="state_error_disk_space">Yeterli Disk Alanı Yok!</string>
-  <string name="state_error_unknown">Bilinmeyen hata</string>
   <string name="error_disk_space_sub" formatted="false">Diskinizde %d Mb boş alan var, %d Mb gerekli.</string>
   <string name="notify_update_available">Yeni bir güncelleme mevcut</string>
-  <string name="notify_checking">Güncellemeler kontrol ediliyor &#8230;</string>
-  <string name="last_checked" formatted="false">Son Güncelleme Kontrolü: %s \'de St: %s \'de yapıldı.</string>
-  <string name="last_checked_never">Daha önce hiç güncelleme kontrolü yapılmadı. Şimdi yapılsın mı ?</string>
-  <string name="button_check_now">Şimdi kontrol et &#8230;</string>
-  <string name="button_flash_now">Şimdi Yükle!</string>
 </resources>

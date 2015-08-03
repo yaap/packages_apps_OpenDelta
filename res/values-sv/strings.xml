@@ -3,19 +3,8 @@
 <resources>
   <string name="title">Systemuppdateringar</string>
   <string name="action_networks">Nätverk</string>
-  <string name="title_networks">Nätverk för autouppdatering</string>
   <string name="network_unknown">Annat</string>
   <string name="action_about">Om</string>
-  <string name="about_content"><![CDATA[
-        Copyright &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>
-        <br>
-        Ursprungligen skapad för <b>The OmniROM Project</b><br>
-        <br>
-        Licensierad enligt villkoren i <b>GNU General Public License, version 3.0 (GPLv3)</b><br>
-        <br>
-        Deltaavkodning baserad på <b>xdelta</b>, Copyright &copy; _COPYRIGHT_XDELTA_ <b>Joshua MacDonald</b><br>
-    ]]></string>
-  <string name="state_action_none">Systemet är uppdaterat</string>
   <string name="state_action_checking">Söker efter uppdateringar&#8230;</string>
   <string name="state_action_checking_md5">Verifierar fil&#8230;</string>
   <string name="state_action_searching">Söker efter filer&#8230;</string>
@@ -24,16 +13,8 @@
   <string name="state_action_applying">Sammanfogar&#8230;</string>
   <string name="state_action_applying_patch">Sammanfogar&#8230;</string>
   <string name="state_action_applying_md5">Verifierar fil&#8230;</string>
-  <string name="state_action_ready">En uppdatering är tillgänglig</string>
-  <string name="state_error_disk_space">Inte tillräckligt med lagringsutrymme!</string>
-  <string name="state_error_unknown">Okänt fel</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB tillgängligt, %d MiB behövs</string>
   <string name="notify_update_available">En uppdatering är tillgänglig</string>
-  <string name="notify_checking">Söker efter uppdateringar&#8230;</string>
-  <string name="last_checked" formatted="false">Sökte senast den %s vid %s</string>
-  <string name="last_checked_never">Du har aldrig sökt. Vill du göra det nu?</string>
-  <string name="button_check_now">Sök nu&#8230;</string>
-  <string name="button_flash_now">Installera nu</string>
   <string name="action_secure_mode">Säkert läge</string>
   <string name="secure_mode_enabled_title">Säkert läge aktiverat</string>
   <string name="secure_mode_enabled_description"><![CDATA[Uppdateringens kryptografiska signatur kommer att verifieras innan installationen för att bekräfta dess ursprung, och inga övriga uppdateringar kommer att installeras. Detta läge är endast kompatibelt med <b>TWRP</b>.]]></string>

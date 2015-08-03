@@ -4,7 +4,6 @@
   <string name="app_name">OpenDelta</string>
   <string name="title">Aktualizacje systemu</string>
   <string name="action_networks">Sieci</string>
-  <string name="title_networks">Sieci wykorzystywane przy aktualizacji</string>
   <string name="network_2g">2G</string>
   <string name="network_3g">3G</string>
   <string name="network_4g">4G</string>
@@ -12,16 +11,6 @@
   <string name="network_ethernet">Ethernet</string>
   <string name="network_unknown">Inne</string>
   <string name="action_about">O aplikacji</string>
-  <string name="about_content"><![CDATA[
-        Wszelkie prawa zastrzeżone &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>
-        <br>
-        Oryginalnie stworzona w <b>Projekcie OmniROM</b><br>
-        <br>
-        Na licencji <b>GNU General Public License, wersja 3.0 (GPLv3)</b><br>
-        <br>
-        Dekodowanie delta oparte na <b>xdelta</b>, copyright &copy; _COPYRIGHT_XDELTA_ <b>Joshua MacDonald</b><br>
-    ]]></string>
-  <string name="state_action_none">Twój system jest aktualny</string>
   <string name="state_action_checking">Wyszukiwanie aktualizacji &#8230;</string>
   <string name="state_action_checking_md5">Weryfikacja pliku &#8230;</string>
   <string name="state_action_searching">Wyszukiwanie plików &#8230;</string>
@@ -30,16 +19,8 @@
   <string name="state_action_applying">Patchowanie &#8230;</string>
   <string name="state_action_applying_patch">Patchowanie &#8230;</string>
   <string name="state_action_applying_md5">v &#8230;</string>
-  <string name="state_action_ready">Dostępna nowa aktualizacja</string>
-  <string name="state_error_disk_space">Brak miejsca na dysku !</string>
-  <string name="state_error_unknown">Nieznany błąd</string>
   <string name="error_disk_space_sub" formatted="false">%d MB dostępne, %d MB wymagane</string>
   <string name="notify_update_available">Dostępna nowa aktualizacja</string>
-  <string name="notify_checking">Wyszukiwanie aktualizacji &#8230;</string>
-  <string name="last_checked" formatted="false">Ostatnie sprawdzenie %s o %s</string>
-  <string name="last_checked_never">Brak ostatnich wyszukiwań, może ty chcesz to zrobić ?</string>
-  <string name="button_check_now">Wyszukaj teraz &#8230;</string>
-  <string name="button_flash_now">Wgraj teraz</string>
   <string name="action_secure_mode">Tryb Bezpieczny</string>
   <string name="secure_mode_enabled_title">Tryb bezpieczny: włączony</string>
   <string name="secure_mode_enabled_description"><![CDATA[Podpis kryptograficzny aktualizacji zostanie zweryfikowany przed w graniem w celu potwierdzenia jego pochodzenia, żadne dodatkowe aktualizacje nie zostaną zainstalowane. Ten tryb jest kompatybilny tylko z <b>TWRP</b>.]]></string>

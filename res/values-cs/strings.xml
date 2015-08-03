@@ -4,7 +4,6 @@
   <string name="app_name">OpenDelta</string>
   <string name="title">Aktualizace systému</string>
   <string name="action_networks">Sítě</string>
-  <string name="title_networks">Sítě používané pro automatické aktualizace</string>
   <string name="network_2g">2G</string>
   <string name="network_3g">3G</string>
   <string name="network_4g">4G</string>
@@ -12,16 +11,6 @@
   <string name="network_ethernet">Ethernet</string>
   <string name="network_unknown">Ostatní</string>
   <string name="action_about">O aplikaci</string>
-  <string name="about_content"><![CDATA[
-        Všechna práva vyhrazena &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>
-        <br>
-        Původně vytvořený pro <b>Projekt OmniROM</b><br>
-        <br>
-        Licencován na základě podmínek <b>GNU General Public License, verze 3.0 (GPLv3)</b><br>
-        <br>
-        Delta dekódování na základě <b>xdelta</b>, copyright &copy; _COPYRIGHT_XDELTA_ <b>Joshua MacDonald</b><br>
-    ]]></string>
-  <string name="state_action_none">Váš systém je aktuální</string>
   <string name="state_action_checking">Kontroluji aktualizace &#8230;</string>
   <string name="state_action_checking_md5">Ověřování souboru &#8230;</string>
   <string name="state_action_searching">Hledání souborů &#8230;</string>
@@ -30,16 +19,8 @@
   <string name="state_action_applying">Provádění změn &#8230;</string>
   <string name="state_action_applying_patch">Provádění změn &#8230;</string>
   <string name="state_action_applying_md5">Ověřování souboru &#8230;</string>
-  <string name="state_action_ready">Aktualizace je k dispozici</string>
-  <string name="state_error_disk_space">Není dostatek místa na disku !</string>
-  <string name="state_error_unknown">Neznámá chyba</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB volných, %d MiB požadovaných</string>
   <string name="notify_update_available">Aktualizace je k dispozici</string>
-  <string name="notify_checking">Kontroluji aktualizace &#8230;</string>
-  <string name="last_checked" formatted="false">Poslední kontrola proběhla dne %s v %s</string>
-  <string name="last_checked_never">Kontrola nebyla nikdy provedena, možná chcete provést kontrolu nyní ?</string>
-  <string name="button_check_now">Zkontrolovat nyní &#8230;</string>
-  <string name="button_flash_now">Aktualizovat nyní</string>
   <string name="action_secure_mode">Zabezpečení</string>
   <string name="secure_mode_enabled_title">Zabezpečený režim: povoleno</string>
   <string name="secure_mode_enabled_description"><![CDATA[Před nahráním aktualizace bude ověřen digitální podpis pro ověření původu aktualizace. Tento režim je kompatibilní pouze s <b>TWRP</b>.]]></string>
