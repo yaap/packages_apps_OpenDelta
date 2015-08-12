@@ -184,6 +184,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     public static final String PREF_STOP_DOWNLOAD = "stop_download";
     public static final String PREF_DOWNLOAD_SIZE = "download_size";
     public static final String PREF_DELTA_SIGNATURE = "delta_signature";
+    public static final String PREF_INITIAL_FILE = "initial_file";
 
     public static final int PREF_AUTO_DOWNLOAD_DISABLED = 0;
     public static final int PREF_AUTO_DOWNLOAD_CHECK = 1;
@@ -1456,6 +1457,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
         boolean deltaSignature = prefs.getBoolean(PREF_DELTA_SIGNATURE, false);
         String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
+        String intialFile = prefs.getString(PREF_INITIAL_FILE, PREF_READY_FILENAME_DEFAULT);
 
         clearState();
 
@@ -1463,6 +1465,12 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 || !flashFilename.startsWith(config.getPathBase()))
             return;
 
+        // now delete the initial file
+        if (intialFile != null
+                && new File(intialFile).exists()
+                && intialFile.startsWith(config.getPathBase())){
+            new File(intialFile).delete();
+        }
         // Remove the path to the storage from the filename, so we get a path
         // relative to the root of the storage
         String path_sd = Environment.getExternalStorageDirectory()
@@ -1733,6 +1741,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         prefs.edit().putString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT).commit();
         prefs.edit().putString(PREF_DOWNLOAD_SIZE, null).commit();
         prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, false).commit();
+        prefs.edit().putString(PREF_INITIAL_FILE, PREF_READY_FILENAME_DEFAULT).commit();
     }
 
     private void shouldShowErrorNotification() {
@@ -1754,11 +1763,14 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         wakeLock.acquire();
         wifiLock.acquire();
 
+        String notificationText = getString(R.string.state_action_checking);
+        if (checkOnly > PREF_AUTO_DOWNLOAD_CHECK) {
+            notificationText = getString(R.string.state_action_downloading);
+        }
         Notification notification = (new Notification.Builder(this)).
                 setSmallIcon(R.drawable.stat_notify_update).
                 setContentTitle(getString(R.string.title)).
-                setContentText(getString(R.string.notify_checking)).
-                setTicker(getString(R.string.notify_checking)).
+                setContentText(notificationText).
                 setShowWhen(false).
                 setContentIntent(getNotificationIntent(false)).
                 build();
@@ -2055,9 +2067,13 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                                 if (di != lastDelta)
                                     (new File(config.getPathBase() + di.getOut().getName())).delete();
                             }
+                            // we will not delete initialFile until flashing
+                            // else people building images and not flashing for 24h will loose
+                            // the possibility to do delta updates
                             if (initialFile != null) {
-                                if (initialFile.startsWith(config.getPathBase()))
-                                    (new File(initialFile)).delete();
+                                if (initialFile.startsWith(config.getPathBase())) {
+                                    prefs.edit().putString(PREF_INITIAL_FILE, initialFile).commit();
+                                }
                             }
                             prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, true).commit();
                             prefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
