@@ -49,8 +49,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-    private static final String PREF_START_HINT_SHOWN = "start_hint_shown";
-
     private TextView title = null;
     private TextView sub = null;
     private ProgressBar progress = null;
@@ -213,7 +211,7 @@ public class MainActivity extends Activity {
                 // check for first start until check button has been pressed
                 // use a special title then - but only once
                 if (UpdateService.STATE_ACTION_NONE.equals(state)
-                        && !prefs.getBoolean(PREF_START_HINT_SHOWN, false)) {
+                        && !prefs.getBoolean(SettingsActivity.PREF_START_HINT_SHOWN, false)) {
                     title = getString(R.string.last_checked_never_title);
                 }
                 // dont spill for progress
@@ -411,9 +409,7 @@ public class MainActivity extends Activity {
     public void onButtonCheckNowClick(View v) {
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(this);
-        if (!prefs.getBoolean(PREF_START_HINT_SHOWN, false)) {
-            prefs.edit().putBoolean(PREF_START_HINT_SHOWN, true).commit();
-        }
+        prefs.edit().putBoolean(SettingsActivity.PREF_START_HINT_SHOWN, true).commit();
         UpdateService.startCheck(this);
     }
 

@@ -99,5 +99,9 @@
 	<string name="category_flashing">Flashing</string>
 	<string name="secure_mode_title">Secure mode</string>
 	<string name="state_error_connection">No data connection.</string>
+	<string name="category_admin">Maintenance</string>
+	<string name="clear_files_title">Clean update files</string>
+	<string name="clear_files_summary">Delete existing update files to force downloading full update</string>
+	<string name="clean_files_feedback" formatted="false">Deleted %d files. Now press \'Check for updates\'</string>
 
 </resources>

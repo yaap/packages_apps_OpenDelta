@@ -17,6 +17,7 @@
  */
 package eu.chainfire.opendelta;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -40,6 +41,7 @@ import android.text.Html;
 import android.text.format.DateFormat;
 import android.view.MenuItem;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 public class SettingsActivity extends PreferenceActivity implements
         OnPreferenceChangeListener, OnTimeSetListener {
@@ -50,6 +52,8 @@ public class SettingsActivity extends PreferenceActivity implements
     private static final String KEY_SECURE_MODE = "secure_mode";
     private static final String KEY_CATEGORY_DOWNLOAD = "category_download";
     public static final String PREF_SCREEN_STATE_OFF = "screen_state_off";
+    private static final String PREF_CLEAN_FILES = "clear_files";
+    public static final String PREF_START_HINT_SHOWN = "start_hint_shown";
 
     public static final String PREF_SCHEDULER_MODE = "scheduler_mode";
     public static final String PREF_SCHEDULER_MODE_SMART = String.valueOf(0);
@@ -66,6 +70,7 @@ public class SettingsActivity extends PreferenceActivity implements
     private PreferenceCategory mAutoDownloadCategory;
     private ListPreference mSchedulerMode;
     private Preference mSchedulerDailyTime;
+    private Preference mCleanFiles;
 
     @Override
     public void onPause() {
@@ -122,6 +127,8 @@ public class SettingsActivity extends PreferenceActivity implements
         mSchedulerDailyTime.setEnabled(schedulerMode.equals(PREF_SCHEDULER_MODE_DAILY));
         mSchedulerDailyTime.setSummary(prefs.getString(
                 PREF_SCHEDULER_DAILY_TIME, "00:00"));
+
+        mCleanFiles = (Preference) findPreference(PREF_CLEAN_FILES);
     }
 
     @Override
@@ -162,6 +169,14 @@ public class SettingsActivity extends PreferenceActivity implements
             return true;
         } else if (preference == mSchedulerDailyTime) {
             showTimePicker();
+            return true;
+        } else if (preference == mCleanFiles) {
+            int numDeletedFiles = cleanFiles();
+            SharedPreferences prefs = PreferenceManager
+                    .getDefaultSharedPreferences(this);
+            UpdateService.clearState(prefs);
+            prefs.edit().putBoolean(PREF_START_HINT_SHOWN, false).commit();
+            Toast.makeText(this, String.format(getString(R.string.clean_files_feedback), numDeletedFiles), Toast.LENGTH_LONG).show();
             return true;
         }
         return false;
@@ -279,5 +294,20 @@ public class SettingsActivity extends PreferenceActivity implements
             return false;
         }
         return true;
+    }
+
+    private int cleanFiles() {
+        int deletedFiles = 0;
+        String dataFolder = mConfig.getPathBase();
+        File[] contents = new File(dataFolder).listFiles();
+        if (contents != null) {
+            for (File file : contents) {
+                if (file.isFile() && file.getName().startsWith(mConfig.getFileBaseNamePrefix())) {
+                    file.delete();
+                    deletedFiles++;
+                }
+            }
+        }
+        return deletedFiles;
     }
 }

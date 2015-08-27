@@ -1442,6 +1442,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
     @SuppressLint("SdCardPath")
     private void flashUpdate() {
+        Logger.d("flashUpdate");
         if (getPackageManager().checkPermission(
                 PERMISSION_ACCESS_CACHE_FILESYSTEM, getPackageName()) != PackageManager.PERMISSION_GRANTED) {
             Logger.d("[%s] required beyond this point",
@@ -1459,17 +1460,19 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
         String intialFile = prefs.getString(PREF_INITIAL_FILE, PREF_READY_FILENAME_DEFAULT);
 
-        clearState();
+        clearState(prefs);
 
         if ((flashFilename == null)
-                || !flashFilename.startsWith(config.getPathBase()))
+                || !flashFilename.startsWith(config.getPathBase())) {
+            Logger.d("flashUpdate - no valid file to flash found");
             return;
-
+        }
         // now delete the initial file
         if (intialFile != null
                 && new File(intialFile).exists()
                 && intialFile.startsWith(config.getPathBase())){
             new File(intialFile).delete();
+            Logger.d("flashUpdate - delete initial file");
         }
         // Remove the path to the storage from the filename, so we get a path
         // relative to the root of the storage
@@ -1482,6 +1485,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         for (int i = 0; i < extras.size(); i++) {
             extras.set(i, extras.get(i).substring(path_sd.length()));
         }
+        Logger.d("flashUpdate - extra files to flash " + extras);
+
 
         try {
             // TWRP - OpenRecoveryScript - the recovery will find the correct
@@ -1496,6 +1501,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             // risk.
             {
                 if (config.getInjectSignatureEnable() && deltaSignature) {
+                    Logger.d("flashUpdate - create /cache/recovery/keys");
+
                     FileOutputStream os = new FileOutputStream(
                             "/cache/recovery/keys", false);
                     try {
@@ -1506,6 +1513,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     setPermissions("/cache/recovery/keys", 0644,
                             Process.myUid(), 2001 /* AID_CACHE */);
                 }
+
+                Logger.d("flashUpdate - create /cache/recovery/openrecoveryscript");
 
                 FileOutputStream os = new FileOutputStream(
                         "/cache/recovery/openrecoveryscript", false);
@@ -1554,6 +1563,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             // We don't generate a CWM script in secure mode, because it
             // doesn't support checking our custom signatures
             if (!config.getSecureModeCurrent()) {
+                Logger.d("flashUpdate - create /cache/recovery/extendedcommand");
+
                 FileOutputStream os = new FileOutputStream(
                         "/cache/recovery/extendedcommand", false);
                 try {
@@ -1579,8 +1590,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 (new File("/cache/recovery/extendedcommand")).delete();
             }
 
-            ((PowerManager) getSystemService(Context.POWER_SERVICE))
-            .reboot("recovery");
+            Logger.d("flashUpdate - reboot to recovery");
+
+            ((PowerManager) getSystemService(Context.POWER_SERVICE)).reboot("recovery");
         } catch (Exception e) {
             // We have failed to write something. There's not really anything
             // else to do at
@@ -1735,7 +1747,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         return timeSnooze;
     }
 
-    private void clearState() {
+    public static void clearState(SharedPreferences prefs) {
         prefs.edit().putString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT).commit();
         prefs.edit().putString(PREF_LATEST_DELTA_NAME, PREF_READY_FILENAME_DEFAULT).commit();
         prefs.edit().putString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT).commit();
@@ -1793,7 +1805,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     (new File(config.getPathBase())).mkdir();
                     (new File(config.getPathFlashAfterUpdate())).mkdir();
 
-                    clearState();
+                    clearState(prefs);
 
                     String latestFullBuild = getNewestFullBuild();
                     // if we dont even find a build on dl no sense to continue
@@ -2099,7 +2111,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
                     if (isErrorState(state)) {
                         failedUpdateCount++;
-                        clearState();
+                        clearState(prefs);
                         if (!userInitiated) {
                             shouldShowErrorNotification();
                         }

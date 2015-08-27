@@ -73,5 +73,14 @@
 			android:key="battery_level_string"
 			android:title="@string/battery_level_title" />
 	</PreferenceCategory>
+	<PreferenceCategory
+		android:key="category_admin"
+		android:title="@string/category_admin" >
+		<Preference
+			android:key="clear_files"
+			android:persistent="false"
+			android:summary="@string/clear_files_summary"
+			android:title="@string/clear_files_title" />
+	</PreferenceCategory>
 
 </PreferenceScreen>
