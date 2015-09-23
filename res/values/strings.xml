@@ -93,7 +93,9 @@
 	<string name="scheduler_mode_title">Scheduler mode</string>
 	<string name="scheduler_smart">Smart</string>
 	<string name="scheduler_daily">Daily</string>
-	<string name="scheduler_daily_time">Daily time</string>
+	<string name="scheduler_weekly">Weekly</string>
+	<string name="scheduler_daily_time">Time</string>
+	<string name="scheduler_week_day">Day</string>
 	<string name="networks_title">Networks</string>
 	<string name="networks_message">Download only on networks types</string>
 	<string name="category_flashing">Flashing</string>

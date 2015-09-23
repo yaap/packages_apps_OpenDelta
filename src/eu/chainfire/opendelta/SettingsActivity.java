@@ -18,7 +18,11 @@
 package eu.chainfire.opendelta;
 
 import java.io.File;
+import java.text.DateFormatSymbols;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 import android.app.AlertDialog;
@@ -58,8 +62,10 @@ public class SettingsActivity extends PreferenceActivity implements
     public static final String PREF_SCHEDULER_MODE = "scheduler_mode";
     public static final String PREF_SCHEDULER_MODE_SMART = String.valueOf(0);
     public static final String PREF_SCHEDULER_MODE_DAILY = String.valueOf(1);
+    public static final String PREF_SCHEDULER_MODE_WEEKLY = String.valueOf(2);
 
     public static final String PREF_SCHEDULER_DAILY_TIME = "scheduler_daily_time";
+    public static final String PREF_SCHEDULER_WEEK_DAY = "scheduler_week_day";
 
     private Preference mNetworksConfig;
     private ListPreference mAutoDownload;
@@ -71,6 +77,7 @@ public class SettingsActivity extends PreferenceActivity implements
     private ListPreference mSchedulerMode;
     private Preference mSchedulerDailyTime;
     private Preference mCleanFiles;
+    private ListPreference mScheduleWeekDay;
 
     @Override
     public void onPause() {
@@ -124,11 +131,17 @@ public class SettingsActivity extends PreferenceActivity implements
 
         String schedulerMode = prefs.getString(PREF_SCHEDULER_MODE, PREF_SCHEDULER_MODE_SMART);
         mSchedulerDailyTime = (Preference) findPreference(PREF_SCHEDULER_DAILY_TIME);
-        mSchedulerDailyTime.setEnabled(schedulerMode.equals(PREF_SCHEDULER_MODE_DAILY));
+        mSchedulerDailyTime.setEnabled(!schedulerMode.equals(PREF_SCHEDULER_MODE_SMART));
         mSchedulerDailyTime.setSummary(prefs.getString(
                 PREF_SCHEDULER_DAILY_TIME, "00:00"));
 
         mCleanFiles = (Preference) findPreference(PREF_CLEAN_FILES);
+
+        mScheduleWeekDay = (ListPreference) findPreference(PREF_SCHEDULER_WEEK_DAY);
+        mScheduleWeekDay.setEntries(getWeekdays());
+        mScheduleWeekDay.setSummary(mScheduleWeekDay.getEntry());
+        mScheduleWeekDay.setOnPreferenceChangeListener(this);
+        mScheduleWeekDay.setEnabled(schedulerMode.equals(PREF_SCHEDULER_MODE_WEEKLY));
     }
 
     @Override
@@ -206,7 +219,12 @@ public class SettingsActivity extends PreferenceActivity implements
             int idx = mSchedulerMode.findIndexOfValue(value);
             mSchedulerMode.setSummary(mSchedulerMode.getEntries()[idx]);
             mSchedulerMode.setValueIndex(idx);
-            mSchedulerDailyTime.setEnabled(!value.equals("0"));
+            mSchedulerDailyTime.setEnabled(!value.equals(PREF_SCHEDULER_MODE_SMART));
+            mScheduleWeekDay.setEnabled(value.equals(PREF_SCHEDULER_MODE_WEEKLY));
+            return true;
+        } else if (preference == mScheduleWeekDay) {
+            int idx = mScheduleWeekDay.findIndexOfValue((String) newValue);
+            mScheduleWeekDay.setSummary(mScheduleWeekDay.getEntries()[idx]);
             return true;
         }
         return false;
@@ -309,5 +327,12 @@ public class SettingsActivity extends PreferenceActivity implements
             }
         }
         return deletedFiles;
+    }
+
+    private String[] getWeekdays() {
+        DateFormatSymbols dfs = new DateFormatSymbols();
+        List<String> weekDayList = new ArrayList<String>();
+        weekDayList.addAll(Arrays.asList(dfs.getWeekdays()).subList(1, 7));
+        return weekDayList.toArray(new String[weekDayList.size()]);
     }
 }

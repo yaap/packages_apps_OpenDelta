@@ -26,10 +26,21 @@
 	<string-array name="scheduler_mode_keys" translatable="false">
 		<item>@string/scheduler_smart</item>
 		<item>@string/scheduler_daily</item>
+		<item>@string/scheduler_weekly</item>
 	</string-array>
 	<string-array name="scheduler_mode_values" translatable="false">
 		<item>0</item>
 		<item>1</item>
+		<item>2</item>
+	</string-array>
+	<string-array name="week_start_values" translatable="false">
+		<item>1</item>
+		<item>2</item>
+		<item>3</item>
+		<item>4</item>
+		<item>5</item>
+		<item>6</item>
+		<item>7</item>
 	</string-array>
 
 </resources>

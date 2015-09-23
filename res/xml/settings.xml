@@ -45,6 +45,12 @@
 			android:key="scheduler_daily_time"
 			android:persistent="false"
 			android:title="@string/scheduler_daily_time" />
+
+		<ListPreference
+			android:defaultValue="1"
+			android:entryValues="@array/week_start_values"
+			android:key="scheduler_week_day"
+			android:title="@string/scheduler_week_day" />
 	</PreferenceCategory>
 	<PreferenceCategory
 		android:key="category_download"

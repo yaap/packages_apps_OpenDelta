@@ -81,10 +81,10 @@ public class Scheduler implements OnScreenStateListener,
     private PendingIntent alarmInterval = null;
     private PendingIntent alarmSecondaryWake = null;
     private PendingIntent alarmDetectSleep = null;
-    private PendingIntent alarmDaily = null;
+    private PendingIntent alarmCustom = null;
 
     private boolean stopped;
-    private boolean dailyAlarm;
+    private boolean customAlarm;
 
     private SimpleDateFormat sdfLog = (new SimpleDateFormat("HH:mm",
             Locale.ENGLISH));
@@ -99,7 +99,7 @@ public class Scheduler implements OnScreenStateListener,
         alarmInterval = UpdateService.alarmPending(context, 1);
         alarmSecondaryWake = UpdateService.alarmPending(context, 2);
         alarmDetectSleep = UpdateService.alarmPending(context, 3);
-        alarmDaily = UpdateService.alarmPending(context, 4);
+        alarmCustom = UpdateService.alarmPending(context, 4);
 
         stopped = true;
     }
@@ -136,7 +136,7 @@ public class Scheduler implements OnScreenStateListener,
 
     @Override
     public void onScreenState(boolean state) {
-        if (!stopped && !dailyAlarm) {
+        if (!stopped && !customAlarm) {
             Logger.d("isScreenStateEnabled = " + isScreenStateEnabled(state));
             if (!state) {
                 setDetectSleepAlarm();
@@ -212,7 +212,7 @@ public class Scheduler implements OnScreenStateListener,
 
         // Reset fallback wakeup command, we don't need to be called for another
         // few hours
-        if (!dailyAlarm) {
+        if (!customAlarm) {
             cancelSecondaryWakeAlarm();
             setSecondaryWakeAlarm();
         }
@@ -223,16 +223,17 @@ public class Scheduler implements OnScreenStateListener,
         cancelSecondaryWakeAlarm();
         cancelDetectSleepAlarm();
         alarmManager.cancel(alarmInterval);
-        alarmManager.cancel(alarmDaily);
+        alarmManager.cancel(alarmCustom);
         stopped = true;
     }
 
     public void start() {
         Logger.i("Starting scheduler");
-        dailyAlarm = prefs.getString(SettingsActivity.PREF_SCHEDULER_MODE, SettingsActivity.PREF_SCHEDULER_MODE_SMART)
-                .equals(SettingsActivity.PREF_SCHEDULER_MODE_DAILY);
-        if (dailyAlarm) {
-            setDailyAlarmFromPrefs();
+        String alarmType = prefs.getString(SettingsActivity.PREF_SCHEDULER_MODE, SettingsActivity.PREF_SCHEDULER_MODE_SMART);
+        customAlarm = alarmType.equals(SettingsActivity.PREF_SCHEDULER_MODE_DAILY) || alarmType.equals(SettingsActivity.PREF_SCHEDULER_MODE_WEEKLY);
+
+        if (customAlarm) {
+            setCustomAlarmFromPrefs();
         } else {
             alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,
                     SystemClock.elapsedRealtime() + ALARM_INTERVAL_START,
@@ -243,11 +244,17 @@ public class Scheduler implements OnScreenStateListener,
         stopped = false;
     }
 
-    private void setDailyAlarmFromPrefs() {
-        if (dailyAlarm) {
-            String dailyAlarmTime = prefs.getString(
+    private void setCustomAlarmFromPrefs() {
+        if (customAlarm) {
+            final String dailyAlarmTime = prefs.getString(
                     SettingsActivity.PREF_SCHEDULER_DAILY_TIME, "00:00");
-            if (dailyAlarmTime != null) {
+            final String weeklyAlarmDay = prefs.getString(
+                    SettingsActivity.PREF_SCHEDULER_WEEK_DAY, "1");
+            final String alarmType = prefs.getString(SettingsActivity.PREF_SCHEDULER_MODE, SettingsActivity.PREF_SCHEDULER_MODE_SMART);
+            final boolean dailyAlarm = alarmType.equals(SettingsActivity.PREF_SCHEDULER_MODE_DAILY);
+            final boolean weeklyAlarm = alarmType.equals(SettingsActivity.PREF_SCHEDULER_MODE_WEEKLY);
+
+            if (dailyAlarm && dailyAlarmTime != null) {
                 try {
                     String[] timeParts = dailyAlarmTime.split(":");
                     int hour = Integer.valueOf(timeParts[0]);
@@ -256,12 +263,37 @@ public class Scheduler implements OnScreenStateListener,
                     c.set(Calendar.HOUR_OF_DAY, hour);
                     c.set(Calendar.MINUTE, minute);
 
-                    Logger.i("Setting daily alarm to %s", dailyAlarmTime);
+                    SimpleDateFormat format = new SimpleDateFormat("kk:mm");
+                    Logger.i("Setting daily alarm to %s", format.format(c.getTime()));
 
-                    alarmManager.cancel(alarmDaily);
+                    alarmManager.cancel(alarmCustom);
                     alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
                             c.getTimeInMillis(), AlarmManager.INTERVAL_DAY,
-                            alarmDaily);
+                            alarmCustom);
+                } catch (Exception e) {
+                }
+            }
+            if (weeklyAlarm && dailyAlarmTime != null && weeklyAlarmDay != null) {
+                try {
+                    String[] timeParts = dailyAlarmTime.split(":");
+                    int hour = Integer.valueOf(timeParts[0]);
+                    int minute = Integer.valueOf(timeParts[1]);
+                    final Calendar c = Calendar.getInstance();
+                    c.set(Calendar.DAY_OF_WEEK, Integer.valueOf(weeklyAlarmDay));
+                    c.set(Calendar.HOUR_OF_DAY, hour);
+                    c.set(Calendar.MINUTE, minute);
+                    // next week
+                    if (c.getTimeInMillis() < Calendar.getInstance().getTimeInMillis()) {
+                        c.set(Calendar.WEEK_OF_YEAR, Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) + 1);
+                    }
+
+                    SimpleDateFormat format = new SimpleDateFormat("EEEE, MMMM d, yyyy 'at' kk:mm");
+                    Logger.i("Setting weekly alarm to %s", format.format(c.getTime()));
+
+                    alarmManager.cancel(alarmCustom);
+                    alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
+                            c.getTimeInMillis(), AlarmManager.INTERVAL_DAY * 7,
+                            alarmCustom);
                 } catch (Exception e) {
                 }
             }
@@ -277,8 +309,8 @@ public class Scheduler implements OnScreenStateListener,
                 start();
             }
         }
-        if (key.equals(SettingsActivity.PREF_SCHEDULER_DAILY_TIME)) {
-            setDailyAlarmFromPrefs();
+        if (key.equals(SettingsActivity.PREF_SCHEDULER_DAILY_TIME) || key.equals(SettingsActivity.PREF_SCHEDULER_WEEK_DAY)) {
+            setCustomAlarmFromPrefs();
         }
     }
 }
