@@ -332,7 +332,7 @@ public class SettingsActivity extends PreferenceActivity implements
     private String[] getWeekdays() {
         DateFormatSymbols dfs = new DateFormatSymbols();
         List<String> weekDayList = new ArrayList<String>();
-        weekDayList.addAll(Arrays.asList(dfs.getWeekdays()).subList(1, 7));
+        weekDayList.addAll(Arrays.asList(dfs.getWeekdays()).subList(1, dfs.getWeekdays().length));
         return weekDayList.toArray(new String[weekDayList.size()]);
     }
 }
