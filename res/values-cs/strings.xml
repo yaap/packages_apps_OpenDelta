@@ -4,6 +4,7 @@
   <string name="app_name">OpenDelta</string>
   <string name="title">Aktualizace systému</string>
   <string name="action_networks">Sítě</string>
+  <string name="title_networks">Sítě pro autom. stažení</string>
   <string name="network_2g">2G</string>
   <string name="network_3g">3G</string>
   <string name="network_4g">4G</string>
@@ -11,6 +12,7 @@
   <string name="network_ethernet">Ethernet</string>
   <string name="network_unknown">Ostatní</string>
   <string name="action_about">O aplikaci</string>
+  <string name="state_action_none">Váš systém je aktuální.</string>
   <string name="state_action_checking">Kontroluji aktualizace &#8230;</string>
   <string name="state_action_checking_md5">Ověřování souboru &#8230;</string>
   <string name="state_action_searching">Hledání souborů &#8230;</string>
@@ -19,8 +21,16 @@
   <string name="state_action_applying">Provádění změn &#8230;</string>
   <string name="state_action_applying_patch">Provádění změn &#8230;</string>
   <string name="state_action_applying_md5">Ověřování souboru &#8230;</string>
+  <string name="state_action_ready">Aktualizace je připravena na flash.</string>
+  <string name="state_error_disk_space">Není dostatek místa na úložišti!</string>
+  <string name="state_error_unknown">Neznámá chyba.</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB volných, %d MiB požadovaných</string>
   <string name="notify_update_available">Aktualizace je k dispozici</string>
+  <string name="notify_checking">Kontrola aktualizací &#8230;</string>
+  <string name="last_checked" formatted="false">%s v %s</string>
+  <string name="last_checked_never">Kontrola nebyla nikdy provedena, možná chcete provést kontrolu nyní?</string>
+  <string name="button_check_now">Vyhledat aktualizace</string>
+  <string name="button_flash_now">Flash</string>
   <string name="action_secure_mode">Zabezpečení</string>
   <string name="secure_mode_enabled_title">Zabezpečený režim: povoleno</string>
   <string name="secure_mode_enabled_description"><![CDATA[Před nahráním aktualizace bude ověřen digitální podpis pro ověření původu aktualizace. Tento režim je kompatibilní pouze s <b>TWRP</b>.]]></string>
@@ -31,4 +41,47 @@
   <string name="recovery_notice_description_not_secure"><![CDATA[Flashování aktualizací je v současném režimu podporováno pouze na <b>TWRP</b> recovery.<i>Oficiální</i><b>CWM</b> vydání <i>není</i> podporováno, ale některé<i>neoficiální</i> verze <b>CWM</b><i>mohou</i> přesto pracovat správně. Zkontrolujte si prosím kompatibilitu recovery před spuštěním.]]></string>
   <string name="flash_after_update_notice_title">Upozornění</string>
   <string name="flash_after_update_notice_description"><![CDATA[Další aktualizace jsou přítomny ve složce <b>FlashAfterUpdate</b>, ale je povolen zabezpečený režim. Budete-li pokračovat, tyto další aktualizace se <b>nebudou</b> instalovat.]]></string>
+  <string name="official_version_tag">"NIGHTLY"</string>
+  <string name="state_error_not_official_title">Aktualizace zakázána.</string>
+  <string name="state_error_not_official_extra" formatted="false">Aktualizace %s není možná</string>
+  <string name="button_build_delta">Stáhnout</string>
+  <string name="button_stop">Stop</string>
+  <string name="state_action_build">Aktualizace je k dispozici.</string>
+  <string name="state_action_build_delta">Je možná rozdílová aktualizace.</string>
+  <string name="state_action_build_full">Je možná úplná aktualizace.</string>
+  <string name="state_error_download">Problém při stahování.</string>
+  <string name="text_current_version_header_title">Aktuální verze</string>
+  <string name="text_last_checked_header_title">Naposledy zkontrolováno</string>
+  <string name="text_update_version_title">Verze aktualizace</string>
+  <string name="text_download_size_header_title">Velikost ke stažení</string>
+  <string name="text_download_size_unknown">Neznámá</string>
+  <string name="auto_download">Plánování</string>
+  <string name="auto_download_title">Akce plánovače</string>
+  <string name="download_disabled">Zakázáno</string>
+  <string name="check_only">Zkontrolovat a upozornit</string>
+  <string name="download_delta">Autom. stažení rozdíl. aktualizací</string>
+  <string name="download_full">Automatické stažení všech</string>
+  <string name="menu_settings">Nastavení</string>
+  <string name="category_download">Automatické stažení</string>
+  <string name="charge_only_title">Pouze na nabíječce</string>
+  <string name="charge_only_message">Stáhnout jen při připojení na nabíječku</string>
+  <string name="battery_level_title">Min. stav baterie</string>
+  <string name="twenty_five_percent">25</string>
+  <string name="fifty_percent">50;</string>
+  <string name="seventy_five_percent">75</string>
+  <string name="notify_title_error">Problém při kontrole aktualizací</string>
+  <string name="notify_title_flash">Aktualizace je připravena na flash</string>
+  <string name="notify_title_download">Aktualizace je k dispozici ke stažení</string>
+  <string name="last_checked_never_title">Stiskněte tlačítko \"Vyhledat aktualizace\"</string>
+  <string name="screen_state_title">Vypnutá obrazovka</string>
+  <string name="screen_state_message">Stahovat pouze při vypnuté obrazovce</string>
+  <string name="category_scheduler">Automatická aktualizace</string>
+  <string name="scheduler_mode_title">Režim plánovače</string>
+  <string name="scheduler_smart">Smart</string>
+  <string name="scheduler_daily">Denně</string>
+  <string name="networks_title">Sítě</string>
+  <string name="networks_message">Stáhnout pouze na těchto sítích</string>
+  <string name="category_flashing">Flashing</string>
+  <string name="secure_mode_title">Bezpečný režim</string>
+  <string name="state_error_connection">Žádné datové připojení.</string>
 </resources>

@@ -4,6 +4,7 @@
   <string name="app_name">OpenDelta</string>
   <string name="title">Обновление телефона</string>
   <string name="action_networks">Сети для обновлений</string>
+  <string name="title_networks">Сети для автозагрузки</string>
   <string name="network_2g">2G</string>
   <string name="network_3g">3G</string>
   <string name="network_4g">4G</string>
@@ -11,6 +12,18 @@
   <string name="network_ethernet">Ethernet</string>
   <string name="network_unknown">Другие</string>
   <string name="action_about">О программе</string>
+  <string name="about_content">
+<![CDATA[
+        &copy; <b>Jorrit \'Chainfire\' Jongma</b>, _COPYRIGHT_OPENDELTA_.<br>
+        <br>
+        Изначально разработано для проекта <b>OmniROM</b><br>
+        <br>
+        Распространяется на условиях <b>Универсальной общественной лицензии GNU версии 3.0 (GPLv3)</b><br>
+        <br>
+        Декодирование дельта-файлов на основе <b>xdelta</b>, &copy <b>Joshua MacDonald</b>, _COPYRIGHT_XDELTA_.<br>
+    ]]>
+	</string>
+  <string name="state_action_none">Установлена последняя версия ПО.</string>
   <string name="state_action_checking">Поиск обновлений &#8230;</string>
   <string name="state_action_checking_md5">Проверка файла &#8230;</string>
   <string name="state_action_searching">Поиск файлов &#8230;</string>
@@ -19,8 +32,16 @@
   <string name="state_action_applying">Внесение изменений &#8230;</string>
   <string name="state_action_applying_patch">Внесение изменений &#8230;</string>
   <string name="state_action_applying_md5">Проверка файла &#8230;</string>
+  <string name="state_action_ready">Обновление готово к установке.</string>
+  <string name="state_error_disk_space">Недостаточно свободного места!</string>
+  <string name="state_error_unknown">Неизвестная ошибка.</string>
   <string name="error_disk_space_sub" formatted="false">%d МБ доступно, %d МБ необходимо</string>
   <string name="notify_update_available">Доступно обновление</string>
+  <string name="notify_checking">Поиск обновлений &#8230;</string>
+  <string name="last_checked" formatted="false">%s в %s</string>
+  <string name="last_checked_never">Поиск обновлений ещё не выполнялся. Возможно, стоит попробовать?</string>
+  <string name="button_check_now">Проверить обновления</string>
+  <string name="button_flash_now">Установить</string>
   <string name="action_secure_mode">Безопасный режим</string>
   <string name="secure_mode_enabled_title">Безопасный режим: активирован</string>
   <string name="secure_mode_enabled_description"><![CDATA[Криптографическая подпись обновления будет проверена перед установкой, чтобы подтвердить происхождение обновления, и никакие дополнительные файлы не будут установлены. Этот режим совместим только с <b>TWRP</b>.]]></string>
@@ -31,4 +52,47 @@
   <string name="recovery_notice_description_not_secure"><![CDATA[Установка обновлений в данном режиме официально поддерживается только с помощью  <b>TWRP</b> рекавери. <i>Официально</i> <b>CWM</b>  <i>не</i> поддерживается, но некоторые <i>пользовательские сборки</i> <b>CWM</b> <i>возможно</i> совместимы. Пожалуйста, убедитесь, что у вас совместимое рекавери, прежде чем продолжить.]]></string>
   <string name="flash_after_update_notice_title">Внимание!</string>
   <string name="flash_after_update_notice_description"><![CDATA[Дополнительные обновления располагаются в папке <b>FlashAfterUpdate</b>, но Безопасный режим активирован. Если вы продолжите, все дополнительные файлы <b>не будут</b> установлены.]]></string>
+  <string name="official_version_tag">"NIGHTLY"</string>
+  <string name="state_error_not_official_title">Обновления отключены.</string>
+  <string name="state_error_not_official_extra" formatted="false">Обновление %s невозможно</string>
+  <string name="button_build_delta">Загрузить</string>
+  <string name="button_stop">Остановить</string>
+  <string name="state_action_build">Доступно обновление.</string>
+  <string name="state_action_build_delta">Возможно обновление дельта-файлом.</string>
+  <string name="state_action_build_full">Возможно обновление полным файлом ПО.</string>
+  <string name="state_error_download">Проблема при загрузке.</string>
+  <string name="text_current_version_header_title">Текущая версия</string>
+  <string name="text_last_checked_header_title">Последний поиск</string>
+  <string name="text_update_version_title">Версия обновления</string>
+  <string name="text_download_size_header_title">Размер загрузки</string>
+  <string name="text_download_size_unknown">Неизвестно</string>
+  <string name="auto_download">Расписание</string>
+  <string name="auto_download_title">Запланированное действие</string>
+  <string name="download_disabled">Отключено</string>
+  <string name="check_only">Проверять обновления и уведомлять о них</string>
+  <string name="download_delta">Автоматически загружать дельта-файлы обновлений</string>
+  <string name="download_full">Автоматически загружать все обновления</string>
+  <string name="menu_settings">Настройки</string>
+  <string name="category_download">Автозагрузка</string>
+  <string name="charge_only_title">Только при зарядке</string>
+  <string name="charge_only_message">Обновления будут загружаться только при подключённом зарядном устройстве</string>
+  <string name="battery_level_title">Минимальный уровень заряда батареи</string>
+  <string name="twenty_five_percent">25</string>
+  <string name="fifty_percent">50</string>
+  <string name="seventy_five_percent">75</string>
+  <string name="notify_title_error">Не удалось выполнить поиск обновлений</string>
+  <string name="notify_title_flash">Обновление готово к установке</string>
+  <string name="notify_title_download">Обновление готово к загрузке</string>
+  <string name="last_checked_never_title">Нажмите «Проверить обновления»</string>
+  <string name="screen_state_title">При выключенном экране</string>
+  <string name="screen_state_message">Обновления будут загружаться только при выключенном экране устройства</string>
+  <string name="category_scheduler">Автоматическое обновление</string>
+  <string name="scheduler_mode_title">Режим планировщика</string>
+  <string name="scheduler_smart">Интеллектуальный</string>
+  <string name="scheduler_daily">Ежедневный</string>
+  <string name="networks_title">Сети</string>
+  <string name="networks_message">Загружать обновления только по сетям указанных типов</string>
+  <string name="category_flashing">Установка</string>
+  <string name="secure_mode_title">Защищенный режим</string>
+  <string name="state_error_connection">Нет подключения к интернету.</string>
 </resources>

@@ -4,6 +4,7 @@
   <string name="app_name">OpenDelta</string>
   <string name="title">Aktualizacje systemu</string>
   <string name="action_networks">Sieci</string>
+  <string name="title_networks">Pobierz automatycznie sieci</string>
   <string name="network_2g">2G</string>
   <string name="network_3g">3G</string>
   <string name="network_4g">4G</string>
@@ -11,6 +12,7 @@
   <string name="network_ethernet">Ethernet</string>
   <string name="network_unknown">Inne</string>
   <string name="action_about">O aplikacji</string>
+  <string name="state_action_none">Twój system jest aktualny.</string>
   <string name="state_action_checking">Wyszukiwanie aktualizacji &#8230;</string>
   <string name="state_action_checking_md5">Weryfikacja pliku &#8230;</string>
   <string name="state_action_searching">Wyszukiwanie plików &#8230;</string>
@@ -19,8 +21,16 @@
   <string name="state_action_applying">Patchowanie &#8230;</string>
   <string name="state_action_applying_patch">Patchowanie &#8230;</string>
   <string name="state_action_applying_md5">v &#8230;</string>
+  <string name="state_action_ready">Aktualizacja gotowa do zaflashowania.</string>
+  <string name="state_error_disk_space">Nie wystarczająco miejsca na dysku!</string>
+  <string name="state_error_unknown">Nieznany błąd.</string>
   <string name="error_disk_space_sub" formatted="false">%d MB dostępne, %d MB wymagane</string>
   <string name="notify_update_available">Dostępna nowa aktualizacja</string>
+  <string name="notify_checking">Sprawdzanie aktualizacji&#8230;</string>
+  <string name="last_checked" formatted="false">%s w %s</string>
+  <string name="last_checked_never">Nigdy nie wyszukiwaliśmy, może ty chcesz to zrobić?</string>
+  <string name="button_check_now">Sprawdź dostępność aktualizacji</string>
+  <string name="button_flash_now">Flash</string>
   <string name="action_secure_mode">Tryb Bezpieczny</string>
   <string name="secure_mode_enabled_title">Tryb bezpieczny: włączony</string>
   <string name="secure_mode_enabled_description"><![CDATA[Podpis kryptograficzny aktualizacji zostanie zweryfikowany przed w graniem w celu potwierdzenia jego pochodzenia, żadne dodatkowe aktualizacje nie zostaną zainstalowane. Ten tryb jest kompatybilny tylko z <b>TWRP</b>.]]></string>
@@ -31,4 +41,47 @@
   <string name="recovery_notice_description_not_secure"><![CDATA[Instalowanie aktualizacji w tym trybie jest oficjalnie obsługiwane tylko przez recovery <b>TWRP</b>. <i>Oficjalne</i> wersje <b>CWM</b> <i>nie</i> są wspierane, choć niektóre wersje <b>CWM</b> <i>tworzone przez społeczność</i> <i>mogą</i> wciąż działać. Upewnij się, że używasz kompatybilnego recovery przed kontynuowaniem.]]></string>
   <string name="flash_after_update_notice_title">Uwaga</string>
   <string name="flash_after_update_notice_description"><![CDATA[Dodatkowe aktualizacje znajdują się w folderze <b>FlashAfterUpdate</b>, ale tryb bezpieczny jest włączony. Jeśli chcesz kontynuować, te dodatkowe aktualizacje <b>nie</b> zostaną zainstalowane.]]></string>
+  <string name="official_version_tag">"NOCNE"</string>
+  <string name="state_error_not_official_title">Aktualizacje wyłączone.</string>
+  <string name="state_error_not_official_extra" formatted="false">Aktualizacja %s nie możliwa</string>
+  <string name="button_build_delta">Pobierz</string>
+  <string name="button_stop">Zatrzymaj</string>
+  <string name="state_action_build">Aktualizacja jest dostępna.</string>
+  <string name="state_action_build_delta">Delta aktualizacja możliwa.</string>
+  <string name="state_action_build_full">Pełna aktualizacja możliwa.</string>
+  <string name="state_error_download">Problem z pobieraniem.</string>
+  <string name="text_current_version_header_title">Aktualna wersja</string>
+  <string name="text_last_checked_header_title">Ostatnio sprawdzana</string>
+  <string name="text_update_version_title">Wersja aktualizacji</string>
+  <string name="text_download_size_header_title">Rozmiar pliku do pobrania</string>
+  <string name="text_download_size_unknown">Nieznana</string>
+  <string name="auto_download">Harmonogram</string>
+  <string name="auto_download_title">Harmonogram działań</string>
+  <string name="download_disabled">Nieaktywne</string>
+  <string name="check_only">Sprawdź i powiadom</string>
+  <string name="download_delta">Automatyczne pobieranie delta</string>
+  <string name="download_full">Automatyczne pobieranie wszystkiego</string>
+  <string name="menu_settings">Ustawienia</string>
+  <string name="category_download">Automatyczne pobieranie</string>
+  <string name="charge_only_title">Ładowarka tylko</string>
+  <string name="charge_only_message">Pobierz tylko kiedy jest na ładowarce</string>
+  <string name="battery_level_title">Min. procent baterii</string>
+  <string name="twenty_five_percent">25</string>
+  <string name="fifty_percent">50;</string>
+  <string name="seventy_five_percent">75</string>
+  <string name="notify_title_error">Problem podczas sprawdzania aktualizacji</string>
+  <string name="notify_title_flash">Aktualizacja gotowa do zaflashowania</string>
+  <string name="notify_title_download">Aktualizacja gotowa do pobrania</string>
+  <string name="last_checked_never_title">Naciśnij \"Sprawdź aktualizację\"</string>
+  <string name="screen_state_title">Wyłącz ekran</string>
+  <string name="screen_state_message">Pobierz tylko kiedy ekran jest wyłączony</string>
+  <string name="category_scheduler">Aktualizuj automatycznie</string>
+  <string name="scheduler_mode_title">Tryb harmonogramu</string>
+  <string name="scheduler_smart">Inteligentne</string>
+  <string name="scheduler_daily">Codziennie</string>
+  <string name="networks_title">Sieci</string>
+  <string name="networks_message">Pobierz tylko na typach sieci</string>
+  <string name="category_flashing">Flashowanie</string>
+  <string name="secure_mode_title">Bezpieczny tryb</string>
+  <string name="state_error_connection">Brak połączenia danych.</string>
 </resources>

@@ -4,6 +4,7 @@
   <string name="app_name">OpenDelta</string>
   <string name="title">Rendszerfrissítések</string>
   <string name="action_networks">Hálózatok</string>
+  <string name="title_networks">Automatikus letöltési hálózatok</string>
   <string name="network_2g">2G</string>
   <string name="network_3g">3G</string>
   <string name="network_4g">4G</string>
@@ -11,6 +12,18 @@
   <string name="network_ethernet">Ethernet</string>
   <string name="network_unknown">Egyéb</string>
   <string name="action_about">Névjegy</string>
+  <string name="about_content">
+<![CDATA[
+        Szerzői jog &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>
+        <br>
+        Eredetileg <b>Az OmniROM Projekt</b> részére készítve<br>
+        <br>
+        A következő engedélyek szerint liszenszelt: <b>GNU General Public License, version 3.0 (GPLv3)</b><br>
+        <br>
+        Delta dekódolás alapja: <b>xdelta</b>, szerzői jog &copy; _COPYRIGHT_XDELTA_ <b>Joshua MacDonald</b><br>
+    ]]>
+	</string>
+  <string name="state_action_none">A rendszer naprakész.</string>
   <string name="state_action_checking">Frissítések keresése &#8230;</string>
   <string name="state_action_checking_md5">Fájl ellenőrzése &#8230;</string>
   <string name="state_action_searching">Keresés a fájlok után &#8230;</string>
@@ -19,8 +32,16 @@
   <string name="state_action_applying">Patchelés &#8230;</string>
   <string name="state_action_applying_patch">Patchelés &#8230;</string>
   <string name="state_action_applying_md5">Fájl ellenőrzése &#8230;</string>
+  <string name="state_action_ready">Frissítés flashelésre kész.</string>
+  <string name="state_error_disk_space">Nincs elég tárhely!</string>
+  <string name="state_error_unknown">Ismeretlen hiba.</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB elérhető, %d MiB szükséges</string>
   <string name="notify_update_available">Egy frissítés elérhető</string>
+  <string name="notify_checking">Frissítések keresése &#8230;</string>
+  <string name="last_checked" formatted="false">%s ekkor: %s</string>
+  <string name="last_checked_never">Mi soha nem ellenőriztük, talán szeretné most megtenni?</string>
+  <string name="button_check_now">Frissítés keresése</string>
+  <string name="button_flash_now">Flash</string>
   <string name="action_secure_mode">Biztonságos</string>
   <string name="secure_mode_enabled_title">Biztonságos üzemmód: engedélyezve</string>
   <string name="secure_mode_enabled_description"><![CDATA[A frissítés kriptográfiai aláírása ellenőrzésre kerül a telepítés előtt az eredetiség megerősítéséhez, további frissítés nem került telepítésre. Ez az üzemmód csak <b>TWRP</b> kompatibilis.]]></string>
@@ -31,4 +52,47 @@
   <string name="recovery_notice_description_not_secure"><![CDATA[Frissítések telepítése az aktuális módban csak a <b>TWRP</b> recovery által támogatott. <i>Hivatalos</i> <b>CWM</b> kiadások <i>nem</i> támogatottak, bár néhány <i>közösségi kiadású</i> verziója a <b>CWM</b>-nak <i>talán</i> mégis működhet. Kérjük, a folytatás előtt győződjön meg róla, hogy egy kompatibilis recovery-t használ.]]></string>
   <string name="flash_after_update_notice_title">Figyelmeztetés</string>
   <string name="flash_after_update_notice_description"><![CDATA[További frissítések találhatóak a <b>FlashAfterUpdate</b> mappában, de a biztonságos mód engedélyezve van. Ha folytatja, ezek a további frissítések <b>nem</b> fognak települni.]]></string>
+  <string name="official_version_tag">"NIGHTLY"</string>
+  <string name="state_error_not_official_title">Frissítés letiltva.</string>
+  <string name="state_error_not_official_extra" formatted="false">%s frissítése nem lehetséges</string>
+  <string name="button_build_delta">Letöltés</string>
+  <string name="button_stop">Leállítás</string>
+  <string name="state_action_build">Frissítés érhető el.</string>
+  <string name="state_action_build_delta">Delta-frissítés lehetséges.</string>
+  <string name="state_action_build_full">Teljes frissítés lehetséges.</string>
+  <string name="state_error_download">Letöltési probléma.</string>
+  <string name="text_current_version_header_title">Jelenlegi verzió</string>
+  <string name="text_last_checked_header_title">Utoljára ellenőrizve</string>
+  <string name="text_update_version_title">Verziófrissítés</string>
+  <string name="text_download_size_header_title">Letöltés mérete</string>
+  <string name="text_download_size_unknown">Ismeretlen</string>
+  <string name="auto_download">Ütemezés</string>
+  <string name="auto_download_title">Tervezett művelet</string>
+  <string name="download_disabled">Kikapcsolva</string>
+  <string name="check_only">Ellenőriz és értesít</string>
+  <string name="download_delta">Delta automatikus letöltése</string>
+  <string name="download_full">Teljes automatikus letöltése</string>
+  <string name="menu_settings">Beállítások</string>
+  <string name="category_download">Automatikus letöltés</string>
+  <string name="charge_only_title">Csak töltőn</string>
+  <string name="charge_only_message">Csak akkor töltse le, ha töltőn van</string>
+  <string name="battery_level_title">Min akkumulátor százalék</string>
+  <string name="twenty_five_percent">25</string>
+  <string name="fifty_percent">50;</string>
+  <string name="seventy_five_percent">75</string>
+  <string name="notify_title_error">Frissítés ellenőrzési probléma</string>
+  <string name="notify_title_flash">Frissítés flashelésre kész</string>
+  <string name="notify_title_download">Frissítés letöltésre kész</string>
+  <string name="last_checked_never_title">Nyomjon a \"Frissítés keresése\" gombra</string>
+  <string name="screen_state_title">Képernyő ki</string>
+  <string name="screen_state_message">Csak kikapcsolt képernyőnél töltse le</string>
+  <string name="category_scheduler">Automatikus frissítés</string>
+  <string name="scheduler_mode_title">Ütemezés módja</string>
+  <string name="scheduler_smart">Intelligens</string>
+  <string name="scheduler_daily">Napi</string>
+  <string name="networks_title">Hálózatok</string>
+  <string name="networks_message">Letöltés csak bizonyos hálózatokon</string>
+  <string name="category_flashing">Flashelés</string>
+  <string name="secure_mode_title">Biztonságos üzemmód</string>
+  <string name="state_error_connection">Nincs adatkapcsolat.</string>
 </resources>
