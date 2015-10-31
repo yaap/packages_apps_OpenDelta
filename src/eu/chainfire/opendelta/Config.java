@@ -66,6 +66,7 @@ public class Config {
     private final boolean keep_screen_on;
     private final String filename_base_prefix;
     private final String url_base_json;
+    private final String official_version_tag;
 
     /*
      * Using reflection voodoo instead calling the hidden class directly, to
@@ -119,6 +120,7 @@ public class Config {
         url_base_json = res.getString(R.string.url_base_json);
         filename_base_prefix = String.format(Locale.ENGLISH,
                 res.getString(R.string.filename_base), "");
+        official_version_tag = res.getString(R.string.official_version_tag);
         boolean keep_screen_on = false;
         try {
             String[] devices = res
@@ -274,5 +276,9 @@ public class Config {
 
     public String getUrlBaseJson() {
         return url_base_json;
+    }
+
+    public String getOfficialVersionTag() {
+        return official_version_tag;
     }
 }

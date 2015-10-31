@@ -52,7 +52,6 @@
   <string name="recovery_notice_description_not_secure"><![CDATA[Das Installieren von Aktualisierungen im aktuellen Modus wird offiziell nur vom <b>TWRP</b>-Recovery unterstützt. <i>Offizielle</i> <b>CWM</b> Versionen werden <i>nicht</i> unterstützt, dennoch können einige <i>Community-Built</i> Versionen von <b>CWM</b> <i>eventuell</i> funktionieren. Bitte vergewissern Sie sich, dass ein kompatibles Recovery installiert ist, bevor Sie fortfahren.]]></string>
   <string name="flash_after_update_notice_title">Hinweis</string>
   <string name="flash_after_update_notice_description"><![CDATA[Es sind zusätzliche Aktualisierungen im Ordner <b>FlashAfterUpdate</b> vorhanden, aber der sichere Modus ist aktiviert. Wenn du fortfährst, werden diese zusätzlichen Aktualisierungen <b>nicht</b> installiert.]]></string>
-  <string name="official_version_tag">"NIGHTLY"</string>
   <string name="state_error_not_official_title">Aktualisierung deaktiviert.</string>
   <string name="state_error_not_official_extra" formatted="false">Aktualisierung von %s nicht möglich</string>
   <string name="button_build_delta">Herunterladen</string>

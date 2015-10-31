@@ -41,7 +41,6 @@
   <string name="recovery_notice_description_not_secure"><![CDATA[Flashování aktualizací je v současném režimu podporováno pouze na <b>TWRP</b> recovery.<i>Oficiální</i><b>CWM</b> vydání <i>není</i> podporováno, ale některé<i>neoficiální</i> verze <b>CWM</b><i>mohou</i> přesto pracovat správně. Zkontrolujte si prosím kompatibilitu recovery před spuštěním.]]></string>
   <string name="flash_after_update_notice_title">Upozornění</string>
   <string name="flash_after_update_notice_description"><![CDATA[Další aktualizace jsou přítomny ve složce <b>FlashAfterUpdate</b>, ale je povolen zabezpečený režim. Budete-li pokračovat, tyto další aktualizace se <b>nebudou</b> instalovat.]]></string>
-  <string name="official_version_tag">"NIGHTLY"</string>
   <string name="state_error_not_official_title">Aktualizace zakázána.</string>
   <string name="state_error_not_official_extra" formatted="false">Aktualizace %s není možná</string>
   <string name="button_build_delta">Stáhnout</string>

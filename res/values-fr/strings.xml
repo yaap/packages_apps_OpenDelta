@@ -52,7 +52,6 @@
   <string name="recovery_notice_description_not_secure"><![CDATA[Le mode d\'installation actuellement sélectionné est uniquement compatible avec le mode de récupération <b>TWRP</b>. <i>Officiellement</i>, le mode de récupération <b>CWM</b> <i>n\'est pas</i> supporté même si certaines versions de <b>CWM</b> compilées par la communauté <i>peuvent</i> fonctionner. Assurez-vous d\'avoir un mode de récupération compatible avant de continuer.]]></string>
   <string name="flash_after_update_notice_title">Avertissement</string>
   <string name="flash_after_update_notice_description"><![CDATA[Des mises à jour additionnelles sont présentes dans le dossier <b>FlashAfterUpdate</b>. Le mode de sécurité est activé, si vous continuez, les mises à jours additionnelles ne seront <b>pas</b> installées.]]></string>
-  <string name="official_version_tag">"NIGHTLY"</string>
   <string name="state_error_not_official_title">Mise à jour désactivée.</string>
   <string name="state_error_not_official_extra" formatted="false">Mise à jour de %s impossible</string>
   <string name="button_build_delta">Télécharger</string>

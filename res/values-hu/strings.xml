@@ -52,7 +52,6 @@
   <string name="recovery_notice_description_not_secure"><![CDATA[Frissítések telepítése az aktuális módban csak a <b>TWRP</b> recovery által támogatott. <i>Hivatalos</i> <b>CWM</b> kiadások <i>nem</i> támogatottak, bár néhány <i>közösségi kiadású</i> verziója a <b>CWM</b>-nak <i>talán</i> mégis működhet. Kérjük, a folytatás előtt győződjön meg róla, hogy egy kompatibilis recovery-t használ.]]></string>
   <string name="flash_after_update_notice_title">Figyelmeztetés</string>
   <string name="flash_after_update_notice_description"><![CDATA[További frissítések találhatóak a <b>FlashAfterUpdate</b> mappában, de a biztonságos mód engedélyezve van. Ha folytatja, ezek a további frissítések <b>nem</b> fognak települni.]]></string>
-  <string name="official_version_tag">"NIGHTLY"</string>
   <string name="state_error_not_official_title">Frissítés letiltva.</string>
   <string name="state_error_not_official_extra" formatted="false">%s frissítése nem lehetséges</string>
   <string name="button_build_delta">Letöltés</string>

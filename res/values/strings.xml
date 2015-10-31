@@ -55,7 +55,6 @@
 	<string name="recovery_notice_description_not_secure"><![CDATA[Flashing updates in the current mode is only officially supported on <b>TWRP</b> recoveries. <i>Official</i> <b>CWM</b> builds are <i>not</i> supported, though some <i>community-built</i> versions of <b>CWM</b> <i>may</i> still work. Please make sure you are running a compatible recovery before continuing.]]></string>
 	<string name="flash_after_update_notice_title">Notice</string>
 	<string name="flash_after_update_notice_description"><![CDATA[Additional updates are present in the <b>FlashAfterUpdate</b> folder, but secure mode is enabled. If you continue, these additional updates will <b>not</b> be flashed.]]></string>
-	<string name="official_version_tag">"NIGHTLY"</string>
 	<string name="state_error_not_official_title">Update disabled.</string>
 	<string name="state_error_not_official_extra" formatted="false">Update of %s not possible</string>
 	<string name="button_build_delta">Download</string>

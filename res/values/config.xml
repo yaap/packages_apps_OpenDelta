@@ -54,4 +54,5 @@
 		<item>i777</item>
 	</string-array>
 
+	<string name="official_version_tag">NIGHTLY</string>
 </resources>
