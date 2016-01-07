@@ -53,6 +53,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -149,6 +150,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     public static final String STATE_ACTION_BUILD = "action_build";
     public static final String STATE_ERROR_DOWNLOAD = "error_download";
     public static final String STATE_ERROR_CONNECTION = "error_connection";
+    public static final String STATE_ERROR_PERMISSIONS = "error_permissions";
 
     private static final String ACTION_CHECK = "eu.chainfire.opendelta.action.CHECK";
     private static final String ACTION_FLASH = "eu.chainfire.opendelta.action.FLASH";
@@ -306,9 +308,13 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             if (ACTION_CHECK.equals(intent.getAction())) {
-                checkForUpdates(true, PREF_AUTO_DOWNLOAD_CHECK);
+                if (checkPermissions()) {
+                    checkForUpdates(true, PREF_AUTO_DOWNLOAD_CHECK);
+                }
             } else if (ACTION_FLASH.equals(intent.getAction())) {
-                flashUpdate();
+                if (checkPermissions()) {
+                    flashUpdate();
+                }
             } else if (ACTION_ALARM.equals(intent.getAction())) {
                 scheduler.alarm(intent.getIntExtra(EXTRA_ALARM_ID, -1));
             } else if (ACTION_NOTIFICATION_DELETED.equals(intent.getAction())) {
@@ -321,7 +327,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     prefs.edit().putString(PREF_SNOOZE_UPDATE_NAME, lastBuild).commit();
                 }
             } else if (ACTION_BUILD.equals(intent.getAction())) {
-                checkForUpdates(true, PREF_AUTO_DOWNLOAD_FULL);
+                if (checkPermissions()) {
+                    checkForUpdates(true, PREF_AUTO_DOWNLOAD_FULL);
+                }
             } else if (ACTION_UPDATE.equals(intent.getAction())) {
                 autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
             }
@@ -2123,5 +2131,15 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 }
             }
         });
+    }
+
+    private boolean checkPermissions() {
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            Logger.d("checkPermissions failed");
+            updateState(STATE_ERROR_PERMISSIONS, null, null, null, null, null);
+            return false;
+        }
+        return true;
     }
 }
