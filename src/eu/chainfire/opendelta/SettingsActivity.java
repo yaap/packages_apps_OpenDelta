@@ -187,7 +187,7 @@ public class SettingsActivity extends PreferenceActivity implements
             int numDeletedFiles = cleanFiles();
             SharedPreferences prefs = PreferenceManager
                     .getDefaultSharedPreferences(this);
-            UpdateService.clearState(prefs);
+            clearState(prefs);
             prefs.edit().putBoolean(PREF_START_HINT_SHOWN, false).commit();
             Toast.makeText(this, String.format(getString(R.string.clean_files_feedback), numDeletedFiles), Toast.LENGTH_LONG).show();
             return true;
@@ -334,5 +334,14 @@ public class SettingsActivity extends PreferenceActivity implements
         List<String> weekDayList = new ArrayList<String>();
         weekDayList.addAll(Arrays.asList(dfs.getWeekdays()).subList(1, dfs.getWeekdays().length));
         return weekDayList.toArray(new String[weekDayList.size()]);
+    }
+
+    private void clearState(SharedPreferences prefs) {
+        prefs.edit().putString(UpdateService.PREF_LATEST_FULL_NAME, UpdateService.PREF_READY_FILENAME_DEFAULT).commit();
+        prefs.edit().putString(UpdateService.PREF_LATEST_DELTA_NAME, UpdateService.PREF_READY_FILENAME_DEFAULT).commit();
+        prefs.edit().putString(UpdateService.PREF_READY_FILENAME_NAME, UpdateService.PREF_READY_FILENAME_DEFAULT).commit();
+        prefs.edit().putLong(UpdateService.PREF_DOWNLOAD_SIZE, -1).commit();
+        prefs.edit().putBoolean(UpdateService.PREF_DELTA_SIGNATURE, false).commit();
+        prefs.edit().putString(UpdateService.PREF_INITIAL_FILE, UpdateService.PREF_READY_FILENAME_DEFAULT).commit();
     }
 }

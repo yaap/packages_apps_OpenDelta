@@ -214,6 +214,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private boolean updateRunning;
     private int failedUpdateCount;
     private SharedPreferences prefs = null;
+    private String oldFlashFilename;
 
     /*
      * Using reflection voodoo instead calling the hidden class directly, to
@@ -307,10 +308,12 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             if (ACTION_CHECK.equals(intent.getAction())) {
                 if (checkPermissions()) {
                     checkForUpdates(true, PREF_AUTO_DOWNLOAD_CHECK);
+                    scanImageFiles();
                 }
             } else if (ACTION_FLASH.equals(intent.getAction())) {
                 if (checkPermissions()) {
                     flashUpdate();
+                    scanImageFiles();
                 }
             } else if (ACTION_ALARM.equals(intent.getAction())) {
                 scheduler.alarm(intent.getIntExtra(EXTRA_ALARM_ID, -1));
@@ -326,6 +329,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             } else if (ACTION_BUILD.equals(intent.getAction())) {
                 if (checkPermissions()) {
                     checkForUpdates(true, PREF_AUTO_DOWNLOAD_FULL);
+                    scanImageFiles();
                 }
             } else if (ACTION_UPDATE.equals(intent.getAction())) {
                 autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
@@ -426,7 +430,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         String filename = prefs.getString(PREF_READY_FILENAME_NAME,
                 PREF_READY_FILENAME_DEFAULT);
 
-        if (filename != null) {
+        if (filename != PREF_READY_FILENAME_DEFAULT) {
             if (!(new File(filename)).exists()) {
                 filename = null;
             }
@@ -1360,6 +1364,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
         if (downloadUrlFileUnknownSize(url, f, md5Sum)) {
             Logger.d("success");
+            deleteOldFlashFile(fn);
             prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
         } else {
             f.delete();
@@ -1493,11 +1498,12 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
         String intialFile = prefs.getString(PREF_INITIAL_FILE, PREF_READY_FILENAME_DEFAULT);
 
-        clearState(prefs);
+        clearState();
 
-        if ((flashFilename == null)
-                || !flashFilename.startsWith(config.getPathBase())) {
-            Logger.d("flashUpdate - no valid file to flash found");
+        if (flashFilename == PREF_READY_FILENAME_DEFAULT
+                || !flashFilename.startsWith(config.getPathBase())
+                || !new File(flashFilename).exists()) {
+            Logger.d("flashUpdate - no valid file to flash found " + flashFilename);
             return;
         }
         // now delete the initial file
@@ -1781,9 +1787,10 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         return timeSnooze;
     }
 
-    public static void clearState(SharedPreferences prefs) {
+    private void clearState() {
         prefs.edit().putString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT).commit();
         prefs.edit().putString(PREF_LATEST_DELTA_NAME, PREF_READY_FILENAME_DEFAULT).commit();
+        oldFlashFilename = prefs.getString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
         prefs.edit().putString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT).commit();
         prefs.edit().putLong(PREF_DOWNLOAD_SIZE, -1).commit();
         prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, false).commit();
@@ -1839,7 +1846,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     (new File(config.getPathBase())).mkdir();
                     (new File(config.getPathFlashAfterUpdate())).mkdir();
 
-                    clearState(prefs);
+                    clearState();
 
                     String latestFullBuild = getNewestFullBuild();
                     // if we dont even find a build on dl no sense to continue
@@ -2045,6 +2052,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                             if (new File(fn).exists()) {
                                 if (checkFullBuildMd5Sum(latestFullFetch, fn)) {
                                     Logger.d("match found (full): " + fn);
+                                    deleteOldFlashFile(fn);
                                     prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
                                     downloadFullBuild = false;
                                 } else {
@@ -2116,6 +2124,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                                 }
                             }
                             prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, true).commit();
+                            deleteOldFlashFile(flashFilename);
                             prefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
                         }
                     }
@@ -2139,7 +2148,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
                     if (isErrorState(state)) {
                         failedUpdateCount++;
-                        clearState(prefs);
+                        clearState();
                         if (!userInitiated) {
                             shouldShowErrorNotification();
                         }
@@ -2161,5 +2170,29 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             return false;
         }
         return true;
+    }
+
+    private void deleteOldFlashFile(String newFlashFilename) {
+        if (oldFlashFilename != PREF_READY_FILENAME_DEFAULT && !oldFlashFilename.equals(newFlashFilename)
+                && oldFlashFilename.startsWith(config.getPathBase())) {
+            File file = new File(oldFlashFilename);
+            if (file.exists() && file.getName().startsWith(config.getFileBaseNamePrefix())) {
+                Logger.d("delete oldFlashFilename " + oldFlashFilename);
+                file.delete();
+            }
+        }
+    }
+
+    private void scanImageFiles() {
+        // for debugging purposes
+        String dataFolder = config.getPathBase();
+        File[] contents = new File(dataFolder).listFiles();
+        if (contents != null) {
+            for (File file : contents) {
+                if (file.isFile() && file.getName().startsWith(config.getFileBaseNamePrefix())) {
+                    Logger.d("image file: " + file.getName());
+                }
+            }
+        }
     }
 }
