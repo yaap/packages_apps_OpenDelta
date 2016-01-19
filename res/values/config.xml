@@ -55,4 +55,6 @@
 	</string-array>
 
 	<string name="official_version_tag">NIGHTLY</string>
+
+	<string name="android_version">ro.build.version.release</string>
 </resources>

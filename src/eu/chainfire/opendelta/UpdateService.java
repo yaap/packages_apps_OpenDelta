@@ -848,7 +848,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     for (int i = 0; i < builds.length(); i++) {
                         JSONObject build = builds.getJSONObject(i);
                         String file = build.getString("filename");
-                        if (file.endsWith(".zip")) {
+                        if (file.endsWith(".zip") && file.startsWith(config.getFileBaseNamePrefix())) {
                             buildNames.add(new File(file).getName());
                         }
                     }
@@ -1818,7 +1818,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     String latestFullBuild = getNewestFullBuild();
                     // if we dont even find a build on dl no sense to continue
                     if (latestFullBuild == null) {
-                        Logger.d("no latest build found at " + config.getUrlBaseJson() + " for " + config.getDevice());
+                        Logger.d("no latest build found at " + config.getUrlBaseJson() +
+                                " for " + config.getDevice() + " prefix " + config.getFileBaseNamePrefix());
                         return;
                     }
 
