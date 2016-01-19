@@ -848,8 +848,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     for (int i = 0; i < builds.length(); i++) {
                         JSONObject build = builds.getJSONObject(i);
                         String file = build.getString("filename");
-                        if (file.endsWith(".zip") && file.startsWith(config.getFileBaseNamePrefix())) {
-                            buildNames.add(new File(file).getName());
+                        String fileName = new File(file).getName();
+                        if (fileName.endsWith(".zip") && fileName.startsWith(config.getFileBaseNamePrefix())) {
+                            buildNames.add(fileName);
                         }
                     }
                 }
