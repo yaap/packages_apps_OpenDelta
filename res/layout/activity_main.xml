@@ -187,37 +187,40 @@
 			android:id="@+id/button_check_now"
 			android:layout_width="wrap_content"
 			android:layout_height="48dp"
+			android:maxWidth="150dp"
 			android:background="?android:attr/selectableItemBackground"
 			android:onClick="onButtonCheckNowClick"
 			android:paddingLeft="16dp"
 			android:paddingRight="16dp"
 			android:text="@string/button_check_now"
 			android:textAppearance="@android:style/TextAppearance.Material.Button"
-			android:textColor="@color/button_text_color" />
+			android:textColor="@color/button_text_color"/>
 
 		<Button
 			android:id="@+id/button_build_delta"
 			android:layout_width="wrap_content"
 			android:layout_height="48dp"
+			android:maxWidth="150dp"
 			android:background="?android:attr/selectableItemBackground"
 			android:onClick="onButtonBuildNowClick"
 			android:paddingLeft="16dp"
 			android:paddingRight="16dp"
 			android:text="@string/button_build_delta"
 			android:textAppearance="@android:style/TextAppearance.Material.Button"
-			android:textColor="@color/button_text_color" />
+			android:textColor="@color/button_text_color"/>
 
 		<Button
 			android:id="@+id/button_flash_now"
 			android:layout_width="wrap_content"
 			android:layout_height="48dp"
+			android:maxWidth="150dp"
 			android:background="?android:attr/selectableItemBackground"
 			android:onClick="onButtonFlashNowClick"
 			android:paddingLeft="16dp"
 			android:paddingRight="16dp"
 			android:text="@string/button_flash_now"
 			android:textAppearance="@android:style/TextAppearance.Material.Button"
-			android:textColor="@color/button_text_color" />
+			android:textColor="@color/button_text_color"/>
 	</LinearLayout>
 
 </LinearLayout>
