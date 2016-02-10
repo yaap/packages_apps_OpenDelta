@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Date;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -838,26 +839,26 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         JSONObject object = null;
         try {
             object = new JSONObject(buildData);
-
             Iterator<String> nextKey = object.keys();
-            List<String> buildNames = new ArrayList<String>();
+            String latestBuild = null;
+            Date latestTimestamp = new Date(0);
             while (nextKey.hasNext()) {
                 String key = nextKey.next();
                 if (key.equals("./" + config.getDevice())) {
                     JSONArray builds = object.getJSONArray(key);
                     for (int i = 0; i < builds.length(); i++) {
                         JSONObject build = builds.getJSONObject(i);
-                        String file = build.getString("filename");
-                        String fileName = new File(file).getName();
-                        if (fileName.endsWith(".zip") && fileName.startsWith(config.getFileBaseNamePrefix())) {
-                            buildNames.add(fileName);
+                        String fileName = new File(build.getString("filename")).getName();
+                        Date timestamp = new Date(build.getLong("timestamp"));
+                        if (fileName.endsWith(".zip") && fileName.startsWith(config.getFileBaseNamePrefix()) && timestamp.after(latestTimestamp)) {
+                            latestBuild = fileName;
+                            latestTimestamp = timestamp;
                         }
                     }
                 }
             }
-            // assumed its always sorted
-            if (buildNames.size() > 0) {
-                return buildNames.get(buildNames.size() - 1);
+            if (latestBuild != null) {
+                return latestBuild;
             }
         } catch (Exception e) {
         }
