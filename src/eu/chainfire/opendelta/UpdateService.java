@@ -185,7 +185,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     public static final String PREF_LATEST_FULL_NAME = "latest_full_name";
     public static final String PREF_LATEST_DELTA_NAME = "latest_delta_name";
     public static final String PREF_STOP_DOWNLOAD = "stop_download";
-    public static final String PREF_DOWNLOAD_SIZE = "download_size";
+    public static final String PREF_DOWNLOAD_SIZE = "download_size_long";
     public static final String PREF_DELTA_SIGNATURE = "delta_signature";
     public static final String PREF_INITIAL_FILE = "initial_file";
 
@@ -1761,7 +1761,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         prefs.edit().putString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT).commit();
         prefs.edit().putString(PREF_LATEST_DELTA_NAME, PREF_READY_FILENAME_DEFAULT).commit();
         prefs.edit().putString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT).commit();
-        prefs.edit().putString(PREF_DOWNLOAD_SIZE, null).commit();
+        prefs.edit().putLong(PREF_DOWNLOAD_SIZE, -1).commit();
         prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, false).commit();
         prefs.edit().putString(PREF_INITIAL_FILE, PREF_READY_FILENAME_DEFAULT).commit();
     }
@@ -1957,14 +1957,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         }
                         if (updateAvilable && downloadFullBuild) {
                             long size = getUrlDownloadSize(latestFullFetch);
-                            if (size != 0) {
-                                prefs.edit().putString(PREF_DOWNLOAD_SIZE,
-                                                String.valueOf(size)).commit();
-                            } else {
-                                prefs.edit().putString(PREF_DOWNLOAD_SIZE,
-                                                getString(R.string.text_download_size_unknown))
-                                        .commit();
-                            }
+                            prefs.edit().putLong(PREF_DOWNLOAD_SIZE, size).commit();
                         }
                         Logger.d("check donne: latest full build available = " + prefs.getString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT) +
                                 " : updateAvilable = " + updateAvilable + " : downloadFullBuild = " + downloadFullBuild);
@@ -2037,9 +2030,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         }
                         if (updateAvilable) {
                             if (deltaUpdatePossible) {
-                                prefs.edit().putString(PREF_DOWNLOAD_SIZE, String.valueOf(deltaDownloadSize)).commit();
+                                prefs.edit().putLong(PREF_DOWNLOAD_SIZE, deltaDownloadSize).commit();
                             } else if (downloadFullBuild) {
-                                prefs.edit().putString(PREF_DOWNLOAD_SIZE, String.valueOf(fullDownloadSize)).commit();
+                                prefs.edit().putLong(PREF_DOWNLOAD_SIZE, fullDownloadSize).commit();
                             }
                         }
                         Logger.d("check donne: latest valid delta update = " + prefs.getString(PREF_LATEST_DELTA_NAME, PREF_READY_FILENAME_DEFAULT) +

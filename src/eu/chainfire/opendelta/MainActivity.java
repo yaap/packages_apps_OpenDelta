@@ -42,6 +42,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.format.DateFormat;
+import android.text.format.Formatter;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -311,8 +312,15 @@ public class MainActivity extends Activity {
                     updateVersion = latestFullBase;
                     title = getString(R.string.state_action_build_full);
                 }
-                downloadSizeText = prefs.getString(
-                        UpdateService.PREF_DOWNLOAD_SIZE, "");
+                long downloadSize = prefs.getLong(
+                        UpdateService.PREF_DOWNLOAD_SIZE, -1);
+                if(downloadSize == -1) {
+                    downloadSizeText = "";
+                } else if (downloadSize == 0) {
+                    downloadSizeText = getString(R.string.text_download_size_unknown);
+                } else {
+                    downloadSizeText = Formatter.formatFileSize(context, downloadSize);
+                }
             } else if (UpdateService.STATE_ACTION_SEARCHING.equals(state)
                     || UpdateService.STATE_ACTION_CHECKING.equals(state)) {
                 enableProgress = true;
