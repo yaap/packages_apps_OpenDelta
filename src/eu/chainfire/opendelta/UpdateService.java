@@ -152,6 +152,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     public static final String STATE_ERROR_DOWNLOAD = "error_download";
     public static final String STATE_ERROR_CONNECTION = "error_connection";
     public static final String STATE_ERROR_PERMISSIONS = "error_permissions";
+    public static final String STATE_ERROR_FLASH = "error_flash";
 
     private static final String ACTION_CHECK = "eu.chainfire.opendelta.action.CHECK";
     private static final String ACTION_FLASH = "eu.chainfire.opendelta.action.FLASH";
@@ -1608,6 +1609,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             // else to do at
             // at this stage than give up. No reason to crash though.
             Logger.ex(e);
+            updateState(STATE_ERROR_FLASH, null, null, null, null, null);
         }
     }
 

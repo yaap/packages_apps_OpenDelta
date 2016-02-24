@@ -105,4 +105,5 @@
 	<string name="clear_files_summary">Delete existing update files to force downloading full update</string>
 	<string name="clean_files_feedback" formatted="false">Deleted %d files. Now press \'Check for updates\'</string>
 	<string name="state_error_permissions">No storage permissions.</string>
+	<string name="state_error_flash">Failed to setup flash. Clean /cache and retry.</string>
 </resources>

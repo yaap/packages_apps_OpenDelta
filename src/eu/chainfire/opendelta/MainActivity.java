@@ -257,6 +257,10 @@ public class MainActivity extends Activity {
                 progress.setIndeterminate(false);
             } else if (UpdateService.STATE_ERROR_PERMISSIONS.equals(state)) {
                 progress.setIndeterminate(false);
+            } else if (UpdateService.STATE_ERROR_FLASH.equals(state)) {
+                enableCheck = true;
+                enableFlash = true;
+                progress.setIndeterminate(false);
             } else if (UpdateService.STATE_ACTION_NONE.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
