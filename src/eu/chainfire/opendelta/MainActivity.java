@@ -66,6 +66,8 @@ public class MainActivity extends Activity {
     private TextView downloadSize = null;
     private Config config;
     private boolean mPermOk;
+    private TextView mSub2;
+    private TextView mProgressPercent;
 
     private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 0;
 
@@ -91,6 +93,7 @@ public class MainActivity extends Activity {
 
         title = (TextView) findViewById(R.id.text_title);
         sub = (TextView) findViewById(R.id.progress_text);
+        mSub2 = (TextView) findViewById(R.id.progress_text2);
         progress = (ProgressBar) findViewById(R.id.progress_bar);
         checkNow = (Button) findViewById(R.id.button_check_now);
         flashNow = (Button) findViewById(R.id.button_flash_now);
@@ -101,6 +104,7 @@ public class MainActivity extends Activity {
         currentVersion = (TextView) findViewById(R.id.text_current_version);
         lastChecked = (TextView) findViewById(R.id.text_last_checked);
         downloadSize = (TextView) findViewById(R.id.text_download_size);
+        mProgressPercent = (TextView) findViewById(R.id.progress_percent);
 
         config = Config.getInstance(this);
         mPermOk = false;
@@ -188,6 +192,8 @@ public class MainActivity extends Activity {
         public void onReceive(Context context, Intent intent) {
             String title = "";
             String sub = "";
+            String sub2 = "";
+            String progressPercent = "";
             String updateVersion = "";
             String lastCheckedText = "";
             String extraText = "";
@@ -351,38 +357,33 @@ public class MainActivity extends Activity {
                 String filename = intent
                         .getStringExtra(UpdateService.EXTRA_FILENAME);
                 if (filename != null) {
+                    sub = filename;
                     long ms = intent.getLongExtra(UpdateService.EXTRA_MS, 0);
+                    progressPercent = String.format(Locale.ENGLISH, "%.0f %%",
+                                intent.getFloatExtra(UpdateService.EXTRA_PROGRESS, 0));
 
-                    if ((ms <= 500) || (current <= 0) || (total <= 0)) {
-                        sub = String.format(Locale.ENGLISH, "%s %.0f %%",
-                                filename, intent.getFloatExtra(
-                                        UpdateService.EXTRA_PROGRESS, 0));
-                    } else {
+                    if ((ms > 500) && (current > 0) && (total > 0)) {
                         float kibps = ((float) current / 1024f)
                                 / ((float) ms / 1000f);
                         if (progressInK)
                             kibps *= 1024f;
                         int sec = (int) (((((float) total / (float) current) * (float) ms) - ms) / 1000f);
-
                         if (kibps < 10000) {
-                            sub = String.format(Locale.ENGLISH,
-                                    "%s %.0f %%, %.0f KiB/s, %02d:%02d",
-                                    filename, intent.getFloatExtra(
-                                            UpdateService.EXTRA_PROGRESS, 0),
+                            sub2 = String.format(Locale.ENGLISH,
+                                    "%.0f KiB/s, %02d:%02d",
                                     kibps, sec / 60, sec % 60);
                         } else {
-                            sub = String.format(Locale.ENGLISH,
-                                    "%s %.0f %%, %.0f MiB/s, %02d:%02d",
-                                    filename, intent.getFloatExtra(
-                                            UpdateService.EXTRA_PROGRESS, 0),
+                            sub2 = String.format(Locale.ENGLISH,
+                                    "%.0f MiB/s, %02d:%02d",
                                     kibps / 1024f, sec / 60, sec % 60);
                         }
                     }
                 }
             }
-
             MainActivity.this.title.setText(title);
             MainActivity.this.sub.setText(sub);
+            MainActivity.this.mSub2.setText(sub2);
+            MainActivity.this.mProgressPercent.setText(progressPercent);
             MainActivity.this.updateVersion.setText(updateVersion);
             MainActivity.this.currentVersion.setText(config.getFilenameBase());
             MainActivity.this.lastChecked.setText(lastCheckedText);
@@ -391,11 +392,7 @@ public class MainActivity extends Activity {
 
             progress.setProgress((int) current);
             progress.setMax((int) total);
-            progress.setVisibility(!enableProgress ? View.INVISIBLE
-                    : View.VISIBLE);
-            MainActivity.this.sub
-                    .setVisibility(!enableProgress ? View.INVISIBLE
-                            : View.VISIBLE);
+            progress.setVisibility(!enableProgress ? View.INVISIBLE : View.VISIBLE);
 
             checkNow.setEnabled(enableCheck ? true : false);
             buildNow.setEnabled(enableBuild ? true : false);
