@@ -42,6 +42,7 @@
   <string name="last_checked_never">Поиск обновлений ещё не выполнялся. Возможно, стоит попробовать?</string>
   <string name="button_check_now">Проверить обновления</string>
   <string name="button_flash_now">Установить</string>
+  <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Безопасный режим</string>
   <string name="secure_mode_enabled_title">Безопасный режим: активирован</string>
   <string name="secure_mode_enabled_description"><![CDATA[Криптографическая подпись обновления будет проверена перед установкой, чтобы подтвердить происхождение обновления, и никакие дополнительные файлы не будут установлены. Этот режим совместим только с <b>TWRP</b>.]]></string>

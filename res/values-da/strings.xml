@@ -21,4 +21,5 @@
   <string name="state_action_applying_md5">Kontrollerer fil &#8230;</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB tilgængelig, %d MiB påkrævet</string>
   <string name="notify_update_available">En opdatering er tilgængelig</string>
+  <!-- updates from 2013/12/18 -->
 </resources>

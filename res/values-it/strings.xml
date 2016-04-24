@@ -21,6 +21,7 @@
   <string name="state_action_applying_md5">Verifica file&#8230;</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB disponibili, %d MiB richiesti</string>
   <string name="notify_update_available">Aggiornamento disponibile</string>
+  <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Sicurezza</string>
   <string name="secure_mode_enabled_title">Modalità Sicura: attivata</string>
   <string name="secure_mode_enabled_description"><![CDATA[La firma dell\'aggiornamento verrà verificata prima dell\'installazione per confermarne l\'origine,nessun aggiornamento aggiuntivo verrà installato. Questa modalità è compatibile solo con la recovery <b>TWRP</b>.]]></string>

@@ -42,6 +42,7 @@
   <string name="last_checked_never">Noch niemals überprüft. Möchtest du jetzt nach Aktualisierungen suchen?</string>
   <string name="button_check_now">Nach Aktualisierung suchen</string>
   <string name="button_flash_now">Jetzt aufspielen</string>
+  <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Sicherheit</string>
   <string name="secure_mode_enabled_title">Sicherer Modus: aktiviert</string>
   <string name="secure_mode_enabled_description"><![CDATA[Die Signatur der Aktualisierung wird vor dem Installieren überprüft, um die Echtheit zu garantieren. Es werden keine zusätzlichen Aktualisierungen installiert. Dieser Modus funktioniert nur mit <b>TWRP</b>.]]></string>
@@ -89,9 +90,18 @@
   <string name="scheduler_mode_title">Zeitplaner-Modus</string>
   <string name="scheduler_smart">Intelligent</string>
   <string name="scheduler_daily">Täglich</string>
+  <string name="scheduler_weekly">Wöchentlich</string>
+  <string name="scheduler_daily_time">Uhrzeit</string>
+  <string name="scheduler_week_day">Tag</string>
   <string name="networks_title">Netzwerke</string>
   <string name="networks_message">Herunterladen nur über Netzwerk-Typen</string>
   <string name="category_flashing">Aufspielen</string>
   <string name="secure_mode_title">Sicherer Modus</string>
   <string name="state_error_connection">Keine Datenverbindung.</string>
+  <string name="category_admin">Wartung</string>
+  <string name="clear_files_title">Aktualisierungsdateien säubern</string>
+  <string name="clear_files_summary">Bestehende Aktualisierungsdateien löschen um das Herunterladen einer vollständigen Aktualisierung zu erzwingen</string>
+  <string name="clean_files_feedback" formatted="false">%d Dateien gelöscht. Jetzt \"Nach Aktualisierungen suchen\" drücken</string>
+  <string name="state_error_permissions">Keine Berechtigung zum speichern.</string>
+  <string name="state_error_flash">Fehler beim Vorbereiten zum Einspielen. Bitte \"/cache \" bereinigen und wiederholen.</string>
 </resources>

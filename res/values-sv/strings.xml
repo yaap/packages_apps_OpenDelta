@@ -15,6 +15,7 @@
   <string name="state_action_applying_md5">Verifierar fil&#8230;</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB tillgängligt, %d MiB behövs</string>
   <string name="notify_update_available">En uppdatering är tillgänglig</string>
+  <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Säkert läge</string>
   <string name="secure_mode_enabled_title">Säkert läge aktiverat</string>
   <string name="secure_mode_enabled_description"><![CDATA[Uppdateringens kryptografiska signatur kommer att verifieras innan installationen för att bekräfta dess ursprung, och inga övriga uppdateringar kommer att installeras. Detta läge är endast kompatibelt med <b>TWRP</b>.]]></string>

@@ -42,6 +42,7 @@
   <string name="last_checked_never">Mi soha nem ellenőriztük, talán szeretné most megtenni?</string>
   <string name="button_check_now">Frissítés keresése</string>
   <string name="button_flash_now">Flash</string>
+  <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Biztonságos</string>
   <string name="secure_mode_enabled_title">Biztonságos üzemmód: engedélyezve</string>
   <string name="secure_mode_enabled_description"><![CDATA[A frissítés kriptográfiai aláírása ellenőrzésre kerül a telepítés előtt az eredetiség megerősítéséhez, további frissítés nem került telepítésre. Ez az üzemmód csak <b>TWRP</b> kompatibilis.]]></string>
@@ -89,9 +90,18 @@
   <string name="scheduler_mode_title">Ütemezés módja</string>
   <string name="scheduler_smart">Intelligens</string>
   <string name="scheduler_daily">Napi</string>
+  <string name="scheduler_weekly">Heti</string>
+  <string name="scheduler_daily_time">Idő</string>
+  <string name="scheduler_week_day">Nap</string>
   <string name="networks_title">Hálózatok</string>
   <string name="networks_message">Letöltés csak bizonyos hálózatokon</string>
   <string name="category_flashing">Flashelés</string>
   <string name="secure_mode_title">Biztonságos üzemmód</string>
   <string name="state_error_connection">Nincs adatkapcsolat.</string>
+  <string name="category_admin">Karbantartás</string>
+  <string name="clear_files_title">Frissítési fájlok törlése</string>
+  <string name="clear_files_summary">Meglévő frissítési fájlok törlése a teljes frissítés letöltésének kényszerítésére</string>
+  <string name="clean_files_feedback" formatted="false">%d fájl törölve. Most nyomjon a \"Frissítések keresése\" gombra</string>
+  <string name="state_error_permissions">Nincs tárhely engedély.</string>
+  <string name="state_error_flash">Zseblámpa beállítása sikertelen. Törölje a /cache-t és próbálja újra.</string>
 </resources>

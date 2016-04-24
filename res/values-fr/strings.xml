@@ -32,7 +32,7 @@
   <string name="state_action_applying">Mise à jour&#8230;</string>
   <string name="state_action_applying_patch">Mise à jour&#8230;</string>
   <string name="state_action_applying_md5">Vérification du fichier&#8230;</string>
-  <string name="state_action_ready">Mise à jour prête à être installée.</string>
+  <string name="state_action_ready">Mise à jour prête à être installer.</string>
   <string name="state_error_disk_space">Espace mémoire insuffisant\u00A0!</string>
   <string name="state_error_unknown">Erreur inconnue.</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB disponible, %d MiB nécessaire</string>
@@ -42,6 +42,7 @@
   <string name="last_checked_never">Nous n\'avons jamais effectué de vérification, voulez-vous le faire maintenant\u00A0?</string>
   <string name="button_check_now">Vérifier les mises à jour disponibles</string>
   <string name="button_flash_now">Installer</string>
+  <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Sécurité</string>
   <string name="secure_mode_enabled_title">Mode de sécurité : activé</string>
   <string name="secure_mode_enabled_description"><![CDATA[Pour confirmer son origine, la signature cryptographique de la mise à jour sera vérifiée avant son installation et aucune mise à jour additionnelle ne sera installée. Ce mode est uniquement compatible avec le mode de récupération <b>TWRP</b>.]]></string>
@@ -89,9 +90,18 @@
   <string name="scheduler_mode_title">Mode de planification</string>
   <string name="scheduler_smart">Intelligent</string>
   <string name="scheduler_daily">Quotidien</string>
+  <string name="scheduler_weekly">Hebdomadaire</string>
+  <string name="scheduler_daily_time">Heure</string>
+  <string name="scheduler_week_day">Jour</string>
   <string name="networks_title">Réseaux</string>
   <string name="networks_message">Télécharger uniquement sur certains réseaux</string>
   <string name="category_flashing">Installation en cours</string>
   <string name="secure_mode_title">Mode sécurisé</string>
   <string name="state_error_connection">Aucune connexion réseau.</string>
+  <string name="category_admin">Maintenance</string>
+  <string name="clear_files_title">Supprimer les fichiers de mise à jour</string>
+  <string name="clear_files_summary">Supprime les fichiers de mise à jour existants pour forcer le téléchargement de la mise à jour complète</string>
+  <string name="clean_files_feedback" formatted="false">%d fichiers supprimés. Appuyer maintenant sur \'Vérifier les mises à jour disponibles\'</string>
+  <string name="state_error_permissions">Aucune autorisation de stockage.</string>
+  <string name="state_error_flash">Échec de la préparation de mise à jour. Supprimer le contenu du /cache et réessayer.</string>
 </resources>

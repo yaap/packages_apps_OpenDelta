@@ -21,4 +21,5 @@
   <string name="state_action_applying_md5">校验文件 &#8230;</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB 可用, %d MiB 需要</string>
   <string name="notify_update_available">有一个更新可用</string>
+  <!-- updates from 2013/12/18 -->
 </resources>

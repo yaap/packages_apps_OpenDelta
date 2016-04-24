@@ -12,6 +12,17 @@
   <string name="network_ethernet">Ethernet</string>
   <string name="network_unknown">Ostatní</string>
   <string name="action_about">O aplikaci</string>
+  <string name="about_content">
+<![CDATA[
+Všechna práva vyhrazena &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>
+        <br>
+        Původně vytvořeno pro <b>Projekt OmniROM</b><br>
+        <br>
+        Licencováno na základě podmínek <b>GNU General Public License, verze 3.0 (GPLv3)</b><br>
+        <br>
+        Delta dekódování na základě <b>xdelta</b>, copyright &copy; _COPYRIGHT_XDELTA_ <b>Joshua MacDonald</b><br>
+   ]]>
+ 	</string>
   <string name="state_action_none">Váš systém je aktuální.</string>
   <string name="state_action_checking">Kontroluji aktualizace &#8230;</string>
   <string name="state_action_checking_md5">Ověřování souboru &#8230;</string>
@@ -31,6 +42,7 @@
   <string name="last_checked_never">Kontrola nebyla nikdy provedena, možná chcete provést kontrolu nyní?</string>
   <string name="button_check_now">Vyhledat aktualizace</string>
   <string name="button_flash_now">Flash</string>
+  <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Zabezpečení</string>
   <string name="secure_mode_enabled_title">Zabezpečený režim: povoleno</string>
   <string name="secure_mode_enabled_description"><![CDATA[Před nahráním aktualizace bude ověřen digitální podpis pro ověření původu aktualizace. Tento režim je kompatibilní pouze s <b>TWRP</b>.]]></string>
@@ -78,9 +90,18 @@
   <string name="scheduler_mode_title">Režim plánovače</string>
   <string name="scheduler_smart">Smart</string>
   <string name="scheduler_daily">Denně</string>
+  <string name="scheduler_weekly">Týdně</string>
+  <string name="scheduler_daily_time">Čas</string>
+  <string name="scheduler_week_day">Den</string>
   <string name="networks_title">Sítě</string>
   <string name="networks_message">Stáhnout pouze na těchto sítích</string>
   <string name="category_flashing">Flashing</string>
   <string name="secure_mode_title">Bezpečný režim</string>
   <string name="state_error_connection">Žádné datové připojení.</string>
+  <string name="category_admin">Údržba</string>
+  <string name="clear_files_title">Vyčistit aktualizační soubory</string>
+  <string name="clear_files_summary">Odstranit existující soubory aktualizace k vynucení stažení úplné aktualizace</string>
+  <string name="clean_files_feedback" formatted="false">Odstraněno %d souborů. Nyní stiskněte tlačítko \"Vyhledat aktualizace\"</string>
+  <string name="state_error_permissions">Není oprávnění k přístupu na úložiště.</string>
+  <string name="state_error_flash">Nepodařilo se nastavení flash. Vymažte /cache a akci opakujte.</string>
 </resources>

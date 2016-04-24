@@ -21,6 +21,7 @@
   <string name="state_action_applying_md5">Επιβεβαίωση αρχείου &#8230;</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB διαθέσιμα, %d MiB απαιτούνται</string>
   <string name="notify_update_available">Υπάρχει διαθέσιμη ενημέρωση</string>
+  <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Ασφαλής</string>
   <string name="secure_mode_enabled_title">Ασφαλής τρόπος: ενεργοποιημένος</string>
   <string name="secure_mode_enabled_description"><![CDATA[Για επιβεβαίωση της προέλευσης, η υπογραφή κρυπτογράφησης της ενημέρωσης θα επαληθευθεί πριν την εφαρμογή της ενημέρωσης και δεν θα εφαρμοστούν πρόσθετες ενημερώσεις. Ο τρόπος αυτός είναι συμβατός μόνο με <b>TWRP</b>.]]></string>
