@@ -102,4 +102,5 @@
   <string name="clear_files_summary">Usuń istniejące pliki aktualizacji, aby wymusić pobranie pełnej aktualizacji</string>
   <string name="clean_files_feedback" formatted="false">Usunięto %d plików. Naciśnij teraz \"Sprawdź dostępność aktualizacji\"</string>
   <string name="state_error_permissions">Brak uprawnień pamięci.</string>
+  <string name="state_error_flash">Nie udało się przygotować instalacji. Wyczyść /cache i ponów próbę.</string>
 </resources>
