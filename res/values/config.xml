@@ -55,6 +55,8 @@
 	</string-array>
 
 	<string name="official_version_tag">NIGHTLY</string>
+	<string name="weekly_version_tag">WEEKLY</string>
+	<string name="security_version_tag">SECURITY_RELEASE</string>
 
 	<string name="android_version">ro.build.version.release</string>
 </resources>

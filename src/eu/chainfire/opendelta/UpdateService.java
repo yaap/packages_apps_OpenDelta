@@ -1108,7 +1108,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         if (!isSupportedVersion()) {
             // TODO - to be more generic this should maybe use the info from getNewestFullBuild
             updateState(STATE_ERROR_UNOFFICIAL, null, null, null, config.getVersion(), null);
-            Logger.i("Ignoring request to check for updates - not compatible for update! " + config.getVersion() + " " + config.getOfficialVersionTag());
+            Logger.i("Ignoring request to check for updates - not compatible for update! " + config.getVersion());
             return false;
         }
         if (!networkState.isConnected()) {
@@ -1715,10 +1715,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private boolean isSupportedVersion() {
-        if (config.getVersion().indexOf(config.getOfficialVersionTag()) == -1) {
-            return false;
-        }
-        return true;
+        return config.isOfficialVersion();
     }
 
     private int getAutoDownloadValue() {
