@@ -17,10 +17,10 @@
 	<string name="path_base">OpenDelta</string>
 
 	<!-- URL base to find .delta files, %s is expanded to property_device value. Path is suffixed by (expanded) filename_base -->
-	<string name="url_base_delta">https://delta.omnirom.org/nightlies/%s/</string>
+	<string name="url_base_delta">https://delta.omnirom.org/weeklies/%s/</string>
 
 	<!-- URL base to find .update and .sign files, %s is expanded to property_device value. Path is suffixed by (expanded) filename_base -->
-	<string name="url_base_update">https://delta.omnirom.org/nightlies/%s/</string>
+	<string name="url_base_update">https://delta.omnirom.org/weeklies/%s/</string>
 
 	<!-- URL base to find the full zip files, %s is expanded to property_device value. Path is suffixed by (expanded) filename_base -->
 	<string name="url_base_full">https://dl.omnirom.org/%s/</string>
