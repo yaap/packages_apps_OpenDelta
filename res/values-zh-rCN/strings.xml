@@ -4,6 +4,7 @@
   <string name="app_name">OpenDelta</string>
   <string name="title">系统更新</string>
   <string name="action_networks">网络</string>
+  <string name="title_networks">自动下载网络</string>
   <string name="network_2g">2G</string>
   <string name="network_3g">3G</string>
   <string name="network_4g">4G</string>
@@ -11,6 +12,17 @@
   <string name="network_ethernet">以太网</string>
   <string name="network_unknown">其他</string>
   <string name="action_about">关于</string>
+  <string name="about_content">
+<![CDATA[
+        版权 &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>
+        <br>
+        为<b>OmniROM项目</b>而创建<br>
+        <br>
+        授权许可 <b>GNU 通用公共授权，版本3.0 (GPLv3)</b><br>
+        <br>
+        Delta解码基于 <b>xdelta</b>, 版权&copy; _COPYRIGHT_XDELTA_ <b>Joshua MacDonald</b><br>
+    ]]></string>
+  <string name="state_action_none">您的系统已经是最新版本</string>
   <string name="state_action_checking">正在检查更新 &#8230;</string>
   <string name="state_action_checking_md5">校验文件 &#8230;</string>
   <string name="state_action_searching">正在查找文件 &#8230;</string>
@@ -19,6 +31,7 @@
   <string name="state_action_applying">正在补丁 &#8230;</string>
   <string name="state_action_applying_patch">正在补丁 &#8230;</string>
   <string name="state_action_applying_md5">校验文件 &#8230;</string>
+  <string name="state_action_ready">更新已准备好刷入。</string>
   <string name="state_error_disk_space">磁盘空间不足！</string>
   <string name="state_error_unknown">未知错误。</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB 可用, %d MiB 需要</string>
@@ -26,19 +39,28 @@
   <string name="notify_checking">正在检查更新&#8230;&#8230;</string>
   <string name="last_checked" formatted="false">%s 在 %s</string>
   <string name="last_checked_never">我们从未检查过，也许您想现在检查？</string>
+  <string name="button_check_now">检查更新</string>
   <string name="button_flash_now">刷入</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">安全</string>
   <string name="secure_mode_enabled_title">安全模式：已启用</string>
+  <string name="secure_mode_enabled_description"><![CDATA[在刷入前会验证更新的加密签名从而确认它的来源，并且不会刷入附加更新。这个模式仅兼容 <b>TWRP</b> 。]]></string>
   <string name="secure_mode_disabled_title">安全模式：已禁用</string>
+  <string name="secure_mode_disabled_description"><![CDATA[会自动刷入附加更新（如果有的话）。注意：任何软件包（甚至是恶意的）都可能会被刷入系统并获得完整访问权限，请谨慎行事。]]></string>
   <string name="recovery_notice_title">通知</string>
+  <string name="recovery_notice_description_secure"><![CDATA[更新刷入功能目前仅在 <b>TWRP</b> 系列的 Recovery 中工作，在继续前，请确保您正在使用兼容的 Recovery 。]]></string>
+  <string name="recovery_notice_description_not_secure"><![CDATA[在当前的模式中的更新刷入功能仅在 <b>TWRP</b> 的 Recovery 中得到 <i>正式</i> 支持。而 <b>CWM</b> 并没有被 <i>正式</i> 支持。但是有一些 <i>社区构建</i> 的<b>CWM</b> <i>可能</i> 能够工作。在继续前，请确保您目前正在使用的 Recovery 能够兼容。]]></string>
   <string name="flash_after_update_notice_title">通知</string>
+  <string name="flash_after_update_notice_description"><![CDATA[附加更新目前是放在 <b>FlashAfterUpdate</b> 文件夹中，但是由于安全模式已开启，如果您选择继续，这些附加的功能将 <b>不会</b> 被刷入。]]></string>
   <string name="state_error_not_official_title">更新被禁用。</string>
+  <string name="state_error_not_official_extra" formatted="false">不能执行 %s 的更新</string>
   <string name="button_build_delta">下载</string>
   <string name="button_stop">停止</string>
   <string name="state_action_build">有可用更新。</string>
   <string name="state_action_build_delta">可以进行增量更新。</string>
   <string name="state_action_build_full">可以进行完整更新。</string>
+  <string name="state_error_download">下载问题。</string>
+  <string name="text_current_version_header_title">当前版本</string>
   <string name="text_last_checked_header_title">最后检查</string>
   <string name="text_update_version_title">更新版本</string>
   <string name="text_download_size_header_title">下载大小</string>
@@ -50,11 +72,15 @@
   <string name="download_delta">自动下载增量</string>
   <string name="download_full">自动下载全部</string>
   <string name="menu_settings">设置</string>
+  <string name="category_download">自动下载</string>
+  <string name="charge_only_title">仅在充电时</string>
   <string name="charge_only_message">仅当在充电时才开始下载</string>
+  <string name="battery_level_title">最小电量百分比</string>
   <string name="twenty_five_percent">25</string>
   <string name="fifty_percent">50；</string>
   <string name="seventy_five_percent">75</string>
   <string name="notify_title_error">检查更新出现问题</string>
+  <string name="notify_title_flash">更新已准备好刷入。</string>
   <string name="notify_title_download">有更新可以下载。</string>
   <string name="last_checked_never_title">按“检查更新”</string>
   <string name="screen_state_title">关闭屏幕</string>
@@ -75,5 +101,6 @@
   <string name="clear_files_title">清理更新文件</string>
   <string name="clear_files_summary">删除现有的更新文件来强制下载完整更新</string>
   <string name="clean_files_feedback" formatted="false">已删除 %d 文件。现在按“检查更新”</string>
+  <string name="state_error_permissions">没有访问存储的权限。</string>
   <string name="state_error_flash">刷入失败，请清除 /cache 后再试。</string>
 </resources>

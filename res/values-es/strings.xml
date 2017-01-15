@@ -4,6 +4,7 @@
   <string name="app_name">OpenDelta</string>
   <string name="title">Actualizaciones del sistema</string>
   <string name="action_networks">Redes</string>
+  <string name="title_networks">Redes de descarga automática</string>
   <string name="network_2g">2G</string>
   <string name="network_3g">3G</string>
   <string name="network_4g">4G</string>
@@ -11,6 +12,17 @@
   <string name="network_ethernet">Ethernet</string>
   <string name="network_unknown">Otros</string>
   <string name="action_about">Acerca de</string>
+  <string name="about_content">
+<![CDATA[
+Copyright &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>
+        <br>
+        Creado para <b>el proyecto OmniROM</b><br>
+        <br>
+        Licenciado bajo los términos de la <b>GNU General Public License, version 3.0 (GPLv3)</b><br>
+        <br>
+        Decodificación Delta basada en <b>xdelta</b>, copyright &copy; _COPYRIGHT_XDELTA_ <b>Joshua MacDonald</b><br>
+]]></string>
+  <string name="state_action_none">El sistema está actualizado.</string>
   <string name="state_action_checking">Comprobando si hay actualizaciones disponibles &#8230;</string>
   <string name="state_action_checking_md5">Verificando archivo &#8230;</string>
   <string name="state_action_searching">Buscando archivos &#8230;</string>
@@ -19,8 +31,16 @@
   <string name="state_action_applying">Parcheando &#8230;</string>
   <string name="state_action_applying_patch">Parcheando &#8230;</string>
   <string name="state_action_applying_md5">Verificando archivo &#8230;</string>
+  <string name="state_action_ready">Actualización lista para flashear.</string>
+  <string name="state_error_disk_space">¡No hay espacio suficiente en el disco!</string>
+  <string name="state_error_unknown">Error desconocido.</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB disponible, %d MiB necesario</string>
   <string name="notify_update_available">Una actualización está disponible</string>
+  <string name="notify_checking">Comprobando actualizaciones &#8230;</string>
+  <string name="last_checked" formatted="false">%s a las %s</string>
+  <string name="last_checked_never">Nunca se ha comprobado, ¿Le gustaría hacerlo ahora?</string>
+  <string name="button_check_now">Comprobar actualizaciones</string>
+  <string name="button_flash_now">Flash</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Modo Seguro</string>
   <string name="secure_mode_enabled_title">Modo seguro: habilitado</string>
@@ -32,4 +52,55 @@
   <string name="recovery_notice_description_not_secure"><![CDATA[Aplicar actualizaciones en el modo actual es sólo soportado con el recovery <b>TWRP</b>. <i>El recovery oficial</i> de <b>CWM</b> <i>no</i> es soportado, aunque algunas <i>versiones construidas por la comunidad</i> de <b>CWM</b> <i>pueden</i> funcionar. Por favor, asegúrese que está usando el recovery compatible antes de continuar.]]></string>
   <string name="flash_after_update_notice_title">Aviso</string>
   <string name="flash_after_update_notice_description"><![CDATA[Las actualizaciones estarán en la carpeta <b>FlashAfterUpdate</b>. Si usted continua, estas actualizaciones <b>no</b> serán aplicadas.]]></string>
+  <string name="state_error_not_official_title">Actualización deshabilitada.</string>
+  <string name="state_error_not_official_extra" formatted="false">Actualización de %s no es posible</string>
+  <string name="button_build_delta">Descarga</string>
+  <string name="button_stop">Parar</string>
+  <string name="state_action_build">Actualización disponible.</string>
+  <string name="state_action_build_delta">Es posible la actualización Delta.</string>
+  <string name="state_action_build_full">Es posible la actualización completa.</string>
+  <string name="state_error_download">Problema con la descarga.</string>
+  <string name="text_current_version_header_title">Versión actual</string>
+  <string name="text_last_checked_header_title">Última comprobación</string>
+  <string name="text_update_version_title">Versión de actualización</string>
+  <string name="text_download_size_header_title">Tamaño de descarga</string>
+  <string name="text_download_size_unknown">Desconocido</string>
+  <string name="auto_download">Programar</string>
+  <string name="auto_download_title">Acción de programador</string>
+  <string name="download_disabled">Deshabilitado</string>
+  <string name="check_only">Comprobar y notificar</string>
+  <string name="download_delta">Auto descargar deltas</string>
+  <string name="download_full">Auto descargar todos</string>
+  <string name="menu_settings">Configuraciones</string>
+  <string name="category_download">Descarga automática</string>
+  <string name="charge_only_title">Solo cargador</string>
+  <string name="charge_only_message">Descargar solo mientras se está cargando</string>
+  <string name="battery_level_title">Porcentaje de batería mínimo</string>
+  <string name="twenty_five_percent">25</string>
+  <string name="fifty_percent">50;</string>
+  <string name="seventy_five_percent">75</string>
+  <string name="notify_title_error">Hubo un problema al buscar actualizaciones</string>
+  <string name="notify_title_flash">Actualización lista para ser flasheada</string>
+  <string name="notify_title_download">Actualización lista para ser descargada</string>
+  <string name="last_checked_never_title">Pulsa \'Comprobar actualizaciones\'</string>
+  <string name="screen_state_title">Pantalla apagada</string>
+  <string name="screen_state_message">Descargar sólo cuando la pantalla está apagada</string>
+  <string name="category_scheduler">Actualización automática</string>
+  <string name="scheduler_mode_title">Modo de programación</string>
+  <string name="scheduler_smart">Inteligente</string>
+  <string name="scheduler_daily">Diario</string>
+  <string name="scheduler_weekly">Semanal</string>
+  <string name="scheduler_daily_time">Hora</string>
+  <string name="scheduler_week_day">Día</string>
+  <string name="networks_title">Redes</string>
+  <string name="networks_message">Descargar sólo en tipos de redes</string>
+  <string name="category_flashing">Intermitente</string>
+  <string name="secure_mode_title">Modo seguro</string>
+  <string name="state_error_connection">No hay conexión de datos.</string>
+  <string name="category_admin">Mantenimiento</string>
+  <string name="clear_files_title">Limpiar archivos de actualización</string>
+  <string name="clear_files_summary">Eliminar archivos de actualización existentes para forzar una descarga de actualización completa</string>
+  <string name="clean_files_feedback" formatted="false">%d archivos borrados. Ahora presione \'Comprobar actualizaciones\'</string>
+  <string name="state_error_permissions">Sin permisos de almacenamiento.</string>
+  <string name="state_error_flash">Ajuste de flash fallado. Limpia /cache y reintenta.</string>
 </resources>

@@ -65,6 +65,8 @@
   <string name="text_update_version_title">Güncelleme sürümü</string>
   <string name="text_download_size_header_title">İndirme boyutu</string>
   <string name="text_download_size_unknown">Bilinmiyor</string>
+  <string name="auto_download">Programla</string>
+  <string name="auto_download_title">Programlayıcı eylemi</string>
   <string name="download_disabled">Devre dışı</string>
   <string name="check_only">Denetle ve bana bildir</string>
   <string name="download_delta">Delta güncellemesini otomatik indir</string>
@@ -81,4 +83,24 @@
   <string name="notify_title_flash">Güncelleme yüklenmeye hazır</string>
   <string name="notify_title_download">Güncelleme indirilmeye hazır</string>
   <string name="last_checked_never_title">\'Güncellemeleri denetle\' düğmesine basın</string>
+  <string name="screen_state_title">Ekran kapalı</string>
+  <string name="screen_state_message">Sadece ekran kapalıyken indir</string>
+  <string name="category_scheduler">Otomatik güncelleme</string>
+  <string name="scheduler_mode_title">Programlayıcı modu</string>
+  <string name="scheduler_smart">Akıllı</string>
+  <string name="scheduler_daily">Günlük</string>
+  <string name="scheduler_weekly">Haftalık</string>
+  <string name="scheduler_daily_time">Zaman</string>
+  <string name="scheduler_week_day">Gün</string>
+  <string name="networks_title">Ağlar</string>
+  <string name="networks_message">Yalnızca ağ türleri üzerinde indirme</string>
+  <string name="category_flashing">Yükleniyor</string>
+  <string name="secure_mode_title">Güvenli mod</string>
+  <string name="state_error_connection">Ver bağlantısı yok.</string>
+  <string name="category_admin">Bakım</string>
+  <string name="clear_files_title">Güncelleme dosyalarını temizle</string>
+  <string name="clear_files_summary">Mevcut güncelleme dosyalarını silerek tam güncellemeye zorla</string>
+  <string name="clean_files_feedback" formatted="false">%d dosya silindi. Şimdi \'Güncelleştirmeleri Denetle\' ye bas</string>
+  <string name="state_error_permissions">Depolama izini yok.</string>
+  <string name="state_error_flash">Yükleme başarısız oldu. Önbelleği temizleyin ve tekrar deneyin.</string>
 </resources>

@@ -90,9 +90,14 @@
   <string name="scheduler_mode_title">Режим планировщика</string>
   <string name="scheduler_smart">Интеллектуальный</string>
   <string name="scheduler_daily">Ежедневный</string>
+  <string name="scheduler_weekly">Еженедельно</string>
+  <string name="scheduler_daily_time">Время</string>
+  <string name="scheduler_week_day">День</string>
   <string name="networks_title">Сети</string>
   <string name="networks_message">Загружать обновления только по сетям указанных типов</string>
   <string name="category_flashing">Установка</string>
   <string name="secure_mode_title">Защищенный режим</string>
   <string name="state_error_connection">Нет подключения к интернету.</string>
+  <string name="category_admin">Поддержка</string>
+  <string name="state_error_permissions">Нет разрешения для хранения.</string>
 </resources>

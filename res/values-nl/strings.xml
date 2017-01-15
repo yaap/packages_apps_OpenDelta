@@ -12,6 +12,17 @@
   <string name="network_ethernet">Bedraad</string>
   <string name="network_unknown">Anders</string>
   <string name="action_about">Over</string>
+  <string name="about_content">
+<![CDATA[
+        Copyright &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>
+        <br>
+        Oorspronkelijk gemaakt voor <b>Het OmniROM Project</b><br>
+        <br>
+        licentie onder de voorwaarden van de <b>GNU General Public License, version 3.0 (GPLv3)</b><br>
+        <br>
+        Delta gebaseerd op <b>xdelta</b>, copyright &copy; _COPYRIGHT_XDELTA_ <b>Joshua MacDonald</b><br>
+    ]]>
+	</string>
   <string name="state_action_none">Uw systeem is up to date.</string>
   <string name="state_action_checking">Controleren op updates &#8230;</string>
   <string name="state_action_checking_md5">Bestand verifiëren &#8230;</string>
@@ -92,4 +103,5 @@
   <string name="clear_files_summary">Verwijder bestaande update bestanden om te forceren dat de hele update word gedownload</string>
   <string name="clean_files_feedback" formatted="false">%d Bestanden verwijderd. Klik nu \'Controleer voor updates\'</string>
   <string name="state_error_permissions">Geen opslag-machtigingen.</string>
+  <string name="state_error_flash">Voorbereiden flashen mislukt. Wis /cache en probeer opnieuw.</string>
 </resources>

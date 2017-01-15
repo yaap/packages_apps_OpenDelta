@@ -101,7 +101,7 @@
   <string name="category_admin">Údržba</string>
   <string name="clear_files_title">Vyčistiť súbory aktualizácie</string>
   <string name="clear_files_summary">Vymazať existujúce súbory aktualizácie na vynútenie stiahnutia plnej aktualizácie</string>
-  <string name="clean_files_feedback" formatted="false">Vymazaných %d súborov. Teraz stlačte \'Skontrolovať aktualizácie\'</string>
+  <string name="clean_files_feedback" formatted="false">Vymazaných %d súbor/y/ov. Teraz môžete dotykom \'Vyhľadať aktualizácie\'</string>
   <string name="state_error_permissions">Chýba povolenie na prístup k úložisku.</string>
   <string name="state_error_flash">Nemožno nastaviť flash. Vyčistiť /cache a skúsiť znova.</string>
 </resources>

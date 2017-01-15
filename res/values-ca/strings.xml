@@ -45,6 +45,7 @@
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Mode Segur</string>
   <string name="secure_mode_enabled_title">Mode segur: habilitat</string>
+  <string name="secure_mode_enabled_description"><![CDATA[Es verificarà la signatura criptogràfica de l\'actualització abans d\'instal lar-la per confirmar el seu origen, i no s\'instal laran actualitzacions addicionals. Aquest mode només és compatible amb el <b>TWRP</b>.]]></string>
   <string name="secure_mode_disabled_title">Mode segur: inhabilitat</string>
   <string name="secure_mode_disabled_description"><![CDATA[Les actualitzacions són aplicades si estan presents. Tingueu en compte que qualsevol paquet de programari (maliciós) pot obtenir accés complet al sistema. Es recomana precaució.]]></string>
   <string name="recovery_notice_title">Avís</string>
