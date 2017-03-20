@@ -40,7 +40,7 @@
 	<string name="notify_checking">Checking for update &#8230;</string>
 	<string name="last_checked" formatted="false">%s at %s</string>
 	<string name="last_checked_never">We\'ve never checked, maybe you would like to do so?</string>
-	<string name="button_check_now">Check for update</string>
+	<string name="button_check_short">Check</string>
 	<string name="button_flash_now">Flash</string>
 
 	<!-- updates from 2013/12/18 -->
@@ -85,7 +85,7 @@
 	<string name="notify_title_error">Problem checking for update</string>
 	<string name="notify_title_flash">Update ready to flash</string>
 	<string name="notify_title_download">Update ready to download</string>
-	<string name="last_checked_never_title">Press \'Check for update\'</string>
+	<string name="last_checked_never_title_new">Press \'Check\' to start</string>
 	<string name="screen_state_title">Screen off</string>
 	<string name="screen_state_message">Download only when screen is off</string>
 	<string name="category_scheduler">Auto update</string>

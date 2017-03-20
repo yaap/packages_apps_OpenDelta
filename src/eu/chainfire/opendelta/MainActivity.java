@@ -40,6 +40,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.Html;
 import android.text.format.DateFormat;
 import android.text.format.Formatter;
@@ -48,6 +50,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -68,6 +71,7 @@ public class MainActivity extends Activity {
     private boolean mPermOk;
     private TextView mSub2;
     private TextView mProgressPercent;
+    private ImageView mOmniLogo;
 
     private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 0;
 
@@ -105,6 +109,7 @@ public class MainActivity extends Activity {
         lastChecked = (TextView) findViewById(R.id.text_last_checked);
         downloadSize = (TextView) findViewById(R.id.text_download_size);
         mProgressPercent = (TextView) findViewById(R.id.progress_percent);
+        mOmniLogo = (ImageView) findViewById(R.id.omni_logo);
 
         config = Config.getInstance(this);
         mPermOk = false;
@@ -225,7 +230,7 @@ public class MainActivity extends Activity {
                 // use a special title then - but only once
                 if (UpdateService.STATE_ACTION_NONE.equals(state)
                         && !prefs.getBoolean(SettingsActivity.PREF_START_HINT_SHOWN, false)) {
-                    title = getString(R.string.last_checked_never_title);
+                    title = getString(R.string.last_checked_never_title_new);
                 }
                 // dont spill for progress
                 if (!UpdateService.isProgressState(state)) {
@@ -245,6 +250,7 @@ public class MainActivity extends Activity {
 
                 extraText = getString(R.string.error_disk_space_sub, current,
                         total);
+                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ERROR_UNKNOWN.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
@@ -254,10 +260,12 @@ public class MainActivity extends Activity {
                 title = getString(R.string.state_error_not_official_title);
                 extraText = getString(R.string.state_error_not_official_extra,
                         intent.getStringExtra(UpdateService.EXTRA_FILENAME));
+                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_disabled));
             } else if (UpdateService.STATE_ERROR_DOWNLOAD.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
                 extraText = intent.getStringExtra(UpdateService.EXTRA_FILENAME);
+                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_alert));
             } else if (UpdateService.STATE_ERROR_CONNECTION.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
@@ -308,6 +316,8 @@ public class MainActivity extends Activity {
 
                 deltaUpdatePossible = latestDeltaZip != null;
                 fullUpdatePossible = latestFullZip != null;
+                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
+
 
                 if (deltaUpdatePossible) {
                     String latestDeltaBase = latestDelta.substring(0,
@@ -315,12 +325,14 @@ public class MainActivity extends Activity {
                     enableBuild = true;
                     updateVersion = latestDeltaBase;
                     title = getString(R.string.state_action_build_delta);
+                    DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
                 } else if (fullUpdatePossible) {
                     String latestFullBase = latestFull.substring(0,
                             latestFull.lastIndexOf('.'));
                     enableBuild = true;
                     updateVersion = latestFullBase;
                     title = getString(R.string.state_action_build_full);
+                    DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_alert));
                 }
                 long downloadSize = prefs.getLong(
                         UpdateService.PREF_DOWNLOAD_SIZE, -1);
@@ -345,6 +357,16 @@ public class MainActivity extends Activity {
                         current);
                 total = intent.getLongExtra(UpdateService.EXTRA_TOTAL, total);
                 progress.setIndeterminate(false);
+
+                long downloadSize = prefs.getLong(
+                        UpdateService.PREF_DOWNLOAD_SIZE, -1);
+                if(downloadSize == -1) {
+                    downloadSizeText = "";
+                } else if (downloadSize == 0) {
+                    downloadSizeText = getString(R.string.text_download_size_unknown);
+                } else {
+                    downloadSizeText = Formatter.formatFileSize(context, downloadSize);
+                }
 
                 // long --> int overflows FTL (progress.setXXX)
                 boolean progressInK = false;

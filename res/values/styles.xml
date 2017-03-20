@@ -3,6 +3,7 @@
 
 	<style name="Theme.OpenDelta" parent="@android:style/Theme.Material.Settings">
 		<item name="android:actionBarStyle">@style/ThemeActionBar</item>
+                <item name="android:buttonStyle">?android:attr/borderlessButtonStyle</item>
 	</style>
 
 	<style name="Theme.OpenDelta.Settings" parent="@android:style/Theme.Material.Settings"></style>
