@@ -93,8 +93,6 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_below="@+id/text_current_version"
-                    android:layout_gravity="top"
-                    android:layout_marginTop="12dp"
                     android:text="@string/text_last_checked_header_title"
                     android:textAppearance="@android:style/TextAppearance.Material.Menu" />
 
@@ -155,10 +153,8 @@
                         android:id="@+id/text_update_version"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_alignBottom="@+id/imageView8"
-                        android:layout_alignParentEnd="true"
                         android:layout_alignStart="@+id/text_update_version_header"
-                        android:layout_gravity="bottom"
+                        android:layout_below="@+id/text_update_version_header"
                         android:textAppearance="@android:style/TextAppearance.Material.Small" />
 
                     <TextView
@@ -166,9 +162,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
-                        android:layout_below="@+id/imageView8"
-                        android:layout_gravity="top"
-                        android:layout_marginTop="5dp"
+                        android:layout_below="@+id/text_update_version"
                         android:text="@string/text_download_size_header_title"
                         android:textAppearance="@android:style/TextAppearance.Material.Menu" />
 
@@ -196,6 +190,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/progress_text"
+                        android:layout_alignParentStart="true"
                         android:orientation="horizontal">
 
                         <ProgressBar
@@ -223,6 +218,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/progress_container"
+                        android:layout_alignParentStart="true"
                         android:orientation="horizontal">
 
                         <TextView
