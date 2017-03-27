@@ -40,7 +40,7 @@ Všechna práva vyhrazena &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' J
   <string name="notify_checking">Kontrola aktualizací &#8230;</string>
   <string name="last_checked" formatted="false">%s v %s</string>
   <string name="last_checked_never">Kontrola nebyla nikdy provedena, možná chcete provést kontrolu nyní?</string>
-  <string name="button_check_now">Vyhledat aktualizace</string>
+  <string name="button_check_short">Zkontrolovat</string>
   <string name="button_flash_now">Flash</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Zabezpečení</string>
@@ -83,7 +83,7 @@ Všechna práva vyhrazena &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' J
   <string name="notify_title_error">Problém při kontrole aktualizací</string>
   <string name="notify_title_flash">Aktualizace je připravena na flash</string>
   <string name="notify_title_download">Aktualizace je k dispozici ke stažení</string>
-  <string name="last_checked_never_title">Stiskněte tlačítko \"Vyhledat aktualizace\"</string>
+  <string name="last_checked_never_title_new">Stiskněte tlačítko \'Zkontrolovat\' pro zahájení</string>
   <string name="screen_state_title">Vypnutá obrazovka</string>
   <string name="screen_state_message">Stahovat pouze při vypnuté obrazovce</string>
   <string name="category_scheduler">Automatická aktualizace</string>

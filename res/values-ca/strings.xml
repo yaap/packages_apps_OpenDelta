@@ -40,7 +40,6 @@
   <string name="notify_checking">S\'està cercant una actualització &#8230;</string>
   <string name="last_checked" formatted="false">%s a %s</string>
   <string name="last_checked_never">No s\'ha comprovat mai, voldríeu fer-ho?</string>
-  <string name="button_check_now">Cerca d\'actualitzacions</string>
   <string name="button_flash_now">Instal·la</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Mode Segur</string>
@@ -83,7 +82,6 @@
   <string name="notify_title_error">Problema cercant actualitzacions</string>
   <string name="notify_title_flash">Actualització llesta per instal·lar</string>
   <string name="notify_title_download">Actualització llesta per baixar</string>
-  <string name="last_checked_never_title">Premeu «Cerca d\'actualitzacions»</string>
   <string name="screen_state_title">Pantalla apagada</string>
   <string name="screen_state_message">Baixa només si la pantalla està apagada</string>
   <string name="category_scheduler">Actualització automàtica</string>

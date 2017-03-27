@@ -40,7 +40,7 @@
   <string name="notify_checking">Suche nach Aktualisierung &#8230;</string>
   <string name="last_checked" formatted="false">%s um %s</string>
   <string name="last_checked_never">Noch niemals überprüft. Möchtest du jetzt nach Aktualisierungen suchen?</string>
-  <string name="button_check_now">Nach Aktualisierung suchen</string>
+  <string name="button_check_short">Prüfen</string>
   <string name="button_flash_now">Jetzt aufspielen</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Sicherheit</string>
@@ -83,7 +83,7 @@
   <string name="notify_title_error">Problem beim überprüfen auf Aktualisierungen</string>
   <string name="notify_title_flash">Aktualisierung bereit zum aufspielen</string>
   <string name="notify_title_download">Aktualisierung bereit zum herunterladen</string>
-  <string name="last_checked_never_title">\"Auf Aktualisierung prüfen\" drücken</string>
+  <string name="last_checked_never_title_new">\'Prüfen\' drücken, um zu starten</string>
   <string name="screen_state_title">Bildschirm aus</string>
   <string name="screen_state_message">Herunterladen nur wenn Bildschirm ausgeschaltet ist</string>
   <string name="category_scheduler">Automatisch aktualisieren</string>

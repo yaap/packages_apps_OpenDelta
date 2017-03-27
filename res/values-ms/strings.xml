@@ -28,7 +28,6 @@
   <string name="notify_checking">Memeriksa untuk kemas kini &#8230;</string>
   <string name="last_checked" formatted="false">%s pada %s</string>
   <string name="last_checked_never">Kami tidak pernah diperiksa, mungkin anda mahu untuk berbuat demikian?</string>
-  <string name="button_check_now">Semak untuk pengemaskinian</string>
   <string name="button_flash_now">Flash</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Selamat</string>

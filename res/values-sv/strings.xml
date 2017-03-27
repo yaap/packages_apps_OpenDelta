@@ -23,7 +23,6 @@
   <string name="error_disk_space_sub" formatted="false">%d MiB tillgängligt, %d MiB behövs</string>
   <string name="notify_update_available">En uppdatering är tillgänglig</string>
   <string name="notify_checking">Söker efter uppdatering &#8230;</string>
-  <string name="button_check_now">Sök efter uppdatering</string>
   <string name="button_flash_now">Blixt</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Säkert läge</string>

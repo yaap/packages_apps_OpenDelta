@@ -42,7 +42,6 @@
   <string name="notify_checking">Перевірка наявності оновлень&#8230;</string>
   <string name="last_checked" formatted="false">%s в %s</string>
   <string name="last_checked_never">Пошук оновлень ще не виконувався. Можливо, варто спробувати?</string>
-  <string name="button_check_now">Перевірити оновлення</string>
   <string name="button_flash_now">Встановити</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Безпечний режим</string>
@@ -85,7 +84,6 @@
   <string name="notify_title_error">Проблема перевірки оновлення</string>
   <string name="notify_title_flash">Оновлення готове до встановлення</string>
   <string name="notify_title_download">Оновлення готове до завантаження</string>
-  <string name="last_checked_never_title">Натисніть \"Перевірити оновлення\"</string>
   <string name="screen_state_title">При вимкненому екрані</string>
   <string name="screen_state_message">Оновлення завантажуватимуться тільки при вимкненому екрані пристрою</string>
   <string name="category_scheduler">Автоматичне оновлення</string>

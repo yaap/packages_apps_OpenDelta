@@ -40,7 +40,6 @@
   <string name="notify_checking">업데이트 확인하는 중...</string>
   <string name="last_checked" formatted="false">%s에서 %s</string>
   <string name="last_checked_never">확인한 적이 없습니다, 지금 확인할까요?</string>
-  <string name="button_check_now">업데이트 확인</string>
   <string name="button_flash_now">플래시</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">보안</string>
@@ -83,7 +82,6 @@
   <string name="notify_title_error">업데이트에 대한 문제 확인</string>
   <string name="notify_title_flash">업데이트 플래싱 준비 됨</string>
   <string name="notify_title_download">업데이트 내려받기 준비 됨</string>
-  <string name="last_checked_never_title">\'업데이트 확인\'을 누르세요.</string>
   <string name="screen_state_title">화면 꺼짐</string>
   <string name="screen_state_message">화면이 꺼졌을 때만 다운로드</string>
   <string name="category_scheduler">자동 업데이트</string>

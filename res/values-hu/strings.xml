@@ -40,7 +40,7 @@
   <string name="notify_checking">Frissítések keresése &#8230;</string>
   <string name="last_checked" formatted="false">%s ekkor: %s</string>
   <string name="last_checked_never">Mi soha nem ellenőriztük, talán szeretné most megtenni?</string>
-  <string name="button_check_now">Frissítés keresése</string>
+  <string name="button_check_short">Ellenőrzés</string>
   <string name="button_flash_now">Flash</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Biztonságos</string>
@@ -83,7 +83,7 @@
   <string name="notify_title_error">Frissítés ellenőrzési probléma</string>
   <string name="notify_title_flash">Frissítés flashelésre kész</string>
   <string name="notify_title_download">Frissítés letöltésre kész</string>
-  <string name="last_checked_never_title">Nyomjon a \"Frissítés keresése\" gombra</string>
+  <string name="last_checked_never_title_new">Indításhoz nyomja meg: \"Ellenőrzés\"</string>
   <string name="screen_state_title">Képernyő ki</string>
   <string name="screen_state_message">Csak kikapcsolt képernyőnél töltse le</string>
   <string name="category_scheduler">Automatikus frissítés</string>

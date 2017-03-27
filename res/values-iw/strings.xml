@@ -29,7 +29,6 @@
   <string name="notify_checking">בודק אם קיימים עדכונים &#8230;</string>
   <string name="last_checked" formatted="false">%s ב %s</string>
   <string name="last_checked_never">לא בדקנו, אולי תרצה לעשות זאת?</string>
-  <string name="button_check_now">בדוק עדכונים</string>
   <string name="button_flash_now">צרוב</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">מאובטח</string>
@@ -71,7 +70,6 @@
   <string name="notify_title_error">בעיה בבדיקת לעדכונים</string>
   <string name="notify_title_flash">עדכון מוכן לצריבה</string>
   <string name="notify_title_download">עדכון מוכן להורדה</string>
-  <string name="last_checked_never_title">לחץ על \'בדוק עבור עדכון\'</string>
   <string name="screen_state_title">מסך כבוי</string>
   <string name="screen_state_message">הורד רק כאשר המסך כבוי</string>
   <string name="category_scheduler">עדכן אוטומטית</string>

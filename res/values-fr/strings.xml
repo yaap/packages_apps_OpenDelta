@@ -4,7 +4,7 @@
   <string name="app_name">OpenDelta</string>
   <string name="title">Mise à jour système</string>
   <string name="action_networks">Réseau</string>
-  <string name="title_networks">Réseau de téléchargement automatique</string>
+  <string name="title_networks">Télécharger automatiquement sur les réseaux</string>
   <string name="network_2g">2G</string>
   <string name="network_3g">3G</string>
   <string name="network_4g">4G</string>
@@ -18,7 +18,7 @@
         <br>
         Créé pour <b>le projet OmniROM</b><br>
         <br>
-        Sous les termes de la license <b>GNU General Public License, version 3.0 (GPLv3)</b><br>
+        Sous les termes de la licence <b>GNU General Public License, version 3.0 (GPLv3)</b><br>
         <br>
         Delta decoding basé sur <b>xdelta</b>, copyright &copy; _COPYRIGHT_XDELTA_ <b>Joshua MacDonald</b><br>
     ]]>
@@ -32,7 +32,7 @@
   <string name="state_action_applying">Mise à jour&#8230;</string>
   <string name="state_action_applying_patch">Mise à jour&#8230;</string>
   <string name="state_action_applying_md5">Vérification du fichier&#8230;</string>
-  <string name="state_action_ready">Mise à jour prête à être installer.</string>
+  <string name="state_action_ready">Mise à jour prête à être installée.</string>
   <string name="state_error_disk_space">Espace mémoire insuffisant\u00A0!</string>
   <string name="state_error_unknown">Erreur inconnue.</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB disponible, %d MiB nécessaire</string>
@@ -40,7 +40,7 @@
   <string name="notify_checking">Vérification des mises à jour disponibles&#8230;</string>
   <string name="last_checked" formatted="false">%s à %s</string>
   <string name="last_checked_never">Nous n\'avons jamais effectué de vérification, voulez-vous le faire maintenant\u00A0?</string>
-  <string name="button_check_now">Vérifier les mises à jour disponibles</string>
+  <string name="button_check_short">Vérifier</string>
   <string name="button_flash_now">Installer</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Sécurité</string>
@@ -67,11 +67,11 @@
   <string name="text_download_size_header_title">Taille du téléchargement</string>
   <string name="text_download_size_unknown">Inconnue</string>
   <string name="auto_download">Planification</string>
-  <string name="auto_download_title">Action de la planification</string>
+  <string name="auto_download_title">Gestion de la planification</string>
   <string name="download_disabled">Désactivée</string>
   <string name="check_only">Vérifier et notifier</string>
   <string name="download_delta">Télécharger automatiquement le delta</string>
-  <string name="download_full">Télécharger automatiquement tout</string>
+  <string name="download_full">Télécharger Tout automatiquement</string>
   <string name="menu_settings">Paramètres</string>
   <string name="category_download">Téléchargement automatique</string>
   <string name="charge_only_title">En charge uniquement</string>
@@ -83,7 +83,7 @@
   <string name="notify_title_error">Problème lors de la vérification des mises à jour</string>
   <string name="notify_title_flash">Mise à jour prête à installer</string>
   <string name="notify_title_download">Mise à jour prête à télécharger</string>
-  <string name="last_checked_never_title">Appuyer sur \'Vérifier les mises à jour disponible\'</string>
+  <string name="last_checked_never_title_new">Appuyez sur « Vérifier » pour démarrer</string>
   <string name="screen_state_title">Écran éteint</string>
   <string name="screen_state_message">Télécharger uniquement si l\'écran est éteint</string>
   <string name="category_scheduler">Mise à jour automatique</string>

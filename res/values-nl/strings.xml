@@ -40,7 +40,6 @@
   <string name="notify_checking">Zoeken naar updates &#8230;</string>
   <string name="last_checked" formatted="false">%s op %s</string>
   <string name="last_checked_never">Er is nog niet eerder gecontroleerd op updates, zou u willen wat wij het voor u gaan controleren?</string>
-  <string name="button_check_now">Controleren op updates</string>
   <string name="button_flash_now">Installeer</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Beveilig</string>
@@ -83,7 +82,6 @@
   <string name="notify_title_error">Problemen bij het controleren voor updates</string>
   <string name="notify_title_flash">Update gereed voor installatie</string>
   <string name="notify_title_download">Update gereed voor download</string>
-  <string name="last_checked_never_title">Klik \'Controleer voor updates\'</string>
   <string name="screen_state_title">Scherm uit</string>
   <string name="screen_state_message">Download alleen wanneer het scherm uit staat</string>
   <string name="category_scheduler">Automatisch bijwerken</string>

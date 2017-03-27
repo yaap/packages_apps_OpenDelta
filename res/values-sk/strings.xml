@@ -40,7 +40,6 @@
   <string name="notify_checking">Vyhľadávanie aktualizácie &#8230;</string>
   <string name="last_checked" formatted="false">%s na %s</string>
   <string name="last_checked_never">Kontrola nebola nikdy vykonaná, chcete vykonať kontrolu teraz?</string>
-  <string name="button_check_now">Vyhľadať aktualizácie</string>
   <string name="button_flash_now">Flash</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Zabezpečenie</string>
@@ -83,7 +82,6 @@
   <string name="notify_title_error">Problém pri kontrole aktualizácie</string>
   <string name="notify_title_flash">Aktualizácia pripravená na flash</string>
   <string name="notify_title_download">Aktualizácia pripravená na stiahnutie</string>
-  <string name="last_checked_never_title">Stlačte tlačidlo \'Skontrolovať aktualizácie\'</string>
   <string name="screen_state_title">Vypnutá obrazovka</string>
   <string name="screen_state_message">Sťahovať len pri vypnutej obrazovke</string>
   <string name="category_scheduler">Auto aktualizácia</string>

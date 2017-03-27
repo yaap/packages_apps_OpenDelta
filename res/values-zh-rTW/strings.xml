@@ -39,7 +39,6 @@
   <string name="notify_checking">正在檢查更新...</string>
   <string name="last_checked" formatted="false">%s 在 %s</string>
   <string name="last_checked_never">從未檢查過更新，現在要檢查嗎 ?</string>
-  <string name="button_check_now">檢查更新</string>
   <string name="button_flash_now">刷寫</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">安全</string>
@@ -83,7 +82,6 @@
   <string name="notify_title_error">檢查更新出現問題</string>
   <string name="notify_title_flash">更新已準備好刷寫</string>
   <string name="notify_title_download">有更新可以下載</string>
-  <string name="last_checked_never_title">按“檢查更新”</string>
   <string name="screen_state_title">螢幕關閉</string>
   <string name="screen_state_message">只有在螢幕關閉時才進行下載</string>
   <string name="category_scheduler">自動更新</string>

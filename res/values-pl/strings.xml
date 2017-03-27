@@ -39,7 +39,6 @@
   <string name="notify_checking">Sprawdzanie aktualizacji&#8230;</string>
   <string name="last_checked" formatted="false">%s w %s</string>
   <string name="last_checked_never">Nigdy nie wyszukiwaliśmy, może ty chcesz to zrobić?</string>
-  <string name="button_check_now">Sprawdź dostępność aktualizacji</string>
   <string name="button_flash_now">Flash</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Tryb Bezpieczny</string>
@@ -82,7 +81,6 @@
   <string name="notify_title_error">Problem podczas sprawdzania aktualizacji</string>
   <string name="notify_title_flash">Aktualizacja gotowa do zaflashowania</string>
   <string name="notify_title_download">Aktualizacja gotowa do pobrania</string>
-  <string name="last_checked_never_title">Naciśnij \"Sprawdź aktualizację\"</string>
   <string name="screen_state_title">Wyłącz ekran</string>
   <string name="screen_state_message">Pobierz tylko kiedy ekran jest wyłączony</string>
   <string name="category_scheduler">Aktualizuj automatycznie</string>

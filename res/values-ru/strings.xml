@@ -40,7 +40,6 @@
   <string name="notify_checking">Поиск обновлений &#8230;</string>
   <string name="last_checked" formatted="false">%s в %s</string>
   <string name="last_checked_never">Поиск обновлений ещё не выполнялся. Возможно, стоит попробовать?</string>
-  <string name="button_check_now">Проверить обновления</string>
   <string name="button_flash_now">Установить</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Безопасный режим</string>
@@ -83,7 +82,6 @@
   <string name="notify_title_error">Не удалось выполнить поиск обновлений</string>
   <string name="notify_title_flash">Обновление готово к установке</string>
   <string name="notify_title_download">Обновление готово к загрузке</string>
-  <string name="last_checked_never_title">Нажмите «Проверить обновления»</string>
   <string name="screen_state_title">При выключенном экране</string>
   <string name="screen_state_message">Обновления будут загружаться только при выключенном экране устройства</string>
   <string name="category_scheduler">Автоматическое обновление</string>

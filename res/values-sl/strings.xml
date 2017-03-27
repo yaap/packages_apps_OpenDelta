@@ -40,7 +40,6 @@
   <string name="notify_checking">Preverjanje za posodobitve &#8230;</string>
   <string name="last_checked" formatted="false">%s ob %s</string>
   <string name="last_checked_never">Še ni bilo preverjeno, ali bi radi to storili?</string>
-  <string name="button_check_now">Preveri za posodobitve</string>
   <string name="button_flash_now">Namesti</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Varno</string>
@@ -83,7 +82,6 @@
   <string name="notify_title_error">Težava s preverjanjem posodobitev</string>
   <string name="notify_title_flash">Posodobitev pripravljena za namestitev</string>
   <string name="notify_title_download">Posodobitev pripravljena za prejem.</string>
-  <string name="last_checked_never_title">Pritisnite \'Preveri za posodobitve\'</string>
   <string name="screen_state_title">Zaslon izklopljen</string>
   <string name="screen_state_message">Prejmi samo ob izklopljenem zaslonu</string>
   <string name="category_scheduler">Samodejno posodobi</string>
