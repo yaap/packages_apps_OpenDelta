@@ -31,6 +31,7 @@ Copyright © COPYRIGHT OPENDELTA Jorrit \'Chainfire\' Jongma - Originalmente cri
   <string name="notify_checking">Verificando atualizações&#8230;</string>
   <string name="last_checked" formatted="false">%s em %s</string>
   <string name="last_checked_never">Nunca verificamos, talvez você queira fazê-lo?</string>
+  <string name="button_check_short">Verificar</string>
   <string name="button_flash_now">Instalar</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Seguro</string>
@@ -73,6 +74,7 @@ Copyright © COPYRIGHT OPENDELTA Jorrit \'Chainfire\' Jongma - Originalmente cri
   <string name="notify_title_error">Problema de verificação da atualização</string>
   <string name="notify_title_flash">Pronto para a atualização</string>
   <string name="notify_title_download">Pronto para baixar a atualização</string>
+  <string name="last_checked_never_title_new">Pressione \'Verificar\' para iniciar</string>
   <string name="screen_state_title">Tela desligada</string>
   <string name="screen_state_message">Baixar somente quando a tela estiver desligada</string>
   <string name="category_scheduler">Atualização automática</string>
