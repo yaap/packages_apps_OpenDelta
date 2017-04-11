@@ -38,6 +38,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -853,6 +854,25 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         }
     }
 
+    private boolean isMatchingImage(String fileName) {
+        try {
+            if(fileName.endsWith(".zip") && fileName.indexOf(config.getDevice()) != -1) {
+                String[] parts = fileName.split("-");
+                if (parts.length > 1) {
+                    String version = parts[1];
+                    Version current = new Version(config.getAndroidVersion());
+                    Version fileVersion = new Version(version);
+                    if (fileVersion.compareTo(current) >= 0) {
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Logger.ex(e);
+        }
+        return false;
+    }
+
     private String getNewestFullBuild() {
         Logger.d("Checking for latest full build");
 
@@ -877,7 +897,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         JSONObject build = builds.getJSONObject(i);
                         String fileName = new File(build.getString("filename")).getName();
                         Date timestamp = new Date(build.getLong("timestamp"));
-                        if (fileName.endsWith(".zip") && fileName.startsWith(config.getFileBaseNamePrefix()) && timestamp.after(latestTimestamp)) {
+                        // latest build can have a larger micro version then what we run now
+                        if (isMatchingImage(fileName) && timestamp.after(latestTimestamp)) {
                             latestBuild = fileName;
                             latestTimestamp = timestamp;
                         }
@@ -888,6 +909,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 return latestBuild;
             }
         } catch (Exception e) {
+            Logger.ex(e);
         }
         updateState(STATE_ERROR_UNOFFICIAL, null, null, null, config.getVersion(), null);
         return null;

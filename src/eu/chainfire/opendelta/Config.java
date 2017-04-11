@@ -290,4 +290,8 @@ public class Config {
                 getVersion().indexOf(weekly_version_tag) != -1 ||
                 getVersion().indexOf(security_version_tag) != -1;
     }
+
+    public String getAndroidVersion() {
+        return android_version;
+    }
 }
