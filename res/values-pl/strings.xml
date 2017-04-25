@@ -39,6 +39,7 @@
   <string name="notify_checking">Sprawdzanie aktualizacji&#8230;</string>
   <string name="last_checked" formatted="false">%s w %s</string>
   <string name="last_checked_never">Nigdy nie wyszukiwaliśmy, może ty chcesz to zrobić?</string>
+  <string name="button_check_short">Sprawdź</string>
   <string name="button_flash_now">Flash</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Tryb Bezpieczny</string>

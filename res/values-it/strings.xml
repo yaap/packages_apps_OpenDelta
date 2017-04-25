@@ -39,6 +39,7 @@
   <string name="notify_checking">Controllo aggiornamenti&#8230;</string>
   <string name="last_checked" formatted="false">%s al %s</string>
   <string name="last_checked_never">Mai eseguito controllo aggiornamenti. Vuoi farlo ora?</string>
+  <string name="button_check_short">Verifica</string>
   <string name="button_flash_now">Flash</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Sicurezza</string>
@@ -81,6 +82,7 @@
   <string name="notify_title_error">Problema verifica aggiornamenti</string>
   <string name="notify_title_flash">Aggiornamento pronto per l\'installazione</string>
   <string name="notify_title_download">Aggiornamento pronto per il download</string>
+  <string name="last_checked_never_title_new">Premere \'Verifica\' per avviare</string>
   <string name="screen_state_title">Spegni schermo</string>
   <string name="screen_state_message">Scarica solo quando lo schermo è spento</string>
   <string name="category_scheduler">Aggiornamento automatico</string>

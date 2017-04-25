@@ -40,6 +40,7 @@
   <string name="notify_checking">Поиск обновлений &#8230;</string>
   <string name="last_checked" formatted="false">%s в %s</string>
   <string name="last_checked_never">Поиск обновлений ещё не выполнялся. Возможно, стоит попробовать?</string>
+  <string name="button_check_short">Проверить</string>
   <string name="button_flash_now">Установить</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Безопасный режим</string>
@@ -82,6 +83,7 @@
   <string name="notify_title_error">Не удалось выполнить поиск обновлений</string>
   <string name="notify_title_flash">Обновление готово к установке</string>
   <string name="notify_title_download">Обновление готово к загрузке</string>
+  <string name="last_checked_never_title_new">Нажмите «Check», чтобы начать</string>
   <string name="screen_state_title">При выключенном экране</string>
   <string name="screen_state_message">Обновления будут загружаться только при выключенном экране устройства</string>
   <string name="category_scheduler">Автоматическое обновление</string>
@@ -97,5 +99,8 @@
   <string name="secure_mode_title">Защищенный режим</string>
   <string name="state_error_connection">Нет подключения к интернету.</string>
   <string name="category_admin">Поддержка</string>
+  <string name="clear_files_title">Очистить файлы обновления</string>
+  <string name="clear_files_summary">Удалить существующие файлы обновлений для принудительного скачивания обновления</string>
+  <string name="clean_files_feedback" formatted="false">Удалено %d файлов. Теперь нажмите «Check for updates»</string>
   <string name="state_error_permissions">Нет разрешения для хранения.</string>
 </resources>

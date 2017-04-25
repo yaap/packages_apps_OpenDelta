@@ -39,6 +39,7 @@ Copyright &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>
   <string name="notify_checking">Comprobando actualizaciones &#8230;</string>
   <string name="last_checked" formatted="false">%s a las %s</string>
   <string name="last_checked_never">Nunca se ha comprobado, ¿Le gustaría hacerlo ahora?</string>
+  <string name="button_check_short">Comprobar</string>
   <string name="button_flash_now">Flash</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Modo Seguro</string>
@@ -81,6 +82,7 @@ Copyright &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>
   <string name="notify_title_error">Hubo un problema al buscar actualizaciones</string>
   <string name="notify_title_flash">Actualización lista para ser flasheada</string>
   <string name="notify_title_download">Actualización lista para ser descargada</string>
+  <string name="last_checked_never_title_new">Pulsa \'Comprobar\' para iniciar</string>
   <string name="screen_state_title">Pantalla apagada</string>
   <string name="screen_state_message">Descargar sólo cuando la pantalla está apagada</string>
   <string name="category_scheduler">Actualización automática</string>

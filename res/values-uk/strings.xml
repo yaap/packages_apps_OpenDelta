@@ -42,6 +42,7 @@
   <string name="notify_checking">Перевірка наявності оновлень&#8230;</string>
   <string name="last_checked" formatted="false">%s в %s</string>
   <string name="last_checked_never">Пошук оновлень ще не виконувався. Можливо, варто спробувати?</string>
+  <string name="button_check_short">Перевірити</string>
   <string name="button_flash_now">Встановити</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Безпечний режим</string>
