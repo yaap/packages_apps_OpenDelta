@@ -14,5 +14,5 @@
     <color name="material_grey_300">#ffe0e0e0</color>
     <color name="view_background">@color/material_grey_100</color>
     <color name="window_background">@color/material_grey_300</color>
-
+    <color name="text_color">@android:color/black</color>
 </resources>

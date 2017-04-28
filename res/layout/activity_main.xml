@@ -35,7 +35,7 @@
             android:layout_gravity="center"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:src="@drawable/ic_omni_small"></ImageView>
+            android:src="@drawable/ic_omni_small"/>
     </LinearLayout>
 
     <LinearLayout
@@ -78,7 +78,8 @@
                     android:layout_marginStart="9dp"
                     android:layout_toEndOf="@+id/curr_ver"
                     android:text="@string/text_current_version_header_title"
-                    android:textAppearance="@android:style/TextAppearance.Material.Menu" />
+                    android:textAppearance="@android:style/TextAppearance.Material.Menu"
+                    android:textColor="@color/text_color" />
 
                 <TextView
                     android:id="@+id/text_current_version"
@@ -86,7 +87,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignStart="@+id/text_current_version_header"
                     android:layout_below="@+id/text_current_version_header"
-                    android:textAppearance="@android:style/TextAppearance.Material.Small" />
+                    android:textAppearance="@android:style/TextAppearance.Material.Small"
+                    android:textColor="@color/text_color" />
 
                 <TextView
                     android:id="@+id/text_last_checked_header"
@@ -95,7 +97,8 @@
                     android:layout_above="@+id/text_last_checked"
                     android:layout_alignParentStart="true"
                     android:text="@string/text_last_checked_header_title"
-                    android:textAppearance="@android:style/TextAppearance.Material.Menu" />
+                    android:textAppearance="@android:style/TextAppearance.Material.Menu"
+                    android:textColor="@color/text_color" />
 
                 <TextView
                     android:id="@+id/text_last_checked"
@@ -103,7 +106,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
                     android:layout_alignStart="@+id/text_last_checked_header"
-                    android:textAppearance="@android:style/TextAppearance.Material.Small" />
+                    android:textAppearance="@android:style/TextAppearance.Material.Small"
+                    android:textColor="@color/text_color" />
 
             </RelativeLayout>
 
@@ -147,7 +151,8 @@
                         android:layout_marginStart="9dp"
                         android:layout_toEndOf="@+id/imageView8"
                         android:text="@string/text_update_version_title"
-                        android:textAppearance="@android:style/TextAppearance.Material.Menu" />
+                        android:textAppearance="@android:style/TextAppearance.Material.Menu"
+                        android:textColor="@color/text_color" />
 
                     <TextView
                         android:id="@+id/text_update_version"
@@ -155,7 +160,8 @@
                         android:layout_height="wrap_content"
                         android:layout_alignStart="@+id/text_update_version_header"
                         android:layout_below="@+id/text_update_version_header"
-                        android:textAppearance="@android:style/TextAppearance.Material.Small" />
+                        android:textAppearance="@android:style/TextAppearance.Material.Small"
+                        android:textColor="@color/text_color" />
 
                     <TextView
                         android:id="@+id/text_download_size_header"
@@ -164,7 +170,8 @@
                         android:layout_alignParentStart="true"
                         android:layout_below="@+id/text_update_version"
                         android:text="@string/text_download_size_header_title"
-                        android:textAppearance="@android:style/TextAppearance.Material.Menu" />
+                        android:textAppearance="@android:style/TextAppearance.Material.Menu"
+                        android:textColor="@color/text_color" />
 
                     <TextView
                         android:id="@+id/text_download_size"
@@ -172,7 +179,8 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
                         android:layout_below="@+id/text_download_size_header"
-                        android:textAppearance="@android:style/TextAppearance.Material.Small" />
+                        android:textAppearance="@android:style/TextAppearance.Material.Small"
+                        android:textColor="@color/text_color" />
 
                     <TextView
                         android:id="@+id/progress_text"
@@ -183,7 +191,8 @@
                         android:layout_marginTop="20dp"
                         android:ellipsize="marquee"
                         android:maxLines="1"
-                        android:textAppearance="@android:style/TextAppearance.Material.Small" />
+                        android:textAppearance="@android:style/TextAppearance.Material.Small"
+                        android:textColor="@color/text_color" />
 
                     <LinearLayout
                         android:id="@+id/progress_container"
@@ -228,7 +237,8 @@
                             android:layout_below="@+id/progress_text"
                             android:gravity="start"
                             android:maxLines="1"
-                            android:textAppearance="@android:style/TextAppearance.Material.Small" />
+                            android:textAppearance="@android:style/TextAppearance.Material.Small"
+                            android:textColor="@color/text_color" />
 
                         <Space
                             android:layout_width="0dp"
@@ -243,7 +253,8 @@
                             android:ellipsize="marquee"
                             android:gravity="end"
                             android:maxLines="1"
-                            android:textAppearance="@android:style/TextAppearance.Material.Small" />
+                            android:textAppearance="@android:style/TextAppearance.Material.Small"
+                            android:textColor="@color/text_color" />
 
                     </LinearLayout>
 
@@ -255,7 +266,8 @@
                         android:layout_alignParentStart="true"
                         android:ellipsize="marquee"
                         android:maxLines="2"
-                        android:textAppearance="@android:style/TextAppearance.Material.Small" />
+                        android:textAppearance="@android:style/TextAppearance.Material.Small"
+                        android:textColor="@color/text_color" />
 
                 </RelativeLayout>
 

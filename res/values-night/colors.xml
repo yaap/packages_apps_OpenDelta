@@ -3,4 +3,5 @@
     <color name="material_grey_900">#212121</color>
     <color name="view_background">@color/material_grey_800</color>
     <color name="window_background">@*android:color/material_grey_900</color>
+    <color name="text_color">@android:color/white</color>
 </resources>
