@@ -14,13 +14,13 @@
   <string name="action_about">Hakkında</string>
   <string name="about_content">
 <![CDATA[
-        Tüm hakları saklıdır&copy; _COPYRIGHT_OPENDELTA_<b>Jorrit \'Chainfire\' Jongma</b><br>
+        Telif hakkı&copy; _COPYRIGHT_OPENDELTA_<b>Jorrit \'Chainfire\' Jongma</b><br>
         <br>
         <b>OmniROM Projesi</b>için oluşturulmuştur<br>
         <br>
-        <b>GNU Genel Kamu Lisansı</b>koşulları altında lisanslı sürüm 3.0 (GPLv3)<br>
+        <b>GNU Genel Kamu Lisansı, sürüm 3.0 (GPLv3)</b> şartları altında lisanslanmıştır<br>
         <br>
-        Delta decoding <b>xdelta</b>dan baz alındı, tüm hakları saklıdır &copy; _COPYRIGHT_XDELTA_<b>Joshua MacDonald</b><br>
+        Delta decoding <b>xdelta</b> tabanlıdır, telif hakkı &copy; _COPYRIGHT_XDELTA_<b>Joshua MacDonald</b><br>
     ]]></string>
   <string name="state_action_none">Sisteminiz güncel.</string>
   <string name="state_action_checking">Güncellemeler kontrol ediliyor &#8230;</string>
@@ -39,7 +39,7 @@
   <string name="notify_checking">Güncellemeler denetleniyor &#8230;</string>
   <string name="last_checked" formatted="false">%s de %s</string>
   <string name="last_checked_never">Daha önce hiç güncelleme denetimi yapılmadı. Şimdi yapılsın mı?</string>
-  <string name="button_check_short">Kontrol et</string>
+  <string name="button_check_short">Denetle</string>
   <string name="button_flash_now">Yükle</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Güvenli</string>
@@ -82,7 +82,7 @@
   <string name="notify_title_error">Güncelleme denetleme sorunu</string>
   <string name="notify_title_flash">Güncelleme yüklenmeye hazır</string>
   <string name="notify_title_download">Güncelleme indirilmeye hazır</string>
-  <string name="last_checked_never_title_new">Başlamak için \'Kontrol et\' tuşuna basın</string>
+  <string name="last_checked_never_title_new">Başlatmak için \'Denetle\' düğmesine basın</string>
   <string name="screen_state_title">Ekran kapalı</string>
   <string name="screen_state_message">Sadece ekran kapalıyken indir</string>
   <string name="category_scheduler">Otomatik güncelleme</string>

@@ -103,4 +103,5 @@
   <string name="clear_files_summary">Удалить существующие файлы обновлений для принудительного скачивания обновления</string>
   <string name="clean_files_feedback" formatted="false">Удалено %d файлов. Теперь нажмите «Check for updates»</string>
   <string name="state_error_permissions">Нет разрешения для хранения.</string>
+  <string name="state_error_flash">Ошибка установки. Сделайте очистку /cache и попробуйте еще раз.</string>
 </resources>
