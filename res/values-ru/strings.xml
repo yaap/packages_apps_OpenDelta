@@ -83,7 +83,7 @@
   <string name="notify_title_error">Не удалось выполнить поиск обновлений</string>
   <string name="notify_title_flash">Обновление готово к установке</string>
   <string name="notify_title_download">Обновление готово к загрузке</string>
-  <string name="last_checked_never_title_new">Нажмите «Check», чтобы начать</string>
+  <string name="last_checked_never_title_new">Нажмите «Проверить», чтобы начать</string>
   <string name="screen_state_title">При выключенном экране</string>
   <string name="screen_state_message">Обновления будут загружаться только при выключенном экране устройства</string>
   <string name="category_scheduler">Автоматическое обновление</string>

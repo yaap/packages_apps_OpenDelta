@@ -40,6 +40,7 @@
   <string name="notify_checking">À procura de actualizações&#8230;</string>
   <string name="last_checked" formatted="false">%s em %s</string>
   <string name="last_checked_never">Nunca verificamos, pretende verificar agora?</string>
+  <string name="button_check_short">Verificar</string>
   <string name="button_flash_now">Flash</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Seguro</string>
@@ -82,6 +83,7 @@
   <string name="notify_title_error">Problema a verificar actualização</string>
   <string name="notify_title_flash">Actualização pronta para ser instalada</string>
   <string name="notify_title_download">Actualização pronta para download</string>
+  <string name="last_checked_never_title_new">Pressione \'Verificar\' para iniciar</string>
   <string name="screen_state_title">Desligar ecrã</string>
   <string name="screen_state_message">Descarregar apenas com o ecrã desligado</string>
   <string name="category_scheduler">Actualização automática</string>
