@@ -4,14 +4,14 @@
   <string name="app_name">OpenDelta</string>
   <string name="title">Aktualizácie systému</string>
   <string name="action_networks">Siete</string>
-  <string name="title_networks">Automaticky stahovať v</string>
+  <string name="title_networks">Automaticky preberať v sieťach</string>
   <string name="network_2g">2G</string>
   <string name="network_3g">3G</string>
   <string name="network_4g">4G</string>
   <string name="network_wifi">Wi-Fi</string>
   <string name="network_ethernet">Ethernet</string>
   <string name="network_unknown">Iné</string>
-  <string name="action_about">Info</string>
+  <string name="action_about">O aplikácii</string>
   <string name="about_content">
 <![CDATA[
         Copyright &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>
@@ -24,82 +24,84 @@
     ]]>
 	</string>
   <string name="state_action_none">Váš systém je aktuálny.</string>
-  <string name="state_action_checking">Kontrolujem aktualizácie &#8230;</string>
-  <string name="state_action_checking_md5">Overovanie súboru &#8230;</string>
-  <string name="state_action_searching">Hľadanie súborov &#8230;</string>
-  <string name="state_action_searching_md5">Overovanie súboru &#8230;</string>
-  <string name="state_action_downloading">Sťahovanie&#8230;</string>
-  <string name="state_action_applying">Patchovanie &#8230;</string>
-  <string name="state_action_applying_patch">Patchovanie &#8230;</string>
-  <string name="state_action_applying_md5">Overovanie súboru &#8230;</string>
+  <string name="state_action_checking">Kontrolujú sa aktualizácie &#8230;</string>
+  <string name="state_action_checking_md5">Overuje sa súbor &#8230;</string>
+  <string name="state_action_searching">Vyhľadávajú sa súbory &#8230;</string>
+  <string name="state_action_searching_md5">Overuje sa súbor &#8230;</string>
+  <string name="state_action_downloading">Preberá sa &#8230;</string>
+  <string name="state_action_applying">Aplikujú sa záplaty &#8230;</string>
+  <string name="state_action_applying_patch">Aplikujú sa záplaty &#8230;</string>
+  <string name="state_action_applying_md5">Overuje sa súbor &#8230;</string>
   <string name="state_action_ready">Aktualizácia pripravená na flash.</string>
   <string name="state_error_disk_space">Nedostatok miesta na disku!</string>
   <string name="state_error_unknown">Neznáma chyba.</string>
-  <string name="error_disk_space_sub" formatted="false">%d MiB volných, %d MiB požadovaných</string>
+  <string name="error_disk_space_sub" formatted="false">%d MiB dostupných, %d MiB potrebných</string>
   <string name="notify_update_available">Je dostupná aktualizácia</string>
-  <string name="notify_checking">Vyhľadávanie aktualizácie &#8230;</string>
-  <string name="last_checked" formatted="false">%s na %s</string>
-  <string name="last_checked_never">Kontrola nebola nikdy vykonaná, chcete vykonať kontrolu teraz?</string>
-  <string name="button_flash_now">Flash</string>
+  <string name="notify_checking">Kontroluje sa aktualizácia &#8230;</string>
+  <string name="last_checked" formatted="false">%s o %s</string>
+  <string name="last_checked_never">Kontrola nebola nikdy vykonaná. Chcete vykonať kontrolu teraz?</string>
+  <string name="button_check_short">Skontrolovať</string>
+  <string name="button_flash_now">Inštalovať</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Zabezpečenie</string>
-  <string name="secure_mode_enabled_title">Zabezpečený režim: povolené</string>
-  <string name="secure_mode_enabled_description"><![CDATA[Kôli overeniu pôvodu aktualizácie bude pred jej zapísaním overený digitálny podpis, žiadne ďalšie aktualizácie nebudú zapísané. Tento režim je kompatibilný jedine s <b>TWRP</b>.]]></string>
-  <string name="secure_mode_disabled_title">Zabezpečený režim: vypnuté</string>
-  <string name="secure_mode_disabled_description"><![CDATA[Všetky ďalšie prítomné aktualizácie budú nahraté. Majte na mysli, že akákoľvek (škodlivá) aplikácia sem môže umiestniť vlastnú aktualizáciu a prevziať kontrolu nad zariadením. Preto buďte opatrní.]]></string>
-  <string name="recovery_notice_title">Upozornenie</string>
-  <string name="recovery_notice_description_secure"><![CDATA[Zapisovanie aktualizácií v tomto režime je podporované jedine cez <b>TWRP</b> recovery. Pred tým, ako budete pokračovať, sa uistite, že používate kompatibilnú verziu recovery.]]></string>
-  <string name="recovery_notice_description_not_secure"><![CDATA[Zapisovanie aktualizácií v tomto režime je oficiálne podporované len cez <b>TWRP</b> recovery. <i>Oficiálnel</i> <b>CWM</b> recovery <i>nie sú</i> podporované, aj keď niektoré <i>komunitné</i> verzie <b>CWM</b> <i>môžu</i> stále fungovať. Pred tým, než budete pokračovať, sa prosím uistite, že používate kompatibilnú recovery.]]></string>
-  <string name="flash_after_update_notice_title">Upozornenie</string>
+  <string name="secure_mode_enabled_title">Zabezpečený režim: povolený</string>
+  <string name="secure_mode_enabled_description"><![CDATA[Kvôli overeniu pôvodu aktualizácie bude pred jej zapísaním overený digitálny podpis a žiadne ďalšie aktualizácie nebudú nainštalované. Tento režim je kompatibilný iba s <b>TWRP</b>.]]></string>
+  <string name="secure_mode_disabled_title">Zabezpečený režim: zakázaný</string>
+  <string name="secure_mode_disabled_description"><![CDATA[Všetky ďalšie prítomné aktualizácie budú nainštalované. Majte na mysli, že akákoľvek (škodlivá) aplikácia sem môže umiestniť vlastnú aktualizáciu a prevziať kontrolu nad zariadením. Preto buďte opatrní.]]></string>
+  <string name="recovery_notice_title">Oznam</string>
+  <string name="recovery_notice_description_secure"><![CDATA[Inštalácia aktualizácií v aktuálnom režime je podporovaná iba cez <b>TWRP</b> recovery. Pred tým, ako budete pokračovať, sa uistite, že používate kompatibilnú verziu recovery.]]></string>
+  <string name="recovery_notice_description_not_secure"><![CDATA[Inštalácia aktualizácií v aktuálnom režime je oficiálne podporovaná len cez <b>TWRP</b> recovery. <i>Oficiálnel</i> <b>CWM</b> recovery <i>nie sú</i> podporované, aj keď niektoré <i>komunitné</i> verzie <b>CWM</b> <i>môžu</i> stále fungovať. Pred tým, než budete pokračovať, sa prosím uistite, že používate kompatibilnú recovery.]]></string>
+  <string name="flash_after_update_notice_title">Oznam</string>
   <string name="flash_after_update_notice_description"><![CDATA[V adresári <b>FlashAfterUpdate</b> sú prítomné ďalšie aktualizácie, ale zároveň je zapnutý zabezpečený režim. Ak sa rozhodnete pokračovať, tieto ďalšie aktualizácie <b>nebudú</b> nainštalované.]]></string>
-  <string name="state_error_not_official_title">Aktualizácia zakázaná.</string>
+  <string name="state_error_not_official_title">Aktualizácia je zakázaná.</string>
   <string name="state_error_not_official_extra" formatted="false">Aktualizácia %s nie je možná</string>
-  <string name="button_build_delta">Stiahnuť</string>
+  <string name="button_build_delta">Prevziať</string>
   <string name="button_stop">Zastaviť</string>
-  <string name="state_action_build">Aktualizácia je k dispozícií.</string>
+  <string name="state_action_build">Aktualizácia je dostupná.</string>
   <string name="state_action_build_delta">Je možná delta aktualizácia.</string>
   <string name="state_action_build_full">Je možná úplná aktualizácia.</string>
-  <string name="state_error_download">Problém pri sťahovaní.</string>
+  <string name="state_error_download">Problém pri preberaní.</string>
   <string name="text_current_version_header_title">Aktuálna verzia</string>
   <string name="text_last_checked_header_title">Naposledy kontrolované</string>
   <string name="text_update_version_title">Verzia aktualizácie</string>
-  <string name="text_download_size_header_title">Veľkosť na stiahnutie</string>
+  <string name="text_download_size_header_title">Veľkosť preberania</string>
   <string name="text_download_size_unknown">Neznáma</string>
   <string name="auto_download">Plánovanie</string>
   <string name="auto_download_title">Akcia plánovača</string>
   <string name="download_disabled">Zakázané</string>
   <string name="check_only">Skontrolovať a oznámiť</string>
-  <string name="download_delta">Automaticky sťahovať rozdiely</string>
-  <string name="download_full">Automaticky sťahovať všetko</string>
+  <string name="download_delta">Automaticky preberať delty</string>
+  <string name="download_full">Automaticky preberať všetko</string>
   <string name="menu_settings">Nastavenia</string>
-  <string name="category_download">Automatické sťahovanie</string>
+  <string name="category_download">Automatické preberanie</string>
   <string name="charge_only_title">Len na nabíjačke</string>
-  <string name="charge_only_message">Sťahovať len pri pripojení na nabíjačku</string>
-  <string name="battery_level_title">Minimálny stav batérie</string>
+  <string name="charge_only_message">Preberať len pri pripojení nabíjačky</string>
+  <string name="battery_level_title">Minimálne nabitie batérie</string>
   <string name="twenty_five_percent">25</string>
   <string name="fifty_percent">50;</string>
   <string name="seventy_five_percent">75</string>
   <string name="notify_title_error">Problém pri kontrole aktualizácie</string>
-  <string name="notify_title_flash">Aktualizácia pripravená na flash</string>
-  <string name="notify_title_download">Aktualizácia pripravená na stiahnutie</string>
+  <string name="notify_title_flash">Aktualizácia je pripravená na inštaláciu</string>
+  <string name="notify_title_download">Aktualizácia je pripravená na prebratie</string>
+  <string name="last_checked_never_title_new">Stlačte tlačidlo „Skontrolovať“ na začiatok</string>
   <string name="screen_state_title">Vypnutá obrazovka</string>
-  <string name="screen_state_message">Sťahovať len pri vypnutej obrazovke</string>
-  <string name="category_scheduler">Auto aktualizácia</string>
+  <string name="screen_state_message">Preberať len pri vypnutej obrazovke</string>
+  <string name="category_scheduler">Automatická aktualizácia</string>
   <string name="scheduler_mode_title">Režim plánovača</string>
-  <string name="scheduler_smart">Smart</string>
+  <string name="scheduler_smart">Inteligentný</string>
   <string name="scheduler_daily">Denne</string>
   <string name="scheduler_weekly">Týždenne</string>
   <string name="scheduler_daily_time">Čas</string>
   <string name="scheduler_week_day">Deň</string>
   <string name="networks_title">Siete</string>
-  <string name="networks_message">Stiahnuť iba pri typoch siete</string>
-  <string name="category_flashing">Flashujem</string>
-  <string name="secure_mode_title">Zabezpečný režim</string>
+  <string name="networks_message">Preberať len pri typoch siete</string>
+  <string name="category_flashing">Inštaluje sa</string>
+  <string name="secure_mode_title">Zabezpečený režim</string>
   <string name="state_error_connection">Žiadne dátové pripojenie.</string>
   <string name="category_admin">Údržba</string>
-  <string name="clear_files_title">Vyčistiť súbory aktualizácie</string>
-  <string name="clear_files_summary">Vymazať existujúce súbory aktualizácie na vynútenie stiahnutia plnej aktualizácie</string>
-  <string name="clean_files_feedback" formatted="false">Vymazaných %d súbor/y/ov. Teraz môžete dotykom \'Vyhľadať aktualizácie\'</string>
+  <string name="clear_files_title">Vyčistiť súbory aktualizácií</string>
+  <string name="clear_files_summary">Vymazať existujúce súbory aktualizácií na vynútenie prebratia plnej aktualizácie</string>
+  <string name="clean_files_feedback" formatted="false">Vymazaných %d súbor/y/ov. Teraz môžete dotykom „Skontrolovať aktualizácie“</string>
   <string name="state_error_permissions">Chýba povolenie na prístup k úložisku.</string>
-  <string name="state_error_flash">Nemožno nastaviť flash. Vyčistiť /cache a skúsiť znova.</string>
+  <string name="state_error_flash">Zlyhalo nastavenie inštalácie. Vyčistite oddiel /cache a skúste to znovu.</string>
 </resources>

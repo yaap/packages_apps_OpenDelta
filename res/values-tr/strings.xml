@@ -16,7 +16,7 @@
 <![CDATA[
         Telif hakkı&copy; _COPYRIGHT_OPENDELTA_<b>Jorrit \'Chainfire\' Jongma</b><br>
         <br>
-        <b>OmniROM Projesi</b>için oluşturulmuştur<br>
+        Aslen <b>OmniROM Projesi</b>için oluşturulmuştur<br>
         <br>
         <b>GNU Genel Kamu Lisansı, sürüm 3.0 (GPLv3)</b> şartları altında lisanslanmıştır<br>
         <br>
@@ -28,16 +28,16 @@
   <string name="state_action_searching">Dosyalar aranıyor &#8230;</string>
   <string name="state_action_searching_md5">Dosya doğrulanıyor &#8230;</string>
   <string name="state_action_downloading">İndiriliyor &#8230;</string>
-  <string name="state_action_applying">Uygulanıyor &#8230;</string>
-  <string name="state_action_applying_patch">Uygulanıyor &#8230;</string>
+  <string name="state_action_applying">Yamalanıyor &#8230;</string>
+  <string name="state_action_applying_patch">Yamalanıyor &#8230;</string>
   <string name="state_action_applying_md5">Dosya doğrulanıyor &#8230;</string>
   <string name="state_action_ready">Güncelleme yüklenmeye hazır.</string>
   <string name="state_error_disk_space">Yeterli disk alanı yok!</string>
-  <string name="state_error_unknown">Bilinmeyen hata.</string>
-  <string name="error_disk_space_sub" formatted="false">Diskinizde %d Mb boş alan var, %d Mb gerekli.</string>
-  <string name="notify_update_available">Yeni bir güncelleme mevcut</string>
+  <string name="state_error_unknown">Bilinmeyen hatâ.</string>
+  <string name="error_disk_space_sub" formatted="false">Diskinizde %d MiB boş alan var, %d MiB gerekli</string>
+  <string name="notify_update_available">Bir güncelleme mevcud</string>
   <string name="notify_checking">Güncelleme denetleniyor &#8230;</string>
-  <string name="last_checked" formatted="false">%s %s tarihinde</string>
+  <string name="last_checked" formatted="false">%s, %s târihinde</string>
   <string name="last_checked_never">Hiç denetlemedik, denetlemek ister misiniz?</string>
   <string name="button_check_short">Denetle</string>
   <string name="button_flash_now">Yükle</string>
