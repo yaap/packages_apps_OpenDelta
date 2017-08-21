@@ -28,6 +28,7 @@ import java.util.Locale;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -88,8 +89,7 @@ public class MainActivity extends Activity {
             // its icon
             Logger.ex(e);
         }
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setElevation(0);
+        getActionBar().setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_TITLE);
 
         UpdateService.start(this);
 
