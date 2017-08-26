@@ -224,7 +224,7 @@ public class MainActivity extends Activity {
                 } catch (Exception e) {
                     // String for this state could not be found (displays empty
                     // string)
-                    Logger.ex(e);
+                    //Logger.ex(e);
                 }
                 // check for first start until check button has been pressed
                 // use a special title then - but only once
