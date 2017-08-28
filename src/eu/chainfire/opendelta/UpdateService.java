@@ -1673,11 +1673,14 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         String md5Url = latestFullFetch + ".md5sum";
         String latestFullMd5 = downloadUrlMemoryAsString(md5Url);
         if (latestFullMd5 != null){
+            String md5Part = null;
             try {
-                String md5Part = latestFullMd5.split("  ")[0];
-                return md5Part;
+                md5Part = latestFullMd5.split("  ")[0];
             } catch (Exception e) {
+                md5Part = latestFullMd5;
             }
+            Logger.d("getLatestFullMd5Sum - md5sum = " + md5Part);
+            return md5Part;
         }
         return null;
     }
