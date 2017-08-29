@@ -1,8 +1,6 @@
 <resources>
     <color name="button_text_color">?android:attr/colorAccent</color>
     <color name="button_text_color_disabled">#80009688</color>
-    <color name="title_text_color">@android:color/white</color>
-    <color name="title_text_bg">#ff263238</color>
     <color name="logo_none">#fffafafa</color>
     <color name="logo_disabled">#ff9E9E9E</color>
     <color name="logo_err">#F44336</color>

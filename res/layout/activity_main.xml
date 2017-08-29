@@ -12,7 +12,7 @@
         android:layout_height="67dp"
         android:addStatesFromChildren="false"
         android:alwaysDrawnWithCache="false"
-        android:background="@color/title_text_bg"
+        android:background="@drawable/switchbar_background"
         android:orientation="horizontal">
 
         <TextView
@@ -25,7 +25,7 @@
             android:layout_weight="1"
             android:gravity="start"
             android:textAppearance="@android:style/TextAppearance.Material.Large"
-            android:textColor="@color/title_text_color" />
+            android:textColor="?android:attr/textColorPrimary" />
 
 
         <ImageView
