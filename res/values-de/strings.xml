@@ -35,6 +35,7 @@
   <string name="state_action_ready">Aktualisierung bereit zum aufspielen.</string>
   <string name="state_error_disk_space">Nicht genügend Speicherplatz vorhanden!</string>
   <string name="state_error_unknown">Unbekannter Fehler.</string>
+  <string name="state_error_unofficial">Aktualisierung deaktiviert</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB verfügbar, %d MiB benötigt</string>
   <string name="notify_update_available">Eine Aktualisierung ist verfügbar</string>
   <string name="notify_checking">Suche nach Aktualisierung &#8230;</string>

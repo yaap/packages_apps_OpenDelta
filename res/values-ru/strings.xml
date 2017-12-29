@@ -35,6 +35,7 @@
   <string name="state_action_ready">Обновление готово к установке.</string>
   <string name="state_error_disk_space">Недостаточно свободного места!</string>
   <string name="state_error_unknown">Неизвестная ошибка.</string>
+  <string name="state_error_unofficial">Обновления отключены</string>
   <string name="error_disk_space_sub" formatted="false">%d МБ доступно, %d МБ необходимо</string>
   <string name="notify_update_available">Доступно обновление</string>
   <string name="notify_checking">Поиск обновлений &#8230;</string>

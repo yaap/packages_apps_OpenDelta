@@ -35,6 +35,7 @@
   <string name="state_action_ready">A actualização está pronta a ser aplicada.</string>
   <string name="state_error_disk_space">Sem espaço suficiente na memoria interna!</string>
   <string name="state_error_unknown">Erro desconhecido.</string>
+  <string name="state_error_unofficial">Actualização desabilitada</string>
   <string name="error_disk_space_sub" formatted="false">%d Mb disponíveis, %d Mb necessários</string>
   <string name="notify_update_available">Existem actualizações disponíveis</string>
   <string name="notify_checking">À procura de actualizações&#8230;</string>

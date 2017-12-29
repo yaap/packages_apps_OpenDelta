@@ -35,6 +35,7 @@ Všechna práva vyhrazena &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' J
   <string name="state_action_ready">Aktualizace je připravena na flash.</string>
   <string name="state_error_disk_space">Není dostatek místa na úložišti!</string>
   <string name="state_error_unknown">Neznámá chyba.</string>
+  <string name="state_error_unofficial">Aktualizace zakázána</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB volných, %d MiB požadovaných</string>
   <string name="notify_update_available">Aktualizace je k dispozici</string>
   <string name="notify_checking">Kontrola aktualizací &#8230;</string>

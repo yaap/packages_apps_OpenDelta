@@ -34,6 +34,7 @@
   <string name="state_action_ready">Aggiornamento pronto per essere flashato.</string>
   <string name="state_error_disk_space">Spazio di archiviazione insufficiente!</string>
   <string name="state_error_unknown">Errore sconosciuto.</string>
+  <string name="state_error_unofficial">Aggiornamenti disabilitati</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB disponibili, %d MiB richiesti</string>
   <string name="notify_update_available">Aggiornamento disponibile</string>
   <string name="notify_checking">Controllo aggiornamenti&#8230;</string>

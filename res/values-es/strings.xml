@@ -34,6 +34,7 @@ Copyright &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>
   <string name="state_action_ready">Actualización lista para flashear.</string>
   <string name="state_error_disk_space">¡No hay espacio suficiente en el disco!</string>
   <string name="state_error_unknown">Error desconocido.</string>
+  <string name="state_error_unofficial">Actualización deshabilitada</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB disponible, %d MiB necesario</string>
   <string name="notify_update_available">Una actualización está disponible</string>
   <string name="notify_checking">Comprobando actualizaciones &#8230;</string>
