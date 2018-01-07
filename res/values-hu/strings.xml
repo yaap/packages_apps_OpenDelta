@@ -35,6 +35,7 @@
   <string name="state_action_ready">Frissítés flashelésre kész.</string>
   <string name="state_error_disk_space">Nincs elég tárhely!</string>
   <string name="state_error_unknown">Ismeretlen hiba.</string>
+  <string name="state_error_unofficial">Frissítés letiltva</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB elérhető, %d MiB szükséges</string>
   <string name="notify_update_available">Egy frissítés elérhető</string>
   <string name="notify_checking">Frissítések keresése &#8230;</string>

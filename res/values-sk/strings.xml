@@ -35,6 +35,7 @@
   <string name="state_action_ready">Aktualizácia pripravená na flash.</string>
   <string name="state_error_disk_space">Nedostatok miesta na disku!</string>
   <string name="state_error_unknown">Neznáma chyba.</string>
+  <string name="state_error_unofficial">Aktualizácia je zakázaná.</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB dostupných, %d MiB potrebných</string>
   <string name="notify_update_available">Je dostupná aktualizácia</string>
   <string name="notify_checking">Kontroluje sa aktualizácia &#8230;</string>

@@ -34,6 +34,7 @@
   <string name="state_action_ready">更新已准备好刷入。</string>
   <string name="state_error_disk_space">磁盘空间不足！</string>
   <string name="state_error_unknown">未知错误。</string>
+  <string name="state_error_unofficial">更新被禁用。</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB 可用, %d MiB 需要</string>
   <string name="notify_update_available">有一个更新可用</string>
   <string name="notify_checking">正在检查更新&#8230;&#8230;</string>
