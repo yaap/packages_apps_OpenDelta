@@ -265,7 +265,7 @@ public class MainActivity extends Activity {
                 enableCheck = true;
                 progress.setIndeterminate(false);
                 extraText = intent.getStringExtra(UpdateService.EXTRA_FILENAME);
-                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_alert));
+                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ERROR_CONNECTION.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
@@ -332,7 +332,7 @@ public class MainActivity extends Activity {
                     enableBuild = true;
                     updateVersion = latestFullBase;
                     title = getString(R.string.state_action_build_full);
-                    DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_alert));
+                    DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
                 }
                 long downloadSize = prefs.getLong(
                         UpdateService.PREF_DOWNLOAD_SIZE, -1);
