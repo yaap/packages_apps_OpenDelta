@@ -18,6 +18,7 @@ LOCAL_AAPT_FLAGS := --auto-add-overlay \
 LOCAL_JNI_SHARED_LIBRARIES := libopendelta
 LOCAL_REQUIRED_MODULES := libopendelta
 LOCAL_PROGUARD_FLAG_FILES := proguard-project.txt
+#LOCAL_DEX_PREOPT := false
 
 include $(BUILD_PACKAGE)
 

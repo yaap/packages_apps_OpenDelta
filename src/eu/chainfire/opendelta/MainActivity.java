@@ -416,9 +416,9 @@ public class MainActivity extends Activity {
             progress.setMax((int) total);
             progress.setVisibility(!enableProgress ? View.INVISIBLE : View.VISIBLE);
 
-            checkNow.setEnabled(enableCheck ? true : false);
-            buildNow.setEnabled(enableBuild ? true : false);
-            flashNow.setEnabled(enableFlash ? true : false);
+            checkNow.setEnabled((mPermOk && enableCheck) ? true : false);
+            buildNow.setEnabled((mPermOk && enableBuild) ? true : false);
+            flashNow.setEnabled((mPermOk && enableFlash) ? true : false);
 
             flashNow.setVisibility(enableFlash ? View.VISIBLE : View.GONE);
             buildNow.setVisibility(!enableBuild || enableFlash ? View.GONE
@@ -557,8 +557,11 @@ public class MainActivity extends Activity {
 
     private void requestPermissions() {
         if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED ||
+                checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE },
+            requestPermissions(new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE },
                     PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
         } else {
             mPermOk = true;

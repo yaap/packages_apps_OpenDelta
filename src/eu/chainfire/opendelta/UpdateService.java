@@ -934,42 +934,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         };
     }
 
-    private String findZIPOnSD(DeltaInfo.FileFull zip, File base) {
-        //Logger.d("scanning: %s", base.getAbsolutePath());
-        File[] list = base.listFiles();
-        if (list != null) {
-            for (File f : list) {
-                if (!f.isDirectory()
-                        && f.getName().endsWith(".zip")
-                        && f.getName().startsWith(
-                                config.getFileBaseNamePrefix())) {
-                    Logger.d("checking: %s", f.getAbsolutePath());
-
-                    boolean ok = (zip.match(
-                            f,
-                            true,
-                            getMD5Progress(STATE_ACTION_SEARCHING_MD5,
-                                    f.getName())) != null);
-                    updateState(STATE_ACTION_SEARCHING, null, null, null, null,
-                            null);
-
-                    if (ok)
-                        return f.getAbsolutePath();
-                }
-            }
-
-            for (File f : list) {
-                if (f.isDirectory()) {
-                    String ret = findZIPOnSD(zip, f);
-                    if (ret != null)
-                        return ret;
-                }
-            }
-        }
-
-        return null;
-    }
-
     private long sizeOnDisk(long size) {
         // Assuming 256k block size here, should be future proof for a little
         // bit
@@ -1236,7 +1200,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 biggest = Math.max(biggest, sizeOnDisk(di.getUpdate()
                         .getApplied().getSize()));
 
-            requiredSpace += 2 * sizeOnDisk(biggest);
+            requiredSpace += 3 * sizeOnDisk(biggest);
         }
 
         return requiredSpace;
@@ -1245,6 +1209,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private String findInitialFile(List<DeltaInfo> deltas,
             String possibleMatch, boolean[] needsProcessing) {
         // Find the currently flashed ZIP
+        Logger.d("findInitialFile possibleMatch = " + possibleMatch);
 
         DeltaInfo firstDelta = deltas.get(0);
 
@@ -1255,6 +1220,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         // Check if an original flashable ZIP is in our preferred location
         String expectedLocation = config.getPathBase()
                 + firstDelta.getIn().getName();
+        Logger.d("findInitialFile expectedLocation = " + expectedLocation);
         DeltaInfo.FileSizeMD5 match = null;
         if (expectedLocation.equals(possibleMatch)) {
             match = firstDelta.getIn().match(new File(expectedLocation), false,
@@ -1272,39 +1238,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                             .getIn().getName()));
             if (match != null) {
                 initialFile = expectedLocation;
-            }
-        }
-        updateState(STATE_ACTION_SEARCHING, null, null, null, null, null);
-
-        // If the user flashed manually, the file is probably not in our
-        // preferred location (assuming it wasn't sideloaded), so search
-        // the storages for it.
-        if (initialFile == null) {
-            // Primary external storage ( == internal storage)
-            initialFile = findZIPOnSD(firstDelta.getIn(),
-                    Environment.getExternalStorageDirectory());
-
-            if (initialFile == null) {
-                // Search secondary external storages ( == sdcards, OTG drives,
-                // etc)
-                String secondaryStorages = System.getenv("SECONDARY_STORAGE");
-                if ((secondaryStorages != null)
-                        && (secondaryStorages.length() > 0)) {
-                    String[] storages = TextUtils.split(secondaryStorages,
-                            File.pathSeparator);
-                    for (String storage : storages) {
-                        initialFile = findZIPOnSD(firstDelta.getIn(), new File(
-                                storage));
-                        if (initialFile != null) {
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (initialFile != null) {
-                match = firstDelta.getIn().match(new File(initialFile), false,
-                        null);
             }
         }
 
@@ -2042,7 +1975,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
                         // If we don't have a file to start out with, or the
                         // combined deltas get big, just get the latest full ZIP
-                        downloadFullBuild = ((initialFile == null) || (deltaDownloadSize > fullDownloadSize));
+                        boolean betterDownloadFullBuild = deltaDownloadSize > fullDownloadSize;
 
                         final String latestFull = prefs.getString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT);
                         final String latestDelta = flashFilename;
@@ -2051,9 +1984,18 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         String latestFullZip = latestFull !=  PREF_READY_FILENAME_DEFAULT ? latestFull : null;
                         String currentVersionZip = config.getFilenameBase() +".zip";
                         boolean fullUpdatePossible = latestFullZip != null && latestFullZip.compareTo(currentVersionZip) > 0;
-                        boolean deltaUpdatePossible = !downloadFullBuild && latestDeltaZip != null && latestDeltaZip.compareTo(currentVersionZip) > 0 && latestDeltaZip.equals(latestFullZip);
+                        boolean deltaUpdatePossible = initialFile != null && latestDeltaZip != null && latestDeltaZip.compareTo(currentVersionZip) > 0;
 
-                        if (!deltaUpdatePossible && fullUpdatePossible) {
+                        // is the full version newer then what we could create with delta?
+                        if (latestFullZip.compareTo(latestDeltaZip) > 0) {
+                            betterDownloadFullBuild = true;
+                        }
+
+                        Logger.d("latestDeltaZip = " + latestDeltaZip + " currentVersionZip = " + currentVersionZip + " latestFullZip = " + latestFullZip);
+
+                        Logger.d("deltaUpdatePossible = " + deltaUpdatePossible + " fullUpdatePossible = " + fullUpdatePossible + " betterDownloadFullBuild = " + betterDownloadFullBuild);
+
+                        if (!deltaUpdatePossible || (betterDownloadFullBuild && fullUpdatePossible)) {
                             downloadFullBuild = true;
                         }
                         boolean updateAvilable = fullUpdatePossible || deltaUpdatePossible;
@@ -2093,12 +2035,10 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                                 " : latest full build available = " + prefs.getString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT) +
                                 " : updateAvilable = " + updateAvilable + " : downloadFullBuild = " + downloadFullBuild);
 
-                        if (checkOnly == PREF_AUTO_DOWNLOAD_CHECK) {
-                            return;
-                        }
-
                         long requiredSpace = getRequiredSpace(deltas, downloadFullBuild);
                         long freeSpace = (new StatFs(config.getPathBase())).getAvailableBytes();
+                        Logger.d("requiredSpace = " + requiredSpace + " freeSpace = " + freeSpace);
+
                         if (freeSpace < requiredSpace) {
                             updateState(STATE_ERROR_DISK_SPACE, null, freeSpace, requiredSpace,
                                     null, null);
@@ -2106,6 +2046,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                             return;
                         }
 
+                        if (checkOnly == PREF_AUTO_DOWNLOAD_CHECK) {
+                            return;
+                        }
                         long downloadSize = downloadFullBuild ? fullDownloadSize : deltaDownloadSize;
 
                         if (!downloadFullBuild && checkOnly > PREF_AUTO_DOWNLOAD_CHECK) {
@@ -2186,6 +2129,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
     private boolean checkPermissions() {
         if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED ||
+                checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             Logger.d("checkPermissions failed");
             updateState(STATE_ERROR_PERMISSIONS, null, null, null, null, null);

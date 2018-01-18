@@ -288,8 +288,7 @@
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="@string/button_flash_now"
-                        android:textAppearance="@android:style/TextAppearance.Material.Button"
-                        android:textColor="@color/button_color" />
+                        android:textAppearance="@android:style/TextAppearance.Material.Button" />
 
                     <Button
                         android:id="@+id/button_build_delta"
@@ -299,8 +298,7 @@
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="@string/button_build_delta"
-                        android:textAppearance="@android:style/TextAppearance.Material.Button"
-                        android:textColor="@color/button_color" />
+                        android:textAppearance="@android:style/TextAppearance.Material.Button" />
 
                     <Button
                         android:id="@+id/button_check_now"
@@ -310,8 +308,7 @@
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="@string/button_check_short"
-                        android:textAppearance="@android:style/TextAppearance.Material.Button"
-                        android:textColor="@color/button_color" />
+                        android:textAppearance="@android:style/TextAppearance.Material.Button" />
                 </LinearLayout>
             </LinearLayout>
 
