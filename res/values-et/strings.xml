@@ -11,6 +11,14 @@
   <string name="network_ethernet">Ethernet</string>
   <string name="network_unknown">Muu</string>
   <string name="action_about">Teave</string>
+  <string name="state_action_checking">Kontrollin uuendusi&#8230;</string>
+  <string name="state_action_checking_md5">Kinnitan faili&#8230;</string>
+  <string name="state_action_searching">Otsin faile&#8230;</string>
+  <string name="state_action_searching_md5">Kinnitan faili&#8230;</string>
+  <string name="state_action_downloading">Allalaadimine&#8230;</string>
+  <string name="state_action_applying">Paikamine&#8230;</string>
+  <string name="state_action_applying_patch">Paikamine&#8230;</string>
+  <string name="state_action_ready">Uuendus on välgutamiseks valmis</string>
   <string name="state_error_unknown">Tundmatu viga</string>
   <string name="state_error_unofficial">Uuendamine keelatud</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB saadaval, %d MiB nõutud</string>
@@ -23,6 +31,7 @@
   <string name="action_secure_mode">Turvaline</string>
   <string name="secure_mode_enabled_title">Turvaline režiim: lubatud</string>
   <string name="recovery_notice_title">Teade</string>
+  <string name="flash_after_update_notice_title">Teade</string>
   <string name="state_error_not_official_title">Uuendamine keelatud</string>
   <string name="button_build_delta">Laadi alla</string>
   <string name="button_stop">Peata</string>
@@ -32,13 +41,25 @@
   <string name="state_error_download">Allalaadimisel esines probleem</string>
   <string name="text_current_version_header_title">Praegune versioon</string>
   <string name="text_last_checked_header_title">Viimati kontrollitud</string>
+  <string name="text_update_version_title">Uuenduse versioon</string>
   <string name="text_download_size_unknown">Tundmatu</string>
   <string name="auto_download">Ajakava</string>
   <string name="download_disabled">Keelatud</string>
   <string name="download_full">Tõmba automaatselt kõik</string>
+  <string name="menu_settings">Seaded</string>
   <string name="twenty_five_percent">25</string>
   <string name="fifty_percent">50;</string>
   <string name="seventy_five_percent">75</string>
+  <string name="screen_state_title">Ekraan välja</string>
+  <string name="scheduler_smart">Tark</string>
+  <string name="scheduler_daily">Igapäevane</string>
+  <string name="scheduler_weekly">Iganädalane</string>
+  <string name="scheduler_daily_time">Kellaaeg</string>
   <string name="scheduler_week_day">Päev</string>
+  <string name="networks_title">Võrgud</string>
+  <string name="category_flashing">Välgutamine</string>
+  <string name="secure_mode_title">Turvaline režiim</string>
+  <string name="state_error_connection">Andmeside puudub.</string>
+  <string name="category_admin">Hooldus</string>
   <string name="clear_files_title">Puhasta uuendusfailid</string>
 </resources>
