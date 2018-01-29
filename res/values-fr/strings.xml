@@ -35,6 +35,7 @@
   <string name="state_action_ready">Mise à jour prête à être installée.</string>
   <string name="state_error_disk_space">Espace mémoire insuffisant\u00A0!</string>
   <string name="state_error_unknown">Erreur inconnue.</string>
+  <string name="state_error_unofficial">Mise à jour désactivée</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB disponible, %d MiB nécessaire</string>
   <string name="notify_update_available">Une mise à jour est disponible</string>
   <string name="notify_checking">Vérification des mises à jour disponibles&#8230;</string>

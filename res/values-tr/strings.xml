@@ -18,12 +18,12 @@
         <br>
         Aslen <b>OmniROM Projesi</b>için oluşturulmuştur<br>
         <br>
-        <b>GNU Umûmî Ruhsat, sürüm 3.0 (GPLv3)</b> şartları altında ruhsat verilmiştir<br>
+        <b>GNU Genel Kamu Lisansı, sürüm 3.0 (GPLv3)</b> şartları altında ruhsat verilmiştir<br>
         <br>
-        Delta decoding <b>xdelta</b> tabanlıdır, telif hakkı &copy; _COPYRIGHT_XDELTA_<b>Joshua MacDonald</b><br>
+        Delta decoding <b>xdelta</b> esaslıdır, telif hakkı &copy; _COPYRIGHT_XDELTA_<b>Joshua MacDonald</b><br>
     ]]></string>
   <string name="state_action_none">Sisteminiz güncel</string>
-  <string name="state_action_checking">Güncellemeler denetleniyor &#8230;</string>
+  <string name="state_action_checking">Güncellemeler yoklanıyor &#8230;</string>
   <string name="state_action_checking_md5">Dosya doğrulanıyor &#8230;</string>
   <string name="state_action_searching">Dosyalar aranıyor &#8230;</string>
   <string name="state_action_searching_md5">Dosya doğrulanıyor &#8230;</string>
@@ -37,21 +37,21 @@
   <string name="state_error_unofficial">Güncelleme devre dışı bırakıldı</string>
   <string name="error_disk_space_sub" formatted="false">Diskinizde %d MiB boş alan mevcûd, %d MiB gerekli</string>
   <string name="notify_update_available">Bir güncelleme mevcûd</string>
-  <string name="notify_checking">Güncelleme denetleniyor &#8230;</string>
+  <string name="notify_checking">Güncelleme yoklanıyor &#8230;</string>
   <string name="last_checked" formatted="false">%s, %s târihinde</string>
-  <string name="last_checked_never">Hiç denetlemedik, denetlemek ister misiniz?</string>
-  <string name="button_check_short">Denetle</string>
+  <string name="last_checked_never">Daha evvel hiç yoklamadık, yoklamak ister misiniz?</string>
+  <string name="button_check_short">Yokla</string>
   <string name="button_flash_now">Yükle</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Güvenli</string>
   <string name="secure_mode_enabled_title">Güvenli mod: etkin</string>
-  <string name="secure_mode_enabled_description"><![CDATA[Güncellemenin şifreleme imzası, kaynağının tasdîk edilmesi için yüklemeden evvel teyit edilecek, ve hiçbir ilâve güncelleme yüklenmeyecek. Bu mod sadece <b>TWRP</b> ile uyumludur.]]></string>
+  <string name="secure_mode_enabled_description"><![CDATA[Güncellemenin şifreleme imzası, kaynağının tasdîk edilmesi için yüklemeden evvel teyit edilecek, ve hiçbir ilâve güncelleme yüklenmeyecek. Bu mod sadece <b>TWRP</b> tarafından desteklenir.]]></string>
   <string name="secure_mode_disabled_title">Güvenli mod: devre dışı</string>
   <string name="secure_mode_disabled_description"><![CDATA[İlâve güncellemeler mevcûd ise yüklenecek. Herhangi bir (zararlı) yazılım paketinin bu güncellemelere yerleştirilebileceğinin ve tam sistem erişimi kazanabileceğinin farkında olun. Dikkatli olunması tavsiye edilir.]]></string>
   <string name="recovery_notice_title">Bildiri</string>
-  <string name="recovery_notice_description_secure"><![CDATA[Mevcûd modda güncellemeleri yüklemek sadece <b>TWRP</b> recovery yazılımları üzerinde desteklenir. Lütfen devam etmeden evvel uyumlu bir recovery yazılımına sahip olduğunuzdan emin olun.]]></string>
+  <string name="recovery_notice_description_secure"><![CDATA[Mevcûd modda güncellemeleri yüklemek sadece <b>TWRP</b> recovery yazılımları üzerinde desteklenir. Lütfen devam etmeden evvel desteklenen bir recovery yazılımına sahip olduğunuzdan emin olun.]]></string>
   <string name="recovery_notice_description_not_secure"><![CDATA[Mevcûd modda güncellemeleri yüklemek sadece resmen desteklenen <b>TWRP</b> recovery yazılımları üzerinde desteklenir.
- <i>Resmî</i> <b>CWM</b> derlemeleri <i>desteklenmemektedir</i>, fakat yine de <i>topluluk tarafından derlenen</i> bazı <b>CWM</b> sürümleri <i>çalışabilir.</i> Lütfen devam etmeden evvel uyumlu bir recovery yazılımına sahip olduğunuzdan emin olun.]]></string>
+ <i>Resmî</i> <b>CWM</b> derlemeleri <i>desteklenmemektedir</i>, fakat yine de <i>topluluk tarafından derlenen</i> bazı <b>CWM</b> sürümleri <i>çalışabilir.</i> Lütfen devam etmeden evvel desteklenen bir recovery yazılımına sahip olduğunuzdan emin olun.]]></string>
   <string name="flash_after_update_notice_title">Bildiri</string>
   <string name="flash_after_update_notice_description"><![CDATA[İlâve güncellemeler <b>FlashAfterUpdate</b> klasöründe mevcûd, fakat güvenli mod etkin. Devam ederseniz, bu ilâve güncellemeler <b>yüklenmeyecek.</b>.]]></string>
   <string name="state_error_not_official_title">Güncelleme devre dışı bırakıldı</string>
@@ -61,16 +61,16 @@
   <string name="state_action_build">Güncelleme mevcûd</string>
   <string name="state_action_build_delta">Delta güncelleme mümkün</string>
   <string name="state_action_build_full">Tam güncelleme mümkün</string>
-  <string name="state_error_download">İndirme sorunu</string>
+  <string name="state_error_download">İndirme hatâsı</string>
   <string name="text_current_version_header_title">Mevcûd sürüm</string>
-  <string name="text_last_checked_header_title">Son denetim</string>
+  <string name="text_last_checked_header_title">Son yoklama</string>
   <string name="text_update_version_title">Güncelleme sürümü</string>
   <string name="text_download_size_header_title">İndirme boyutu</string>
   <string name="text_download_size_unknown">Bilinmiyor</string>
   <string name="auto_download">Programla</string>
   <string name="auto_download_title">Programlayıcı eylemi</string>
   <string name="download_disabled">Devre dışı</string>
-  <string name="check_only">Denetle ve bana bildir</string>
+  <string name="check_only">Yokla ve bana bildir</string>
   <string name="download_delta">Delta güncellemesini kendiliğinden indir</string>
   <string name="download_full">Hepsini kendiliğinden indir</string>
   <string name="menu_settings">Ayarlar</string>
@@ -81,10 +81,10 @@
   <string name="twenty_five_percent">25</string>
   <string name="fifty_percent">50;</string>
   <string name="seventy_five_percent">75</string>
-  <string name="notify_title_error">Güncelleme denetleme sorunu</string>
+  <string name="notify_title_error">Güncelleme yoklama hatâsı</string>
   <string name="notify_title_flash">Güncelleme yüklenmeye hazır</string>
   <string name="notify_title_download">Güncelleme indirilmeye hazır</string>
-  <string name="last_checked_never_title_new">Başlatmak için \'Denetle\' düğmesine dokunun</string>
+  <string name="last_checked_never_title_new">Başlatmak için \'Yokla\' düğmesine dokunun</string>
   <string name="screen_state_title">Ekran kapalı</string>
   <string name="screen_state_message">Sadece ekran kapalıyken indir</string>
   <string name="category_scheduler">Kendiliğinden güncelleme</string>
@@ -102,7 +102,7 @@
   <string name="category_admin">Bakım</string>
   <string name="clear_files_title">Temiz güncelleme dosyaları</string>
   <string name="clear_files_summary">Bütün güncellemeyi indirmeye mecbûr etmek için mevcûd güncelleme dosyalarını sil</string>
-  <string name="clean_files_feedback" formatted="false">%d dosya silindi. Şimdi \'Güncellemeleri denetle\' düğmesine dokunun</string>
+  <string name="clean_files_feedback" formatted="false">%d dosya silindi. Şimdi \'Güncellemeleri yokla\' düğmesine dokunun</string>
   <string name="state_error_permissions">Depolama izinleri yok.</string>
   <string name="state_error_flash">Yükleme başarısız oldu. Önbelleği temizleyin ve tekrar deneyin.</string>
 </resources>
