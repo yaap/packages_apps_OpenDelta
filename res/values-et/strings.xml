@@ -46,9 +46,14 @@
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">Turvaline</string>
   <string name="secure_mode_enabled_title">Turvaline režiim: lubatud</string>
+  <string name="secure_mode_enabled_description"><![CDATA[Uuenduse krüptograafiline allkiri kontrollitakse enne välgutamist, et kinnitada selle allikat ning lisauuendusi ei välgutata. See režiim ühildub ainult <b>TWRP</b>ga.]]></string>
   <string name="secure_mode_disabled_title">Turvaline režiim: keelatud</string>
+  <string name="secure_mode_disabled_description"><![CDATA[Lisauuendused välgutatakse nende olemasolul. Pane tähele, et iga (pahatahtlik) tarkvara võib asetada neid uuendusi ja saada täieliku juurdepääsu süsteemile. Ettevaatlikkus on soovitatav.]]></string>
   <string name="recovery_notice_title">Teade</string>
+  <string name="recovery_notice_description_secure"><![CDATA[Uuenduste välgutamine praeguses režiimis on toetatud ainult <b>TWRP</b> taastustes. Palun tee kindlaks, et kasutad ühilduvat taastust enne jätkamist.]]></string>
+  <string name="recovery_notice_description_not_secure"><![CDATA[Uuenduste välgutamine praeguses režiimis on ametlikult toetatud ainult <b>TWRP</b> taastustes. <i>Ametlikud</i> <b>CWM</b> versioonid <i>ei ole</i> toetatud, ent mõned <i>kogukonna poolt</i> tehtud <b>CWM</b> versioonid <i>võivad</i> siiski töötada. Palun tee kindlaks, et kasutad ühilduvat taastust enne jätkamist.]]></string>
   <string name="flash_after_update_notice_title">Teade</string>
+  <string name="flash_after_update_notice_description"><![CDATA[Lisauuendused asuvad <b>FlashAfterUpdate</b> kaustas, ent turvaline režiim on lubatud. Jätkamisel neid lisauuendusi <b>ei</b> välgutata.]]></string>
   <string name="state_error_not_official_title">Uuendamine keelatud</string>
   <string name="state_error_not_official_extra" formatted="false">%s uuendus pole võimalik</string>
   <string name="button_build_delta">Laadi alla</string>
