@@ -35,6 +35,7 @@
   <string name="state_action_ready">Oppdateringen klar å flashe.</string>
   <string name="state_error_disk_space">Ikke nok lagringsplass!</string>
   <string name="state_error_unknown">Ukjent feil.</string>
+  <string name="state_error_unofficial">Oppdatering deaktivert</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB tilgjengelig, %d MiB nødvendig</string>
   <string name="notify_update_available">En oppdatering er tilgjengelig</string>
   <string name="notify_checking">Sjekker etter oppdateringer&#8230;</string>
