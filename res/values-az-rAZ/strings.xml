@@ -34,6 +34,7 @@
   <string name="state_action_ready">Təzələmə yükləməyə hazırdır.</string>
   <string name="state_error_disk_space">Kifayət qədər yaddaş yoxdur!</string>
   <string name="state_error_unknown">Naməlum xəta.</string>
+  <string name="state_error_unofficial">Təzələmələr qeyri-aktivdir</string>
   <string name="error_disk_space_sub" formatted="false">Diskinizdə %d Mb boş yer var, %d Mb lazımdır</string>
   <string name="notify_update_available">Təzələmə mövuddur</string>
   <string name="notify_checking">Təzələmələr yoxlanılır &#8230;</string>
