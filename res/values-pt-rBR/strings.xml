@@ -26,6 +26,7 @@ Copyright © COPYRIGHT OPENDELTA Jorrit \'Chainfire\' Jongma - Originalmente cri
   <string name="state_action_ready">Pronto para a atualização.</string>
   <string name="state_error_disk_space">Espaço na memória é insuficiente!</string>
   <string name="state_error_unknown">Erro desconhecido.</string>
+  <string name="state_error_unofficial">Atualização desabilitada</string>
   <string name="error_disk_space_sub" formatted="false">%d Mb disponíveis, %d Mb necessários</string>
   <string name="notify_update_available">Há uma atualização disponível</string>
   <string name="notify_checking">Verificando atualizações&#8230;</string>

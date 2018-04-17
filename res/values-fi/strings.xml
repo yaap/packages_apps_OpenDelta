@@ -79,5 +79,7 @@
   <string name="state_error_connection">Ei datayhteyttä.</string>
   <string name="category_admin">Huolto</string>
   <string name="clear_files_title">Tyhjennä päivitystiedostot</string>
+  <string name="clear_files_summary">Poista olemassa olevat päivitystiedostot pakottaaksesi täyden päivityksen lataamisen</string>
+  <string name="clean_files_feedback" formatted="false">Poistettiin %d tiedostoa. Paina nyt \"Tarkista päivitykset\"</string>
   <string name="state_error_permissions">Ei tallennustilan käyttöoikeuksia.</string>
 </resources>

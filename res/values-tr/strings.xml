@@ -32,10 +32,10 @@
   <string name="state_action_applying_patch">Uygulanıyor &#8230;</string>
   <string name="state_action_applying_md5">Dosya doğrulanıyor &#8230;</string>
   <string name="state_action_ready">Güncelleme yüklenmeye hazır</string>
-  <string name="state_error_disk_space">Yeterli disk alanı yok</string>
+  <string name="state_error_disk_space">Yeteri kadar yer yok</string>
   <string name="state_error_unknown">Bilinmeyen hatâ</string>
   <string name="state_error_unofficial">Güncelleme devre dışı bırakıldı</string>
-  <string name="error_disk_space_sub" formatted="false">Diskinizde %d MiB boş alan mevcûd, %d MiB gerekli</string>
+  <string name="error_disk_space_sub" formatted="false">Diskinizde %d MiB boş yer mevcûd, %d MiB gerekli</string>
   <string name="notify_update_available">Bir güncelleme mevcûd</string>
   <string name="notify_checking">Güncelleme yoklanıyor &#8230;</string>
   <string name="last_checked" formatted="false">%s, %s târihinde</string>
@@ -59,7 +59,7 @@
   <string name="button_build_delta">İndir</string>
   <string name="button_stop">Dur</string>
   <string name="state_action_build">Güncelleme mevcûd</string>
-  <string name="state_action_build_delta">Delta güncelleme mümkün</string>
+  <string name="state_action_build_delta">Kısmî güncelleme mümkün</string>
   <string name="state_action_build_full">Tam güncelleme mümkün</string>
   <string name="state_error_download">İndirme hatâsı</string>
   <string name="text_current_version_header_title">Mevcûd sürüm</string>
@@ -71,7 +71,7 @@
   <string name="auto_download_title">Programlayıcı eylemi</string>
   <string name="download_disabled">Devre dışı</string>
   <string name="check_only">Yokla ve bana bildir</string>
-  <string name="download_delta">Delta güncellemesini kendiliğinden indir</string>
+  <string name="download_delta">Kısmî güncellemeleri kendiliğinden indir</string>
   <string name="download_full">Hepsini kendiliğinden indir</string>
   <string name="menu_settings">Ayarlar</string>
   <string name="category_download">Kendiliğinden indirme</string>
