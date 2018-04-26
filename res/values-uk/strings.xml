@@ -5,26 +5,10 @@
   <string name="title">Оновлення системи</string>
   <string name="action_networks">Мережі</string>
   <string name="title_networks">Автоматичне завантаження мереж</string>
-  <string name="network_2g">2G</string>
-  <string name="network_3g">3G</string>
-  <string name="network_4g">4G</string>
   <string name="network_wifi">Wi-Fi</string>
   <string name="network_ethernet">Ethernet</string>
   <string name="network_unknown">Інші</string>
   <string name="action_about">Про додаток</string>
-  <string name="about_content">
-<![CDATA[
-        Авторські права &copy;_COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>     
-        <br>
-           Створено для <b> OmniROM</b><br>
-        <br>
-        Публічна Ліцензія, версія 3.0 (GPLv3)</b>
-<br>
-        <br>
-        Дельта кодування на основі <b>xdelta</b>, авторські права &copy;_COPYRIGHT_XDELTA_ 
-<b>Joshua MacDonald</b><br>
-    ]]>
-	</string>
   <string name="state_action_none">Установлена остання версія ПЗ.</string>
   <string name="state_action_checking">Перевірка оновлень&#8230;</string>
   <string name="state_action_checking_md5">Верифікація файлу&#8230;</string>
@@ -79,9 +63,6 @@
   <string name="charge_only_title">Тільки при зарядці</string>
   <string name="charge_only_message">Оновлення будуть завантажуватися тільки при підключеному зарядному пристрої</string>
   <string name="battery_level_title">Мінімальний рівень заряду батареї</string>
-  <string name="twenty_five_percent">25</string>
-  <string name="fifty_percent">50;</string>
-  <string name="seventy_five_percent">75</string>
   <string name="notify_title_error">Проблема перевірки оновлення</string>
   <string name="notify_title_flash">Оновлення готове до встановлення</string>
   <string name="notify_title_download">Оновлення готове до завантаження</string>

@@ -5,9 +5,6 @@
   <string name="title">עדכוני מערכת</string>
   <string name="action_networks">רשתות</string>
   <string name="title_networks">רשתות הורדה אוטומטית</string>
-  <string name="network_2g">דור 2</string>
-  <string name="network_3g">דור 3</string>
-  <string name="network_4g">דור 4</string>
   <string name="network_wifi">רשת אלחוטית</string>
   <string name="network_ethernet">אינטרנט</string>
   <string name="network_unknown">שונות</string>
@@ -64,9 +61,6 @@
   <string name="charge_only_title">מטען בלבד</string>
   <string name="charge_only_message">הורד רק כאשר מוטען</string>
   <string name="battery_level_title">אחוז סוללה מינימלי</string>
-  <string name="twenty_five_percent">25</string>
-  <string name="fifty_percent">50;</string>
-  <string name="seventy_five_percent">75</string>
   <string name="notify_title_error">בעיה בבדיקת לעדכונים</string>
   <string name="notify_title_flash">עדכון מוכן לצריבה</string>
   <string name="notify_title_download">עדכון מוכן להורדה</string>

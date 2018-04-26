@@ -5,24 +5,10 @@
   <string name="title">Systeem update</string>
   <string name="action_networks">Netwerken</string>
   <string name="title_networks">Automatisch download op de volgende netwerken</string>
-  <string name="network_2g">2G</string>
-  <string name="network_3g">3G</string>
-  <string name="network_4g">4G</string>
   <string name="network_wifi">Wi-Fi</string>
   <string name="network_ethernet">Bedraad</string>
   <string name="network_unknown">Anders</string>
   <string name="action_about">Over</string>
-  <string name="about_content">
-<![CDATA[
-        Copyright &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>
-        <br>
-        Oorspronkelijk gemaakt voor <b>Het OmniROM Project</b><br>
-        <br>
-        licentie onder de voorwaarden van de <b>GNU General Public License, version 3.0 (GPLv3)</b><br>
-        <br>
-        Delta gebaseerd op <b>xdelta</b>, copyright &copy; _COPYRIGHT_XDELTA_ <b>Joshua MacDonald</b><br>
-    ]]>
-	</string>
   <string name="state_action_none">Uw systeem is up to date.</string>
   <string name="state_action_checking">Controleren op updates &#8230;</string>
   <string name="state_action_checking_md5">Bestand verifiëren &#8230;</string>
@@ -35,6 +21,7 @@
   <string name="state_action_ready">Update is klaar voor installatie.</string>
   <string name="state_error_disk_space">Onvoldoende schijfruimte!</string>
   <string name="state_error_unknown">Onbekende fout.</string>
+  <string name="state_error_unofficial">Updates uitgeschakeld</string>
   <string name="error_disk_space_sub" formatted="false">%d MiB beschikbaar, %d MiB nodig</string>
   <string name="notify_update_available">Er is een update beschikbaar</string>
   <string name="notify_checking">Zoeken naar updates &#8230;</string>
@@ -77,9 +64,6 @@
   <string name="charge_only_title">Alleen aan de oplader</string>
   <string name="charge_only_message">Alleen downloaden wanneer er wordt opgeladen</string>
   <string name="battery_level_title">Min accu percentage</string>
-  <string name="twenty_five_percent">25</string>
-  <string name="fifty_percent">50;</string>
-  <string name="seventy_five_percent">75</string>
   <string name="notify_title_error">Problemen bij het controleren voor updates</string>
   <string name="notify_title_flash">Update gereed voor installatie</string>
   <string name="notify_title_download">Update gereed voor download</string>

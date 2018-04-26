@@ -5,24 +5,10 @@
   <string name="title">Sistemske posodobitve</string>
   <string name="action_networks">Omrežja</string>
   <string name="title_networks">Samodejno prejmi omrežja</string>
-  <string name="network_2g">2G</string>
-  <string name="network_3g">3G</string>
-  <string name="network_4g">4G</string>
   <string name="network_wifi">Wi-Fi</string>
   <string name="network_ethernet">Ethernet</string>
   <string name="network_unknown">Drugo</string>
   <string name="action_about">O programu</string>
-  <string name="about_content">
-<![CDATA[
-        Avtorske pravice &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>
-        <br>
-        Izvirno ustvarjeno za <b>Projekt OmniROM</b><br>
-        <br>
-        Program uporablja dovoljenje pod pogoji <b>Splošnega dovoljenja GNU različice 3.0 (GPLv3)</b><br>
-        <br>
-        Odkodiranje Delta osnovano na <b>xdelti</b>, avtorske pravice &copy; _COPYRIGHT_XDELTA_ <b>Joshua MacDonald</b><br>
-    ]]>
-	</string>
   <string name="state_action_none">Vaš sistem je posodobljen.</string>
   <string name="state_action_checking">Preverjanje za posodobitve &#8230;</string>
   <string name="state_action_checking_md5">Preverjanje datoteke &#8230;</string>
@@ -77,9 +63,6 @@
   <string name="charge_only_title">Samo ob polnjenju</string>
   <string name="charge_only_message">Prejmi samo ob polnjenju</string>
   <string name="battery_level_title">Najm. odstotek baterije</string>
-  <string name="twenty_five_percent">25</string>
-  <string name="fifty_percent">50;</string>
-  <string name="seventy_five_percent">75</string>
   <string name="notify_title_error">Težava s preverjanjem posodobitev</string>
   <string name="notify_title_flash">Posodobitev pripravljena za namestitev</string>
   <string name="notify_title_download">Posodobitev pripravljena za prejem.</string>

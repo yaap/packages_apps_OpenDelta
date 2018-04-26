@@ -5,23 +5,10 @@
   <string name="title">Aggiornamenti di sistema</string>
   <string name="action_networks">Reti</string>
   <string name="title_networks">Reti per il download automatico</string>
-  <string name="network_2g">2G</string>
-  <string name="network_3g">3G</string>
-  <string name="network_4g">4G</string>
   <string name="network_wifi">Wi-Fi</string>
   <string name="network_ethernet">Ethernet</string>
   <string name="network_unknown">Altro</string>
   <string name="action_about">Informazioni</string>
-  <string name="about_content">
-<![CDATA[
-        Copyright &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>
-        <br>
-        Creato originariamente per <b>The OmniROM Project</b><br>
-        <br>
-        Rilasciato sotto i termini della <b>GNU General Public License, version 3.0 (GPLv3)</b><br>
-        <br>
-        Decoding Delta basato su <b>xdelta</b>, copyright &copy; _COPYRIGHT_XDELTA_ <b>Joshua MacDonald</b><br>
-    ]]></string>
   <string name="state_action_none">Il tuo sistema è aggiornato.</string>
   <string name="state_action_checking">Controllo aggiornamenti&#8230;</string>
   <string name="state_action_checking_md5">Verifica file&#8230;</string>
@@ -77,9 +64,6 @@
   <string name="charge_only_title">Solo caricabatterie</string>
   <string name="charge_only_message">Scarica solo quando è in carica</string>
   <string name="battery_level_title">Percentauale min. batteria</string>
-  <string name="twenty_five_percent">25</string>
-  <string name="fifty_percent">50;</string>
-  <string name="seventy_five_percent">75</string>
   <string name="notify_title_error">Problema verifica aggiornamenti</string>
   <string name="notify_title_flash">Aggiornamento pronto per l\'installazione</string>
   <string name="notify_title_download">Aggiornamento pronto per il download</string>

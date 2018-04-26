@@ -5,24 +5,10 @@
   <string name="title">Systemoppdateringer</string>
   <string name="action_networks">Nettverk</string>
   <string name="title_networks">Automatisk nettverksnedlasting</string>
-  <string name="network_2g">2G</string>
-  <string name="network_3g">3G</string>
-  <string name="network_4g">4G</string>
   <string name="network_wifi">Trådløst nett</string>
   <string name="network_ethernet">Ethernet</string>
   <string name="network_unknown">Annet</string>
   <string name="action_about">Om</string>
-  <string name="about_content">
-<![CDATA[
-        Copyright &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>
-        <br>
-        Opprinnelig laget for <b>The OmniROM Project</b><br>
-        <br>
-        Lisensiert under vilkårene i <b>GNU General Public License, version 3.0 (GPLv3)</b><br>
-        <br>
-        Delta dekoding basert på <b>xdelta</b>, copyright &copy; _COPYRIGHT_XDELTA_ <b>Joshua MacDonald</b><br>
-    ]]>
-	</string>
   <string name="state_action_none">Systemet er oppdatert.</string>
   <string name="state_action_checking">Sjekker etter oppdateringer&#8230;</string>
   <string name="state_action_checking_md5">Kontrollerer fil...</string>
@@ -78,9 +64,6 @@
   <string name="charge_only_title">Kun lader</string>
   <string name="charge_only_message">Kun nedlasting ved lading</string>
   <string name="battery_level_title">Min batteriprosent</string>
-  <string name="twenty_five_percent">25</string>
-  <string name="fifty_percent">50;</string>
-  <string name="seventy_five_percent">75</string>
   <string name="notify_title_error">Problem ved sjekk etter oppdatering</string>
   <string name="notify_title_flash">Oppdateringen klar å flashe</string>
   <string name="notify_title_download">Oppdatering klar til nedlasting</string>
