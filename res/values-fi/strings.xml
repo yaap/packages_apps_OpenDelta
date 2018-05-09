@@ -11,17 +11,17 @@
   <string name="action_about">Tietoja</string>
   <string name="state_action_none">Järjestelmäsi on ajan tasalla</string>
   <string name="state_action_checking">Tarkistetaan päivityksiä &#8230;</string>
-  <string name="state_action_checking_md5">Varmennetaan tiedostoa &#8230;</string>
-  <string name="state_action_searching">Etsitään tiedostoja &#8230;</string>
-  <string name="state_action_searching_md5">Varmennetaan tiedostoa &#8230;</string>
-  <string name="state_action_downloading">Ladataan &#8230;</string>
-  <string name="state_action_applying_md5">Varmennetaan tiedostoa &#8230;</string>
+  <string name="state_action_checking_md5">Varmennetaan tiedostoa&#8230;</string>
+  <string name="state_action_searching">Etsitään tiedostoja&#8230;</string>
+  <string name="state_action_searching_md5">Varmennetaan tiedostoa&#8230;</string>
+  <string name="state_action_downloading">Ladataan&#8230;</string>
+  <string name="state_action_applying_md5">Varmennetaan tiedostoa&#8230;</string>
   <string name="state_action_ready">Päivitys on valmis asennettavaksi</string>
   <string name="state_error_disk_space">Ei tarpeeksi levytilaa</string>
   <string name="state_error_unknown">Tuntematon virhe</string>
   <string name="state_error_unofficial">Päivitys pois käytöstä</string>
   <string name="notify_update_available">Päivitys on saatavilla</string>
-  <string name="notify_checking">Tarkistetaan päivityksiä &#8230;</string>
+  <string name="notify_checking">Tarkistetaan päivityksiä&#8230;</string>
   <string name="last_checked" formatted="false">%s klo %s</string>
   <string name="last_checked_never">Emme ole koskaan tarkistaneet, haluatko ehkä tehdä niin?</string>
   <string name="button_check_short">Tarkista</string>
