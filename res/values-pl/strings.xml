@@ -21,6 +21,7 @@
   <string name="state_action_ready">Aktualizacja gotowa do zaflashowania.</string>
   <string name="state_error_disk_space">Nie wystarczająco miejsca na dysku!</string>
   <string name="state_error_unknown">Nieznany błąd.</string>
+  <string name="state_error_unofficial">Aktualizacje wyłączone</string>
   <string name="error_disk_space_sub" formatted="false">%d MB dostępne, %d MB wymagane</string>
   <string name="notify_update_available">Dostępna nowa aktualizacja</string>
   <string name="notify_checking">Sprawdzanie aktualizacji&#8230;</string>
