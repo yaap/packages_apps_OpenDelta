@@ -25,6 +25,12 @@
 			android:key="secure_mode"
 			android:persistent="false"
 			android:title="@string/secure_mode_title" />
+		<CheckBoxPreference
+			android:defaultValue="true"
+			android:key="ab_perf_mode"
+			android:persistent="false"
+			android:title="@string/ab_perf_mode_title"
+			android:summary="@string/ab_perf_mode_summary" />
 	</PreferenceCategory>
 	<PreferenceCategory
 		android:key="category_scheduler"
