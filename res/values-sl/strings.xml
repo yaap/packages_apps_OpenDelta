@@ -21,6 +21,7 @@
   <string name="state_action_ready">Posodobitev pripravljena za namestitev.</string>
   <string name="state_error_disk_space">Ni dovolj prostora na disku!</string>
   <string name="state_error_unknown">Neznana napaka.</string>
+  <string name="state_error_unofficial">Posodobitev onemogočena</string>
   <string name="error_disk_space_sub" formatted="false">Na voljo %d MiB, zahtevano %d MiB</string>
   <string name="notify_update_available">Na voljo je posodobitev</string>
   <string name="notify_checking">Preverjanje za posodobitve &#8230;</string>

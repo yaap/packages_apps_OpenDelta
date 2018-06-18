@@ -22,7 +22,7 @@
   <string name="state_error_disk_space">Yeteri kadar yer yok</string>
   <string name="state_error_unknown">Bilinmeyen hatâ</string>
   <string name="state_error_unofficial">Güncelleme devre dışı bırakıldı</string>
-  <string name="error_disk_space_sub" formatted="false">Diskinizde %d MiB boş yer mevcûd, %d MiB gerekli</string>
+  <string name="error_disk_space_sub" formatted="false">%d MiB mevcûd, %d MiB gerekli</string>
   <string name="notify_update_available">Bir güncelleme mevcûd</string>
   <string name="notify_checking">Güncelleme yoklanıyor &#8230;</string>
   <string name="last_checked" formatted="false">%s, %s târihinde</string>
@@ -76,7 +76,7 @@
   <string name="scheduler_smart">Akıllı</string>
   <string name="scheduler_daily">Günlük</string>
   <string name="scheduler_weekly">Haftalık</string>
-  <string name="scheduler_daily_time">Saat</string>
+  <string name="scheduler_daily_time">Sâat</string>
   <string name="scheduler_week_day">Gün</string>
   <string name="networks_title">Ağlar</string>
   <string name="networks_message">Sadece belirli ağ türleri üzerinde indir</string>

@@ -20,6 +20,7 @@
   <string name="state_error_disk_space">Ei tarpeeksi levytilaa</string>
   <string name="state_error_unknown">Tuntematon virhe</string>
   <string name="state_error_unofficial">Päivitys pois käytöstä</string>
+  <string name="error_disk_space_sub" formatted="false">%d Mt saatavilla, %d Mt vaaditaan</string>
   <string name="notify_update_available">Päivitys on saatavilla</string>
   <string name="notify_checking">Tarkistetaan päivityksiä&#8230;</string>
   <string name="last_checked" formatted="false">%s klo %s</string>
