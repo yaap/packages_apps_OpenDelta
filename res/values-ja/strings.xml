@@ -4,6 +4,7 @@
   <string name="app_name">OpenDelta</string>
   <string name="title">システムアップデート</string>
   <string name="action_networks">ネットワーク</string>
+  <string name="title_networks">自動ダウンロードネットワーク</string>
   <string name="network_wifi">Wi-Fi</string>
   <string name="network_ethernet">イーサネット</string>
   <string name="network_unknown">その他</string>
@@ -24,37 +25,64 @@
   <string name="error_disk_space_sub" formatted="false">空き領域 %d MB, 必要な領域 %d MB</string>
   <string name="notify_update_available">更新が利用可能です</string>
   <string name="notify_checking">更新の確認中&#8230;</string>
+  <string name="last_checked" formatted="false">%s - %s</string>
+  <string name="last_checked_never">私たちは決して確認していません。きっとあなたはそうしたいでしょう？</string>
   <string name="button_check_short">確認</string>
   <string name="button_flash_now">書き込み</string>
   <!-- updates from 2013/12/18 -->
   <string name="action_secure_mode">セキュア</string>
   <string name="secure_mode_enabled_title">セキュアモード：有効</string>
+  <string name="secure_mode_enabled_description"><![CDATA[更新の暗号署名はフラッシュされる前に本物かどうかを確認するために確認され、追加の更新は書き込まれません。このモードは<b>TWRP</b>のみ互換性があります。]]></string>
   <string name="secure_mode_disabled_title">セキュアモード：無効</string>
+  <string name="secure_mode_disabled_description"><![CDATA[追加の更新が存在する場合はフラッシュさます。どんな（悪意のある）ソフトウェアパッケージでも、これらのアップデートを適用して完全なシステムアクセスを得ることができることに注意して下さい。]]></string>
   <string name="recovery_notice_title">注意</string>
+  <string name="recovery_notice_description_secure"><![CDATA[現在のモードでの更新の書き込みは、<b>TWRP</b>リカバリーのみサポートされています。続行する前に互換性のあるリカバリーを実行していることを確認してください。]]></string>
+  <string name="recovery_notice_description_not_secure"><![CDATA[現在のモードでの更新の書き込みは、<b>TWRP</b>リカバリーのみ正式にサポートされています。<b>CWM</b>のいくつかの<i>コミュニティビルド</i>バージョンでは動作する<i>かもしれませんが</i>、<i>公式</i><b>CWM</b>はサポート<i>されていません</i>。続行する前に互換性のあるリカバリーを実行していることを確認してください。]]></string>
   <string name="flash_after_update_notice_title">注意</string>
+  <string name="flash_after_update_notice_description"><![CDATA[追加のアップデートは<b>FlashAfterUpdate</b>フォルダにありますが、セキュアモードは有効です。続行すると、これらの追加の更新はフラッシュ<b>されません</b>。]]></string>
   <string name="state_error_not_official_title">更新が無効になりました</string>
+  <string name="state_error_not_official_extra" formatted="false">%sのアップデートはできません</string>
   <string name="button_build_delta">ダウンロード</string>
   <string name="button_stop">停止</string>
   <string name="state_action_build">利用可能な更新があります</string>
+  <string name="state_action_build_delta">Delta の更新ができます</string>
+  <string name="state_action_build_full">全ての更新ができます</string>
+  <string name="state_error_download">ダウンロードに問題</string>
   <string name="text_current_version_header_title">現在のバージョン</string>
   <string name="text_last_checked_header_title">最終確認</string>
   <string name="text_update_version_title">更新バージョン</string>
   <string name="text_download_size_header_title">ダウンロードサイズ</string>
   <string name="text_download_size_unknown">不明</string>
   <string name="auto_download">スケジュール</string>
+  <string name="auto_download_title">スケジュールアクション</string>
   <string name="download_disabled">無効</string>
   <string name="check_only">確認と通知</string>
+  <string name="download_delta">Deltaの自動ダウンロード</string>
+  <string name="download_full">全て自動ダウンロード</string>
   <string name="menu_settings">設定</string>
   <string name="category_download">自動ダウンロード</string>
+  <string name="charge_only_title">充電時のみ</string>
+  <string name="charge_only_message">充電時のみダウンロードする</string>
   <string name="battery_level_title">最低限のバッテリー割合</string>
+  <string name="notify_title_error">更新確認中に問題発生</string>
+  <string name="notify_title_flash">更新の書き込み準備ができました</string>
+  <string name="notify_title_download">更新のダウンロードの準備ができました</string>
+  <string name="last_checked_never_title_new">「確認」を押して開始</string>
   <string name="screen_state_title">画面オフ</string>
   <string name="screen_state_message">画面がオフの場合のみダウンロードする</string>
   <string name="category_scheduler">自動更新</string>
+  <string name="scheduler_mode_title">スケジュールモード</string>
+  <string name="scheduler_smart">スマート</string>
   <string name="scheduler_daily">毎日</string>
   <string name="scheduler_weekly">毎週</string>
+  <string name="scheduler_daily_time">時刻</string>
+  <string name="scheduler_week_day">日付</string>
+  <string name="networks_title">ネットワーク</string>
+  <string name="networks_message">特定のネットワークモードでのみダウンロードする</string>
   <string name="category_flashing">書き込み</string>
   <string name="secure_mode_title">セキュアモード</string>
   <string name="state_error_connection">データ接続がありません</string>
+  <string name="category_admin">メンテナンス</string>
   <string name="clear_files_title">アップデートファイルを削除する</string>
   <string name="clear_files_summary">存在する更新ファイルを削除して強制的にアップデータをダウンロードする</string>
   <string name="clean_files_feedback" formatted="false">%d個のファイルを削除しました。「更新を確認」をチェックしてください。</string>
