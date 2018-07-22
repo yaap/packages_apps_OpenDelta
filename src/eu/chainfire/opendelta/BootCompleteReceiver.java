@@ -28,6 +28,6 @@ import android.content.Intent;
 public class BootCompleteReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        UpdateService.start(context);
+        UpdateService.startClearRunningInstall(context);
     }
 }

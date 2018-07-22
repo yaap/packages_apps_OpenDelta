@@ -20,6 +20,7 @@ import android.os.UpdateEngineCallback;
 import android.util.Log;
 
 import java.util.Enumeration;
+import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -31,51 +32,81 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import eu.chainfire.opendelta.DeltaInfo.ProgressListener;
+
 class ABUpdate {
 
     private static final String TAG = "ABUpdateInstaller";
 
-    private static boolean sIsInstallingUpdate;
-
     private static final String PAYLOAD_BIN_PATH = "payload.bin";
     private static final String PAYLOAD_PROPERTIES_PATH = "payload_properties.txt";
 
+    private static final String PREFS_IS_INSTALLING_UPDATE = "prefs_is_installing_update";
+
     private final String zipPath;
 
-    private UpdaterListener mUpdateListener;
+    private ProgressListener mProgressListener;
+
+    private UpdateService updateservice;
 
     private final UpdateEngineCallback mUpdateEngineCallback = new UpdateEngineCallback() {
+        float lastPercent;
+        int offset = 0;
         @Override
         public void onStatusUpdate(int status, float percent) {
-            int progress = Math.round(percent * 100);
-            mUpdateListener.progressUpdate(progress);
-            mUpdateListener.notifyUpdateStatusChange(status);
+            if (status == UpdateEngine.UpdateStatusConstants.UPDATED_NEED_REBOOT) {
+                updateservice.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.SUCCESS);
+                return;
+            }
+            if (status == UpdateEngine.UpdateStatusConstants.REPORTING_ERROR_EVENT) {
+                updateservice.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.ERROR);
+                return;
+            }
+            if (lastPercent > percent) {
+                offset = 50;
+            }
+            lastPercent = percent;
+            if (mProgressListener != null) {
+                mProgressListener.setStatus(updateservice.getString(updateservice.getResources().getIdentifier(
+                    "progress_status_" + status, "string", updateservice.getPackageName())));
+                mProgressListener.onProgress(percent * 50f + (float) offset,
+                    (long) Math.round(percent * 50) + (long) offset, 100L);
+            }
         }
 
         @Override
         public void onPayloadApplicationComplete(int errorCode) {
-           sIsInstallingUpdate = false;
-           mUpdateListener.progressUpdate(100);
-           mUpdateListener.notifyUpdateComplete(errorCode);
+            mProgressListener.onProgress(100f, 100L, 100L);
+            updateservice.onUpdateCompleted(errorCode);
+            setInstallingUpdate(false, updateservice);
         }
     };
 
-    static synchronized boolean start(String zipPath, UpdaterListener listener) {
-        if (sIsInstallingUpdate) {
+    static synchronized boolean start(String zipPath, ProgressListener listener,
+            UpdateService us) {
+        if (isInstallingUpdate(us)) {
             return false;
         }
-        ABUpdate installer = new ABUpdate(zipPath, listener);
-        sIsInstallingUpdate = installer.startUpdate();
-        return sIsInstallingUpdate;
+        ABUpdate installer = new ABUpdate(zipPath, listener, us);
+        setInstallingUpdate(installer.startUpdate(), us);
+        return isInstallingUpdate(us);
     }
 
-    static synchronized boolean isInstallingUpdate() {
-        return sIsInstallingUpdate;
+    static synchronized boolean isInstallingUpdate(UpdateService us) {
+        return us.getPrefs()
+                .getBoolean(PREFS_IS_INSTALLING_UPDATE, false);
     }
 
-    private ABUpdate(String zipPath, UpdaterListener listener) {
+    static synchronized void setInstallingUpdate(boolean installing, UpdateService us) {
+        us.getPrefs().edit()
+                .putBoolean(PREFS_IS_INSTALLING_UPDATE, installing).commit();
+    }
+
+    private ABUpdate(String zipPath, ProgressListener listener,
+                UpdateService us) {
         this.zipPath = zipPath;
-        this.mUpdateListener = listener;
+        this.mProgressListener = listener;
+        this.updateservice = us;
     }
 
     private boolean startUpdate() {

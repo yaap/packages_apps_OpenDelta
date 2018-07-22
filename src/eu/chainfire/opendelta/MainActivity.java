@@ -40,6 +40,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -65,14 +66,20 @@ public class MainActivity extends Activity {
     private TextView extra = null;
     private Button buildNow = null;
     private ImageButton stopNow = null;
+    private Button rebootNow = null;
     private TextView currentVersion = null;
     private TextView lastChecked = null;
+    private TextView lastCheckedHeader = null;
+    private TextView downloadSizeHeader = null;
     private TextView downloadSize = null;
     private Config config;
     private boolean mPermOk;
     private TextView mSub2;
     private TextView mProgressPercent;
     private ImageView mOmniLogo;
+    private int mProgressCurrent = 0;
+    private int mProgressMax = 1;
+    private boolean mProgressEnabled = false;
 
     private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 0;
 
@@ -101,13 +108,16 @@ public class MainActivity extends Activity {
         progress = (ProgressBar) findViewById(R.id.progress_bar);
         checkNow = (Button) findViewById(R.id.button_check_now);
         flashNow = (Button) findViewById(R.id.button_flash_now);
+        rebootNow = (Button) findViewById(R.id.button_reboot_now);
         updateVersion = (TextView) findViewById(R.id.text_update_version);
         extra = (TextView) findViewById(R.id.text_extra);
         buildNow = (Button) findViewById(R.id.button_build_delta);
         stopNow = (ImageButton) findViewById(R.id.button_stop);
         currentVersion = (TextView) findViewById(R.id.text_current_version);
         lastChecked = (TextView) findViewById(R.id.text_last_checked);
+        lastCheckedHeader = (TextView) findViewById(R.id.text_last_checked_header);
         downloadSize = (TextView) findViewById(R.id.text_download_size);
+        downloadSizeHeader = (TextView) findViewById(R.id.text_download_size_header);
         mProgressPercent = (TextView) findViewById(R.id.progress_percent);
         mOmniLogo = (ImageView) findViewById(R.id.omni_logo);
 
@@ -209,9 +219,12 @@ public class MainActivity extends Activity {
             boolean enableFlash = false;
             boolean enableBuild = false;
             boolean enableStop = false;
+            boolean enableReboot = false;
             boolean deltaUpdatePossible = false;
             boolean fullUpdatePossible = false;
             boolean enableProgress = false;
+            boolean disableCheckNow = false;
+            boolean disableDataSpeed = false;
             final SharedPreferences prefs = PreferenceManager
                     .getDefaultSharedPreferences(MainActivity.this);
 
@@ -275,6 +288,10 @@ public class MainActivity extends Activity {
                 enableCheck = true;
                 enableFlash = true;
                 progress.setIndeterminate(false);
+            } else if (UpdateService.STATE_ERROR_AB_FLASH.equals(state)) {
+                enableCheck = true;
+                enableReboot = true;
+                progress.setIndeterminate(false);
             } else if (UpdateService.STATE_ACTION_NONE.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
@@ -286,6 +303,20 @@ public class MainActivity extends Activity {
                 progress.setIndeterminate(false);
                 lastCheckedText = formatLastChecked(null,
                         intent.getLongExtra(UpdateService.EXTRA_MS, 0));
+
+                final String flashImage = prefs.getString(
+                        UpdateService.PREF_READY_FILENAME_NAME,
+                        UpdateService.PREF_READY_FILENAME_DEFAULT);
+                String flashImageBase = flashImage != UpdateService.PREF_READY_FILENAME_DEFAULT ? new File(
+                        flashImage).getName() : null;
+                if (flashImageBase != null) {
+                    updateVersion = flashImageBase.substring(0,
+                            flashImageBase.lastIndexOf('.'));
+                }
+            } else if (UpdateService.STATE_ACTION_AB_FINISHED.equals(state)) {
+                enableReboot = true;
+                disableCheckNow = true;
+                progress.setIndeterminate(false);
 
                 final String flashImage = prefs.getString(
                         UpdateService.PREF_READY_FILENAME_NAME,
@@ -350,6 +381,10 @@ public class MainActivity extends Activity {
                 current = 1;
             } else {
                 enableProgress = true;
+                if (UpdateService.STATE_ACTION_AB_FLASH.equals(state)) {
+                    disableCheckNow = true;
+                    disableDataSpeed = true;
+                }
                 if (UpdateService.STATE_ACTION_DOWNLOADING.equals(state)) {
                     enableStop = true;
                 }
@@ -366,6 +401,16 @@ public class MainActivity extends Activity {
                     downloadSizeText = getString(R.string.text_download_size_unknown);
                 } else {
                     downloadSizeText = Formatter.formatFileSize(context, downloadSize);
+                }
+
+                final String flashImage = prefs.getString(
+                        UpdateService.PREF_READY_FILENAME_NAME,
+                        UpdateService.PREF_READY_FILENAME_DEFAULT);
+                String flashImageBase = flashImage != UpdateService.PREF_READY_FILENAME_DEFAULT ? new File(
+                        flashImage).getName() : null;
+                if (flashImageBase != null) {
+                    updateVersion = flashImageBase.substring(0,
+                            flashImageBase.lastIndexOf('.'));
                 }
 
                 // long --> int overflows FTL (progress.setXXX)
@@ -390,14 +435,20 @@ public class MainActivity extends Activity {
                         if (progressInK)
                             kibps *= 1024f;
                         int sec = (int) (((((float) total / (float) current) * (float) ms) - ms) / 1000f);
-                        if (kibps < 10000) {
+                        if(disableDataSpeed) {
                             sub2 = String.format(Locale.ENGLISH,
-                                    "%.0f KiB/s, %02d:%02d",
-                                    kibps, sec / 60, sec % 60);
+                                    "%02d:%02d",
+                                    sec / 60, sec % 60);
                         } else {
-                            sub2 = String.format(Locale.ENGLISH,
-                                    "%.0f MiB/s, %02d:%02d",
-                                    kibps / 1024f, sec / 60, sec % 60);
+                            if (kibps < 10000) {
+                                sub2 = String.format(Locale.ENGLISH,
+                                        "%.0f KiB/s, %02d:%02d",
+                                        kibps, sec / 60, sec % 60);
+                            } else {
+                                sub2 = String.format(Locale.ENGLISH,
+                                        "%.0f MiB/s, %02d:%02d",
+                                        kibps / 1024f, sec / 60, sec % 60);
+                            }
                         }
                     }
                 }
@@ -409,21 +460,32 @@ public class MainActivity extends Activity {
             MainActivity.this.updateVersion.setText(updateVersion);
             MainActivity.this.currentVersion.setText(config.getFilenameBase());
             MainActivity.this.lastChecked.setText(lastCheckedText);
+            MainActivity.this.lastCheckedHeader
+                .setText(lastCheckedText.equals("") ? "" : getString(R.string.text_last_checked_header_title));
             MainActivity.this.extra.setText(extraText);
+            MainActivity.this.lastCheckedHeader
+                .setText(lastCheckedText.equals("") ? "" : getString(R.string.text_last_checked_header_title));
             MainActivity.this.downloadSize.setText(downloadSizeText);
+            MainActivity.this.downloadSizeHeader
+                .setText(downloadSizeText.equals("") ? "" : getString(R.string.text_download_size_header_title));
 
-            progress.setProgress((int) current);
-            progress.setMax((int) total);
-            progress.setVisibility(!enableProgress ? View.INVISIBLE : View.VISIBLE);
+            mProgressCurrent = (int) current;
+            mProgressMax = (int) total;
+            mProgressEnabled = enableProgress;
+
+            handleProgressBar();
 
             checkNow.setEnabled((mPermOk && enableCheck) ? true : false);
             buildNow.setEnabled((mPermOk && enableBuild) ? true : false);
             flashNow.setEnabled((mPermOk && enableFlash) ? true : false);
+            rebootNow.setEnabled(enableReboot ? true : false);
 
+            checkNow.setVisibility(disableCheckNow ? View.GONE : View.VISIBLE);
             flashNow.setVisibility(enableFlash ? View.VISIBLE : View.GONE);
             buildNow.setVisibility(!enableBuild || enableFlash ? View.GONE
                     : View.VISIBLE);
             stopNow.setVisibility(enableStop ? View.VISIBLE : View.GONE);
+            rebootNow.setVisibility(enableReboot ? View.VISIBLE : View.GONE);
         }
     };
 
@@ -442,7 +504,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        UpdateService.startUpdate(this);
+        handleProgressBar();
     }
 
     public void onButtonCheckNowClick(View v) {
@@ -452,12 +514,26 @@ public class MainActivity extends Activity {
         UpdateService.startCheck(this);
     }
 
+    public void onButtonRebootNowClick(View v) {
+        if (getPackageManager().checkPermission(UpdateService.PERMISSION_REBOOT,
+                getPackageName()) != PackageManager.PERMISSION_GRANTED) {
+            Logger.d("[%s] required beyond this point", UpdateService.PERMISSION_REBOOT);
+            return;
+        }
+
+        ((PowerManager) getSystemService(Context.POWER_SERVICE)).rebootCustom(null);
+    }
+
     public void onButtonBuildNowClick(View v) {
         UpdateService.startBuild(this);
     }
 
     public void onButtonFlashNowClick(View v) {
-        flashRecoveryWarning.run();
+        if (Config.isABDevice()) {
+            flashStart.run();
+        } else {
+            flashRecoveryWarning.run();
+        }
     }
 
     public void onButtonStopClick(View v) {
@@ -566,6 +642,12 @@ public class MainActivity extends Activity {
         } else {
             mPermOk = true;
         }
+    }
+
+    private void handleProgressBar() {
+        progress.setProgress(mProgressCurrent);
+        progress.setMax(mProgressMax);
+        progress.setVisibility(mProgressEnabled ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override

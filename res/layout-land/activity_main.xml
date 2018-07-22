@@ -309,6 +309,16 @@
                         android:paddingRight="16dp"
                         android:text="@string/button_check_short"
                         android:textAppearance="@android:style/TextAppearance.Material.Button" />
+
+                    <Button
+                        android:id="@+id/button_reboot_now"
+                        android:layout_width="wrap_content"
+                        android:layout_height="42dp"
+                        android:onClick="onButtonRebootNowClick"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp"
+                        android:text="@string/button_reboot_short"
+                        android:textAppearance="@android:style/TextAppearance.Material.Button" />
                 </LinearLayout>
             </LinearLayout>
 

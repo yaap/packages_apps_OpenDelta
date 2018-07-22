@@ -37,6 +37,7 @@ import java.util.Locale;
 public class DeltaInfo {
     public interface ProgressListener {
         public void onProgress(float progress, long current, long total);
+        public void setStatus(String status);
     }
 
     public class FileSizeMD5 {
