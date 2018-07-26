@@ -77,6 +77,7 @@ public class MainActivity extends Activity {
     private TextView mSub2;
     private TextView mProgressPercent;
     private ImageView mOmniLogo;
+    private View mProgressEndSpace;
     private int mProgressCurrent = 0;
     private int mProgressMax = 1;
     private boolean mProgressEnabled = false;
@@ -120,6 +121,7 @@ public class MainActivity extends Activity {
         downloadSizeHeader = (TextView) findViewById(R.id.text_download_size_header);
         mProgressPercent = (TextView) findViewById(R.id.progress_percent);
         mOmniLogo = (ImageView) findViewById(R.id.omni_logo);
+        mProgressEndSpace = findViewById(R.id.progress_end_margin);
 
         config = Config.getInstance(this);
         mPermOk = false;
@@ -486,6 +488,7 @@ public class MainActivity extends Activity {
                     : View.VISIBLE);
             stopNow.setVisibility(enableStop ? View.VISIBLE : View.GONE);
             rebootNow.setVisibility(enableReboot ? View.VISIBLE : View.GONE);
+            mProgressEndSpace.setVisibility(enableStop ? View.VISIBLE : View.GONE);
         }
     };
 
