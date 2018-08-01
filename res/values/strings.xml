@@ -46,9 +46,6 @@
     <string name="state_action_ab_flash">Installing A/B Update &#8230;</string>
     <string name="state_action_ab_finished">Done Installing. Reboot Now &#8230;</string>
     <string name="button_reboot_short">Reboot</string>
-    <string name="state_action_ab_flash">Installing A/B Update &#8230;</string>
-    <string name="state_action_ab_finished">Update installed. Reboot pending &#8230;</string>
-    <string name="button_reboot_short">Reboot</string>
 
     <!-- updates from 2013/12/18 -->
 
