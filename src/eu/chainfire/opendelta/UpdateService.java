@@ -186,6 +186,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     // we only snooze until a new build
     private static final String PREF_SNOOZE_UPDATE_NAME = "last_snooze_update";
 
+    public static final String PREF_CURRENT_FILENAME_NAME = "current_filename";
+
     private static final long SNOOZE_MS = 24 * AlarmManager.INTERVAL_HOUR;
 
     public static final String PREF_AUTO_UPDATE_NETWORKS_NAME = "auto_update_networks";
@@ -228,7 +230,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private boolean updateRunning;
     private int failedUpdateCount;
     private SharedPreferences prefs = null;
-    private String oldFlashFilename;
     private Notification.Builder mBuilder;
     private boolean isProgressNotificationDismissed = false;
     private long progressUpdateStart;
@@ -1376,7 +1377,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
         if (downloadUrlFileUnknownSize(url, f, md5Sum)) {
             Logger.d("success");
-            deleteOldFlashFile(fn);
             prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
         } else {
             f.delete();
@@ -1513,6 +1513,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     protected void onUpdateCompleted(int status) {
         stopNotification();
         if (status == UpdateEngine.ErrorCodeConstants.SUCCESS) {
+            String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
+            deleteOldFlashFile(flashFilename);
+            prefs.edit().putString(PREF_CURRENT_FILENAME_NAME, flashFilename).commit();
             startABRebootNotification();
             updateState(STATE_ACTION_AB_FINISHED, null, null, null, null, null);
         } else {
@@ -1631,7 +1634,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             Logger.ex(ex);
         }
 
-        clearState();
+        deleteOldFlashFile(flashFilename);
+        prefs.edit().putString(PREF_CURRENT_FILENAME_NAME, flashFilename).commit();
 
         // Remove the path to the storage from the filename, so we get a path
         // relative to the root of the storage
@@ -1911,7 +1915,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private void clearState() {
         prefs.edit().putString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT).commit();
         prefs.edit().putString(PREF_LATEST_DELTA_NAME, PREF_READY_FILENAME_DEFAULT).commit();
-        oldFlashFilename = prefs.getString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
         prefs.edit().putString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT).commit();
         prefs.edit().putLong(PREF_DOWNLOAD_SIZE, -1).commit();
         prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, false).commit();
@@ -1933,6 +1936,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private void checkForUpdatesAsync(final boolean userInitiated, final int checkOnly) {
+        Logger.d("checkForUpdatesAsync " + getPrefs().getAll());
+
         updateState(STATE_ACTION_CHECKING, null, null, null, null, null);
         wakeLock.acquire();
         wifiLock.acquire();
@@ -2182,7 +2187,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                             if (new File(fn).exists()) {
                                 if (checkFullBuildMd5Sum(latestFullFetch, fn)) {
                                     Logger.d("match found (full): " + fn);
-                                    deleteOldFlashFile(fn);
                                     prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
                                     downloadFullBuild = false;
                                 } else {
@@ -2255,7 +2259,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                                 }
                             }
                             prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, true).commit();
-                            deleteOldFlashFile(flashFilename);
                             prefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
                         }
                     }
@@ -2306,6 +2309,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private void deleteOldFlashFile(String newFlashFilename) {
+        String oldFlashFilename = prefs.getString(PREF_CURRENT_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
+        Logger.d("delete oldFlashFilename " + oldFlashFilename + " " + newFlashFilename);
+
         if (oldFlashFilename != PREF_READY_FILENAME_DEFAULT && !oldFlashFilename.equals(newFlashFilename)
                 && oldFlashFilename.startsWith(config.getPathBase())) {
             File file = new File(oldFlashFilename);
