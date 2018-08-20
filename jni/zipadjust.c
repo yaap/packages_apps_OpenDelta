@@ -241,8 +241,6 @@ int zipadjust(char* filenameIn, char* filenameOut, int decompress) {
 			uintptr_t central_directory_out_index = 0;
 
 			central_header_t* central_header = NULL;
-			local_header_t local_header;
-
 			uint32_t out_index = 0;
 
 			while (1) {
