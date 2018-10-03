@@ -401,6 +401,10 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
     @Override
     public boolean onWantUpdateCheck() {
+        if (isProgressState(state)) {
+            Logger.i("Blocked scheduler requests while running in state " + state);
+            return false;
+        }
         Logger.i("Scheduler requests check for updates");
         int autoDownload = getAutoDownloadValue();
         if (autoDownload != PREF_AUTO_DOWNLOAD_DISABLED) {
