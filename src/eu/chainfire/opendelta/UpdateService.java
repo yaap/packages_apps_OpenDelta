@@ -327,7 +327,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             if (ACTION_CHECK.equals(intent.getAction())) {
                 if (checkPermissions()) {
                     checkForUpdates(true, PREF_AUTO_DOWNLOAD_CHECK);
-                    scanImageFiles();
                 }
             } else if (ACTION_FLASH.equals(intent.getAction())) {
                 if (checkPermissions()) {
@@ -336,7 +335,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     } else {
                         flashUpdate();
                     }
-                    scanImageFiles();
                 }
             } else if (ACTION_ALARM.equals(intent.getAction())) {
                 scheduler.alarm(intent.getIntExtra(EXTRA_ALARM_ID, -1));
@@ -354,7 +352,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             } else if (ACTION_BUILD.equals(intent.getAction())) {
                 if (checkPermissions()) {
                     checkForUpdates(true, PREF_AUTO_DOWNLOAD_FULL);
-                    scanImageFiles();
                 }
             } else if (ACTION_UPDATE.equals(intent.getAction())) {
                 autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
@@ -1514,12 +1511,16 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         stopNotification();
         if (status == UpdateEngine.ErrorCodeConstants.SUCCESS) {
             String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
-            deleteOldFlashFile(flashFilename);
-            prefs.edit().putString(PREF_CURRENT_FILENAME_NAME, flashFilename).commit();
+            if (!flashFilename.equals(PREF_READY_FILENAME_DEFAULT)) {
+                deleteOldFlashFile(flashFilename);
+                prefs.edit().putString(PREF_CURRENT_FILENAME_NAME, flashFilename).commit();
+            }
             startABRebootNotification();
             updateState(STATE_ACTION_AB_FINISHED, null, null, null, null, null);
+            clearState();
         } else {
             updateState(STATE_ERROR_AB_FLASH, null, null, null, null, null);
+            clearState();
         }
     }
 
@@ -1632,10 +1633,12 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             flashFilename = handleUpdateCleanup();
         } catch (Exception ex) {
             Logger.ex(ex);
+            return;
         }
 
         deleteOldFlashFile(flashFilename);
         prefs.edit().putString(PREF_CURRENT_FILENAME_NAME, flashFilename).commit();
+        clearState();
 
         // Remove the path to the storage from the filename, so we get a path
         // relative to the root of the storage
