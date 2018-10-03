@@ -1521,10 +1521,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             }
             startABRebootNotification();
             updateState(STATE_ACTION_AB_FINISHED, null, null, null, null, null);
-            clearState();
         } else {
             updateState(STATE_ERROR_AB_FLASH, null, null, null, null, null);
-            clearState();
         }
     }
 
