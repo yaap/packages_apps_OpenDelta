@@ -941,7 +941,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             object = new JSONObject(buildData);
             Iterator<String> nextKey = object.keys();
             String latestBuild = null;
-            Date latestTimestamp = new Date(0);
+            long latestTimestamp = 0;
             while (nextKey.hasNext()) {
                 String key = nextKey.next();
                 if (key.equals("./" + config.getDevice())) {
@@ -949,9 +949,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     for (int i = 0; i < builds.length(); i++) {
                         JSONObject build = builds.getJSONObject(i);
                         String fileName = new File(build.getString("filename")).getName();
-                        Date timestamp = new Date(build.getLong("timestamp"));
+                        long timestamp = build.getLong("timestamp");
                         // latest build can have a larger micro version then what we run now
-                        if (isMatchingImage(fileName) && timestamp.after(latestTimestamp)) {
+                        if (isMatchingImage(fileName) && timestamp>latestTimestamp) {
                             latestBuild = fileName;
                             latestTimestamp = timestamp;
                         }
