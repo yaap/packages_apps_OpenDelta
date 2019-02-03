@@ -24,10 +24,14 @@ package eu.chainfire.opendelta;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.UserManager;
 
 public class BootCompleteReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        UpdateService.startClearRunningInstall(context);
+        UserManager um = UserManager.get(context);
+        if (um.isAdminUser()) {
+            UpdateService.startClearRunningInstall(context);
+        }
     }
 }
