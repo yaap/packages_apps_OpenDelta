@@ -18,6 +18,7 @@
     <uses-permission android:name="android.permission.ACCESS_CACHE_FILESYSTEM" />
     <uses-permission android:name="android.permission.REBOOT" />
     <uses-permission android:name="android.permission.RECOVERY" />
+    <uses-permission android:name="android.permission.MANAGE_USERS" />
 
     <protected-broadcast android:name="eu.chainfire.opendelta.intent.BROADCAST_STATE" />
 
