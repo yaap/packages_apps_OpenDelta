@@ -42,6 +42,7 @@
     <string name="last_checked" formatted="false">%s at %s</string>
     <string name="last_checked_never">We\'ve never checked, maybe you would like to do so?</string>
     <string name="button_check_short">Check</string>
+    <string name="button_check_now">Check for update &#8230;</string>
     <string name="button_flash_now">Flash</string>
     <string name="state_action_ab_flash">Installing A/B Update &#8230;</string>
     <string name="state_action_ab_finished">Done Installing. Reboot Now &#8230;</string>

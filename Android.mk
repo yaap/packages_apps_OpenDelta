@@ -10,7 +10,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
 LOCAL_STATIC_ANDROID_LIBRARIES := android-support-v4 \
-    android-support-v7-cardview
+    androidx.cardview_cardview
 
 LOCAL_USE_AAPT2 := true
 LOCAL_AAPT_FLAGS := --auto-add-overlay
