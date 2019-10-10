@@ -32,7 +32,7 @@
     <!-- updates from 2013/12/18 -->
     <string name="action_secure_mode">Güvenli</string>
     <string name="secure_mode_enabled_title">Güvenli mod: devrede</string>
-    <string name="secure_mode_enabled_description"><![CDATA[Güncellemenin şifreleme imzâsı, kaynağının tasdîk edilmesi için yüklemeden evvel te'yid edilecek, ve hiçbir ilâve güncelleme yüklenmeyecek. Bu mod sadece <b>TWRP</b> tarafından desteklenir.]]></string>
+    <string name="secure_mode_enabled_description"><![CDATA[Güncellemenin şifreleme imzâsı, kaynağının tasdîk edilmesi için yüklemeden evvel te\'yid edilecek, ve hiçbir ilâve güncelleme yüklenmeyecek. Bu mod sadece <b>TWRP</b> tarafından desteklenir.]]></string>
     <string name="secure_mode_disabled_title">Güvenli mod: devre dışı</string>
     <string name="secure_mode_disabled_description"><![CDATA[İlâve güncellemeler mevcûd ise yüklenir. Herhangi bir (zararlı) yazılım paketinin bu güncellemelere yerleştirilebileceğinin ve tam sistem erişimi edinebileceğinin farkında olun. Dikkatli olunması tavsiye edilir.]]></string>
     <string name="recovery_notice_title">Bildiri</string>
