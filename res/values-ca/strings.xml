@@ -36,8 +36,8 @@
     <string name="secure_mode_disabled_title">Mode segur: inhabilitat</string>
     <string name="secure_mode_disabled_description"><![CDATA[Les actualitzacions són aplicades si estan presents. Tingueu en compte que qualsevol paquet de programari (maliciós) pot obtenir accés complet al sistema. Es recomana precaució.]]></string>
     <string name="recovery_notice_title">Avís</string>
-    <string name="recovery_notice_description_secure"><![CDATA[L\'aplicació d\'actualitzacions en el mode actual només és compatible amb el <b>TWRP</b>. Assegureu-vos que teniu un mode recuperació compatible abans de continuar.]]></string>
-    <string name="recovery_notice_description_not_secure"><![CDATA[L\'aplicació d\'actualitzacions en el mode actual només és compatible amb el <b>TWRP</b>. <i>El programa de mode recuperació oficial</i> de <b>CWM</b> <i>no</i> és compatible, encara que algunes <i> versions construïdes per la comunitat </i>de<b> CWM </b> <i> poden </i> funcionar. Assegureu-vos que teniu un mode recuperació compatible abans de continuar.]]></string>
+    <string name="recovery_notice_description_secure"><![CDATA[L'aplicació d'actualitzacions en el mode actual només és compatible amb el <b>TWRP</b>. Assegureu-vos que teniu un mode recuperació compatible abans de continuar.]]></string>
+    <string name="recovery_notice_description_not_secure"><![CDATA[L'aplicació d'actualitzacions en el mode actual només és compatible amb el <b>TWRP</b>. <i>El programa de mode recuperació oficial</i> de <b>CWM</b> <i>no</i> és compatible, encara que algunes <i> versions construïdes per la comunitat </i>de<b> CWM </b> <i> poden </i> funcionar. Assegureu-vos que teniu un mode recuperació compatible abans de continuar.]]></string>
     <string name="flash_after_update_notice_title">Avís</string>
     <string name="flash_after_update_notice_description"><![CDATA[Hi ha actualitzacions addicionals a la carpeta <b>FlashAfterUpdate</b>, però el mode segur està habilitat. Si continueu, les actualitzacions addicionals <b>no</b> s\'instal·laran.]]></string>
     <string name="state_error_not_official_title">Actualització inhabilitada.</string>
