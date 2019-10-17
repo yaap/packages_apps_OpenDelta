@@ -28,7 +28,11 @@
     <string name="last_checked" formatted="false">%s târihinde ve %s saatinde</string>
     <string name="last_checked_never">Daha evvel hiç yoklamadık, yoklamak ister misiniz?</string>
     <string name="button_check_short">Yokla</string>
+    <string name="button_check_now">Güncelleme yokla &#8230;</string>
     <string name="button_flash_now">Yükle</string>
+    <string name="state_action_ab_flash">A/B güncellemesi kuruluyor &#8230;</string>
+    <string name="state_action_ab_finished">Kurulum tamamlandı. Cihazı şimdi tekrar başlatın &#8230;</string>
+    <string name="button_reboot_short">Tekrar başlat</string>
     <!-- updates from 2013/12/18 -->
     <string name="action_secure_mode">Güvenli</string>
     <string name="secure_mode_enabled_title">Güvenli mod: devrede</string>
@@ -68,6 +72,7 @@
     <string name="notify_title_error">Güncelleme yoklama hatâsı</string>
     <string name="notify_title_flash">Güncelleme yüklenmeye hazır</string>
     <string name="notify_title_download">Güncelleme indirilmeye hazır</string>
+    <string name="notify_eta_remaining" formatted="false">%2d%%, %02d:%02d kaldı</string>
     <string name="last_checked_never_title_new">Başlatmak için \'Yokla\' düğmesine dokunun</string>
     <string name="screen_state_title">Ekran kapalı</string>
     <string name="screen_state_message">Sadece ekran kapalıyken indirir</string>
@@ -89,4 +94,17 @@
     <string name="clean_files_feedback" formatted="false">%d adet dosya silindi. Şimdi \'Güncellemeleri yokla\' düğmesine dokunun</string>
     <string name="state_error_permissions">Depolama izinleri yok.</string>
     <string name="state_error_flash">Yüklenemedi. Ön belleği temizleyin ve tekrar deneyin.</string>
+    <string name="state_error_ab_flash">Kurulum tamamlanamadı. Lütfen cihazı tekrar başlatın ve tekrar deneyin.</string>
+    <string name="progress_status_0">Boşta &#8230;</string>
+    <string name="progress_status_1">Güncellemeler yoklanıyor &#8230;</string>
+    <string name="progress_status_2">Güncelleme mevcûd &#8230;</string>
+    <string name="progress_status_3">Kuruluyor &#8230;</string>
+    <string name="progress_status_4">Teyit ediliyor &#8230;</string>
+    <string name="progress_status_5">Tamamlanıyor &#8230;</string>
+    <string name="progress_status_6">Güncellendi. Cihazın tekrar başlatılması bekleniyor &#8230;</string>
+    <string name="progress_status_7">Hatâ vak\'ası raporlanıyor &#8230;</string>
+    <string name="progress_status_8">Değişiklikleri kaldırmaya teşebbüs ediliyor &#8230;</string>
+    <string name="progress_status_9">Devre dışı.</string>
+    <string name="ab_perf_mode_title">AB Performansı Modu</string>
+    <string name="ab_perf_mode_summary">AB güncellemelerini kurmak üzere performans modunu kullanır</string>
 </resources>
