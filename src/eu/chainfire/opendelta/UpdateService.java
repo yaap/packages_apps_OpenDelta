@@ -306,8 +306,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         screenState.start(this, this);
 
         prefs.registerOnSharedPreferenceChangeListener(this);
-
-        autoState(false, PREF_AUTO_DOWNLOAD_CHECK, false);
     }
 
     @Override
@@ -357,6 +355,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
             } else if (ACTION_CLEAR_INSTALL_RUNNING.equals(intent.getAction())) {
                 ABUpdate.setInstallingUpdate(false, this);
+            } else {
+                autoState(false, PREF_AUTO_DOWNLOAD_CHECK, false);
             }
         }
 

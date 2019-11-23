@@ -99,8 +99,6 @@ public class MainActivity extends Activity {
         }
         getActionBar().setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_TITLE);
 
-        UpdateService.start(this);
-
         setContentView(R.layout.activity_main);
 
         title = (TextView) findViewById(R.id.text_title);
@@ -644,6 +642,7 @@ public class MainActivity extends Activity {
                     PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
         } else {
             mPermOk = true;
+            UpdateService.start(this);
         }
     }
 
@@ -661,6 +660,7 @@ public class MainActivity extends Activity {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     mPermOk = true;
+                    UpdateService.start(this);
                 }
             }
         }
