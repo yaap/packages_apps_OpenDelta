@@ -4,9 +4,7 @@
     package="eu.chainfire.opendelta"
     android:versionCode="10"
     android:versionName="1.0" >
-    <uses-sdk
-        android:minSdkVersion="23"
-        android:targetSdkVersion="25" />
+
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -20,6 +18,7 @@
     <uses-permission android:name="android.permission.REBOOT" />
     <uses-permission android:name="android.permission.RECOVERY" />
     <uses-permission android:name="android.permission.MANAGE_USERS" />
+    <uses-permission android:name="android.permission.MANAGE_DOCUMENTS" />
 
     <protected-broadcast android:name="eu.chainfire.opendelta.intent.BROADCAST_STATE" />
 

@@ -286,6 +286,16 @@
                         android:layout_weight="1" />
 
                     <Button
+                        android:id="@+id/button_select_file"
+                        android:layout_width="wrap_content"
+                        android:layout_height="46dp"
+                        android:onClick="onButtonSelectFileClick"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp"
+                        android:text="@string/button_select_file"
+                        android:textAppearance="@android:style/TextAppearance.Material.Button" />
+
+                    <Button
                         android:id="@+id/button_flash_now"
                         android:layout_width="wrap_content"
                         android:layout_height="42dp"

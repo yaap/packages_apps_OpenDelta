@@ -20,17 +20,23 @@
 	<PreferenceCategory
 		android:key="category_flashing"
 		android:title="@string/category_flashing" >
-		<CheckBoxPreference
+		<SwitchPreference
 			android:defaultValue="true"
 			android:key="secure_mode"
 			android:persistent="false"
 			android:title="@string/secure_mode_title" />
-		<CheckBoxPreference
+		<SwitchPreference
 			android:defaultValue="true"
 			android:key="ab_perf_mode"
 			android:persistent="false"
 			android:title="@string/ab_perf_mode_title"
 			android:summary="@string/ab_perf_mode_summary" />
+		<SwitchPreference
+			android:defaultValue="false"
+			android:key="file_flash_support"
+			android:persistent="true"
+			android:title="@string/file_flash_support_title"
+			android:summary="@string/file_flash_support_summary" />
 	</PreferenceCategory>
 	<PreferenceCategory
 		android:key="category_scheduler"
@@ -67,12 +73,12 @@
 			android:summary="@string/networks_message"
 			android:title="@string/networks_title" />
 
-		<CheckBoxPreference
+		<SwitchPreference
 			android:defaultValue="true"
 			android:key="screen_state_off"
 			android:summary="@string/screen_state_message"
 			android:title="@string/screen_state_title" />
-		<CheckBoxPreference
+		<SwitchPreference
 			android:defaultValue="true"
 			android:key="charge_only"
 			android:summary="@string/charge_only_message"
@@ -93,6 +99,5 @@
 			android:persistent="false"
 			android:summary="@string/clear_files_summary"
 			android:title="@string/clear_files_title" />
-	</PreferenceCategory>
-
+		</PreferenceCategory>
 </PreferenceScreen>

@@ -33,7 +33,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
+import android.preference.SwitchPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
@@ -60,6 +60,9 @@ public class SettingsActivity extends PreferenceActivity implements
     public static final String PREF_SCREEN_STATE_OFF = "screen_state_off";
     private static final String PREF_CLEAN_FILES = "clear_files";
     public static final String PREF_START_HINT_SHOWN = "start_hint_shown";
+    public static final String PREF_FILE_FLASH = "file_flash_support";
+    private static final String PREF_FILE_FLASH_HINT_SHOWN = "file_flash_hint_shown";
+    private static final String KEY_CATEGORY_ADMIN = "category_admin";
 
     public static final String PREF_SCHEDULER_MODE = "scheduler_mode";
     public static final String PREF_SCHEDULER_MODE_SMART = String.valueOf(0);
@@ -72,15 +75,16 @@ public class SettingsActivity extends PreferenceActivity implements
     private Preference mNetworksConfig;
     private ListPreference mAutoDownload;
     private ListPreference mBatteryLevel;
-    private CheckBoxPreference mChargeOnly;
-    private CheckBoxPreference mSecureMode;
-    private CheckBoxPreference mABPerfMode;
+    private SwitchPreference mChargeOnly;
+    private SwitchPreference mSecureMode;
+    private SwitchPreference mABPerfMode;
     private Config mConfig;
     private PreferenceCategory mAutoDownloadCategory;
     private ListPreference mSchedulerMode;
     private Preference mSchedulerDailyTime;
     private Preference mCleanFiles;
     private ListPreference mScheduleWeekDay;
+    private SwitchPreference mFileFlash;
 
     @Override
     public void onPause() {
@@ -115,20 +119,22 @@ public class SettingsActivity extends PreferenceActivity implements
         mBatteryLevel = (ListPreference) findPreference(PREF_BATTERY_LEVEL);
         mBatteryLevel.setOnPreferenceChangeListener(this);
         mBatteryLevel.setSummary(mBatteryLevel.getEntry());
-        mChargeOnly = (CheckBoxPreference) findPreference(PREF_CHARGE_ONLY);
+        mChargeOnly = (SwitchPreference) findPreference(PREF_CHARGE_ONLY);
         mBatteryLevel.setEnabled(!prefs.getBoolean(PREF_CHARGE_ONLY, true));
-        mSecureMode = (CheckBoxPreference) findPreference(KEY_SECURE_MODE);
+        mSecureMode = (SwitchPreference) findPreference(KEY_SECURE_MODE);
         mSecureMode.setEnabled(mConfig.getSecureModeEnable());
         mSecureMode.setChecked(mConfig.getSecureModeCurrent());
-        mABPerfMode = (CheckBoxPreference) findPreference(KEY_AB_PERF_MODE);
+        mABPerfMode = (SwitchPreference) findPreference(KEY_AB_PERF_MODE);
         mABPerfMode.setChecked(mConfig.getABPerfModeCurrent());
         mABPerfMode.setOnPreferenceChangeListener(this);
+        mFileFlash = (SwitchPreference) findPreference(PREF_FILE_FLASH);
         mAutoDownloadCategory = (PreferenceCategory) findPreference(KEY_CATEGORY_DOWNLOAD);
         PreferenceCategory flashingCategory =
                 (PreferenceCategory) findPreference(KEY_CATEGORY_FLASHING);
 
         if (!Config.isABDevice()) {
             flashingCategory.removePreference(mABPerfMode);
+            flashingCategory.removePreference(mFileFlash);
         }
 
         mAutoDownloadCategory
@@ -175,11 +181,11 @@ public class SettingsActivity extends PreferenceActivity implements
             showNetworks();
             return true;
         } else if (preference == mChargeOnly) {
-            boolean value = ((CheckBoxPreference) preference).isChecked();
+            boolean value = ((SwitchPreference) preference).isChecked();
             mBatteryLevel.setEnabled(!value);
             return true;
         } else if (preference == mSecureMode) {
-            boolean value = ((CheckBoxPreference) preference).isChecked();
+            boolean value = ((SwitchPreference) preference).isChecked();
             mConfig.setSecureModeCurrent(value);
             (new AlertDialog.Builder(this))
                     .setTitle(
@@ -189,18 +195,29 @@ public class SettingsActivity extends PreferenceActivity implements
                             Html.fromHtml(getString(value ? R.string.secure_mode_enabled_description
                                     : R.string.secure_mode_disabled_description)))
                     .setCancelable(true)
-                    .setNeutralButton(android.R.string.ok, null).show();
+                    .setPositiveButton(android.R.string.ok, null).show();
             return true;
         } else if (preference == mSchedulerDailyTime) {
             showTimePicker();
             return true;
         } else if (preference == mCleanFiles) {
             int numDeletedFiles = cleanFiles();
-            SharedPreferences prefs = PreferenceManager
-                    .getDefaultSharedPreferences(this);
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
             clearState(prefs);
             prefs.edit().putBoolean(PREF_START_HINT_SHOWN, false).commit();
-            Toast.makeText(this, String.format(getString(R.string.clean_files_feedback), numDeletedFiles), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, String.format(getString(R.string.clean_files_feedback),
+                    numDeletedFiles), Toast.LENGTH_LONG).show();
+            return true;
+        } else if (preference == mFileFlash) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            if (!prefs.getBoolean(PREF_FILE_FLASH_HINT_SHOWN, false)) {
+                (new AlertDialog.Builder(this))
+                        .setTitle(R.string.flash_file_notice_title)
+                        .setMessage(R.string.flash_file_notice_message)
+                        .setCancelable(true)
+                        .setPositiveButton(android.R.string.ok, null).show();
+            }
+            prefs.edit().putBoolean(PREF_FILE_FLASH_HINT_SHOWN, true).commit();
             return true;
         }
         return false;

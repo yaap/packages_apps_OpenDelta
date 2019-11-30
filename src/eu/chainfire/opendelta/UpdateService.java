@@ -54,6 +54,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -111,6 +112,13 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         start(context, ACTION_CLEAR_INSTALL_RUNNING);
     }
 
+    public static void startFlashFile(Context context, String flashFilename) {
+        Intent i = new Intent(context, UpdateService.class);
+        i.setAction(ACTION_FLASH_FILE);
+        i.putExtra(EXTRA_FILENAME, flashFilename);
+        context.startService(i);
+    }
+
     private static void start(Context context, String action) {
         Intent i = new Intent(context, UpdateService.class);
         i.setAction(action);
@@ -158,6 +166,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     public static final String STATE_ERROR_PERMISSIONS = "error_permissions";
     public static final String STATE_ERROR_FLASH = "error_flash";
     public static final String STATE_ERROR_AB_FLASH = "error_ab_flash";
+    public static final String STATE_ERROR_FLASH_FILE = "error_flash_file";
+    public static final String STATE_ACTION_FLASH_FILE_READY = "action_flash_file_ready";
 
     private static final String ACTION_CHECK = "eu.chainfire.opendelta.action.CHECK";
     private static final String ACTION_FLASH = "eu.chainfire.opendelta.action.FLASH";
@@ -170,7 +180,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             "eu.chainfire.opendelta.action.ACTION_PROGRESS_NOTIFICATION_DISMISSED";
     static final String ACTION_CLEAR_INSTALL_RUNNING =
             "eu.chainfire.opendelta.action.ACTION_CLEAR_INSTALL_RUNNING";
+    private static final String ACTION_FLASH_FILE = "eu.chainfire.opendelta.action.FLASH_FILE";
 
+    private static final String NOTIFICATION_CHANNEL_ID = "eu.chainfire.opendelta.notification";
     private static final int NOTIFICATION_BUSY = 1;
     private static final int NOTIFICATION_UPDATE = 2;
     private static final int NOTIFICATION_ERROR = 3;
@@ -187,6 +199,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private static final String PREF_SNOOZE_UPDATE_NAME = "last_snooze_update";
 
     public static final String PREF_CURRENT_FILENAME_NAME = "current_filename";
+    public static final String PREF_FILE_FLASH = "file_flash";
 
     private static final long SNOOZE_MS = 24 * AlarmManager.INTERVAL_HOUR;
 
@@ -286,6 +299,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        createNotificationChannel();
 
         scheduler = new Scheduler(this, this);
         int autoDownload = getAutoDownloadValue();
@@ -355,6 +369,11 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
             } else if (ACTION_CLEAR_INSTALL_RUNNING.equals(intent.getAction())) {
                 ABUpdate.setInstallingUpdate(false, this);
+            } else if (ACTION_FLASH_FILE.equals(intent.getAction())) {
+                if (intent.hasExtra(EXTRA_FILENAME)) {
+                    String flashFilename = intent.getStringExtra(EXTRA_FILENAME);
+                    setFlashFilename(flashFilename);
+                }
             } else {
                 autoState(false, PREF_AUTO_DOWNLOAD_CHECK, false);
             }
@@ -546,6 +565,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         notificationManager.notify(
                 NOTIFICATION_UPDATE,
                 (new Notification.Builder(this))
+                .setChannel(NOTIFICATION_CHANNEL_ID)
                 .setSmallIcon(R.drawable.stat_notify_update)
                 .setContentTitle(readyToFlash ? getString(R.string.notify_title_flash) : getString(R.string.notify_title_download))
                 .setShowWhen(true)
@@ -562,6 +582,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         notificationManager.notify(
                 NOTIFICATION_UPDATE,
                 (new Notification.Builder(this))
+                .setChannel(NOTIFICATION_CHANNEL_ID)
                 .setSmallIcon(R.drawable.stat_notify_update)
                 .setContentTitle(getString(R.string.state_action_ab_finished))
                 .setShowWhen(true)
@@ -587,6 +608,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             notificationManager.notify(
                     NOTIFICATION_ERROR,
                     (new Notification.Builder(this))
+                    .setChannel(NOTIFICATION_CHANNEL_ID)
                     .setSmallIcon(R.drawable.stat_notify_error)
                     .setContentTitle(getString(R.string.notify_title_error))
                     .setContentText(errorStateString)
@@ -1494,9 +1516,10 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private String handleUpdateCleanup() throws FileNotFoundException {
         String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
         String intialFile = prefs.getString(PREF_INITIAL_FILE, PREF_READY_FILENAME_DEFAULT);
+        boolean fileFlash =  prefs.getBoolean(SettingsActivity.PREF_FILE_FLASH, false);
 
         if (flashFilename == PREF_READY_FILENAME_DEFAULT
-                || !flashFilename.startsWith(config.getPathBase())
+                || (!fileFlash && !flashFilename.startsWith(config.getPathBase()))
                 || !new File(flashFilename).exists()) {
             throw new FileNotFoundException("flashUpdate - no valid file to flash found " + flashFilename);
         }
@@ -1552,7 +1575,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         try {
             flashFilename = handleUpdateCleanup();
         } catch (Exception ex) {
+            updateState(STATE_ERROR_AB_FLASH, null, null, null, null, null);
             Logger.ex(ex);
+            return;
         }
 
         // Clear the Download size to hide while flashing
@@ -1566,6 +1591,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
         mBuilder = new Notification.Builder(this);
         mBuilder.setSmallIcon(R.drawable.stat_notify_update)
+                .setChannel(NOTIFICATION_CHANNEL_ID)
                 .setContentTitle(getString(R.string.state_action_ab_flash))
                 .setShowWhen(true)
                 .setContentIntent(getNotificationIntent(false))
@@ -1603,10 +1629,10 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 if(!ABUpdate.start(flashFilename, listener, this)) {
                     stopNotification();
                     updateState(STATE_ERROR_AB_FLASH, null, null, null, null, null);
-                    throw new Exception("Failed to start installer, please reboot!");
                 }
             } else {
-                throw new Exception("Not an AB Update or Update already installing");
+                stopNotification();
+                updateState(STATE_ERROR_AB_FLASH, null, null, null, null, null);
             }
         } catch (Exception ex) {
             Logger.ex(ex);
@@ -1634,6 +1660,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         try {
             flashFilename = handleUpdateCleanup();
         } catch (Exception ex) {
+            updateState(STATE_ERROR_FLASH, null, null, null, null, null);
             Logger.ex(ex);
             return;
         }
@@ -1951,13 +1978,14 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         if (checkOnly > PREF_AUTO_DOWNLOAD_CHECK) {
             notificationText = getString(R.string.state_action_downloading);
         }
-        Notification notification = (new Notification.Builder(this)).
-                setSmallIcon(R.drawable.stat_notify_update).
-                setContentTitle(getString(R.string.title)).
-                setContentText(notificationText).
-                setShowWhen(false).
-                setContentIntent(getNotificationIntent(false)).
-                build();
+        Notification notification = (new Notification.Builder(this))
+                .setChannel(NOTIFICATION_CHANNEL_ID)
+                .setSmallIcon(R.drawable.stat_notify_update)
+                .setContentTitle(getString(R.string.title))
+                .setContentText(notificationText)
+                .setShowWhen(false)
+                .setContentIntent(getNotificationIntent(false))
+                .build();
         // TODO update notification with current step
         startForeground(NOTIFICATION_BUSY, notification);
 
@@ -2346,5 +2374,31 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
     public Config getConfig() {
         return config;
+    }
+
+    private boolean setFlashFilename(String flashFilename) {
+        Logger.d("Flash file set: %s", flashFilename);
+        File fn = new File(flashFilename);
+        if (!fn.exists()) {
+            updateState(STATE_ERROR_FLASH_FILE, null, null, null, null, null);
+            return false;
+        }
+        if (!fn.getName().endsWith(".zip")) {
+            updateState(STATE_ERROR_FLASH_FILE, null, null, null, null, null);
+            return false;
+        }
+        Logger.d("Set flash possible: %s", flashFilename);
+        prefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
+        updateState(STATE_ACTION_FLASH_FILE_READY, null, null, null, (new File(flashFilename)).getName(), null);
+        return true;
+    }
+
+    private void createNotificationChannel() {
+        CharSequence name = getString(R.string.channel_name);
+        String description = getString(R.string.channel_description);
+        int importance = NotificationManager.IMPORTANCE_LOW;
+        NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance);
+        channel.setDescription(description);
+        notificationManager.createNotificationChannel(channel);
     }
 }

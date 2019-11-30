@@ -32,6 +32,7 @@ import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.ContentUris;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -39,14 +40,19 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.provider.DocumentsContract;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.Html;
 import android.text.format.DateFormat;
 import android.text.format.Formatter;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -81,12 +87,17 @@ public class MainActivity extends Activity {
     private int mProgressCurrent = 0;
     private int mProgressMax = 1;
     private boolean mProgressEnabled = false;
+    private Button mFileFlashButton;
+    private SharedPreferences mPrefs;
+    private TextView mUpdateVersionTitle;
 
     private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 0;
+    private static final int ACTIVITY_SELECT_FLASH_FILE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         try {
             getActionBar().setIcon(
@@ -120,6 +131,8 @@ public class MainActivity extends Activity {
         mProgressPercent = (TextView) findViewById(R.id.progress_percent);
         mOmniLogo = (ImageView) findViewById(R.id.omni_logo);
         mProgressEndSpace = findViewById(R.id.progress_end_margin);
+        mFileFlashButton = findViewById(R.id.button_select_file);
+        mUpdateVersionTitle = findViewById(R.id.text_update_version_header);
 
         config = Config.getInstance(this);
         mPermOk = false;
@@ -225,8 +238,7 @@ public class MainActivity extends Activity {
             boolean enableProgress = false;
             boolean disableCheckNow = false;
             boolean disableDataSpeed = false;
-            final SharedPreferences prefs = PreferenceManager
-                    .getDefaultSharedPreferences(MainActivity.this);
+            boolean disableFileFlash = !mPrefs.getBoolean(SettingsActivity.PREF_FILE_FLASH, false);
 
             String state = intent.getStringExtra(UpdateService.EXTRA_STATE);
             // don't try this at home
@@ -242,7 +254,7 @@ public class MainActivity extends Activity {
                 // check for first start until check button has been pressed
                 // use a special title then - but only once
                 if (UpdateService.STATE_ACTION_NONE.equals(state)
-                        && !prefs.getBoolean(SettingsActivity.PREF_START_HINT_SHOWN, false)) {
+                        && !mPrefs.getBoolean(SettingsActivity.PREF_START_HINT_SHOWN, false)) {
                     title = getString(R.string.last_checked_never_title_new);
                 }
                 // dont spill for progress
@@ -282,21 +294,33 @@ public class MainActivity extends Activity {
             } else if (UpdateService.STATE_ERROR_CONNECTION.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
+                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ERROR_PERMISSIONS.equals(state)) {
                 progress.setIndeterminate(false);
+                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ERROR_FLASH.equals(state)) {
                 enableCheck = true;
                 enableFlash = true;
                 progress.setIndeterminate(false);
+                title = getString(R.string.state_error_flash_title);
+                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ERROR_AB_FLASH.equals(state)) {
                 enableCheck = true;
                 enableReboot = true;
                 progress.setIndeterminate(false);
+                title = getString(R.string.state_error_ab_flash_title);
+                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
+            } else if (UpdateService.STATE_ERROR_FLASH_FILE.equals(state)) {
+                enableCheck = true;
+                progress.setIndeterminate(false);
+                title = getString(R.string.state_error_flash_file_title);
+                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ACTION_NONE.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
                 lastCheckedText = formatLastChecked(null,
                         intent.getLongExtra(UpdateService.EXTRA_MS, 0));
+                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
             } else if (UpdateService.STATE_ACTION_READY.equals(state)) {
                 enableCheck = true;
                 enableFlash = true;
@@ -304,7 +328,7 @@ public class MainActivity extends Activity {
                 lastCheckedText = formatLastChecked(null,
                         intent.getLongExtra(UpdateService.EXTRA_MS, 0));
 
-                final String flashImage = prefs.getString(
+                final String flashImage = mPrefs.getString(
                         UpdateService.PREF_READY_FILENAME_NAME,
                         UpdateService.PREF_READY_FILENAME_DEFAULT);
                 String flashImageBase = flashImage != UpdateService.PREF_READY_FILENAME_DEFAULT ? new File(
@@ -313,12 +337,32 @@ public class MainActivity extends Activity {
                     updateVersion = flashImageBase.substring(0,
                             flashImageBase.lastIndexOf('.'));
                 }
+                mUpdateVersionTitle.setText(R.string.text_update_version_title);
+                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
+            } else if (UpdateService.STATE_ACTION_FLASH_FILE_READY.equals(state)) {
+                enableCheck = true;
+                enableFlash = true;
+                progress.setIndeterminate(false);
+
+                final String flashImage = mPrefs.getString(
+                        UpdateService.PREF_READY_FILENAME_NAME,
+                        UpdateService.PREF_READY_FILENAME_DEFAULT);
+                mPrefs.edit().putBoolean(UpdateService.PREF_FILE_FLASH, true).commit();
+                String flashImageBase = flashImage != UpdateService.PREF_READY_FILENAME_DEFAULT ? new File(
+                        flashImage).getName() : null;
+                if (flashImageBase != null) {
+                    updateVersion = flashImageBase;
+                }
+                mUpdateVersionTitle.setText(R.string.text_update_file_flash_title);
+                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
             } else if (UpdateService.STATE_ACTION_AB_FINISHED.equals(state)) {
                 enableReboot = true;
                 disableCheckNow = true;
                 progress.setIndeterminate(false);
 
-                final String flashImage = prefs.getString(
+                boolean fileFlash = mPrefs.getBoolean(UpdateService.PREF_FILE_FLASH, false);
+
+                final String flashImage = mPrefs.getString(
                         UpdateService.PREF_READY_FILENAME_NAME,
                         UpdateService.PREF_READY_FILENAME_DEFAULT);
                 String flashImageBase = flashImage != UpdateService.PREF_READY_FILENAME_DEFAULT ? new File(
@@ -327,16 +371,22 @@ public class MainActivity extends Activity {
                     updateVersion = flashImageBase.substring(0,
                             flashImageBase.lastIndexOf('.'));
                 }
+                if (fileFlash) {
+                    mPrefs.edit().putString(UpdateService.PREF_READY_FILENAME_NAME,
+                            UpdateService.PREF_READY_FILENAME_DEFAULT).commit();
+                    mPrefs.edit().putBoolean(UpdateService.PREF_FILE_FLASH, false).commit();
+                }
+                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
             } else if (UpdateService.STATE_ACTION_BUILD.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
                 lastCheckedText = formatLastChecked(null,
                         intent.getLongExtra(UpdateService.EXTRA_MS, 0));
 
-                final String latestFull = prefs.getString(
+                final String latestFull = mPrefs.getString(
                         UpdateService.PREF_LATEST_FULL_NAME,
                         UpdateService.PREF_READY_FILENAME_DEFAULT);
-                final String latestDelta = prefs.getString(
+                final String latestDelta = mPrefs.getString(
                         UpdateService.PREF_LATEST_DELTA_NAME,
                         UpdateService.PREF_READY_FILENAME_DEFAULT);
 
@@ -348,7 +398,6 @@ public class MainActivity extends Activity {
                 deltaUpdatePossible = latestDeltaZip != null;
                 fullUpdatePossible = latestFullZip != null;
                 DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
-
 
                 if (deltaUpdatePossible) {
                     String latestDeltaBase = latestDelta.substring(0,
@@ -365,7 +414,7 @@ public class MainActivity extends Activity {
                     title = getString(R.string.state_action_build_full);
                     DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
                 }
-                long downloadSize = prefs.getLong(
+                long downloadSize = mPrefs.getLong(
                         UpdateService.PREF_DOWNLOAD_SIZE, -1);
                 if(downloadSize == -1) {
                     downloadSizeText = "";
@@ -393,7 +442,7 @@ public class MainActivity extends Activity {
                 total = intent.getLongExtra(UpdateService.EXTRA_TOTAL, total);
                 progress.setIndeterminate(false);
 
-                long downloadSize = prefs.getLong(
+                long downloadSize = mPrefs.getLong(
                         UpdateService.PREF_DOWNLOAD_SIZE, -1);
                 if(downloadSize == -1) {
                     downloadSizeText = "";
@@ -403,7 +452,7 @@ public class MainActivity extends Activity {
                     downloadSizeText = Formatter.formatFileSize(context, downloadSize);
                 }
 
-                final String flashImage = prefs.getString(
+                final String flashImage = mPrefs.getString(
                         UpdateService.PREF_READY_FILENAME_NAME,
                         UpdateService.PREF_READY_FILENAME_DEFAULT);
                 String flashImageBase = flashImage != UpdateService.PREF_READY_FILENAME_DEFAULT ? new File(
@@ -479,6 +528,7 @@ public class MainActivity extends Activity {
             buildNow.setEnabled((mPermOk && enableBuild) ? true : false);
             flashNow.setEnabled((mPermOk && enableFlash) ? true : false);
             rebootNow.setEnabled(enableReboot ? true : false);
+            mFileFlashButton.setEnabled((mPermOk && enableCheck) ? true : false);
 
             checkNow.setVisibility(disableCheckNow ? View.GONE : View.VISIBLE);
             flashNow.setVisibility(enableFlash ? View.VISIBLE : View.GONE);
@@ -486,6 +536,7 @@ public class MainActivity extends Activity {
                     : View.VISIBLE);
             stopNow.setVisibility(enableStop ? View.VISIBLE : View.GONE);
             rebootNow.setVisibility(enableReboot ? View.VISIBLE : View.GONE);
+            mFileFlashButton.setVisibility((disableCheckNow || disableFileFlash) ? View.GONE : View.VISIBLE);
             mProgressEndSpace.setVisibility(enableStop ? View.VISIBLE : View.GONE);
         }
     };
@@ -506,12 +557,12 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         handleProgressBar();
+        mFileFlashButton.setVisibility(
+                mPrefs.getBoolean(SettingsActivity.PREF_FILE_FLASH, false) ? View.VISIBLE : View.GONE);
     }
 
     public void onButtonCheckNowClick(View v) {
-        final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(this);
-        prefs.edit().putBoolean(SettingsActivity.PREF_START_HINT_SHOWN, true).commit();
+        mPrefs.edit().putBoolean(SettingsActivity.PREF_START_HINT_SHOWN, true).commit();
         UpdateService.startCheck(this);
     }
 
@@ -521,7 +572,6 @@ public class MainActivity extends Activity {
             Logger.d("[%s] required beyond this point", UpdateService.PERMISSION_REBOOT);
             return;
         }
-
         ((PowerManager) getSystemService(Context.POWER_SERVICE)).rebootCustom(null);
     }
 
@@ -623,12 +673,10 @@ public class MainActivity extends Activity {
     };
 
     private void stopDownload() {
-        final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(this);
-        prefs.edit()
+        mPrefs.edit()
                 .putBoolean(
                         UpdateService.PREF_STOP_DOWNLOAD,
-                        !prefs.getBoolean(UpdateService.PREF_STOP_DOWNLOAD,
+                        !mPrefs.getBoolean(UpdateService.PREF_STOP_DOWNLOAD,
                                 false)).commit();
     }
 
@@ -663,6 +711,92 @@ public class MainActivity extends Activity {
                     UpdateService.start(this);
                 }
             }
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == ACTIVITY_SELECT_FLASH_FILE && resultCode == Activity.RESULT_OK) {
+            Uri uri = data.getData();
+            Logger.d("Try flash file: %s", uri.getPath());
+            String flashFilename = getPath(uri);
+            if (flashFilename != null) {
+                UpdateService.startFlashFile(this, flashFilename);
+            } else {
+                Intent i = new Intent(UpdateService.BROADCAST_INTENT);
+                i.putExtra(UpdateService.EXTRA_STATE, UpdateService.STATE_ERROR_FLASH_FILE);
+                sendStickyBroadcast(i);
+            }
+        }
+    }
+
+    private boolean isExternalStorageDocument(Uri uri) {
+        return "com.android.externalstorage.documents".equals(uri.getAuthority());
+    }
+
+    private boolean isDownloadsDocument(Uri uri) {
+        return "com.android.providers.downloads.documents".equals(uri.getAuthority());
+    }
+
+    private String getPath(Uri uri) {
+        if (DocumentsContract.isDocumentUri(this, uri)) {
+            final String docId = DocumentsContract.getDocumentId(uri);
+            // ExternalStorageProvider
+            if (isExternalStorageDocument(uri)) {
+                Logger.d("isExternalStorageDocument: %s", uri.getPath());
+                final String[] split = docId.split(":");
+                final String type = split[0];
+
+                if ("primary".equalsIgnoreCase(type)) {
+                    return Environment.getExternalStorageDirectory() + "/" + split[1];
+                }
+                if ("home".equalsIgnoreCase(type)) {
+                    return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/" + split[1];
+                }
+            }
+            // DownloadsProvider
+            else if (isDownloadsDocument(uri)) {
+                Logger.d("isDownloadsDocument: %s", uri.getPath());
+                String fileName = getFileNameColumn(uri);
+                if (fileName != null) {
+                    return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + fileName;
+                }
+            }
+        }
+        return null;
+    }
+
+    private String getFileNameColumn(Uri uri) {
+        Cursor cursor = null;
+        try {
+            cursor = getContentResolver().query(uri, null, null, null, null);
+            while (cursor.moveToNext()) {
+                int index = cursor.getColumnIndexOrThrow("_display_name");
+                return cursor.getString(index);
+            }
+        } catch (Exception e) {
+            Logger.d("Failed to resolve file name", e);
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return null;
+    }
+
+    public void onButtonSelectFileClick(View v) {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("application/zip");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+
+        try {
+            startActivityForResult(Intent.createChooser(intent,
+                    getResources().getString(R.string.select_file_activity_title)),
+                    ACTIVITY_SELECT_FLASH_FILE);
+        } catch (android.content.ActivityNotFoundException ex) {
+            Intent i = new Intent(UpdateService.BROADCAST_INTENT);
+            i.putExtra(UpdateService.EXTRA_STATE, UpdateService.STATE_ERROR_FLASH_FILE);
+            sendStickyBroadcast(i);
         }
     }
 }

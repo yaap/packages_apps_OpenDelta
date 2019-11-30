@@ -125,4 +125,16 @@
     <string name="progress_status_9">Disabled.</string>
     <string name="ab_perf_mode_title">AB Performance Mode</string>
     <string name="ab_perf_mode_summary">Use Performance Mode to install AB Updates</string>
+    <string name="state_error_flash_file_title">Can not flash that file</string>
+    <string name="select_file_activity_title">Select ZIP file</string>
+    <string name="button_select_file">File</string>
+    <string name="state_error_ab_flash_title">Can not flash AB update</string>
+    <string name="state_error_flash_title">Can not flash update</string>
+    <string name="file_flash_support_title">Local file flash</string>
+    <string name="file_flash_support_summary">Enable selecting a local ZIP file</string>
+    <string name="flash_file_notice_title">Local file flash</string>
+    <string name="flash_file_notice_message"><b>Attention:</b> There will be no checks if the selected ZIP file is suitable for your device!\n\n<b>Flashing the wrong ZIP can lead to a non functional device!</b></string>
+    <string name="channel_name">Update progress</string>
+    <string name="channel_description"></string>
+    <string name="text_update_file_flash_title">Update file</string>
 </resources>
