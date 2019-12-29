@@ -4,7 +4,9 @@
     package="eu.chainfire.opendelta"
     android:versionCode="10"
     android:versionName="1.0" >
-
+    <uses-sdk
+        android:minSdkVersion="23"
+        android:targetSdkVersion="25" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
