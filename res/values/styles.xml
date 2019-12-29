@@ -3,6 +3,8 @@
 
     <style name="Theme.OpenDelta" parent="@android:style/Theme.DeviceDefault.Settings">
         <item name="android:buttonStyle">?android:attr/borderlessButtonStyle</item>
+        <item name="android:windowBackground">@color/material_grey_100</item>
+        <item name="android:navigationBarColor">@color/material_grey_100</item>
     </style>
 
     <style name="Theme.OpenDelta.Settings" parent="@style/Theme.OpenDelta"></style>

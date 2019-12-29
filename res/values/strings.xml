@@ -44,7 +44,7 @@
     <string name="button_check_short">Check</string>
     <string name="button_check_now">Check for update &#8230;</string>
     <string name="button_flash_now">Flash</string>
-    <string name="state_action_ab_flash">Installing A/B Update &#8230;</string>
+    <string name="state_action_ab_flash">Installing AB Update &#8230;</string>
     <string name="state_action_ab_finished">Done Installing. Reboot Now &#8230;</string>
     <string name="button_reboot_short">Reboot</string>
 

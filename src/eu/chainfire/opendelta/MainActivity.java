@@ -360,8 +360,6 @@ public class MainActivity extends Activity {
                 disableCheckNow = true;
                 progress.setIndeterminate(false);
 
-                boolean fileFlash = mPrefs.getBoolean(UpdateService.PREF_FILE_FLASH, false);
-
                 final String flashImage = mPrefs.getString(
                         UpdateService.PREF_READY_FILENAME_NAME,
                         UpdateService.PREF_READY_FILENAME_DEFAULT);
@@ -371,11 +369,10 @@ public class MainActivity extends Activity {
                     updateVersion = flashImageBase.substring(0,
                             flashImageBase.lastIndexOf('.'));
                 }
-                if (fileFlash) {
-                    mPrefs.edit().putString(UpdateService.PREF_READY_FILENAME_NAME,
-                            UpdateService.PREF_READY_FILENAME_DEFAULT).commit();
-                    mPrefs.edit().putBoolean(UpdateService.PREF_FILE_FLASH, false).commit();
-                }
+
+                mPrefs.edit().putString(UpdateService.PREF_READY_FILENAME_NAME,
+                        UpdateService.PREF_READY_FILENAME_DEFAULT).commit();
+                mPrefs.edit().putBoolean(UpdateService.PREF_FILE_FLASH, false).commit();
                 DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
             } else if (UpdateService.STATE_ACTION_BUILD.equals(state)) {
                 enableCheck = true;

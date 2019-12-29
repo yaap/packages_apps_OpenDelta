@@ -1516,7 +1516,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private String handleUpdateCleanup() throws FileNotFoundException {
         String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
         String intialFile = prefs.getString(PREF_INITIAL_FILE, PREF_READY_FILENAME_DEFAULT);
-        boolean fileFlash =  prefs.getBoolean(SettingsActivity.PREF_FILE_FLASH, false);
+        boolean fileFlash =  prefs.getBoolean(PREF_FILE_FLASH, false);
 
         if (flashFilename == PREF_READY_FILENAME_DEFAULT
                 || (!fileFlash && !flashFilename.startsWith(config.getPathBase()))
