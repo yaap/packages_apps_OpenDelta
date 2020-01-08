@@ -1,20 +1,20 @@
-/* 
+/*
  * Copyright (C) 2013-2014 Jorrit "Chainfire" Jongma
  * Copyright (C) 2013-2015 The OmniROM Project
  */
-/* 
+/*
  * This file is part of OpenDelta.
- * 
+ *
  * OpenDelta is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * OpenDelta is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with OpenDelta. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -82,7 +82,7 @@ public class MainActivity extends Activity {
     private boolean mPermOk;
     private TextView mSub2;
     private TextView mProgressPercent;
-    private ImageView mOmniLogo;
+    private ImageView mDerpLogo;
     private View mProgressEndSpace;
     private int mProgressCurrent = 0;
     private int mProgressMax = 1;
@@ -129,7 +129,7 @@ public class MainActivity extends Activity {
         downloadSize = (TextView) findViewById(R.id.text_download_size);
         downloadSizeHeader = (TextView) findViewById(R.id.text_download_size_header);
         mProgressPercent = (TextView) findViewById(R.id.progress_percent);
-        mOmniLogo = (ImageView) findViewById(R.id.omni_logo);
+        mDerpLogo = (ImageView) findViewById(R.id.derp_logo);
         mProgressEndSpace = findViewById(R.id.progress_end_margin);
         mFileFlashButton = findViewById(R.id.button_select_file);
         mUpdateVersionTitle = findViewById(R.id.text_update_version_header);
@@ -275,7 +275,7 @@ public class MainActivity extends Activity {
 
                 extraText = getString(R.string.error_disk_space_sub, current,
                         total);
-                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
+                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ERROR_UNKNOWN.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
@@ -285,42 +285,42 @@ public class MainActivity extends Activity {
                 title = getString(R.string.state_error_not_official_title);
                 extraText = getString(R.string.state_error_not_official_extra,
                         intent.getStringExtra(UpdateService.EXTRA_FILENAME));
-                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_disabled));
+                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_disabled));
             } else if (UpdateService.STATE_ERROR_DOWNLOAD.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
                 extraText = intent.getStringExtra(UpdateService.EXTRA_FILENAME);
-                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
+                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ERROR_CONNECTION.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
-                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
+                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ERROR_PERMISSIONS.equals(state)) {
                 progress.setIndeterminate(false);
-                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
+                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ERROR_FLASH.equals(state)) {
                 enableCheck = true;
                 enableFlash = true;
                 progress.setIndeterminate(false);
                 title = getString(R.string.state_error_flash_title);
-                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
+                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ERROR_AB_FLASH.equals(state)) {
                 enableCheck = true;
                 enableReboot = true;
                 progress.setIndeterminate(false);
                 title = getString(R.string.state_error_ab_flash_title);
-                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
+                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ERROR_FLASH_FILE.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
                 title = getString(R.string.state_error_flash_file_title);
-                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
+                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ACTION_NONE.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
                 lastCheckedText = formatLastChecked(null,
                         intent.getLongExtra(UpdateService.EXTRA_MS, 0));
-                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
+                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
             } else if (UpdateService.STATE_ACTION_READY.equals(state)) {
                 enableCheck = true;
                 enableFlash = true;
@@ -338,7 +338,7 @@ public class MainActivity extends Activity {
                             flashImageBase.lastIndexOf('.'));
                 }
                 mUpdateVersionTitle.setText(R.string.text_update_version_title);
-                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
+                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
             } else if (UpdateService.STATE_ACTION_FLASH_FILE_READY.equals(state)) {
                 enableCheck = true;
                 enableFlash = true;
@@ -354,7 +354,7 @@ public class MainActivity extends Activity {
                     updateVersion = flashImageBase;
                 }
                 mUpdateVersionTitle.setText(R.string.text_update_file_flash_title);
-                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
+                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
             } else if (UpdateService.STATE_ACTION_AB_FINISHED.equals(state)) {
                 enableReboot = true;
                 disableCheckNow = true;
@@ -373,7 +373,7 @@ public class MainActivity extends Activity {
                 mPrefs.edit().putString(UpdateService.PREF_READY_FILENAME_NAME,
                         UpdateService.PREF_READY_FILENAME_DEFAULT).commit();
                 mPrefs.edit().putBoolean(UpdateService.PREF_FILE_FLASH, false).commit();
-                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
+                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
             } else if (UpdateService.STATE_ACTION_BUILD.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
@@ -394,7 +394,7 @@ public class MainActivity extends Activity {
 
                 deltaUpdatePossible = latestDeltaZip != null;
                 fullUpdatePossible = latestFullZip != null;
-                DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
+                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
 
                 if (deltaUpdatePossible) {
                     String latestDeltaBase = latestDelta.substring(0,
@@ -402,14 +402,14 @@ public class MainActivity extends Activity {
                     enableBuild = true;
                     updateVersion = latestDeltaBase;
                     title = getString(R.string.state_action_build_delta);
-                    DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
+                    DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
                 } else if (fullUpdatePossible) {
                     String latestFullBase = latestFull.substring(0,
                             latestFull.lastIndexOf('.'));
                     enableBuild = true;
                     updateVersion = latestFullBase;
                     title = getString(R.string.state_action_build_full);
-                    DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
+                    DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
                 }
                 long downloadSize = mPrefs.getLong(
                         UpdateService.PREF_DOWNLOAD_SIZE, -1);

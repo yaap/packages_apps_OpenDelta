@@ -29,13 +29,13 @@
 
 
         <ImageView
-            android:id="@+id/omni_logo"
+            android:id="@+id/derp_logo"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_gravity="center"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:src="@drawable/ic_omni_small"/>
+            android:src="@drawable/ic_derp_small"/>
     </LinearLayout>
 
     <LinearLayout
@@ -342,5 +342,3 @@
     </LinearLayout>
 
 </LinearLayout>
-
-
