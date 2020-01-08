@@ -1,20 +1,20 @@
-/* 
+/*
  * Copyright (C) 2013-2014 Jorrit "Chainfire" Jongma
  * Copyright (C) 2013-2015 The OmniROM Project
  */
-/* 
+/*
  * This file is part of OpenDelta.
- * 
+ *
  * OpenDelta is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * OpenDelta is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with OpenDelta. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -469,7 +470,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         }
         if (stopDownload) {
             // stop download is only possible in the download step
-            // that means must have done a check step before 
+            // that means must have done a check step before
             // so just fall back to this instead to show none state
             // which is just confusing
             checkOnly = PREF_AUTO_DOWNLOAD_CHECK;
@@ -692,17 +693,17 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             InputStream is = urlConnection.getInputStream();
             ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
             int byteInt;
-            
+
             while((byteInt = is.read()) >= 0){
                 byteArray.write(byteInt);
             }
-            
+
             byte[] bytes = byteArray.toByteArray();
             if(bytes == null){
                 return null;
             }
             String responseBody = new String(bytes, StandardCharsets.UTF_8);
-            
+
             return responseBody;
         } catch (Exception e) {
             // Download failed for any number of reasons, timeouts, connection
@@ -961,23 +962,24 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         JSONObject object = null;
         try {
             object = new JSONObject(buildData);
-            Iterator<String> nextKey = object.keys();
+            JSONArray updatesList = object.getJSONArray("response");
             String latestBuild = null;
             long latestTimestamp = 0;
-            while (nextKey.hasNext()) {
-                String key = nextKey.next();
-                if (key.equals("./" + config.getDevice())) {
-                    JSONArray builds = object.getJSONArray(key);
-                    for (int i = 0; i < builds.length(); i++) {
-                        JSONObject build = builds.getJSONObject(i);
-                        String fileName = new File(build.getString("filename")).getName();
-                        long timestamp = build.getLong("timestamp");
-                        // latest build can have a larger micro version then what we run now
-                        if (isMatchingImage(fileName) && timestamp>latestTimestamp) {
-                            latestBuild = fileName;
-                            latestTimestamp = timestamp;
-                        }
+            for (int i = 0; i < updatesList.length(); i++) {
+                if (updatesList.isNull(i)) {
+                    continue;
+                }
+                try {
+                    JSONObject build = updatesList.getJSONObject(i);
+                    String fileName = new File(build.getString("filename")).getName();
+                    long timestamp = build.getLong("datetime");
+                    // latest build can have a larger micro version then what we run now
+                    if (isMatchingImage(fileName) && timestamp>latestTimestamp) {
+                        latestBuild = fileName;
+                        latestTimestamp = timestamp;
                     }
+                } catch (JSONException e) {
+                    Logger.ex(e);
                 }
             }
             if (latestBuild != null) {
@@ -1804,7 +1806,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private String getLatestFullMd5Sum(String latestFullFetch) {
-        String md5Url = latestFullFetch + ".md5sum";
+        String md5Url = latestFullFetch.replace(".zip", ".md5sum");
         String latestFullMd5 = downloadUrlMemoryAsString(md5Url);
         if (latestFullMd5 != null){
             String md5Part = null;
@@ -2011,13 +2013,12 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     // if we dont even find a build on dl no sense to continue
                     if (latestFullBuild == null) {
                         Logger.d("no latest build found at " + config.getUrlBaseJson() +
-                                " for " + config.getDevice() + " prefix " + config.getFileBaseNamePrefix());
+                                " for " + config.getDevice());
                         return;
                     }
 
-                    String latestFullFetch = String.format(Locale.ENGLISH, "%s%s",
-                            config.getUrlBaseFull(),
-                            latestFullBuild);
+                    String latestFullFetch = config.getUrlBaseFull() +
+                            latestFullBuild + config.getUrlSuffix();
                     Logger.d("latest full build for device " + config.getDevice() + " is " + latestFullFetch);
                     prefs.edit().putString(PREF_LATEST_FULL_NAME, latestFullBuild).commit();
 
@@ -2299,7 +2300,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         if (force || networkState.getState()) {
                             String latestFullMd5 = getLatestFullMd5Sum(latestFullFetch);
                             if (latestFullMd5 != null){
-                                downloadFullBuild(latestFullFetch, latestFullMd5, latestFullBuild);
+                                downloadFullBuild(latestFullFetch, latestFullMd5, latestFullBuild); // download full
                             } else {
                                 Logger.d("aborting download due to md5sum not found");
                             }
@@ -2348,7 +2349,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         if (oldFlashFilename != PREF_READY_FILENAME_DEFAULT && !oldFlashFilename.equals(newFlashFilename)
                 && oldFlashFilename.startsWith(config.getPathBase())) {
             File file = new File(oldFlashFilename);
-            if (file.exists() && file.getName().startsWith(config.getFileBaseNamePrefix())) {
+            if (file.exists()) {
                 Logger.d("delete oldFlashFilename " + oldFlashFilename);
                 file.delete();
             }
@@ -2361,7 +2362,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         File[] contents = new File(dataFolder).listFiles();
         if (contents != null) {
             for (File file : contents) {
-                if (file.isFile() && file.getName().startsWith(config.getFileBaseNamePrefix())) {
+                if (file.isFile()) {
                     Logger.d("image file: " + file.getName());
                 }
             }

@@ -1,20 +1,20 @@
-/* 
+/*
  * Copyright (C) 2013-2014 Jorrit "Chainfire" Jongma
  * Copyright (C) 2013-2015 The OmniROM Project
  */
-/* 
+/*
  * This file is part of OpenDelta.
- * 
+ *
  * OpenDelta is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * OpenDelta is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with OpenDelta. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -62,6 +62,7 @@ public class Config {
     private final String url_base_delta;
     private final String url_base_update;
     private final String url_base_full;
+    private final String url_base_suffix;
     private final boolean apply_signature;
     private final boolean inject_signature_enable;
     private final String inject_signature_keys;
@@ -116,15 +117,18 @@ public class Config {
                 res.getString(R.string.url_base_delta), property_device);
         url_base_update = String.format(Locale.ENGLISH,
                 res.getString(R.string.url_base_update), property_device);
-        url_base_full = String.format(Locale.ENGLISH,
+        url_base_full = String.format(
                 res.getString(R.string.url_base_full), property_device);
+        url_base_suffix = res.getString(R.string.url_base_suffix);
         apply_signature = res.getBoolean(R.bool.apply_signature);
         inject_signature_enable = res
                 .getBoolean(R.bool.inject_signature_enable);
         inject_signature_keys = res.getString(R.string.inject_signature_keys);
         secure_mode_enable = res.getBoolean(R.bool.secure_mode_enable);
         secure_mode_default = res.getBoolean(R.bool.secure_mode_default);
-        url_base_json = res.getString(R.string.url_base_json);
+        url_base_json = String.format(
+                res.getString(R.string.url_base_json),
+                property_device, property_device);
         official_version_tag = res.getString(R.string.official_version_tag);
         weekly_version_tag = res.getString(R.string.weekly_version_tag);
         security_version_tag = res.getString(R.string.security_version_tag);
@@ -188,6 +192,10 @@ public class Config {
 
     public String getUrlBaseFull() {
         return url_base_full;
+    }
+
+    public String getUrlSuffix() {
+        return url_base_suffix;
     }
 
     public boolean getApplySignature() {
