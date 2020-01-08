@@ -771,8 +771,11 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     String MD5 = new BigInteger(1, digest.digest())
                     .toString(16).toLowerCase(Locale.ENGLISH);
                     while (MD5.length() < 32)
-                        MD5 = "0" + MD5;
+                         MD5 = "0" + MD5;
                     boolean md5Check = MD5.equals(matchMD5);
+                    Logger.d("MD5=" + MD5 + " matchMD5=" + matchMD5);
+                    Logger.d("MD5.length=" + Integer.toString(MD5.length()) +
+                            " matchMD5.length=" + Integer.toString(matchMD5.length()));
                     if (!md5Check) {
                         Logger.i("MD5 check failed for " + url);
                     }
@@ -884,8 +887,11 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     String MD5 = new BigInteger(1, digest.digest())
                     .toString(16).toLowerCase(Locale.ENGLISH);
                     while (MD5.length() < 32)
-                        MD5 = "0" + MD5;
+                         MD5 = "0" + MD5;
                     boolean md5Check = MD5.equals(matchMD5);
+                    Logger.d("MD5=" + MD5 + " matchMD5=" + matchMD5);
+                    Logger.d("MD5.length=" + Integer.toString(MD5.length()) +
+                            " matchMD5.length=" + Integer.toString(matchMD5.length()));
                     if (!md5Check) {
                         Logger.i("MD5 check failed for " + url);
                     }
@@ -932,6 +938,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
     private boolean isMatchingImage(String fileName) {
         try {
+            Logger.d("Image check for file name: " + fileName);
             if(fileName.endsWith(".zip") && fileName.indexOf(config.getDevice()) != -1) {
                 String[] parts = fileName.split("-");
                 if (parts.length > 1) {
@@ -939,6 +946,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     Version current = new Version(config.getAndroidVersion());
                     Version fileVersion = new Version(version);
                     if (fileVersion.compareTo(current) >= 0) {
+                        Logger.d("Image check: newer version!");
                         return true;
                     }
                 }
@@ -974,6 +982,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     String fileName = new File(build.getString("filename")).getName();
                     long timestamp = build.getLong("datetime");
                     // latest build can have a larger micro version then what we run now
+                    Logger.d("parsed from json:");
+                    Logger.d("fileName= " + fileName);
+                    Logger.d("timeStamp= " + Long.toString(timestamp));
                     if (isMatchingImage(fileName) && timestamp>latestTimestamp) {
                         latestBuild = fileName;
                         latestTimestamp = timestamp;
@@ -1417,11 +1428,16 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private boolean checkFullBuildMd5Sum(String url, String fn) {
-        String md5Url = url + ".md5sum";
+        String urlSuffix = config.getUrlSuffix();
+        String md5Url = "";
+        if (urlSuffix.length() > 0)
+            md5Url = url.replace(urlSuffix, ".md5sum");
+        else
+            md5Url = url + ".md5sum";
         String latestFullMd5 = downloadUrlMemoryAsString(md5Url);
         if (latestFullMd5 != null){
             try {
-                String md5Part = latestFullMd5.split("  ")[0];
+                String md5Part = latestFullMd5;
                 String fileMd5 =getFileMD5(new File(fn), getMD5Progress(STATE_ACTION_CHECKING_MD5, new File(fn).getName()));
                 if (md5Part.equals(fileMd5)) {
                     return true;
@@ -1806,15 +1822,17 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private String getLatestFullMd5Sum(String latestFullFetch) {
-        String md5Url = latestFullFetch.replace(".zip", ".md5sum");
+        String urlSuffix = config.getUrlSuffix();
+        String md5Url = "";
+        if (urlSuffix.length() > 0)
+            md5Url = latestFullFetch.replace(config.getUrlSuffix(), ".md5sum");
+        else
+            md5Url = latestFullFetch + ".md5sum";
         String latestFullMd5 = downloadUrlMemoryAsString(md5Url);
         if (latestFullMd5 != null){
-            String md5Part = null;
-            try {
-                md5Part = latestFullMd5.split("  ")[0];
-            } catch (Exception e) {
-                md5Part = latestFullMd5;
-            }
+            String md5Part = latestFullMd5;
+            while (md5Part.length() > 32)
+                md5Part = md5Part.substring(0, md5Part.length() - 1);
             Logger.d("getLatestFullMd5Sum - md5sum = " + md5Part);
             return md5Part;
         }
@@ -1852,9 +1870,10 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
                 String MD5 = new BigInteger(1, digest.digest()).
                         toString(16).toLowerCase(Locale.ENGLISH);
-                while (MD5.length() < 32)
-                    MD5 = "0" + MD5;
+                //while (MD5.length() < 32)
+                //     MD5 = "0" + MD5;
                 ret = MD5;
+                Logger.d("md5sum from file is: " + ret);
             } finally {
                 is.close();
             }
@@ -2137,6 +2156,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         if (downloadFullBuild) {
                             String fn = config.getPathBase() + latestFullBuild;
                             if (new File(fn).exists()) {
+                                Logger.d("latestFullB4md5=" + latestFullFetch);
                                 if (checkFullBuildMd5Sum(latestFullFetch, fn)) {
                                     Logger.d("match found (full): " + fn);
                                     prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
