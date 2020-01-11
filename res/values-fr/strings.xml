@@ -28,7 +28,11 @@
     <string name="last_checked" formatted="false">%s à %s</string>
     <string name="last_checked_never">Nous n\'avons jamais effectué de vérification, voulez-vous le faire maintenant\u00A0?</string>
     <string name="button_check_short">Vérifier</string>
+    <string name="button_check_now">Vérifier les mises à jour disponibles &#8230;</string>
     <string name="button_flash_now">Installer</string>
+    <string name="state_action_ab_flash">Installation de la mise à jour A/B &#8230;</string>
+    <string name="state_action_ab_finished">Fin de l\'installation. Redémarrez maintenant &#8230;</string>
+    <string name="button_reboot_short">Redémarrer</string>
     <!-- updates from 2013/12/18 -->
     <string name="action_secure_mode">Sécurité</string>
     <string name="secure_mode_enabled_title">Mode de sécurité : activé</string>
@@ -67,6 +71,7 @@
     <string name="notify_title_error">Problème lors de la vérification des mises à jour</string>
     <string name="notify_title_flash">Mise à jour prête à installer</string>
     <string name="notify_title_download">Mise à jour prête à télécharger</string>
+    <string name="notify_eta_remaining" formatted="false">%2d%%, %02d:%02d restant</string>
     <string name="last_checked_never_title_new">Appuyez sur « Vérifier » pour démarrer</string>
     <string name="screen_state_title">Écran éteint</string>
     <string name="screen_state_message">Télécharger uniquement si l\'écran est éteint</string>
@@ -88,4 +93,17 @@
     <string name="clean_files_feedback" formatted="false">%d fichiers supprimés. Appuyer maintenant sur \'Vérifier les mises à jour disponibles\'</string>
     <string name="state_error_permissions">Aucune autorisation de stockage.</string>
     <string name="state_error_flash">Échec de la préparation de mise à jour. Supprimer le contenu du /cache et réessayer.</string>
+    <string name="state_error_ab_flash">Échec de la préparation de la mise à jour. Veuillez redémarrer et réessayer.</string>
+    <string name="progress_status_0">Au repos &#8230;</string>
+    <string name="progress_status_1">Vérification des mises à jour disponibles &#8230;</string>
+    <string name="progress_status_2">Mise à jour disponible &#8230;</string>
+    <string name="progress_status_3">Installation de &#8230;</string>
+    <string name="progress_status_4">Vérification de &#8230;</string>
+    <string name="progress_status_5">Finalisation de &#8230;</string>
+    <string name="progress_status_6">Mis à jour. Redémarrage en attente &#8230;</string>
+    <string name="progress_status_7">Signalement de l\'erreur &#8230;</string>
+    <string name="progress_status_8">Tentative de retour en arrière &#8230;</string>
+    <string name="progress_status_9">Désactivé.</string>
+    <string name="ab_perf_mode_title">Mode de performance AB</string>
+    <string name="ab_perf_mode_summary">Utiliser le mode Performance pour installer des mises à jour AB</string>
 </resources>
