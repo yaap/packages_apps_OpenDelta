@@ -24,7 +24,7 @@
             android:layout_marginStart="@dimen/activity_horizontal_margin"
             android:layout_weight="0.70"
             android:gravity="start"
-            android:textAppearance="@android:style/TextAppearance.Material.Menu"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
             android:textColor="?android:attr/textColorPrimary" />
 
 
@@ -76,7 +76,7 @@
                     android:layout_marginStart="9dp"
                     android:layout_toEndOf="@+id/curr_ver"
                     android:text="@string/text_current_version_header_title"
-                    android:textAppearance="@android:style/TextAppearance.Material.Menu"
+                    android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
                     android:textColor="?android:attr/textColorPrimary"/>
 
                 <TextView
@@ -85,7 +85,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignStart="@+id/text_current_version_header"
                     android:layout_below="@+id/text_current_version_header"
-                    android:textAppearance="@android:style/TextAppearance.Material.Small"
+                    android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
                     android:textColor="?android:attr/textColorPrimary"/>
 
                 <TextView
@@ -95,7 +95,7 @@
                     android:layout_alignParentStart="true"
                     android:layout_below="@+id/text_current_version"
                     android:text="@string/text_last_checked_header_title"
-                    android:textAppearance="@android:style/TextAppearance.Material.Menu"
+                    android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
                     android:textColor="?android:attr/textColorPrimary" />
 
                 <TextView
@@ -104,7 +104,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_below="@+id/text_last_checked_header"
-                    android:textAppearance="@android:style/TextAppearance.Material.Small"
+                    android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
                     android:textColor="?android:attr/textColorPrimary" />
 
             </RelativeLayout>
@@ -150,7 +150,7 @@
                         android:layout_marginStart="9dp"
                         android:layout_toEndOf="@+id/imageView8"
                         android:text="@string/text_update_version_title"
-                        android:textAppearance="@android:style/TextAppearance.Material.Menu"
+                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
                         android:textColor="?android:attr/textColorPrimary" />
 
                     <TextView
@@ -159,7 +159,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignStart="@+id/text_update_version_header"
                         android:layout_below="@+id/text_update_version_header"
-                        android:textAppearance="@android:style/TextAppearance.Material.Small"
+                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
                         android:textColor="?android:attr/textColorPrimary" />
 
                     <TextView
@@ -169,7 +169,7 @@
                         android:layout_alignParentStart="true"
                         android:layout_below="@+id/text_update_version"
                         android:text="@string/text_download_size_header_title"
-                        android:textAppearance="@android:style/TextAppearance.Material.Menu"
+                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
                         android:textColor="?android:attr/textColorPrimary" />
 
                     <TextView
@@ -178,7 +178,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
                         android:layout_below="@+id/text_download_size_header"
-                        android:textAppearance="@android:style/TextAppearance.Material.Small"
+                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
                         android:textColor="?android:attr/textColorPrimary" />
 
                     <TextView
@@ -190,7 +190,7 @@
                         android:layout_marginTop="5dp"
                         android:ellipsize="marquee"
                         android:maxLines="1"
-                        android:textAppearance="@android:style/TextAppearance.Material.Small"
+                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
                         android:textColor="?android:attr/textColorPrimary" />
 
                     <LinearLayout
@@ -236,7 +236,7 @@
                             android:layout_below="@+id/progress_text"
                             android:gravity="start"
                             android:maxLines="1"
-                            android:textAppearance="@android:style/TextAppearance.Material.Small"
+                            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
                             android:textColor="?android:attr/textColorPrimary" />
 
                         <Space
@@ -251,7 +251,7 @@
                             android:ellipsize="marquee"
                             android:gravity="end"
                             android:maxLines="1"
-                            android:textAppearance="@android:style/TextAppearance.Material.Small"
+                            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
                             android:textColor="?android:attr/textColorPrimary" />
 
                         <Space
@@ -270,7 +270,7 @@
                         android:layout_alignParentBottom="true"
                         android:ellipsize="marquee"
                         android:maxLines="2"
-                        android:textAppearance="@android:style/TextAppearance.Material.Small"
+                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
                         android:textColor="?android:attr/textColorPrimary" />
 
                 </RelativeLayout>
@@ -294,7 +294,7 @@
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="@string/button_select_file"
-                        android:textAppearance="@android:style/TextAppearance.Material.Button" />
+                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.Button" />
 
                     <Button
                         android:id="@+id/button_flash_now"
@@ -304,7 +304,7 @@
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="@string/button_flash_now"
-                        android:textAppearance="@android:style/TextAppearance.Material.Button" />
+                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.Button" />
 
                     <Button
                         android:id="@+id/button_build_delta"
@@ -314,7 +314,7 @@
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="@string/button_build_delta"
-                        android:textAppearance="@android:style/TextAppearance.Material.Button" />
+                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.Button" />
 
                     <Button
                         android:id="@+id/button_check_now"
@@ -324,7 +324,7 @@
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="@string/button_check_short"
-                        android:textAppearance="@android:style/TextAppearance.Material.Button" />
+                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.Button" />
 
                     <Button
                         android:id="@+id/button_reboot_now"
@@ -334,7 +334,7 @@
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="@string/button_reboot_short"
-                        android:textAppearance="@android:style/TextAppearance.Material.Button" />
+                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.Button" />
                 </LinearLayout>
             </LinearLayout>
 

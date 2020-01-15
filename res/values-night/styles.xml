@@ -4,23 +4,9 @@
     <style name="Theme.OpenDelta" parent="@android:style/Theme.DeviceDefault.Settings">
         <item name="android:buttonStyle">?android:attr/borderlessButtonStyle</item>
         <item name="android:navigationBarColor">@color/omni_color2</item>
-        <item name="android:actionBarPopupTheme">@style/Theme.OpenDelta.PopupMenu</item>
-        <item name="android:dialogTheme">@style/Theme.OpenDelta.Dialog</item>
-        <item name="android:alertDialogTheme">@style/Theme.OpenDelta.AlertDialog</item>
         <item name="android:windowBackground">@color/omni_color2</item>
     </style>
 
     <style name="Theme.OpenDelta.Settings" parent="@style/Theme.OpenDelta"></style>
 
-    <style name="Theme.OpenDelta.PopupMenu" parent="@android:style/Theme.DeviceDefault.Dialog" >
-        <item name="android:colorBackground">@color/omni_color1</item>
-    </style>
-
-    <style name="Theme.OpenDelta.Dialog" parent="@android:style/Theme.DeviceDefault.Dialog">
-        <item name="android:colorBackground">@color/omni_color1</item>
-    </style>
-
-    <style name="Theme.OpenDelta.AlertDialog" parent="@android:style/Theme.DeviceDefault.Dialog.Alert">
-        <item name="android:colorBackground">@color/omni_color1</item>
-    </style>
 </resources>
