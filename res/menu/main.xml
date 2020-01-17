@@ -6,9 +6,13 @@
 		android:showAsAction="never"
 		android:title="@string/menu_settings"/>
 	<item
-		android:id="@+id/action_about"
+		android:id="@+id/changelog"
 		android:orderInCategory="101"
 		android:showAsAction="never"
+		android:title="@string/menu_changelog"/>
+	<item
+		android:id="@+id/action_about"
+		android:orderInCategory="102"
+		android:showAsAction="never"
 		android:title="@string/action_about"/>
-
 </menu>

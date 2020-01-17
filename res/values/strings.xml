@@ -80,6 +80,7 @@
     <string name="download_delta">Auto download delta</string>
     <string name="download_full">Auto download all</string>
     <string name="menu_settings">Settings</string>
+    <string name="menu_changelog">Changelog</string>
     <string name="category_download">Auto download</string>
     <string name="charge_only_title">Charger only</string>
     <string name="charge_only_message">Download only when on charger</string>

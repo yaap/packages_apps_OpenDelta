@@ -176,6 +176,12 @@ public class MainActivity extends Activity {
             Intent settingsActivity = new Intent(this, SettingsActivity.class);
             startActivity(settingsActivity);
             return true;
+        case R.id.changelog:
+            Intent changelogActivity = new Intent(Intent.ACTION_VIEW,
+                    Uri.parse(config.getUrlBaseJson().replace(
+                    config.getDevice() + ".json", "changelog.txt")));
+            startActivity(changelogActivity);
+            return true;
         case R.id.action_about:
             showAbout();
             return true;
