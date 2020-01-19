@@ -55,11 +55,16 @@ class ABUpdate {
         int offset = 0;
         @Override
         public void onStatusUpdate(int status, float percent) {
+            if (!isInstallingUpdate(updateservice)) {
+                return;
+            }
             if (status == UpdateEngine.UpdateStatusConstants.UPDATED_NEED_REBOOT) {
+                setInstallingUpdate(false, updateservice);
                 updateservice.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.SUCCESS);
                 return;
             }
             if (status == UpdateEngine.UpdateStatusConstants.REPORTING_ERROR_EVENT) {
+                setInstallingUpdate(false, updateservice);
                 updateservice.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.ERROR);
                 return;
             }
