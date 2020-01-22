@@ -248,6 +248,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private boolean isProgressNotificationDismissed = false;
     private long progressUpdateStart;
 
+    // url override
+    private boolean isUrlOverride = false;
+    private String md5UrlOvr = null;
 
     /*
      * Using reflection voodoo instead calling the hidden class directly, to
@@ -957,7 +960,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         return false;
     }
 
-    private String getNewestFullBuild() {
+    private List<String> getNewestFullBuild() {
         Logger.d("Checking for latest full build");
 
         String url = config.getUrlBaseJson();
@@ -972,7 +975,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             object = new JSONObject(buildData);
             JSONArray updatesList = object.getJSONArray("response");
             String latestBuild = null;
-            long latestTimestamp = 0;
+            String urlOverride = null;
+            String md5Override = null;
             for (int i = 0; i < updatesList.length(); i++) {
                 if (updatesList.isNull(i)) {
                     continue;
@@ -980,22 +984,43 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 try {
                     JSONObject build = updatesList.getJSONObject(i);
                     String fileName = new File(build.getString("filename")).getName();
-                    long timestamp = build.getLong("datetime");
-                    // latest build can have a larger micro version then what we run now
+                    String urlOvr = null;
+                    String md5Ovr = null;
+                    if (build.has("url"))
+                        urlOvr = build.getString("url");
+                    if (build.has("md5url"))
+                        md5Ovr = build.getString("md5url");
                     Logger.d("parsed from json:");
                     Logger.d("fileName= " + fileName);
-                    Logger.d("timeStamp= " + Long.toString(timestamp));
-                    if (isMatchingImage(fileName) && timestamp>latestTimestamp) {
+                    if (isMatchingImage(fileName))
                         latestBuild = fileName;
-                        latestTimestamp = timestamp;
+                    if (urlOvr != null && urlOvr != "") {
+                        urlOverride = urlOvr;
+                        Logger.d("url= " + urlOverride);
+                    }
+                    if (md5Ovr != null && md5Ovr != "") {
+                        md5Override = md5Ovr;
+                        Logger.d("md5 url= " + md5Override);
                     }
                 } catch (JSONException e) {
                     Logger.ex(e);
                 }
             }
+
+            List<String> ret = new ArrayList<>();
             if (latestBuild != null) {
-                return latestBuild;
+                ret.add(latestBuild);
+                if (urlOverride != null) {
+                    ret.add(urlOverride);
+                    if (md5Override != null) {
+                        ret.add(md5Override);
+                        isUrlOverride = true;
+                        md5UrlOvr = md5Override;
+                    }
+                }
             }
+            return ret;
+
         } catch (Exception e) {
             Logger.ex(e);
         }
@@ -1427,13 +1452,23 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         return true;
     }
 
-    private boolean checkFullBuildMd5Sum(String url, String fn) {
+    /**
+     * @param url - url to file or direct to md5sum file
+     * @param fn - file name
+     * @param ovr - wether direct link to md5sum is provided
+     * @returns true if md5sum matches the file
+     */
+    private boolean checkFullBuildMd5Sum(String url, String fn, boolean ovr) {
         String urlSuffix = config.getUrlSuffix();
         String md5Url = "";
-        if (urlSuffix.length() > 0)
-            md5Url = url.replace(urlSuffix, ".md5sum");
-        else
-            md5Url = url + ".md5sum";
+        if (!ovr) {
+            if (urlSuffix.length() > 0)
+                md5Url = url.replace(urlSuffix, ".md5sum");
+            else
+                md5Url = url + ".md5sum";
+        } else {
+            md5Url = url;
+        }
         String latestFullMd5 = downloadUrlMemoryAsString(md5Url);
         if (latestFullMd5 != null){
             try {
@@ -1824,10 +1859,14 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private String getLatestFullMd5Sum(String latestFullFetch) {
         String urlSuffix = config.getUrlSuffix();
         String md5Url = "";
-        if (urlSuffix.length() > 0)
-            md5Url = latestFullFetch.replace(config.getUrlSuffix(), ".md5sum");
-        else
-            md5Url = latestFullFetch + ".md5sum";
+        if (isUrlOverride) {
+            md5Url = md5UrlOvr;
+        } else {
+            if (urlSuffix.length() > 0)
+                md5Url = latestFullFetch.replace(config.getUrlSuffix(), ".md5sum");
+            else
+                md5Url = latestFullFetch + ".md5sum";
+        }
         String latestFullMd5 = downloadUrlMemoryAsString(md5Url);
         if (latestFullMd5 != null){
             String md5Part = latestFullMd5;
@@ -2028,16 +2067,22 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
                     clearState();
 
-                    String latestFullBuild = getNewestFullBuild();
+                    List<String> latestFullBuildWithUrl = getNewestFullBuild();
+                    String latestFullBuild = null;
                     // if we dont even find a build on dl no sense to continue
-                    if (latestFullBuild == null) {
+                    if (latestFullBuildWithUrl == null || latestFullBuildWithUrl.size() == 0) {
                         Logger.d("no latest build found at " + config.getUrlBaseJson() +
                                 " for " + config.getDevice());
                         return;
                     }
+                    latestFullBuild = latestFullBuildWithUrl.get(0);
 
-                    String latestFullFetch = config.getUrlBaseFull() +
-                            latestFullBuild + config.getUrlSuffix();
+                    String latestFullFetch = null;
+                    if (latestFullBuildWithUrl.size() < 3)
+                        latestFullFetch = config.getUrlBaseFull() +
+                                latestFullBuild + config.getUrlSuffix();
+                    else
+                        latestFullFetch = latestFullBuildWithUrl.get(1);
                     Logger.d("latest full build for device " + config.getDevice() + " is " + latestFullFetch);
                     prefs.edit().putString(PREF_LATEST_FULL_NAME, latestFullBuild).commit();
 
@@ -2156,8 +2201,10 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         if (downloadFullBuild) {
                             String fn = config.getPathBase() + latestFullBuild;
                             if (new File(fn).exists()) {
-                                Logger.d("latestFullB4md5=" + latestFullFetch);
-                                if (checkFullBuildMd5Sum(latestFullFetch, fn)) {
+                                boolean directMD5 = latestFullBuildWithUrl.size() == 3;
+                                if (checkFullBuildMd5Sum(
+                                        (directMD5 ? latestFullBuildWithUrl.get(2) : latestFullFetch),
+                                        fn, directMD5)) {
                                     Logger.d("match found (full): " + fn);
                                     prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
                                     downloadFullBuild = false;
@@ -2239,7 +2286,10 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         if (downloadFullBuild) {
                             String fn = config.getPathBase() + latestFullBuild;
                             if (new File(fn).exists()) {
-                                if (checkFullBuildMd5Sum(latestFullFetch, fn)) {
+                                boolean directMD5 = latestFullBuildWithUrl.size() == 3;
+                                if (checkFullBuildMd5Sum(
+                                        (directMD5 ? latestFullBuildWithUrl.get(2) : latestFullFetch),
+                                        fn, directMD5)) {
                                     Logger.d("match found (full): " + fn);
                                     prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
                                     downloadFullBuild = false;
