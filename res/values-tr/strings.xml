@@ -103,7 +103,7 @@
     <string name="progress_status_5">Tamamlanıyor &#8230;</string>
     <string name="progress_status_6">Güncellendi. Cihazın tekrar başlatılması bekleniyor &#8230;</string>
     <string name="progress_status_7">Hatâ vak\'ası raporlanıyor &#8230;</string>
-    <string name="progress_status_8">Değişiklikleri kaldırmaya teşebbüs ediliyor &#8230;</string>
+    <string name="progress_status_8">Değişikliklerin kaldırılmasına teşebbüs ediliyor &#8230;</string>
     <string name="progress_status_9">Devre dışı.</string>
     <string name="ab_perf_mode_title">AB Performansı Modu</string>
     <string name="ab_perf_mode_summary">AB güncellemelerini kurmak üzere performans modunu kullanır</string>
