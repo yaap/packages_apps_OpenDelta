@@ -30,7 +30,7 @@
 			android:key="ab_perf_mode"
 			android:persistent="false"
 			android:title="@string/ab_perf_mode_title"
-			android:summary="@string/ab_perf_mode_summary" />
+			android:summary="@string/ab_perf_mode_summary_new" />
 		<SwitchPreference
 			android:defaultValue="false"
 			android:key="file_flash_support"
