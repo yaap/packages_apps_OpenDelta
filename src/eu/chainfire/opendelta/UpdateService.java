@@ -1635,7 +1635,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
         // Clear the Download size to hide while flashing
         prefs.edit().putLong(PREF_DOWNLOAD_SIZE, -1).commit();
-            
+
         final String _filename = new File(flashFilename).getName();
         updateState(STATE_ACTION_AB_FLASH, 0f, 0L, 100L, _filename, null);
 

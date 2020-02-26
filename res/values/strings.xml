@@ -124,8 +124,8 @@
     <string name="progress_status_7">Reporting Error Event &#8230;</string>
     <string name="progress_status_8">Attempting Rollback &#8230;</string>
     <string name="progress_status_9">Disabled.</string>
-    <string name="ab_perf_mode_title">AB Performance Mode</string>
-    <string name="ab_perf_mode_summary">Use Performance Mode to install AB Updates</string>
+    <string name="ab_perf_mode_title">AB performance mode</string>
+    <string name="ab_perf_mode_summary_new">Increase priority of update process. Might influence normal usage during update.</string>
     <string name="state_error_flash_file_title">Can not flash that file</string>
     <string name="select_file_activity_title">Select ZIP file</string>
     <string name="button_select_file">File</string>

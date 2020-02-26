@@ -49,7 +49,7 @@ public class Config {
     private final static String PREF_SHOWN_RECOVERY_WARNING_SECURE_NAME = "shown_recovery_warning_secure";
     private final static String PREF_SHOWN_RECOVERY_WARNING_NOT_SECURE_NAME = "shown_recovery_warning_not_secure";
     private final static String PREF_AB_PERF_MODE_NAME = "ab_perf_mode";
-    private final static boolean PREF_AB_PERF_MODE_DEFAULT = false;
+    private final static boolean PREF_AB_PERF_MODE_DEFAULT = true;
     private static final String PROP_AB_DEVICE = "ro.build.ab_update";
 
     private final SharedPreferences prefs;
