@@ -70,11 +70,12 @@ public class Config {
     private final boolean secure_mode_default;
     private final boolean keep_screen_on;
     private final String filename_base_prefix;
-    private final String url_base_json;
+    private String url_base_json;
     private final String official_version_tag;
     private final String android_version;
     private final String weekly_version_tag;
     private final String security_version_tag;
+    private final String gapps_version_tag;
 
     /*
      * Using reflection voodoo instead calling the hidden class directly, to
@@ -132,6 +133,7 @@ public class Config {
         official_version_tag = res.getString(R.string.official_version_tag);
         weekly_version_tag = res.getString(R.string.weekly_version_tag);
         security_version_tag = res.getString(R.string.security_version_tag);
+        gapps_version_tag = res.getString(R.string.gapps_version_tag);
         android_version = getProperty(context,
                 res.getString(R.string.android_version), "");
         filename_base_prefix = String.format(Locale.ENGLISH,
@@ -151,6 +153,17 @@ public class Config {
         } catch (Resources.NotFoundException e) {
         }
         this.keep_screen_on = keep_screen_on;
+
+        if (isGappsDevice()) {
+            url_base_delta = String.format(Locale.ENGLISH,
+                    res.getString(R.string.url_base_delta), "tmp/" + property_device);
+            url_base_update = String.format(Locale.ENGLISH,
+                    res.getString(R.string.url_base_update), "tmp/" + property_device);
+            url_base_full = String.format(Locale.ENGLISH,
+                    res.getString(R.string.url_base_full), "tmp/" + property_device);
+            url_base_json = String.format(Locale.ENGLISH,
+                    res.getString(R.string.url_base_full_file), "tmp/json.php");
+        }
 
         Logger.d("property_version: %s", property_version);
         Logger.d("property_device: %s", property_device);
@@ -318,5 +331,13 @@ public class Config {
 
     public static boolean isABDevice() {
         return SystemProperties.getBoolean(PROP_AB_DEVICE, false);
+    }
+
+    public boolean isGappsDevice() {
+        return getVersion().indexOf(gapps_version_tag) != -1;
+    }
+
+    public String getDeviceRelativePath() {
+        return "./" + getDevice();
     }
 }
