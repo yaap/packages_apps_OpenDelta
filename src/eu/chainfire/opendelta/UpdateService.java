@@ -949,7 +949,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private String getNewestFullBuild() {
-        Logger.d("Checking for latest full build");
+        Logger.d("Checking for latest full build " + config.getDeviceRelativePath());
 
         String url = config.getUrlBaseJson();
 
@@ -966,7 +966,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             long latestTimestamp = 0;
             while (nextKey.hasNext()) {
                 String key = nextKey.next();
-                if (key.equals("./" + config.getDevice())) {
+                if (key.equals(config.getDeviceRelativePath())) {
                     JSONArray builds = object.getJSONArray(key);
                     for (int i = 0; i < builds.length(); i++) {
                         JSONObject build = builds.getJSONObject(i);
@@ -1874,7 +1874,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private boolean isSupportedVersion() {
-        return config.isOfficialVersion();
+        return config.isOfficialVersion() || config.isGappsDevice();
     }
 
     private int getAutoDownloadValue() {
@@ -2301,9 +2301,11 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                             if (latestFullMd5 != null){
                                 downloadFullBuild(latestFullFetch, latestFullMd5, latestFullBuild);
                             } else {
+                                updateState(STATE_ERROR_DOWNLOAD, null, null, null, null, null);
                                 Logger.d("aborting download due to md5sum not found");
                             }
                         } else {
+                            updateState(STATE_ERROR_DOWNLOAD, null, null, null, null, null);
                             Logger.d("aborting download due to network state");
                         }
                     }

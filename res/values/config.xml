@@ -24,6 +24,7 @@
 
 	<!-- URL base to find the full zip files, %s is expanded to property_device value. Path is suffixed by (expanded) filename_base -->
 	<string name="url_base_full">https://dl.omnirom.org/%s/</string>
+	<string name="url_base_full_file">https://dl.omnirom.org/%s</string>
 
 	<!-- URL base to fetch all builds -->
 	<string name="url_base_json">https://dl.omnirom.org/json.php"</string>
@@ -57,6 +58,7 @@
 	<string name="official_version_tag">NIGHTLY</string>
 	<string name="weekly_version_tag">WEEKLY</string>
 	<string name="security_version_tag">SECURITY_RELEASE</string>
+	<string name="gapps_version_tag">GAPPS</string>
 
 	<string name="android_version">ro.build.version.release</string>
 </resources>
