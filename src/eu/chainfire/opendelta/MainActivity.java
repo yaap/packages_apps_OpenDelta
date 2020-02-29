@@ -373,6 +373,9 @@ public class MainActivity extends Activity {
                 mPrefs.edit().putString(UpdateService.PREF_READY_FILENAME_NAME,
                         UpdateService.PREF_READY_FILENAME_DEFAULT).commit();
                 mPrefs.edit().putBoolean(UpdateService.PREF_FILE_FLASH, false).commit();
+                mPrefs.edit().putString(UpdateService.PREF_LATEST_FULL_NAME,
+                        UpdateService.PREF_READY_FILENAME_DEFAULT).commit();
+
                 DrawableCompat.setTint(mOmniLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
             } else if (UpdateService.STATE_ACTION_BUILD.equals(state)) {
                 enableCheck = true;
