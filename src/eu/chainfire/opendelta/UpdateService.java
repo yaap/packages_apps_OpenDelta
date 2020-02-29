@@ -2086,42 +2086,22 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     Logger.d("latest full build for device " + config.getDevice() + " is " + latestFullFetch);
                     prefs.edit().putString(PREF_LATEST_FULL_NAME, latestFullBuild).commit();
 
-                    // Create a list of deltas to apply to get from our current
-                    // version to the latest
-                    String fetch = String.format(Locale.ENGLISH, "%s%s.delta",
-                            config.getUrlBaseDelta(),
-                            config.getFilenameBase());
+                    if (!Config.isABDevice()) {
+                        // Create a list of deltas to apply to get from our current
+                        // version to the latest
+                        String fetch = String.format(Locale.ENGLISH, "%s%s.delta",
+                                config.getUrlBaseDelta(),
+                                config.getFilenameBase());
 
-                    while (true) {
-                        DeltaInfo delta = null;
-                        byte[] data = downloadUrlMemory(fetch);
-                        if (data != null && data.length != 0) {
-                            try {
-                                delta = new DeltaInfo(data, false);
-                            } catch (JSONException e) {
-                                // There's an error in the JSON. Could be bad JSON,
-                                // could be a 404 text, etc
-                                Logger.ex(e);
-                                delta = null;
-                            } catch (NullPointerException e) {
-                                // Download failed
-                                Logger.ex(e);
-                                delta = null;
-                            }
-                        }
-
-                        if (delta == null) {
-                            // See if we have a revoked version instead, we
-                            // still need it for chaining future deltas, but
-                            // will not allow flashing this one
-                            data = downloadUrlMemory(fetch.replace(".delta",
-                                    ".delta_revoked"));
+                        while (true) {
+                            DeltaInfo delta = null;
+                            byte[] data = downloadUrlMemory(fetch);
                             if (data != null && data.length != 0) {
                                 try {
-                                    delta = new DeltaInfo(data, true);
+                                    delta = new DeltaInfo(data, false);
                                 } catch (JSONException e) {
-                                    // There's an error in the JSON. Could be bad
-                                    // JSON, could be a 404 text, etc
+                                    // There's an error in the JSON. Could be bad JSON,
+                                    // could be a 404 text, etc
                                     Logger.ex(e);
                                     delta = null;
                                 } catch (NullPointerException e) {
@@ -2131,17 +2111,39 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                                 }
                             }
 
-                            // We didn't get a delta or a delta_revoked - end of
-                            // the delta availability chain
-                            if (delta == null)
-                                break;
-                        }
+                            if (delta == null) {
+                                // See if we have a revoked version instead, we
+                                // still need it for chaining future deltas, but
+                                // will not allow flashing this one
+                                data = downloadUrlMemory(fetch.replace(".delta",
+                                        ".delta_revoked"));
+                                if (data != null && data.length != 0) {
+                                    try {
+                                        delta = new DeltaInfo(data, true);
+                                    } catch (JSONException e) {
+                                        // There's an error in the JSON. Could be bad
+                                        // JSON, could be a 404 text, etc
+                                        Logger.ex(e);
+                                        delta = null;
+                                    } catch (NullPointerException e) {
+                                        // Download failed
+                                        Logger.ex(e);
+                                        delta = null;
+                                    }
+                                }
 
-                        Logger.d("delta --> [%s]", delta.getOut().getName());
-                        fetch = String.format(Locale.ENGLISH, "%s%s.delta",
-                                config.getUrlBaseDelta(), delta
-                                .getOut().getName().replace(".zip", ""));
-                        deltas.add(delta);
+                                // We didn't get a delta or a delta_revoked - end of
+                                // the delta availability chain
+                                if (delta == null)
+                                    break;
+                            }
+
+                            Logger.d("delta --> [%s]", delta.getOut().getName());
+                            fetch = String.format(Locale.ENGLISH, "%s%s.delta",
+                                    config.getUrlBaseDelta(), delta
+                                    .getOut().getName().replace(".zip", ""));
+                            deltas.add(delta);
+                        }
                     }
 
                     if (deltas.size() > 0) {
