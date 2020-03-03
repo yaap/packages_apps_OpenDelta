@@ -1934,7 +1934,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private boolean isSupportedVersion() {
-        return config.isOfficialVersion() || config.isGappsDevice();
+        return config.isOfficialVersion();
     }
 
     private int getAutoDownloadValue() {
@@ -2374,11 +2374,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                             if (latestFullMd5 != null){
                                 downloadFullBuild(latestFullFetch, latestFullMd5, latestFullBuild); // download full
                             } else {
-                                updateState(STATE_ERROR_DOWNLOAD, null, null, null, null, null);
                                 Logger.d("aborting download due to md5sum not found");
                             }
                         } else {
-                            updateState(STATE_ERROR_DOWNLOAD, null, null, null, null, null);
                             Logger.d("aborting download due to network state");
                         }
                     }
