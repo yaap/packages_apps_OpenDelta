@@ -179,7 +179,7 @@ public class MainActivity extends Activity {
         case R.id.changelog:
             Intent changelogActivity = new Intent(Intent.ACTION_VIEW,
                     Uri.parse(config.getUrlBaseJson().replace(
-                    config.getDevice() + ".json", "changelog.txt")));
+                    config.getDevice() + ".json", "Changelog.txt")));
             startActivity(changelogActivity);
             return true;
         case R.id.action_about:
