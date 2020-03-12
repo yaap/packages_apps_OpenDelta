@@ -931,13 +931,17 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
     private boolean isMatchingImage(String fileName) {
         try {
-            if(fileName.endsWith(".zip") && fileName.indexOf(config.getDevice()) != -1) {
+            if (fileName.endsWith(".zip") && fileName.contains(config.getDevice()) &&
+                    (config.getBuildTypeTag() != null ? fileName.contains(config.getBuildTypeTag()) : false) &&
+                    fileName.startsWith(config.getFileBaseNamePrefix())) {
                 String[] parts = fileName.split("-");
                 if (parts.length > 1) {
+                    Logger.d("isMatchingImage: check " + fileName);
                     String version = parts[1];
                     Version current = new Version(config.getAndroidVersion());
                     Version fileVersion = new Version(version);
                     if (fileVersion.compareTo(current) >= 0) {
+                        Logger.d("isMatchingImage: ok " + fileName);
                         return true;
                     }
                 }
@@ -1874,7 +1878,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private boolean isSupportedVersion() {
-        return config.isOfficialVersion() || config.isGappsDevice();
+        return config.isOfficialVersion() || config.isGappsDevice() || config.isMicroGDevice();
     }
 
     private int getAutoDownloadValue() {
