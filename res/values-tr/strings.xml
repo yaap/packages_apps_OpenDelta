@@ -21,8 +21,8 @@
     <string name="state_error_disk_space">Yeteri kadar yer yok</string>
     <string name="state_error_unknown">Bilinmeyen hatâ</string>
     <string name="state_error_unofficial">Güncelleme devre dışı bırakıldı</string>
-    <string name="error_disk_space_sub" formatted="false">%d MiB mevcûd, %d MiB lazım</string>
-    <string name="notify_update_available">Bir güncelleme mevcûd</string>
+    <string name="error_disk_space_sub" formatted="false">%d MiB mevcut, %d MiB lazım</string>
+    <string name="notify_update_available">Bir güncelleme mevcut</string>
     <string name="notify_checking">Güncelleme yoklanıyor &#8230;</string>
     <string name="last_checked" formatted="false">%s târihinde ve %s saatinde</string>
     <string name="last_checked_never">Daha evvel hiç yoklamadık, yoklamak ister misiniz?</string>
@@ -37,22 +37,22 @@
     <string name="secure_mode_enabled_title">Güvenli mod: devrede</string>
     <string name="secure_mode_enabled_description"><![CDATA[Güncellemenin şifreleme imzâsı, kaynağının tasdîk edilmesi için kurulmadan evvel te\'yid edilecek ve hiçbir ilâve güncelleme kurulmayacaktır. Bu mod sadece <b>TWRP</b> tarafından desteklenir.]]></string>
     <string name="secure_mode_disabled_title">Güvenli mod: devre dışı</string>
-    <string name="secure_mode_disabled_description"><![CDATA[İlâve güncellemeler mevcûd ise kurulur. Herhangi bir (zararlı) yazılım paketinin bu güncellemelere yerleştirilebileceğinin ve tam sistem erişimi edinebileceğinin farkında olun. Dikkatli olunması tavsiye edilir.]]></string>
+    <string name="secure_mode_disabled_description"><![CDATA[İlâve güncellemeler mevcut ise kurulur. Herhangi bir (kötü niyetli) yazılım paketinin bu güncellemelere yerleştirilebileceğinin ve tam sistem erişimi edinebileceğinin farkında olun. Dikkatli olunması tavsiye edilir.]]></string>
     <string name="recovery_notice_title">Bildiri</string>
-    <string name="recovery_notice_description_secure"><![CDATA[Mevcûd modda güncellemeleri kurmak sadece <b>TWRP</b> recovery yazılımları üzerinde desteklenir. Lütfen devam etmeden evvel desteklenen bir recovery yazılımına sahip olduğunuzdan emin olun.]]></string>
-    <string name="recovery_notice_description_not_secure"><![CDATA[Mevcûd modda güncellemeleri kurmak sadece <b>TWRP</b> isimli recovery yazılımları üzerinde resmen desteklenir.
+    <string name="recovery_notice_description_secure"><![CDATA[Mevcut modda güncellemeleri kurmak sadece <b>TWRP</b> recovery yazılımları üzerinde desteklenir. Lütfen devam etmeden evvel desteklenen bir recovery yazılımına sahip olduğunuzdan emin olun.]]></string>
+    <string name="recovery_notice_description_not_secure"><![CDATA[Mevcut modda güncellemeleri kurmak sadece <b>TWRP</b> isimli recovery yazılımları üzerinde resmen desteklenir.
  <i>Resmî</i> <b>CWM</b> derlemeleri <i>desteklenmemektedir</i>, fakat <i>topluluk tarafından derlenen</i> bazı <b>CWM</b> versiyonları hâlâ <i>çalışabilir</i>. Lütfen devam etmeden evvel uyumlu bir recovery yazılımına sahip olduğunuzdan emin olun.]]></string>
     <string name="flash_after_update_notice_title">Bildiri</string>
-    <string name="flash_after_update_notice_description"><![CDATA[İlâve güncellemeler <b>FlashAfterUpdate</b> klasöründe mevcûddur, fakat güvenli mod devrede. Devam ederseniz, bu ilâve güncellemeler <b>kurulmayacaktır</b>.]]></string>
+    <string name="flash_after_update_notice_description"><![CDATA[İlâve güncellemeler <b>FlashAfterUpdate</b> klasöründe mevcuttur, fakat güvenli mod devrede. Devam ederseniz bu ilâve güncellemeler <b>kurulmayacaktır</b>.]]></string>
     <string name="state_error_not_official_title">Güncelleme devre dışı bırakıldı</string>
     <string name="state_error_not_official_extra" formatted="false">%s yazılımının güncellenmesi mümkün değil</string>
     <string name="button_build_delta">İndir</string>
     <string name="button_stop">Dur</string>
-    <string name="state_action_build">Güncelleme mevcûd</string>
+    <string name="state_action_build">Güncelleme mevcut</string>
     <string name="state_action_build_delta">Kısmî güncelleme mümkün</string>
     <string name="state_action_build_full">Tam güncelleme mümkün</string>
     <string name="state_error_download">İndirme hatâsı</string>
-    <string name="text_current_version_header_title">Mevcûd versiyon</string>
+    <string name="text_current_version_header_title">Mevcut versiyon</string>
     <string name="text_last_checked_header_title">Son yoklama</string>
     <string name="text_update_version_title">Güncellemenin versiyonu</string>
     <string name="text_download_size_header_title">İndirmenin boyutu</string>
@@ -89,14 +89,14 @@
     <string name="state_error_connection">Veri bağlantısı yok.</string>
     <string name="category_admin">Bakım</string>
     <string name="clear_files_title">Güncelleme dosyalarını temizle</string>
-    <string name="clear_files_summary">Bütün güncellemeyi indirmeye mecbûr etmek için mevcûd güncelleme dosyalarını siler</string>
+    <string name="clear_files_summary">Bütün güncellemeyi indirmeye mecbûr etmek için mevcut güncelleme dosyalarını siler</string>
     <string name="clean_files_feedback" formatted="false">%d adet dosya silindi. Şimdi \'Güncellemeleri yokla\' düğmesine dokunun</string>
     <string name="state_error_permissions">Depolama izinleri yok.</string>
     <string name="state_error_flash">Kurulamadı. Ön belleği temizleyin ve tekrar deneyin.</string>
     <string name="state_error_ab_flash">Kurulum tamamlanamadı. Lütfen cihazı tekrar başlatın ve tekrar deneyin.</string>
     <string name="progress_status_0">Boşta &#8230;</string>
     <string name="progress_status_1">Güncellemeler yoklanıyor &#8230;</string>
-    <string name="progress_status_2">Güncelleme mevcûd &#8230;</string>
+    <string name="progress_status_2">Güncelleme mevcut &#8230;</string>
     <string name="progress_status_3">Kuruluyor &#8230;</string>
     <string name="progress_status_4">Teyit ediliyor &#8230;</string>
     <string name="progress_status_5">Tamamlanıyor &#8230;</string>
@@ -104,6 +104,8 @@
     <string name="progress_status_7">Hatâ vak\'ası raporlanıyor &#8230;</string>
     <string name="progress_status_8">Değişikliklerin kaldırılmasına teşebbüs ediliyor &#8230;</string>
     <string name="progress_status_9">Devre dışı.</string>
+    <string name="ab_perf_mode_title">AB performansı modu</string>
+    <string name="ab_perf_mode_summary_new">Güncelleme işleminin önceliği artırılır. Güncelleme esnasında normal kullanıma tesir edebilir.</string>
     <string name="state_error_flash_file_title">Bu dosya kurulamıyor</string>
     <string name="select_file_activity_title">ZIP dosyasını seçin</string>
     <string name="button_select_file">Dosya</string>

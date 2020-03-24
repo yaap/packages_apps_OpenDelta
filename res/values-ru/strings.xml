@@ -103,6 +103,8 @@
     <string name="progress_status_7">Сообщение об ошибке &#8230;</string>
     <string name="progress_status_8">Попытка отката &#8230;</string>
     <string name="progress_status_9">Отключено.</string>
+    <string name="ab_perf_mode_title">Режим производительности A/B</string>
+    <string name="ab_perf_mode_summary_new">Приоритет процесса обновления. Может повлиять на обычное использование во время обновления.</string>
     <string name="state_error_flash_file_title">Не могу установить этот файл</string>
     <string name="select_file_activity_title">Выберите ZIP файл</string>
     <string name="button_select_file">Файл</string>

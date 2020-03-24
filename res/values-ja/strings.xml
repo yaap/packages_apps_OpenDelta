@@ -103,6 +103,8 @@
     <string name="progress_status_7">エラーイベントの報告中&#8230;</string>
     <string name="progress_status_8">ロールバックの試行中&#8230;</string>
     <string name="progress_status_9">無効</string>
+    <string name="ab_perf_mode_title">A/B パフォーマンスモード</string>
+    <string name="ab_perf_mode_summary_new">更新プロセスの優先度を上げます。更新中の通常の使用に影響する場合があります。</string>
     <string name="state_error_flash_file_title">そのファイルをフラッシュできません</string>
     <string name="select_file_activity_title">ZIP ファイルの選択</string>
     <string name="button_select_file">ファイル</string>

@@ -16,10 +16,10 @@
     <string name="state_action_downloading">Pobieranie &#8230;</string>
     <string name="state_action_applying">Patchowanie &#8230;</string>
     <string name="state_action_applying_patch">Patchowanie &#8230;</string>
-    <string name="state_action_applying_md5">v &#8230;</string>
-    <string name="state_action_ready">Aktualizacja gotowa do zaflashowania.</string>
+    <string name="state_action_applying_md5">Weryfikowanie pliku &#8230;</string>
+    <string name="state_action_ready">Aktualizacja gotowa do wgrania</string>
     <string name="state_error_disk_space">Nie wystarczająco miejsca na dysku!</string>
-    <string name="state_error_unknown">Nieznany błąd.</string>
+    <string name="state_error_unknown">Nieznany błąd</string>
     <string name="state_error_unofficial">Aktualizacje wyłączone</string>
     <string name="error_disk_space_sub" formatted="false">%d MB dostępne, %d MB wymagane</string>
     <string name="notify_update_available">Dostępna nowa aktualizacja</string>
@@ -64,11 +64,11 @@
     <string name="download_full">Automatyczne pobieranie wszystkiego</string>
     <string name="menu_settings">Ustawienia</string>
     <string name="category_download">Automatyczne pobieranie</string>
-    <string name="charge_only_title">Ładowarka tylko</string>
+    <string name="charge_only_title">Tylko ładowarka</string>
     <string name="charge_only_message">Pobierz tylko kiedy jest na ładowarce</string>
     <string name="battery_level_title">Min. procent baterii</string>
     <string name="notify_title_error">Problem podczas sprawdzania aktualizacji</string>
-    <string name="notify_title_flash">Aktualizacja gotowa do zaflashowania</string>
+    <string name="notify_title_flash">Aktualizacja gotowa do wgrania</string>
     <string name="notify_title_download">Aktualizacja gotowa do pobrania</string>
     <string name="notify_eta_remaining" formatted="false">pozostało %2d%%, %02d:%02d</string>
     <string name="last_checked_never_title_new">Naciśnij przycisk \"Sprawdź\", aby rozpocząć</string>
@@ -79,11 +79,11 @@
     <string name="scheduler_smart">Inteligentne</string>
     <string name="scheduler_daily">Codziennie</string>
     <string name="scheduler_weekly">Co tydzień</string>
-    <string name="scheduler_daily_time">Godzina</string>
+    <string name="scheduler_daily_time">Czas</string>
     <string name="scheduler_week_day">Dzień tygodnia</string>
     <string name="networks_title">Sieci</string>
     <string name="networks_message">Pobierz tylko na typach sieci</string>
-    <string name="category_flashing">Flashowanie</string>
+    <string name="category_flashing">Wgrywanie</string>
     <string name="secure_mode_title">Bezpieczny tryb</string>
     <string name="state_error_connection">Brak połączenia danych.</string>
     <string name="category_admin">Konserwacja</string>
@@ -98,11 +98,13 @@
     <string name="progress_status_2">Dostępna aktualizacja &#8230;</string>
     <string name="progress_status_3">Instalowanie &#8230;</string>
     <string name="progress_status_4">Weryfikowanie &#8230;</string>
-    <string name="progress_status_5">Finalizowanie &#8230;</string>
+    <string name="progress_status_5">Kończenie &#8230;</string>
     <string name="progress_status_6">Zaktualizowano. Oczekiwanie na ponowne uruchomienie &#8230;</string>
     <string name="progress_status_7">Zgłaszanie błędu &#8230;</string>
     <string name="progress_status_8">Próba cofania zmian &#8230;</string>
     <string name="progress_status_9">Wyłączony.</string>
+    <string name="ab_perf_mode_title">Tryb wydajności AB</string>
+    <string name="ab_perf_mode_summary_new">Zwiększa priorytet procesu aktualizacji. Może wpływać na normalne zużycie podczas aktualizacji.</string>
     <string name="state_error_flash_file_title">Nie można wgrać tego pliku</string>
     <string name="select_file_activity_title">Wybierz plik ZIP</string>
     <string name="button_select_file">Plik</string>
