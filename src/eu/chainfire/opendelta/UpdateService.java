@@ -2193,8 +2193,21 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         String latestFullZip = latestFull !=  PREF_READY_FILENAME_DEFAULT ? latestFull : null;
                         String currentVersionZip = config.getFilenameBase() +".zip";
 
-                        boolean updateAvilable = (latestFullZip != null && Long.parseLong(latestFullZip.replaceAll("\\D+","")) > Long.parseLong(currentVersionZip.replaceAll("\\D+","")));
-                        downloadFullBuild = updateAvilable;
+                        Long currFileDate; // will store current build date as YYYYMMDD
+                        Long latestFileDate; // will store latest build date as YYYYMMDD
+                        boolean updateAvilable = false;
+                        if (latestFullZip != null) {
+                            try {
+                                currFileDate = Long.parseLong(currentVersionZip.split("-")[4].substring(0, 8));
+                                latestFileDate = Long.parseLong(latestFullZip.split("-")[4].substring(0, 8));
+                                updateAvilable = latestFileDate > currFileDate;
+                            } catch (NumberFormatException exception) {
+                                // Just incase someone decides to make up his own zip / build name and F's this up
+                                Logger.d("Build name malformed");
+                                Logger.ex(exception);
+                            }
+                            downloadFullBuild = updateAvilable;
+                        }
 
                         if (!updateAvilable) {
                             prefs.edit().putString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT).commit();
