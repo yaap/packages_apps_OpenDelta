@@ -399,7 +399,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         if (ms != null)
             i.putExtra(EXTRA_MS, ms);
 
-        sendBroadcast(i);
+        sendStickyBroadcast(i);
     }
 
     @Override
