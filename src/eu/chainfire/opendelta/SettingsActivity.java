@@ -132,10 +132,8 @@ public class SettingsActivity extends PreferenceActivity implements
         PreferenceCategory flashingCategory =
                 (PreferenceCategory) findPreference(KEY_CATEGORY_FLASHING);
 
-        if (!Config.isABDevice()) {
+        if (!Config.isABDevice())
             flashingCategory.removePreference(mABPerfMode);
-            flashingCategory.removePreference(mFileFlash);
-        }
 
         mAutoDownloadCategory
                 .setEnabled(autoDownloadValue > UpdateService.PREF_AUTO_DOWNLOAD_CHECK);
