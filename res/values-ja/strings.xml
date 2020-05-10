@@ -51,7 +51,7 @@
     <string name="state_action_build_delta">Delta の更新ができます</string>
     <string name="state_action_build_full">全ての更新ができます</string>
     <string name="state_error_download">ダウンロードに問題</string>
-    <string name="text_current_version_header_title">現在のバージョン</string>
+    <string name="text_current_version_header_title">現行バージョン</string>
     <string name="text_last_checked_header_title">最終確認</string>
     <string name="text_update_version_title">更新バージョン</string>
     <string name="text_download_size_header_title">ダウンロードサイズ</string>
