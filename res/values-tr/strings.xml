@@ -37,7 +37,7 @@
     <string name="secure_mode_enabled_title">Güvenli mod: devrede</string>
     <string name="secure_mode_enabled_description"><![CDATA[Güncellemenin şifreleme imzâsı, kaynağının tasdîk edilmesi için kurulmadan evvel te\'yid edilecek ve hiçbir ilâve güncelleme kurulmayacaktır. Bu mod sadece <b>TWRP</b> tarafından desteklenir.]]></string>
     <string name="secure_mode_disabled_title">Güvenli mod: devre dışı</string>
-    <string name="secure_mode_disabled_description"><![CDATA[İlâve güncellemeler mevcut ise kurulur. Herhangi bir (kötü niyetli) yazılım paketinin bu güncellemelere yerleştirilebileceğinin ve tam sistem erişimi edinebileceğinin farkında olun. Dikkatli olunması tavsiye edilir.]]></string>
+    <string name="secure_mode_disabled_description"><![CDATA[İlâve güncellemeler mevcut ise kurulur. Herhangi bir (art niyetli) yazılım paketinin bu güncellemelere yerleştirilebileceğinin ve tam sistem erişimi edinebileceğinin farkında olun. Dikkatli olunması tavsiye edilir.]]></string>
     <string name="recovery_notice_title">Bildiri</string>
     <string name="recovery_notice_description_secure"><![CDATA[Mevcut modda güncellemeleri kurmak sadece <b>TWRP</b> recovery yazılımları üzerinde desteklenir. Lütfen devam etmeden evvel desteklenen bir recovery yazılımına sahip olduğunuzdan emin olun.]]></string>
     <string name="recovery_notice_description_not_secure"><![CDATA[Mevcut modda güncellemeleri kurmak sadece <b>TWRP</b> isimli recovery yazılımları üzerinde resmen desteklenir.

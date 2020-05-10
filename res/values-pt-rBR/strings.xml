@@ -27,7 +27,11 @@
     <string name="last_checked" formatted="false">%s em %s</string>
     <string name="last_checked_never">Nunca verificamos, talvez você queira fazê-lo?</string>
     <string name="button_check_short">Verificar</string>
+    <string name="button_check_now">Verificando atualizações&#8230;</string>
     <string name="button_flash_now">Instalar</string>
+    <string name="state_action_ab_flash">Instalando Atualização AB &#8230;</string>
+    <string name="state_action_ab_finished">Instalação concluída. Reinicie agora &#8230;</string>
+    <string name="button_reboot_short">Reiniciar</string>
     <!-- updates from 2013/12/18 -->
     <string name="action_secure_mode">Seguro</string>
     <string name="secure_mode_enabled_title">Modo seguro: habilitado</string>
@@ -66,6 +70,7 @@
     <string name="notify_title_error">Problema de verificação da atualização</string>
     <string name="notify_title_flash">Pronto para a atualização</string>
     <string name="notify_title_download">Pronto para baixar a atualização</string>
+    <string name="notify_eta_remaining" formatted="false">%2d%%, %02d:%02d restantes</string>
     <string name="last_checked_never_title_new">Pressione \'Verificar\' para iniciar</string>
     <string name="screen_state_title">Tela desligada</string>
     <string name="screen_state_message">Baixar somente quando a tela estiver desligada</string>
@@ -87,4 +92,28 @@
     <string name="clean_files_feedback" formatted="false">%d arquivos apagados. Pressione \'Verificar atualizações\'</string>
     <string name="state_error_permissions">Nenhuma permissão de armazenamento.</string>
     <string name="state_error_flash">Falha de instalação do flash. Limpar /cache e tente novamente.</string>
+    <string name="state_error_ab_flash">Falha de instalação do flash. Por favor reinicie e tente novamente.</string>
+    <string name="progress_status_0">Inativo &#8230;</string>
+    <string name="progress_status_1">Verificando atualizações &#8230;</string>
+    <string name="progress_status_2">Atualização disponível &#8230;</string>
+    <string name="progress_status_3">Instalando &#8230;</string>
+    <string name="progress_status_4">Verificando &#8230;</string>
+    <string name="progress_status_5">Finalizando &#8230;</string>
+    <string name="progress_status_6">Atualizado. Reinicialização pendente &#8230;</string>
+    <string name="progress_status_7">Reportando evento de erro &#8230;</string>
+    <string name="progress_status_8">Tentando reverter &#8230;</string>
+    <string name="progress_status_9">Desativado.</string>
+    <string name="ab_perf_mode_title">Modo de desempenho AB</string>
+    <string name="ab_perf_mode_summary_new">Aumenta a prioridade do processo de atualização. Pode influenciar o uso normal durante a atualização.</string>
+    <string name="state_error_flash_file_title">Não é possível instalar este arquivo</string>
+    <string name="select_file_activity_title">Selecione o arquivo ZIP</string>
+    <string name="button_select_file">Arquivo</string>
+    <string name="state_error_ab_flash_title">Não foi possível instalar a atualização AB</string>
+    <string name="state_error_flash_title">Não foi possível instalar a atualização</string>
+    <string name="file_flash_support_title">Flash local do arquivo</string>
+    <string name="file_flash_support_summary">Habilitar seleção de um arquivo ZIP local</string>
+    <string name="flash_file_notice_title">Flash local do arquivo</string>
+    <string name="flash_file_notice_message"><b>Atenção:</b> Não haverá nenhuma verificação se o arquivo ZIP selecionado é adequado para o seu dispositivo!\n\n<b>Piscar o ZIP errado pode levar a um dispositivo não funcional!</b></string>
+    <string name="channel_name">Atualização em andamento</string>
+    <string name="text_update_file_flash_title">Atualizar arquivo</string>
 </resources>
