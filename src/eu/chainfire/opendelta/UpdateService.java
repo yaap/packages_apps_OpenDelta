@@ -403,7 +403,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         if (ms != null)
             i.putExtra(EXTRA_MS, ms);
 
-        sendBroadcast(i);
+        sendStickyBroadcast(i);
     }
 
     @Override
@@ -945,11 +945,12 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             if(fileName.endsWith(".zip") && fileName.indexOf(config.getDevice()) != -1) {
                 String[] parts = fileName.split("-");
                 if (parts.length > 1) {
+                    Logger.d("isMatchingImage: check " + fileName);
                     String version = parts[1];
                     Version current = new Version(config.getAndroidVersion());
                     Version fileVersion = new Version(version);
                     if (fileVersion.compareTo(current) >= 0) {
-                        Logger.d("Image check: newer version!");
+                        Logger.d("isMatchingImage: ok " + fileName);
                         return true;
                     }
                 }
@@ -2387,9 +2388,11 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                             if (latestFullMd5 != null){
                                 downloadFullBuild(latestFullFetch, latestFullMd5, latestFullBuild); // download full
                             } else {
+                                updateState(STATE_ERROR_DOWNLOAD, null, null, null, null, null);
                                 Logger.d("aborting download due to md5sum not found");
                             }
                         } else {
+                            updateState(STATE_ERROR_DOWNLOAD, null, null, null, null, null);
                             Logger.d("aborting download due to network state");
                         }
                     }

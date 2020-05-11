@@ -103,6 +103,8 @@
     <string name="progress_status_7">Berichte Error Ereignis &#8230;</string>
     <string name="progress_status_8">Versuche Zurückrollen &#8230;</string>
     <string name="progress_status_9">Deaktiviert.</string>
+    <string name="ab_perf_mode_title">AB Performance Modus</string>
+    <string name="ab_perf_mode_summary_new">Erhöhe die Priorität des Update-Prozesses. Kann die normale Nutzung während des Updates beeinflussen.</string>
     <string name="state_error_flash_file_title">Kann diese Datei nicht flashen</string>
     <string name="select_file_activity_title">ZIP-Datei auswählen</string>
     <string name="button_select_file">Datei</string>

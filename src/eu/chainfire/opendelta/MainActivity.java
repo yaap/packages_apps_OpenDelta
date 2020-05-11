@@ -731,7 +731,7 @@ public class MainActivity extends Activity {
             } else {
                 Intent i = new Intent(UpdateService.BROADCAST_INTENT);
                 i.putExtra(UpdateService.EXTRA_STATE, UpdateService.STATE_ERROR_FLASH_FILE);
-                sendBroadcast(i);
+                sendStickyBroadcast(i);
             }
         }
     }
@@ -802,7 +802,7 @@ public class MainActivity extends Activity {
         } catch (android.content.ActivityNotFoundException ex) {
             Intent i = new Intent(UpdateService.BROADCAST_INTENT);
             i.putExtra(UpdateService.EXTRA_STATE, UpdateService.STATE_ERROR_FLASH_FILE);
-            sendBroadcast(i);
+            sendStickyBroadcast(i);
         }
     }
 }

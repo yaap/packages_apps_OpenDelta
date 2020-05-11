@@ -103,6 +103,8 @@
     <string name="progress_status_7">Hlášení o chybě &#8230;</string>
     <string name="progress_status_8">Pokus o návrat &#8230;</string>
     <string name="progress_status_9">Zakázáno.</string>
+    <string name="ab_perf_mode_title">Výkonný režim AB</string>
+    <string name="ab_perf_mode_summary_new">Zvýšit prioritu procesu aktualizace. Během aktualizace může ovlivnit běžné používání.</string>
     <string name="state_error_flash_file_title">Tento soubor nelze nainstalovat</string>
     <string name="select_file_activity_title">Vyberte soubor ZIP</string>
     <string name="button_select_file">Soubor</string>
