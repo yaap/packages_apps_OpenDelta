@@ -144,6 +144,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     public static final String EXTRA_TOTAL = "eu.chainfire.opendelta.extra.TOTAL";
     public static final String EXTRA_FILENAME = "eu.chainfire.opendelta.extra.FILENAME";
     public static final String EXTRA_MS = "eu.chainfire.opendelta.extra.MS";
+    public static final String EXTRA_ERROR_CODE = "eu.chainfire.opendelta.extra.ERROR_CODE";
 
     public static final String STATE_ACTION_NONE = "action_none";
     public static final String STATE_ACTION_CHECKING = "action_checking";
@@ -190,8 +191,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     public static final String PREF_READY_FILENAME_NAME = "ready_filename";
     public static final String PREF_READY_FILENAME_DEFAULT = null;
 
-    private static final String PREF_LAST_CHECK_TIME_NAME = "last_check_time";
-    private static final long PREF_LAST_CHECK_TIME_DEFAULT = 0L;
+    public static final String PREF_LAST_CHECK_TIME_NAME = "last_check_time";
+    public static final long PREF_LAST_CHECK_TIME_DEFAULT = 0L;
 
     private static final String PREF_LAST_SNOOZE_TIME_NAME = "last_snooze_time";
     private static final long PREF_LAST_SNOOZE_TIME_DEFAULT = 0L;
@@ -382,8 +383,13 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         return START_STICKY;
     }
 
-    private synchronized void updateState(String state, Float progress,
+    private void updateState(String state, Float progress,
             Long current, Long total, String filename, Long ms) {
+        updateState(state, progress, current,  total,  filename,  ms, -1);
+    }
+
+    private synchronized void updateState(String state, Float progress,
+            Long current, Long total, String filename, Long ms, int errorCode) {
         this.state = state;
 
         Intent i = new Intent(BROADCAST_INTENT);
@@ -398,7 +404,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             i.putExtra(EXTRA_FILENAME, filename);
         if (ms != null)
             i.putExtra(EXTRA_MS, ms);
-
+        if (errorCode != -1)
+            i.putExtra(EXTRA_ERROR_CODE, errorCode);
         sendStickyBroadcast(i);
     }
 
@@ -1173,6 +1180,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         stopNotification();
         stopErrorNotification();
 
+        // so we have a time even in the error case
+        prefs.edit().putLong(PREF_LAST_CHECK_TIME_NAME, System.currentTimeMillis()).commit();
+
         if (!isSupportedVersion()) {
             // TODO - to be more generic this should maybe use the info from getNewestFullBuild
             updateState(STATE_ERROR_UNOFFICIAL, null, null, null, config.getVersion(), null);
@@ -1538,7 +1548,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         return flashFilename;
     }
 
-    protected void onUpdateCompleted(int status) {
+    protected void onUpdateCompleted(int status, int errorCode) {
         stopNotification();
         if (status == UpdateEngine.ErrorCodeConstants.SUCCESS) {
             String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
@@ -1549,7 +1559,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             startABRebootNotification();
             updateState(STATE_ACTION_AB_FINISHED, null, null, null, null, null);
         } else {
-            updateState(STATE_ERROR_AB_FLASH, null, null, null, null, null);
+            updateState(STATE_ERROR_AB_FLASH, null, null, null, null, null, errorCode);
         }
     }
 
@@ -1924,7 +1934,10 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 state.equals(UpdateService.STATE_ERROR_DISK_SPACE) ||
                 state.equals(UpdateService.STATE_ERROR_UNKNOWN) ||
                 state.equals(UpdateService.STATE_ERROR_UNOFFICIAL) ||
-                state.equals(UpdateService.STATE_ERROR_CONNECTION)) {
+                state.equals(UpdateService.STATE_ERROR_CONNECTION) ||
+                state.equals(UpdateService.STATE_ERROR_AB_FLASH) ||
+                state.equals(UpdateService.STATE_ERROR_FLASH_FILE) ||
+                state.equals(UpdateService.STATE_ERROR_FLASH)) {
             return true;
         }
         return false;
