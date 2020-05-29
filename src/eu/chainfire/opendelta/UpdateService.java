@@ -571,8 +571,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
         notificationManager.notify(
                 NOTIFICATION_UPDATE,
-                (new Notification.Builder(this))
-                .setChannel(NOTIFICATION_CHANNEL_ID)
+                (new Notification.Builder(this, NOTIFICATION_CHANNEL_ID))
                 .setSmallIcon(R.drawable.stat_notify_update)
                 .setContentTitle(readyToFlash ? getString(R.string.notify_title_flash) : getString(R.string.notify_title_download))
                 .setShowWhen(true)
@@ -588,8 +587,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
         notificationManager.notify(
                 NOTIFICATION_UPDATE,
-                (new Notification.Builder(this))
-                .setChannel(NOTIFICATION_CHANNEL_ID)
+                (new Notification.Builder(this, NOTIFICATION_CHANNEL_ID))
                 .setSmallIcon(R.drawable.stat_notify_update)
                 .setContentTitle(getString(R.string.state_action_ab_finished))
                 .setShowWhen(true)
@@ -614,8 +612,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         if (errorStateString != null) {
             notificationManager.notify(
                     NOTIFICATION_ERROR,
-                    (new Notification.Builder(this))
-                    .setChannel(NOTIFICATION_CHANNEL_ID)
+                    (new Notification.Builder(this, NOTIFICATION_CHANNEL_ID))
                     .setSmallIcon(R.drawable.stat_notify_error)
                     .setContentTitle(getString(R.string.notify_title_error))
                     .setContentText(errorStateString)
@@ -1603,9 +1600,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         isProgressNotificationDismissed = false;
         progressUpdateStart = SystemClock.elapsedRealtime();
 
-        mBuilder = new Notification.Builder(this);
+        mBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
         mBuilder.setSmallIcon(R.drawable.stat_notify_update)
-                .setChannel(NOTIFICATION_CHANNEL_ID)
                 .setContentTitle(getString(R.string.state_action_ab_flash))
                 .setShowWhen(true)
                 .setContentIntent(getNotificationIntent(false))
@@ -1995,8 +1991,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         if (checkOnly > PREF_AUTO_DOWNLOAD_CHECK) {
             notificationText = getString(R.string.state_action_downloading);
         }
-        Notification notification = (new Notification.Builder(this))
-                .setChannel(NOTIFICATION_CHANNEL_ID)
+        Notification notification = (new Notification.Builder(this, NOTIFICATION_CHANNEL_ID))
                 .setSmallIcon(R.drawable.stat_notify_update)
                 .setContentTitle(getString(R.string.title))
                 .setContentText(notificationText)
