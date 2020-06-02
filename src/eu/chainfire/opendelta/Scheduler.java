@@ -263,7 +263,7 @@ public class Scheduler implements OnScreenStateListener,
                     c.set(Calendar.HOUR_OF_DAY, hour);
                     c.set(Calendar.MINUTE, minute);
 
-                    SimpleDateFormat format = new SimpleDateFormat("kk:mm");
+                    SimpleDateFormat format = new SimpleDateFormat("HH:mm");
                     Logger.i("Setting daily alarm to %s", format.format(c.getTime()));
 
                     alarmManager.cancel(alarmCustom);
@@ -287,7 +287,7 @@ public class Scheduler implements OnScreenStateListener,
                         c.set(Calendar.WEEK_OF_YEAR, Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) + 1);
                     }
 
-                    SimpleDateFormat format = new SimpleDateFormat("EEEE, MMMM d, yyyy 'at' kk:mm");
+                    SimpleDateFormat format = new SimpleDateFormat("EEEE, MMMM d, yyyy - HH:mm");
                     Logger.i("Setting weekly alarm to %s", format.format(c.getTime()));
 
                     alarmManager.cancel(alarmCustom);

@@ -22,6 +22,7 @@
 package eu.chainfire.opendelta;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -45,10 +46,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.PowerManager;
+import android.os.UpdateEngine;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.Html;
 import android.text.format.DateFormat;
 import android.text.format.Formatter;
@@ -58,7 +58,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -69,11 +68,12 @@ public class MainActivity extends Activity {
     private Button checkNow = null;
     private Button flashNow = null;
     private TextView updateVersion = null;
-    private TextView extra = null;
+    private TextView updateVersionHeader = null;
     private Button buildNow = null;
     private ImageButton stopNow = null;
     private Button rebootNow = null;
     private TextView currentVersion = null;
+    private TextView currentVersionHeader;
     private TextView lastChecked = null;
     private TextView lastCheckedHeader = null;
     private TextView downloadSizeHeader = null;
@@ -82,7 +82,6 @@ public class MainActivity extends Activity {
     private boolean mPermOk;
     private TextView mSub2;
     private TextView mProgressPercent;
-    private ImageView mDerpLogo;
     private View mProgressEndSpace;
     private int mProgressCurrent = 0;
     private int mProgressMax = 1;
@@ -90,9 +89,11 @@ public class MainActivity extends Activity {
     private Button mFileFlashButton;
     private SharedPreferences mPrefs;
     private TextView mUpdateVersionTitle;
+    private TextView mExtraText;
 
     private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 0;
     private static final int ACTIVITY_SELECT_FLASH_FILE = 1;
+    private static final String COLON = ":";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,19 +121,20 @@ public class MainActivity extends Activity {
         flashNow = (Button) findViewById(R.id.button_flash_now);
         rebootNow = (Button) findViewById(R.id.button_reboot_now);
         updateVersion = (TextView) findViewById(R.id.text_update_version);
-        extra = (TextView) findViewById(R.id.text_extra);
+        updateVersionHeader = (TextView) findViewById(R.id.text_update_version_header);
         buildNow = (Button) findViewById(R.id.button_build_delta);
         stopNow = (ImageButton) findViewById(R.id.button_stop);
         currentVersion = (TextView) findViewById(R.id.text_current_version);
+        currentVersionHeader = findViewById(R.id.text_current_version_header);
         lastChecked = (TextView) findViewById(R.id.text_last_checked);
         lastCheckedHeader = (TextView) findViewById(R.id.text_last_checked_header);
         downloadSize = (TextView) findViewById(R.id.text_download_size);
         downloadSizeHeader = (TextView) findViewById(R.id.text_download_size_header);
         mProgressPercent = (TextView) findViewById(R.id.progress_percent);
-        mDerpLogo = (ImageView) findViewById(R.id.derp_logo);
         mProgressEndSpace = findViewById(R.id.progress_end_margin);
         mFileFlashButton = findViewById(R.id.button_select_file);
         mUpdateVersionTitle = findViewById(R.id.text_update_version_header);
+        mExtraText = findViewById(R.id.extra_text);
 
         config = Config.getInstance(this);
         mPermOk = false;
@@ -193,32 +195,19 @@ public class MainActivity extends Activity {
     private IntentFilter updateFilter = new IntentFilter(
             UpdateService.BROADCAST_INTENT);
     private BroadcastReceiver updateReceiver = new BroadcastReceiver() {
-        private String formatLastChecked(String filename, long ms) {
-            Date date = new Date(ms);
-            if (filename == null) {
-                if (ms == 0) {
-                    return "";
-                } else {
-                    return getString(
-                            R.string.last_checked,
-                            DateFormat.getDateFormat(MainActivity.this).format(
-                                    date),
-                            DateFormat.getTimeFormat(MainActivity.this).format(
-                                    date));
-                }
+        private String formatLastChecked(long ms) {
+            //Date date = new Date(ms);
+            if (ms == 0) {
+                return "";
             } else {
-                if (ms == 0) {
-                    return "";
-                } else {
-                    return String.format(
-                            "%s %s",
-                            filename,
-                            getString(R.string.last_checked,
-                                    DateFormat.getDateFormat(MainActivity.this)
-                                            .format(date), DateFormat
-                                            .getTimeFormat(MainActivity.this)
-                                            .format(date)));
-                }
+                SimpleDateFormat format = new SimpleDateFormat("EEEE, MMMM d, yyyy - HH:mm");
+                return format.format(ms);
+                /*return getString(
+                        R.string.last_checked,
+                        DateFormat.getDateFormat(MainActivity.this).format(
+                                date),
+                        DateFormat.getTimeFormat(MainActivity.this).format(
+                                date));*/
             }
         }
 
@@ -229,7 +218,6 @@ public class MainActivity extends Activity {
             String sub2 = "";
             String progressPercent = "";
             String updateVersion = "";
-            String lastCheckedText = "";
             String extraText = "";
             String downloadSizeText = "";
             long current = 0L;
@@ -244,7 +232,18 @@ public class MainActivity extends Activity {
             boolean enableProgress = false;
             boolean disableCheckNow = false;
             boolean disableDataSpeed = false;
-            boolean disableFileFlash = !mPrefs.getBoolean(SettingsActivity.PREF_FILE_FLASH, true);
+            boolean disableFileFlash = !mPrefs.getBoolean(SettingsActivity.PREF_FILE_FLASH, false);
+            long lastCheckedSaved = mPrefs.getLong(UpdateService.PREF_LAST_CHECK_TIME_NAME,
+                    UpdateService.PREF_LAST_CHECK_TIME_DEFAULT);
+            String lastCheckedText = lastCheckedSaved != UpdateService.PREF_LAST_CHECK_TIME_DEFAULT ?
+                    formatLastChecked(lastCheckedSaved) : getString(R.string.last_checked_never_title_new);
+            String fullVersion = config.getVersion();
+            String[] versionParts = fullVersion.split("-");
+            String versionType = "";
+            try {
+                versionType = versionParts[3];
+            } catch (Exception e) {
+            }
 
             String state = intent.getStringExtra(UpdateService.EXTRA_STATE);
             // don't try this at home
@@ -281,58 +280,48 @@ public class MainActivity extends Activity {
 
                 extraText = getString(R.string.error_disk_space_sub, current,
                         total);
-                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ERROR_UNKNOWN.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
             } else if (UpdateService.STATE_ERROR_UNOFFICIAL.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
-                title = getString(R.string.state_error_not_official_title);
-                extraText = getString(R.string.state_error_not_official_extra,
-                        intent.getStringExtra(UpdateService.EXTRA_FILENAME));
-                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_disabled));
+                extraText = getString(R.string.state_error_not_official_extra, versionType);
             } else if (UpdateService.STATE_ERROR_DOWNLOAD.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
-                extraText = intent.getStringExtra(UpdateService.EXTRA_FILENAME);
-                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ERROR_CONNECTION.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
-                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ERROR_PERMISSIONS.equals(state)) {
+                enableCheck = true;
                 progress.setIndeterminate(false);
-                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ERROR_FLASH.equals(state)) {
                 enableCheck = true;
                 enableFlash = true;
                 progress.setIndeterminate(false);
                 title = getString(R.string.state_error_flash_title);
-                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ERROR_AB_FLASH.equals(state)) {
                 enableCheck = true;
-                enableReboot = true;
                 progress.setIndeterminate(false);
                 title = getString(R.string.state_error_ab_flash_title);
-                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
+                int errorCode = intent.getIntExtra(UpdateService.EXTRA_ERROR_CODE, -1);
+                if (errorCode == UpdateEngine.ErrorCodeConstants.PAYLOAD_TIMESTAMP_ERROR) {
+                    extraText = getString(R.string.error_ab_timestamp);
+                } else if (errorCode == UpdateEngine.ErrorCodeConstants.UPDATED_BUT_NOT_ACTIVE) {
+                    extraText = getString(R.string.error_ab_inactive);
+                }
             } else if (UpdateService.STATE_ERROR_FLASH_FILE.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
                 title = getString(R.string.state_error_flash_file_title);
-                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_err));
             } else if (UpdateService.STATE_ACTION_NONE.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
-                lastCheckedText = formatLastChecked(null,
-                        intent.getLongExtra(UpdateService.EXTRA_MS, 0));
-                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
             } else if (UpdateService.STATE_ACTION_READY.equals(state)) {
                 enableCheck = true;
                 enableFlash = true;
                 progress.setIndeterminate(false);
-                lastCheckedText = formatLastChecked(null,
-                        intent.getLongExtra(UpdateService.EXTRA_MS, 0));
 
                 final String flashImage = mPrefs.getString(
                         UpdateService.PREF_READY_FILENAME_NAME,
@@ -344,12 +333,10 @@ public class MainActivity extends Activity {
                             flashImageBase.lastIndexOf('.'));
                 }
                 mUpdateVersionTitle.setText(R.string.text_update_version_title);
-                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
             } else if (UpdateService.STATE_ACTION_FLASH_FILE_READY.equals(state)) {
                 enableCheck = true;
                 enableFlash = true;
                 progress.setIndeterminate(false);
-
                 final String flashImage = mPrefs.getString(
                         UpdateService.PREF_READY_FILENAME_NAME,
                         UpdateService.PREF_READY_FILENAME_DEFAULT);
@@ -360,7 +347,6 @@ public class MainActivity extends Activity {
                     updateVersion = flashImageBase;
                 }
                 mUpdateVersionTitle.setText(R.string.text_update_file_flash_title);
-                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
             } else if (UpdateService.STATE_ACTION_AB_FINISHED.equals(state)) {
                 enableReboot = true;
                 disableCheckNow = true;
@@ -382,12 +368,9 @@ public class MainActivity extends Activity {
                 mPrefs.edit().putString(UpdateService.PREF_LATEST_FULL_NAME,
                         UpdateService.PREF_READY_FILENAME_DEFAULT).commit();
 
-                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
             } else if (UpdateService.STATE_ACTION_BUILD.equals(state)) {
                 enableCheck = true;
                 progress.setIndeterminate(false);
-                lastCheckedText = formatLastChecked(null,
-                        intent.getLongExtra(UpdateService.EXTRA_MS, 0));
 
                 final String latestFull = mPrefs.getString(
                         UpdateService.PREF_LATEST_FULL_NAME,
@@ -403,7 +386,6 @@ public class MainActivity extends Activity {
 
                 deltaUpdatePossible = latestDeltaZip != null;
                 fullUpdatePossible = latestFullZip != null;
-                DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
 
                 if (deltaUpdatePossible) {
                     String latestDeltaBase = latestDelta.substring(0,
@@ -411,14 +393,12 @@ public class MainActivity extends Activity {
                     enableBuild = true;
                     updateVersion = latestDeltaBase;
                     title = getString(R.string.state_action_build_delta);
-                    DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
                 } else if (fullUpdatePossible) {
                     String latestFullBase = latestFull.substring(0,
                             latestFull.lastIndexOf('.'));
                     enableBuild = true;
                     updateVersion = latestFullBase;
                     title = getString(R.string.state_action_build_full);
-                    DrawableCompat.setTint(mDerpLogo.getDrawable(), ContextCompat.getColor(context, R.color.logo_green));
                 }
                 long downloadSize = mPrefs.getLong(
                         UpdateService.PREF_DOWNLOAD_SIZE, -1);
@@ -437,7 +417,6 @@ public class MainActivity extends Activity {
             } else {
                 enableProgress = true;
                 if (UpdateService.STATE_ACTION_AB_FLASH.equals(state)) {
-                    disableCheckNow = true;
                     disableDataSpeed = true;
                 }
                 if (UpdateService.STATE_ACTION_DOWNLOADING.equals(state)) {
@@ -457,6 +436,8 @@ public class MainActivity extends Activity {
                 } else {
                     downloadSizeText = Formatter.formatFileSize(context, downloadSize);
                 }
+
+                updateVersion = getUpdateVersionString();
 
                 final String flashImage = mPrefs.getString(
                         UpdateService.PREF_READY_FILENAME_NAME,
@@ -513,16 +494,16 @@ public class MainActivity extends Activity {
             MainActivity.this.mSub2.setText(sub2);
             MainActivity.this.mProgressPercent.setText(progressPercent);
             MainActivity.this.updateVersion.setText(updateVersion);
+            MainActivity.this.updateVersionHeader
+                .setText(TextUtils.isEmpty(updateVersion) ? "" : (getString(R.string.text_update_version_title) + COLON));
             MainActivity.this.currentVersion.setText(config.getFilenameBase());
+            MainActivity.this.currentVersionHeader.setText(getString(R.string.text_current_version_header_title) + COLON);
             MainActivity.this.lastChecked.setText(lastCheckedText);
-            MainActivity.this.lastCheckedHeader
-                .setText(lastCheckedText.equals("") ? "" : getString(R.string.text_last_checked_header_title));
-            MainActivity.this.extra.setText(extraText);
-            MainActivity.this.lastCheckedHeader
-                .setText(lastCheckedText.equals("") ? "" : getString(R.string.text_last_checked_header_title));
+            MainActivity.this.lastCheckedHeader.setText(getString(R.string.text_last_checked_header_title) + COLON);
+            MainActivity.this.mExtraText.setText(extraText);
             MainActivity.this.downloadSize.setText(downloadSizeText);
             MainActivity.this.downloadSizeHeader
-                .setText(downloadSizeText.equals("") ? "" : getString(R.string.text_download_size_header_title));
+                .setText(TextUtils.isEmpty(downloadSizeText) ? "" : (getString(R.string.text_download_size_header_title) + COLON));
 
             mProgressCurrent = (int) current;
             mProgressMax = (int) total;
@@ -804,5 +785,30 @@ public class MainActivity extends Activity {
             i.putExtra(UpdateService.EXTRA_STATE, UpdateService.STATE_ERROR_FLASH_FILE);
             sendStickyBroadcast(i);
         }
+    }
+
+    private String getUpdateVersionString() {
+        final String latestFull = mPrefs.getString(
+                UpdateService.PREF_LATEST_FULL_NAME,
+                UpdateService.PREF_READY_FILENAME_DEFAULT);
+        final String latestDelta = mPrefs.getString(
+                UpdateService.PREF_LATEST_DELTA_NAME,
+                UpdateService.PREF_READY_FILENAME_DEFAULT);
+
+        String latestDeltaZip = latestDelta != UpdateService.PREF_READY_FILENAME_DEFAULT ? new File(
+                latestDelta).getName() : null;
+        String latestFullZip = latestFull != UpdateService.PREF_READY_FILENAME_DEFAULT ? latestFull
+                : null;
+
+        if (latestDeltaZip != null) {
+            String latestDeltaBase = latestDelta.substring(0,
+                    latestDelta.lastIndexOf('.'));
+            return latestDeltaBase;
+        } else if (latestFullZip != null) {
+            String latestFullBase = latestFull.substring(0,
+                    latestFull.lastIndexOf('.'));
+            return latestFullBase;
+        }
+        return "";
     }
 }

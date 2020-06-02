@@ -2,10 +2,27 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="Theme.OpenDelta" parent="@android:style/Theme.DeviceDefault.Settings">
-        <item name="android:buttonStyle">?android:attr/borderlessButtonStyle</item>
         <item name="android:windowBackground">@color/material_grey_100</item>
         <item name="android:navigationBarColor">@color/material_grey_100</item>
     </style>
 
     <style name="Theme.OpenDelta.Settings" parent="@style/Theme.OpenDelta"></style>
+
+    <style name="TitleText" parent="@android:style/TextAppearance.DeviceDefault.Large">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="HeaderText" parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="ValueText" parent="@style/HeaderText">
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="OtherText" parent="@style/ValueText">
+        <item name="android:textSize">14sp</item>
+    </style>
 </resources>

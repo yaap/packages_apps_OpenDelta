@@ -58,14 +58,16 @@ class ABUpdate {
             if (!isInstallingUpdate(updateservice)) {
                 return;
             }
+            Logger.d("onStatusUpdate = " + status);
+
             if (status == UpdateEngine.UpdateStatusConstants.UPDATED_NEED_REBOOT) {
                 setInstallingUpdate(false, updateservice);
-                updateservice.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.SUCCESS);
+                updateservice.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.SUCCESS, -1);
                 return;
             }
             if (status == UpdateEngine.UpdateStatusConstants.REPORTING_ERROR_EVENT) {
                 setInstallingUpdate(false, updateservice);
-                updateservice.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.ERROR);
+                updateservice.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.ERROR, -1);
                 return;
             }
             if (lastPercent > percent) {
@@ -82,7 +84,15 @@ class ABUpdate {
 
         @Override
         public void onPayloadApplicationComplete(int errorCode) {
+            Logger.d("onPayloadApplicationComplete = " + errorCode);
             setInstallingUpdate(false, updateservice);
+            if (errorCode == UpdateEngine.ErrorCodeConstants.UPDATED_BUT_NOT_ACTIVE) {
+                updateservice.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.SUCCESS, errorCode);
+            } else if (errorCode != UpdateEngine.ErrorCodeConstants.SUCCESS) {
+                updateservice.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.ERROR, errorCode);
+            } else {
+                updateservice.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.SUCCESS, -1);
+            }
         }
     };
 

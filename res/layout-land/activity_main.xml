@@ -3,343 +3,250 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginStart="20dp"
+    android:layout_marginEnd="20dp"
     android:orientation="vertical"
     tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/text_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:gravity="center_horizontal"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:textAppearance="@style/TitleText" />
+
+    <TextView
+        android:id="@+id/extra_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="marquee"
+        android:singleLine="true"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
+        android:textAppearance="@style/ValueText" />
+
+    <TextView
+        android:id="@+id/progress_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="marquee"
+        android:singleLine="true"
+        android:textAppearance="@style/ValueText" />
+
+    <LinearLayout
+        android:id="@+id/progress_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:max="1"
+            android:progress="0" />
+
+        <ImageButton
+            android:id="@+id/button_stop"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_vertical"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/button_stop"
+            android:onClick="onButtonStopClick"
+            android:src="@android:drawable/ic_menu_close_clear_cancel" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:addStatesFromChildren="false"
-        android:alwaysDrawnWithCache="false"
-        android:orientation="horizontal"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp" >
+        android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/text_title"
+            android:id="@+id/progress_percent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:singleLine="true"
+            android:textAppearance="@style/OtherText" />
+
+        <Space
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="@dimen/activity_horizontal_margin"
-            android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:layout_weight="0.70"
-            android:gravity="start"
-            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
-            android:textColor="?android:attr/textColorPrimary" />
+            android:layout_weight="1" />
 
+        <TextView
+            android:id="@+id/progress_text2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:gravity="end"
+            android:singleLine="true"
+            android:textAppearance="@style/OtherText" />
 
-        <ImageView
-            android:id="@+id/derp_logo"
+        <Space
+            android:id="@+id/progress_end_margin"
             android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="center"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:src="@drawable/ic_derp_small" />
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardView"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="4dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_weight="1"
-            app:cardBackgroundColor="@color/card_bg_color"
-            app:cardCornerRadius="2dp"
-            app:contentPadding="10dp">
+        <TextView
+            android:id="@+id/text_last_checked_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/text_last_checked_header_title"
+            android:textAppearance="@style/HeaderText" />
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <ImageView
-                    android:id="@+id/curr_ver"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
-                    android:layout_gravity="top|left"
-                    android:src="@drawable/ic_rom" />
-
-                <TextView
-                    android:id="@+id/text_current_version_header"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_gravity="top"
-                    android:layout_marginStart="9dp"
-                    android:layout_toEndOf="@+id/curr_ver"
-                    android:text="@string/text_current_version_header_title"
-                    android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
-                    android:textColor="?android:attr/textColorPrimary"/>
-
-                <TextView
-                    android:id="@+id/text_current_version"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignStart="@+id/text_current_version_header"
-                    android:layout_below="@+id/text_current_version_header"
-                    android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
-                    android:textColor="?android:attr/textColorPrimary"/>
-
-                <TextView
-                    android:id="@+id/text_last_checked_header"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_below="@+id/text_current_version"
-                    android:text="@string/text_last_checked_header_title"
-                    android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
-                    android:textColor="?android:attr/textColorPrimary" />
-
-                <TextView
-                    android:id="@+id/text_last_checked"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_below="@+id/text_last_checked_header"
-                    android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
-                    android:textColor="?android:attr/textColorPrimary" />
-
-            </RelativeLayout>
-
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardView2"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginTop="8dp"
-            android:layout_weight="1"
-            app:cardBackgroundColor="@color/card_bg_color"
-            app:cardCornerRadius="2dp"
-            app:contentPadding="10dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1">
-
-                    <ImageView
-                        android:id="@+id/imageView8"
-                        android:layout_width="42dp"
-                        android:layout_height="42dp"
-                        android:layout_gravity="top|left"
-                        android:src="@drawable/ic_cloud" />
-
-                    <TextView
-                        android:id="@+id/text_update_version_header"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentTop="true"
-                        android:layout_gravity="top"
-                        android:layout_marginStart="9dp"
-                        android:layout_toEndOf="@+id/imageView8"
-                        android:text="@string/text_update_version_title"
-                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
-                        android:textColor="?android:attr/textColorPrimary" />
-
-                    <TextView
-                        android:id="@+id/text_update_version"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_alignStart="@+id/text_update_version_header"
-                        android:layout_below="@+id/text_update_version_header"
-                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
-                        android:textColor="?android:attr/textColorPrimary" />
-
-                    <TextView
-                        android:id="@+id/text_download_size_header"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_below="@+id/text_update_version"
-                        android:text="@string/text_download_size_header_title"
-                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
-                        android:textColor="?android:attr/textColorPrimary" />
-
-                    <TextView
-                        android:id="@+id/text_download_size"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_below="@+id/text_download_size_header"
-                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
-                        android:textColor="?android:attr/textColorPrimary" />
-
-                    <TextView
-                        android:id="@+id/progress_text"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_below="@+id/text_download_size"
-                        android:layout_marginTop="5dp"
-                        android:ellipsize="marquee"
-                        android:maxLines="1"
-                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
-                        android:textColor="?android:attr/textColorPrimary" />
-
-                    <LinearLayout
-                        android:id="@+id/progress_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@+id/progress_text"
-                        android:layout_alignParentStart="true"
-                        android:orientation="horizontal">
-
-                        <ProgressBar
-                            android:id="@+id/progress_bar"
-                            style="?android:attr/progressBarStyleHorizontal"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1"
-                            android:max="1"
-                            android:progress="0" />
-
-                        <ImageButton
-                            android:id="@+id/button_stop"
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:layout_gravity="center_vertical"
-                            android:background="?android:attr/selectableItemBackgroundBorderless"
-                            android:contentDescription="@string/button_stop"
-                            android:onClick="onButtonStopClick"
-                            android:src="@android:drawable/ic_menu_close_clear_cancel" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@+id/progress_container"
-                        android:layout_alignParentStart="true"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/progress_percent"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@+id/progress_text"
-                            android:gravity="start"
-                            android:maxLines="1"
-                            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
-                            android:textColor="?android:attr/textColorPrimary" />
-
-                        <Space
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"/>
-
-                        <TextView
-                            android:id="@+id/progress_text2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:ellipsize="marquee"
-                            android:gravity="end"
-                            android:maxLines="1"
-                            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
-                            android:textColor="?android:attr/textColorPrimary" />
-
-                        <Space
-                            android:id="@+id/progress_end_margin"
-                            android:layout_width="32dp"
-                            android:layout_height="wrap_content"
-                            android:visibility="gone" />
-
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/text_extra"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_alignParentBottom="true"
-                        android:ellipsize="marquee"
-                        android:maxLines="2"
-                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
-                        android:textColor="?android:attr/textColorPrimary" />
-
-                </RelativeLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:orientation="horizontal">
-
-                    <Space
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1" />
-
-                    <Button
-                        android:id="@+id/button_select_file"
-                        android:layout_width="wrap_content"
-                        android:layout_height="46dp"
-                        android:onClick="onButtonSelectFileClick"
-                        android:paddingLeft="16dp"
-                        android:paddingRight="16dp"
-                        android:text="@string/button_select_file"
-                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.Button" />
-
-                    <Button
-                        android:id="@+id/button_flash_now"
-                        android:layout_width="wrap_content"
-                        android:layout_height="42dp"
-                        android:onClick="onButtonFlashNowClick"
-                        android:paddingLeft="16dp"
-                        android:paddingRight="16dp"
-                        android:text="@string/button_flash_now"
-                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.Button" />
-
-                    <Button
-                        android:id="@+id/button_build_delta"
-                        android:layout_width="wrap_content"
-                        android:layout_height="42dp"
-                        android:onClick="onButtonBuildNowClick"
-                        android:paddingLeft="16dp"
-                        android:paddingRight="16dp"
-                        android:text="@string/button_build_delta"
-                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.Button" />
-
-                    <Button
-                        android:id="@+id/button_check_now"
-                        android:layout_width="wrap_content"
-                        android:layout_height="42dp"
-                        android:onClick="onButtonCheckNowClick"
-                        android:paddingLeft="16dp"
-                        android:paddingRight="16dp"
-                        android:text="@string/button_check_short"
-                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.Button" />
-
-                    <Button
-                        android:id="@+id/button_reboot_now"
-                        android:layout_width="wrap_content"
-                        android:layout_height="42dp"
-                        android:onClick="onButtonRebootNowClick"
-                        android:paddingLeft="16dp"
-                        android:paddingRight="16dp"
-                        android:text="@string/button_reboot_short"
-                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.Button" />
-                </LinearLayout>
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
-
+        <TextView
+            android:id="@+id/text_last_checked"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textAppearance="@style/ValueText" />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/text_current_version_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/text_current_version_header_title"
+            android:textAppearance="@style/HeaderText" />
+
+        <TextView
+            android:id="@+id/text_current_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textAppearance="@style/ValueText" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/text_update_version_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/text_update_version_title"
+            android:textAppearance="@style/HeaderText" />
+
+        <TextView
+            android:id="@+id/text_update_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textAppearance="@style/ValueText" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/text_download_size_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/text_download_size_header_title"
+            android:textAppearance="@style/HeaderText" />
+
+        <TextView
+            android:id="@+id/text_download_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textAppearance="@style/ValueText" />
+    </LinearLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/button_select_file"
+            style="@android:style/Widget.DeviceDefault.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onButtonSelectFileClick"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:text="@string/button_select_file"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/button_flash_now"
+            style="@android:style/Widget.DeviceDefault.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onButtonFlashNowClick"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:visibility="invisible"
+            android:text="@string/button_flash_now" />
+
+        <Button
+            android:id="@+id/button_build_delta"
+            style="@android:style/Widget.DeviceDefault.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onButtonBuildNowClick"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:visibility="invisible"
+            android:text="@string/button_build_delta" />
+
+        <Button
+            android:id="@+id/button_check_now"
+            style="@android:style/Widget.DeviceDefault.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onButtonCheckNowClick"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:visibility="invisible"
+            android:text="@string/button_check_short" />
+
+        <Button
+            android:id="@+id/button_reboot_now"
+            style="@android:style/Widget.DeviceDefault.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onButtonRebootNowClick"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:visibility="invisible"
+            android:text="@string/button_reboot_short" />
+    </LinearLayout>
 </LinearLayout>
