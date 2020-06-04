@@ -94,6 +94,11 @@
 	<PreferenceCategory
 		android:key="category_admin"
 		android:title="@string/category_admin" >
+		<SwitchPreference
+			android:key="show_info"
+			android:title="@string/show_info_title"
+			android:summary="@string/show_info_summary"
+			android:defaultValue="true" />
 		<Preference
 			android:key="clear_files"
 			android:persistent="false"

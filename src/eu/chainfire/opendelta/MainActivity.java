@@ -58,6 +58,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -90,6 +91,8 @@ public class MainActivity extends Activity {
     private SharedPreferences mPrefs;
     private TextView mUpdateVersionTitle;
     private TextView mExtraText;
+    private TextView mInfoText;
+    private ImageView mInfoImage;
 
     private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 0;
     private static final int ACTIVITY_SELECT_FLASH_FILE = 1;
@@ -135,10 +138,13 @@ public class MainActivity extends Activity {
         mFileFlashButton = findViewById(R.id.button_select_file);
         mUpdateVersionTitle = findViewById(R.id.text_update_version_header);
         mExtraText = findViewById(R.id.extra_text);
+        mInfoText = (TextView) findViewById(R.id.info_text);
+        mInfoImage = (ImageView) findViewById(R.id.info_image);
 
         config = Config.getInstance(this);
         mPermOk = false;
         requestPermissions();
+        updateInfoVisibility();
     }
 
     @Override
@@ -544,6 +550,7 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         handleProgressBar();
+        updateInfoVisibility();
         mFileFlashButton.setVisibility(
                 mPrefs.getBoolean(SettingsActivity.PREF_FILE_FLASH, false) ? View.VISIBLE : View.GONE);
     }
@@ -685,6 +692,12 @@ public class MainActivity extends Activity {
         progress.setProgress(mProgressCurrent);
         progress.setMax(mProgressMax);
         progress.setVisibility(mProgressEnabled ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    private void updateInfoVisibility() {
+        boolean showInfo = config.getShowInfo();
+        mInfoImage.setVisibility(showInfo ? View.VISIBLE : View.INVISIBLE);
+        mInfoText.setVisibility(showInfo ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override
