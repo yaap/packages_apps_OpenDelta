@@ -196,7 +196,7 @@
 
         <Button
             android:id="@+id/button_select_file"
-            style="@android:style/Widget.DeviceDefault.Button.Colored"
+            style="@style/ActionPrimaryButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onButtonSelectFileClick"
@@ -207,46 +207,46 @@
 
         <Button
             android:id="@+id/button_flash_now"
-            style="@android:style/Widget.DeviceDefault.Button.Colored"
+            style="@style/ActionPrimaryButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onButtonFlashNowClick"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
             android:visibility="invisible"
-            android:text="@string/button_flash_now" />
+            android:text="@string/button_flash_now"/>
 
         <Button
             android:id="@+id/button_build_delta"
-            style="@android:style/Widget.DeviceDefault.Button.Colored"
+            style="@style/ActionPrimaryButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onButtonBuildNowClick"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
             android:visibility="invisible"
-            android:text="@string/button_build_delta" />
+            android:text="@string/button_build_delta"/>
 
         <Button
             android:id="@+id/button_check_now"
-            style="@android:style/Widget.DeviceDefault.Button.Colored"
+            style="@style/ActionPrimaryButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onButtonCheckNowClick"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
             android:visibility="invisible"
-            android:text="@string/button_check_short" />
+            android:text="@string/button_check_short"/>
 
         <Button
             android:id="@+id/button_reboot_now"
-            style="@android:style/Widget.DeviceDefault.Button.Colored"
+            style="@style/ActionPrimaryButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onButtonRebootNowClick"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
             android:visibility="invisible"
-            android:text="@string/button_reboot_short" />
+            android:text="@string/button_reboot_short"/>
     </LinearLayout>
 </LinearLayout>
