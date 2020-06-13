@@ -63,6 +63,7 @@ public class Config {
     private final String url_base_delta;
     private final String url_base_update;
     private final String url_base_full;
+    private final String url_base_full_md5;
     private final String url_base_suffix;
     private final boolean apply_signature;
     private final boolean inject_signature_enable;
@@ -120,6 +121,8 @@ public class Config {
                 res.getString(R.string.url_base_update), property_device);
         url_base_full = String.format(
                 res.getString(R.string.url_base_full), property_device);
+        url_base_full_md5 = String.format(
+                res.getString(R.string.url_base_full_md5), property_device);
         url_base_suffix = res.getString(R.string.url_base_suffix);
         apply_signature = res.getBoolean(R.bool.apply_signature);
         inject_signature_enable = res
@@ -162,6 +165,7 @@ public class Config {
         Logger.d("url_base_delta: %s", url_base_delta);
         Logger.d("url_base_update: %s", url_base_update);
         Logger.d("url_base_full: %s", url_base_full);
+        Logger.d("url_base_full_md5: %s", url_base_full_md5);
         Logger.d("url_base_json: %s", url_base_json);
         Logger.d("apply_signature: %d", apply_signature ? 1 : 0);
         Logger.d("inject_signature_enable: %d", inject_signature_enable ? 1 : 0);
@@ -193,6 +197,10 @@ public class Config {
 
     public String getUrlBaseFull() {
         return url_base_full;
+    }
+
+    public String getUrlBaseFullMd5() {
+        return url_base_full_md5;
     }
 
     public String getUrlSuffix() {
