@@ -89,7 +89,7 @@
     <string name="category_admin">Поддержка</string>
     <string name="clear_files_title">Очистить файлы обновления</string>
     <string name="clear_files_summary">Удалить существующие файлы обновлений для принудительного скачивания обновления</string>
-    <string name="clean_files_feedback" formatted="false">Удалено %d файлов. Теперь нажмите «Check for updates»</string>
+    <string name="clean_files_feedback" formatted="false">Удалено %d файлов. Теперь нажмите «Проверить»</string>
     <string name="state_error_permissions">Нет разрешения для хранения.</string>
     <string name="state_error_flash">Ошибка установки. Сделайте очистку /cache и попробуйте еще раз.</string>
     <string name="state_error_ab_flash">Ошибка установки. Перезагрузите устройство и попробуйте еще раз.</string>
