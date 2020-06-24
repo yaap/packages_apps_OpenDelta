@@ -39,8 +39,6 @@
     <string name="recovery_notice_description_not_secure"><![CDATA[在当前的模式中的更新刷入功能仅在 <b>TWRP</b> 的 Recovery 中得到 <i>正式</i> 支持。而 <b>CWM</b> 并没有被 <i>正式</i> 支持。但是有一些 <i>社区构建</i> 的<b>CWM</b> <i>可能</i> 能够工作。在继续前，请确保您目前正在使用的 Recovery 能够兼容。]]></string>
     <string name="flash_after_update_notice_title">通知</string>
     <string name="flash_after_update_notice_description"><![CDATA[附加更新目前是放在 <b>FlashAfterUpdate</b> 文件夹中，但是由于安全模式已开启，如果您选择继续，这些附加的功能将 <b>不会</b> 被刷入。]]></string>
-    <string name="state_error_not_official_title">更新被禁用。</string>
-    <string name="state_error_not_official_extra" formatted="false">不能执行 %s 的更新</string>
     <string name="button_build_delta">下载</string>
     <string name="button_stop">停止</string>
     <string name="state_action_build">有可用更新。</string>

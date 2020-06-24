@@ -39,8 +39,6 @@
     <string name="recovery_notice_description_not_secure"><![CDATA[Nameščanje posodobitev v trenutnem načinu je podprto samo v obnovitvah <b>TWRP</b>.  <i>Uradne</i> izgradnje <b>CWM</b> <i>niso</i> podprte, čeprav lahko nekatere </i>različice</i>  <b>CWM-a</b>, <i>ki jih je izgradila skupnost</i>, še vedno delujejo.  Pred nadaljevanjem se prepričajte, da izvajate združljivo obnovitev.]]></string>
     <string name="flash_after_update_notice_title">Obvestilo</string>
     <string name="flash_after_update_notice_description"><![CDATA[V mapi <b>FlashAfterUpdate</b> so prisotne dodatne posodobitve, vendar je varni način omogočen.  Če nadaljujete, te posodobitve <b>ne</b> bodo nameščene.]]></string>
-    <string name="state_error_not_official_title">Posodobitve onemogočene.</string>
-    <string name="state_error_not_official_extra" formatted="false">Posodobitev %s ni mogoča</string>
     <string name="button_build_delta">Prejmi</string>
     <string name="button_stop">Ustavi</string>
     <string name="state_action_build">Na voljo je posodobitev.</string>

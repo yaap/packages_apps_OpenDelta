@@ -39,8 +39,6 @@
     <string name="recovery_notice_description_not_secure"><![CDATA[Встановлення оновлень в даному режимі офіційно підтримується тільки за допомогою <b>TWRP</b> рекавері. <i>Офіційно</i> <b>CWM</b>  <i>не</i> підтримується, але деякі <i>користувальницькі збірки</i> <b>CWM</b> <i>можливо</i> сумісні. Будь ласка, впевніться, що у вас сумісні рекавері, перш ніж продовжити.]]></string>
     <string name="flash_after_update_notice_title">Зверніть увагу</string>
     <string name="flash_after_update_notice_description"><![CDATA[Додаткові оновлення розташовуються в теці <b>FlashAfterUpdate</b>, але Безпечний режим активовано. Якщо ви продовжуєте, всі додаткові файли <b>не будуть</b> встановлені.]]></string>
-    <string name="state_error_not_official_title">Оновлення вимкнуто.</string>
-    <string name="state_error_not_official_extra" formatted="false">Оновлення %s неможливе</string>
     <string name="button_build_delta">Завантажити</string>
     <string name="button_stop">Стоп</string>
     <string name="state_action_build">Оновлення доступні.</string>

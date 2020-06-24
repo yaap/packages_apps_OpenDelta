@@ -39,8 +39,6 @@
     <string name="recovery_notice_description_not_secure"><![CDATA[Het installeren van updates in de huidige modus wordt alleen officieel ondersteund op <b>TWRP</b>. <i>Officiële</i> <b>CWM</b> recoveries zijn <i>niet</i> ondersteund, hoewel sommige <i>community gebouwde</i> versies van <b>CWM</b> <i>zouden kunnen</i> werken. Zorg ervoor dat u een compatibele recovery heeft voordat u verdergaat.]]></string>
     <string name="flash_after_update_notice_title">Melding</string>
     <string name="flash_after_update_notice_description"><![CDATA[Aanvullende updates zijn aanwezig in de <b>FlashAfterUpdate</b> map, maar veilige modus is ingeschakeld. Als u doorgaat, zullen deze aanvullende updates <b>niet</b> worden geflasht.]]></string>
-    <string name="state_error_not_official_title">Updates uitgeschakeld.</string>
-    <string name="state_error_not_official_extra" formatted="false">Update voor %s niet mogelijk</string>
     <string name="button_build_delta">Download</string>
     <string name="button_stop">Stop</string>
     <string name="state_action_build">Update beschikbaar.</string>

@@ -39,8 +39,6 @@
     <string name="recovery_notice_description_not_secure"><![CDATA[Təzələmələri yalnız rəsmi şəkildə dəstəklənən <b>TWRP</b> bərpa bölümləri ilə yükləyə bilərsiniz. <i>Şəkli</i><b>CWM</b> quruluşları <i>dəstəklənmir.</i> Bəzi <i> cəmiyyət tərəfindən hazırlanmış</i> <b>CWM</b> versiyaları <i> işləyə bilər.</i> Xahiş edirik davam etməzdən əvvəl uyğun bərpa bölümünün cihazınızda olduğuna əmin olun.]]></string>
     <string name="flash_after_update_notice_title">Bildiriş</string>
     <string name="flash_after_update_notice_description"><![CDATA[Əlavə təzələmələr <b>FlashAfterUpdate</b> qovluğundadır, amma təhlükəsiz mod aktivdir. Davam etsəniz, bu əlavə təzələmələr <b> yüklənməyəcək. </b>.]]></string>
-    <string name="state_error_not_official_title">Təzələmələr qeyri-aktiv edildi.</string>
-    <string name="state_error_not_official_extra" formatted="false">%s təzələməsi mümkünsüzdür</string>
     <string name="button_build_delta">Yüklə</string>
     <string name="button_stop">Dayan</string>
     <string name="state_action_build">Təzələmə mövcuddur.</string>

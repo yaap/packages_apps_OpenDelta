@@ -39,8 +39,6 @@
     <string name="recovery_notice_description_not_secure"><![CDATA[L\'installazione degli aggiornamenti in questa modalità è supportata ufficialmente solo dalla recovery <b>TWRP</b>. Le versioni <i>ufficiali</i> <b>CWM</b> <i>non</i> sono supportate, anche se alcune versioni <b>CWM</b> <i>realizzate nella community</i> <i>potrebbero</i> funzionare comunque. Assicurati di utilizzare una recovery compatibile prima di proseguire.]]></string>
     <string name="flash_after_update_notice_title">Attenzione</string>
     <string name="flash_after_update_notice_description"><![CDATA[Nella cartella <b>FlashAfterUpdate</b> sono presenti degli aggiornamenti aggiuntivi, ma la Modalità Sicura è attivata. Se prosegui, questi aggiornamenti aggiuntivi <b>non</b> verranno installati.]]></string>
-    <string name="state_error_not_official_title">Aggiornamenti disabilitati.</string>
-    <string name="state_error_not_official_extra" formatted="false">L\'aggiornamento di %s non è possibile</string>
     <string name="button_build_delta">Download</string>
     <string name="button_stop">Stop</string>
     <string name="state_action_build">Aggiornamento disponibile.</string>

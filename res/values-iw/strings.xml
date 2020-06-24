@@ -36,8 +36,6 @@
     <string name="recovery_notice_description_secure"><![CDATA[התקנת עדכונים במצב הנוכחי נתמכת רק על ידי <b>TWRP</b> ריקברי. נא וודא שמכשירך מריץ ריקברי מתאים לפני שתמשיך.]]></string>
     <string name="flash_after_update_notice_title">הערה</string>
     <string name="flash_after_update_notice_description"><![CDATA[עדכונים נוספים יוצגו בתיקיית <b>FlashAfterUpdate</b>, כעת מצב מאובטח פעיל. אם תבחר להמשיך, אותם עדכונים נוספים <b>לא</b> יותקנו.]]></string>
-    <string name="state_error_not_official_title">עדכון מושבת.</string>
-    <string name="state_error_not_official_extra" formatted="false">עדכון של %s בלתי אפשרי</string>
     <string name="button_build_delta">הורדה</string>
     <string name="button_stop">עצור</string>
     <string name="state_action_build">עדכון זמין.</string>
