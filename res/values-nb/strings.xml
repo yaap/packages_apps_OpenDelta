@@ -39,8 +39,6 @@
     <string name="recovery_notice_description_not_secure"><![CDATA[Flashing i gjeldende modus støttes bare offisielt på <b>TWRP</b> gjenoppretting. <i>Offisielle</i> <b>CWM</b> bygg er <i>ikke</i> støttet, skjønt noen <i>fellesskap-byggede</i> versjoner av <b>CWM</b> <i>kan</i> fremdeles fungere. Vær sikker på at du kjører en kompatibel gjenoppretting før du fortsetter.]]></string>
     <string name="flash_after_update_notice_title">Merknad</string>
     <string name="flash_after_update_notice_description"><![CDATA[Flere oppdateringer er finnes i mappen <b>FlashAfterUpdate</b>, men sikker modus er aktivert. Hvis du fortsetter, vil disse oppdateringene <b>ikke</b> bli flashet.]]></string>
-    <string name="state_error_not_official_title">Oppdatering deaktivert.</string>
-    <string name="state_error_not_official_extra" formatted="false">Oppdatering av %s ikke mulig</string>
     <string name="button_build_delta">Last ned</string>
     <string name="button_stop">Stopp</string>
     <string name="state_action_build">Oppdatering er tilgjengelig.</string>

@@ -32,7 +32,6 @@
     <string name="secure_mode_disabled_description"><![CDATA[Kemas kini tambahan akan diflash jika ada. Ambil perhatian bahawa mana-mana pakej perisian (berbahaya) boleh mengubah kemas kini ini dan mendapat akses sistem penuh. Awas dinasihatkan.]]></string>
     <string name="recovery_notice_title">Notis</string>
     <string name="flash_after_update_notice_title">Notis</string>
-    <string name="state_error_not_official_title">Kemas kini tidak diaktifkan.</string>
     <string name="button_build_delta">Muat turun</string>
     <string name="button_stop">Berhenti</string>
     <string name="state_action_build">Kemas kini tersedia.</string>

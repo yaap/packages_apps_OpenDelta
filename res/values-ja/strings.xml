@@ -43,8 +43,6 @@
     <string name="recovery_notice_description_not_secure"><![CDATA[現在のモードでの更新の書き込みは、<b>TWRP</b> リカバリーのみ正式にサポートされています。<b>CWM</b> のいくつかの<i>コミュニティビルド</i>バージョンでは動作する<i>かもしれませんが</i>、<i>公式</i> <b>CWM</b> はサポート<i>されていません</i>。続行する前に互換性のあるリカバリーを実行していることを確認して下さい。]]></string>
     <string name="flash_after_update_notice_title">注意</string>
     <string name="flash_after_update_notice_description"><![CDATA[追加の更新は <b>FlashAfterUpdate</b> フォルダにありますが、セキュアモードは有効です。続行すると、これらの追加の更新はフラッシュ<b>されません</b>。]]></string>
-    <string name="state_error_not_official_title">更新が無効になりました</string>
-    <string name="state_error_not_official_extra" formatted="false">%sの更新はできません</string>
     <string name="button_build_delta">ダウンロード</string>
     <string name="button_stop">停止</string>
     <string name="state_action_build">利用可能な更新があります</string>

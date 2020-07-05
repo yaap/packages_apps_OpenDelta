@@ -44,10 +44,8 @@
  <i>Resmî</i> <b>CWM</b> derlemeleri <i>desteklenmemektedir</i>, fakat <i>topluluk tarafından derlenen</i> bazı <b>CWM</b> versiyonları hâlâ <i>çalışabilir</i>. Lütfen devam etmeden evvel uyumlu bir recovery yazılımına sahip olduğunuzdan emin olun.]]></string>
     <string name="flash_after_update_notice_title">Bildiri</string>
     <string name="flash_after_update_notice_description"><![CDATA[İlâve güncellemeler <b>FlashAfterUpdate</b> klasöründe mevcuttur, fakat güvenli mod devrede. Devam ederseniz bu ilâve güncellemeler <b>kurulmayacaktır</b>.]]></string>
-    <string name="state_error_not_official_title">Güncelleme devre dışı bırakıldı</string>
-    <string name="state_error_not_official_extra" formatted="false">%s yazılımının güncellenmesi mümkün değil</string>
     <string name="button_build_delta">İndir</string>
-    <string name="button_stop">Dur</string>
+    <string name="button_stop">Durdur</string>
     <string name="state_action_build">Güncelleme mevcut</string>
     <string name="state_action_build_delta">Kısmî güncelleme mümkün</string>
     <string name="state_action_build_full">Tam güncelleme mümkün</string>
