@@ -696,8 +696,10 @@ public class MainActivity extends Activity {
 
     private void updateInfoVisibility() {
         boolean showInfo = config.getShowInfo();
-        mInfoImage.setVisibility(showInfo ? View.VISIBLE : View.INVISIBLE);
-        mInfoText.setVisibility(showInfo ? View.VISIBLE : View.INVISIBLE);
+        if (mInfoImage != null && mInfoText != null) {
+            mInfoImage.setVisibility(showInfo ? View.VISIBLE : View.INVISIBLE);
+            mInfoText.setVisibility(showInfo ? View.VISIBLE : View.INVISIBLE);
+        }
     }
 
     @Override
