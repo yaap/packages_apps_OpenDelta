@@ -32,6 +32,7 @@
     <string name="state_action_ab_flash">Instalando Atualização AB &#8230;</string>
     <string name="state_action_ab_finished">Instalação concluída. Reinicie agora &#8230;</string>
     <string name="button_reboot_short">Reiniciar</string>
+    <string name="state_action_flash_file_ready">Atualização pronta para o flash</string>
     <!-- updates from 2013/12/18 -->
     <string name="action_secure_mode">Seguro</string>
     <string name="secure_mode_enabled_title">Modo seguro: habilitado</string>
@@ -43,6 +44,7 @@
     <string name="recovery_notice_description_not_secure"><![CDATA[A aplicação de atualizações é apenas suportada na recuperação <b>TWRP</b>. Trabalhos <i>Oficiais</i> <b>CWM</b> <i>não</i> são suportadas, apesar de algumas versões <i>da comunidade</i> com <b>CWM</b> <i>possivelmente</i> funcionarão. Por favor, certifique-se de que está rodando uma recovery compatível antes de prosseguir.]]></string>
     <string name="flash_after_update_notice_title">Aviso</string>
     <string name="flash_after_update_notice_description"><![CDATA[Atualizações adicionais serão apresentadas no diretório <b>FlashAfterUpdate</b>, porém o modo seguro será habilitado. Se você prosseguir, estas atualizações <b>não</b> serão aplicadas.]]></string>
+    <string name="state_error_not_official_extra" formatted="false">Atualização do tipo %s não é possível</string>
     <string name="button_build_delta">Baixar</string>
     <string name="button_stop">Pare</string>
     <string name="state_action_build">Atualização disponível.</string>
@@ -114,4 +116,7 @@
     <string name="flash_file_notice_message"><b>Atenção:</b> Não haverá nenhuma verificação se o arquivo ZIP selecionado é adequado para o seu dispositivo!\n\n<b>Piscar o ZIP errado pode levar a um dispositivo não funcional!</b></string>
     <string name="channel_name">Atualização em andamento</string>
     <string name="text_update_file_flash_title">Atualizar arquivo</string>
+    <string name="text_info_section">Pressione verificar para ver se uma atualização está disponível. Após a atualização de uma atualização, você será solicitado a reiniciar. Os dispositivos com uma atualização tradicional baseada em recuperação entrarão em recuperação na reinicialização para executar o processo flash. Se o seu dispositivo suportar atualizações contínuas (A / B), a reinicialização ativará a atualização.</string>
+    <string name="error_ab_timestamp">Versão mais recente do que a atualização</string>
+    <string name="error_ab_inactive">Atualização já instalada e precisa ser reinicializada</string>
 </resources>

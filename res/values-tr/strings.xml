@@ -2,8 +2,8 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">Sistem güncellemeleri</string>
-    <string name="action_networks">Şebekeler</string>
-    <string name="title_networks">İndirmenin kendiliğinden başlayacağı şebekeler</string>
+    <string name="action_networks">Ağlar</string>
+    <string name="title_networks">İndirmenin kendiliğinden başlayacağı ağlar</string>
     <string name="network_wifi">Kablosuz bağlantı</string>
     <string name="network_ethernet">Ethernet</string>
     <string name="network_unknown">Diğer</string>
@@ -32,6 +32,7 @@
     <string name="state_action_ab_flash">AB güncellemesi kuruluyor &#8230;</string>
     <string name="state_action_ab_finished">Kurulum tamamlandı. Cihazı şimdi tekrar başlatın &#8230;</string>
     <string name="button_reboot_short">Tekrar başlat</string>
+    <string name="state_action_flash_file_ready">Güncelleme kurulmaya hazır</string>
     <!-- updates from 2013/12/18 -->
     <string name="action_secure_mode">Güvenli</string>
     <string name="secure_mode_enabled_title">Güvenli mod: devrede</string>
@@ -44,6 +45,7 @@
  <i>Resmî</i> <b>CWM</b> derlemeleri <i>desteklenmemektedir</i>, fakat <i>topluluk tarafından derlenen</i> bazı <b>CWM</b> versiyonları hâlâ <i>çalışabilir</i>. Lütfen devam etmeden evvel uyumlu bir recovery yazılımına sahip olduğunuzdan emin olun.]]></string>
     <string name="flash_after_update_notice_title">Bildiri</string>
     <string name="flash_after_update_notice_description"><![CDATA[İlâve güncellemeler <b>FlashAfterUpdate</b> klasöründe mevcuttur, fakat güvenli mod devrede. Devam ederseniz bu ilâve güncellemeler <b>kurulmayacaktır</b>.]]></string>
+    <string name="state_error_not_official_extra" formatted="false">%s yazılımının güncellenmesi mümkün değildir</string>
     <string name="button_build_delta">İndir</string>
     <string name="button_stop">Durdur</string>
     <string name="state_action_build">Güncelleme mevcut</string>
@@ -80,8 +82,8 @@
     <string name="scheduler_weekly">Haftalık</string>
     <string name="scheduler_daily_time">Zaman</string>
     <string name="scheduler_week_day">Gün</string>
-    <string name="networks_title">Şebekeler</string>
-    <string name="networks_message">Sadece belirli şebeke cinsleri üzerinde indir</string>
+    <string name="networks_title">Ağlar</string>
+    <string name="networks_message">Sadece belirli ağ türleri üzerinde indir</string>
     <string name="category_flashing">Kurma</string>
     <string name="secure_mode_title">Güvenli mod</string>
     <string name="state_error_connection">Veri bağlantısı yok.</string>
@@ -115,4 +117,7 @@
     <string name="flash_file_notice_message"><b>Dikkat:</b> Seçilen ZIP dosyasının cihazınıza uygun olup olmadığına dâir herhangi bir yoklama olmayacaktır!\n\n<b>Yanlış bir ZIP dosyasını kurmak cihazınızı kullanılamaz hâle getirebilir!</b></string>
     <string name="channel_name">Güncelleme ilerlemesi</string>
     <string name="text_update_file_flash_title">Güncelleme dosyası</string>
+    <string name="text_info_section">Bir güncellemenin mevcut olup olmadığına bakmak için yokla düğmesine dokununuz. Bir güncelleme kurulduktan sonra sizden yeniden başlatmanız rica edilir. Geleneksel recovery yazılımı temeline sahip cihazlar kurulum işleminin yerine getirilmesi için yeniden başlatılma esnasında recovery moduna girer. Cihazınız A/B tipi güncellemeleri destekliyorsa yeniden başlatma güncellemeyi devreye sokar.</string>
+    <string name="error_ab_timestamp">Mevcut versiyon güncellemeden daha yeni</string>
+    <string name="error_ab_inactive">Güncelleme zâten kurulmuş ve yeniden başlatmaya ihtiyacı var</string>
 </resources>
