@@ -1843,7 +1843,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
             Logger.d("flashUpdate - reboot to recovery");
 
-            ((PowerManager) getSystemService(Context.POWER_SERVICE)).rebootCustom(PowerManager.REBOOT_RECOVERY);
+            ((PowerManager) getSystemService(Context.POWER_SERVICE)).advancedReboot(PowerManager.REBOOT_RECOVERY);
         } catch (Exception e) {
             // We have failed to write something. There's not really anything
             // else to do at
