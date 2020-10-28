@@ -25,12 +25,12 @@
 			android:key="secure_mode"
 			android:persistent="false"
 			android:title="@string/secure_mode_title" />
-		<SwitchPreference
+		<!-- <SwitchPreference
 			android:defaultValue="true"
 			android:key="ab_perf_mode"
 			android:persistent="false"
 			android:title="@string/ab_perf_mode_title"
-			android:summary="@string/ab_perf_mode_summary_new" />
+			android:summary="@string/ab_perf_mode_summary_new" /> -->
 		<SwitchPreference
 			android:defaultValue="true"
 			android:key="file_flash_support"

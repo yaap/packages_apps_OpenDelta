@@ -154,7 +154,7 @@ class ABUpdate {
         }
 
         UpdateEngine updateEngine = new UpdateEngine();
-        updateEngine.setPerformanceMode(enableABPerfMode);
+        // updateEngine.setPerformanceMode(enableABPerfMode);
         updateEngine.bind(mUpdateEngineCallback);
         String zipFileUri = "file://" + file.getAbsolutePath();
         updateEngine.applyPayload(zipFileUri, offset, 0, headerKeyValuePairs);
