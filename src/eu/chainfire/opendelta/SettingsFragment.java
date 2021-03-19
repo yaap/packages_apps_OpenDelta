@@ -65,7 +65,7 @@ public class SettingsFragment extends PreferenceFragment implements
     private ListPreference mBatteryLevel;
     private SwitchPreference mChargeOnly;
     private SwitchPreference mSecureMode;
-    // private SwitchPreference mABPerfMode;
+    private SwitchPreference mABPerfMode;
     private Config mConfig;
     private PreferenceCategory mAutoDownloadCategory;
     private ListPreference mSchedulerMode;
@@ -99,9 +99,9 @@ public class SettingsFragment extends PreferenceFragment implements
         mSecureMode = (SwitchPreference) findPreference(KEY_SECURE_MODE);
         mSecureMode.setEnabled(mConfig.getSecureModeEnable());
         mSecureMode.setChecked(mConfig.getSecureModeCurrent());
-        // mABPerfMode = (SwitchPreference) findPreference(KEY_AB_PERF_MODE);
-        // mABPerfMode.setChecked(mConfig.getABPerfModeCurrent());
-        // mABPerfMode.setOnPreferenceChangeListener(this);
+        mABPerfMode = (SwitchPreference) findPreference(KEY_AB_PERF_MODE);
+        mABPerfMode.setChecked(mConfig.getABPerfModeCurrent());
+        mABPerfMode.setOnPreferenceChangeListener(this);
         mFileFlash = (SwitchPreference) findPreference(SettingsActivity.PREF_FILE_FLASH);
         mShowInfo = (SwitchPreference) findPreference(KEY_SHOW_INFO);
         mShowInfo.setChecked(mConfig.getShowInfo());
@@ -111,7 +111,7 @@ public class SettingsFragment extends PreferenceFragment implements
                 (PreferenceCategory) findPreference(KEY_CATEGORY_FLASHING);
 
         if (!Config.isABDevice()) {
-            // flashingCategory.removePreference(mABPerfMode);
+            flashingCategory.removePreference(mABPerfMode);
             flashingCategory.removePreference(mFileFlash);
         }
 
@@ -219,9 +219,9 @@ public class SettingsFragment extends PreferenceFragment implements
             int idx = mScheduleWeekDay.findIndexOfValue((String) newValue);
             mScheduleWeekDay.setSummary(mScheduleWeekDay.getEntries()[idx]);
             return true;
-        // } else if (preference.equals(mABPerfMode)) {
-        //     mConfig.setABPerfModeCurrent((boolean) newValue);
-        //     return true;
+        } else if (preference.equals(mABPerfMode)) {
+            mConfig.setABPerfModeCurrent((boolean) newValue);
+            return true;
         } else if (preference.equals(mShowInfo)) {
             mConfig.setShowInfo((boolean) newValue);
             return true;
