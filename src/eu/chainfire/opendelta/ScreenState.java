@@ -29,15 +29,15 @@ import android.os.PowerManager;
 
 public class ScreenState {
     public interface OnScreenStateListener {
-        public void onScreenState(boolean state);
+        void onScreenState(boolean state);
     }
 
     private Context context = null;
     private OnScreenStateListener onScreenStateListener = null;
     private volatile Boolean stateLast = null;
 
-    private IntentFilter filter = null;
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
+    private final IntentFilter filter;
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             updateState(intent);
@@ -95,6 +95,6 @@ public class ScreenState {
     public Boolean getState() {
         if (stateLast == null)
             return false;
-        return stateLast.booleanValue();
+        return stateLast;
     }
 }

@@ -61,7 +61,7 @@ import java.util.Locale;
 public class Scheduler implements OnScreenStateListener,
         OnSharedPreferenceChangeListener {
     public interface OnWantUpdateCheckListener {
-        public boolean onWantUpdateCheck();
+        boolean onWantUpdateCheck();
     }
 
     private static final String PREF_LAST_CHECK_ATTEMPT_TIME_NAME = "last_check_attempt_time";
@@ -74,19 +74,19 @@ public class Scheduler implements OnScreenStateListener,
     private static final long ALARM_DETECT_SLEEP_TIME = (5 * AlarmManager.INTERVAL_HOUR)
             + AlarmManager.INTERVAL_HALF_HOUR;
 
-    private OnWantUpdateCheckListener onWantUpdateCheckListener = null;
-    private AlarmManager alarmManager = null;
-    private SharedPreferences prefs = null;
+    private final OnWantUpdateCheckListener onWantUpdateCheckListener;
+    private final AlarmManager alarmManager;
+    private final SharedPreferences prefs;
 
-    private PendingIntent alarmInterval = null;
-    private PendingIntent alarmSecondaryWake = null;
-    private PendingIntent alarmDetectSleep = null;
-    private PendingIntent alarmCustom = null;
+    private final PendingIntent alarmInterval;
+    private final PendingIntent alarmSecondaryWake;
+    private final PendingIntent alarmDetectSleep;
+    private final PendingIntent alarmCustom;
 
     private boolean stopped;
     private boolean customAlarm;
 
-    private SimpleDateFormat sdfLog = (new SimpleDateFormat("HH:mm",
+    private final SimpleDateFormat sdfLog = (new SimpleDateFormat("HH:mm",
             Locale.ENGLISH));
 
     public Scheduler(Context context,
@@ -156,7 +156,7 @@ public class Scheduler implements OnScreenStateListener,
         return true;
     }
 
-    private boolean checkForUpdates(boolean force) {
+    private void checkForUpdates(boolean force) {
         // Using abs here in case user changes date/time
         if (force
                 || (Math.abs(System.currentTimeMillis()
@@ -172,7 +172,6 @@ public class Scheduler implements OnScreenStateListener,
         } else {
             Logger.i("Skip checkForUpdates");
         }
-        return false;
     }
 
     public void alarm(int id) {
@@ -257,8 +256,8 @@ public class Scheduler implements OnScreenStateListener,
             if (dailyAlarm && dailyAlarmTime != null) {
                 try {
                     String[] timeParts = dailyAlarmTime.split(":");
-                    int hour = Integer.valueOf(timeParts[0]);
-                    int minute = Integer.valueOf(timeParts[1]);
+                    int hour = Integer.parseInt(timeParts[0]);
+                    int minute = Integer.parseInt(timeParts[1]);
                     final Calendar c = Calendar.getInstance();
                     c.set(Calendar.HOUR_OF_DAY, hour);
                     c.set(Calendar.MINUTE, minute);
@@ -276,10 +275,10 @@ public class Scheduler implements OnScreenStateListener,
             if (weeklyAlarm && dailyAlarmTime != null && weeklyAlarmDay != null) {
                 try {
                     String[] timeParts = dailyAlarmTime.split(":");
-                    int hour = Integer.valueOf(timeParts[0]);
-                    int minute = Integer.valueOf(timeParts[1]);
+                    int hour = Integer.parseInt(timeParts[0]);
+                    int minute = Integer.parseInt(timeParts[1]);
                     final Calendar c = Calendar.getInstance();
-                    c.set(Calendar.DAY_OF_WEEK, Integer.valueOf(weeklyAlarmDay));
+                    c.set(Calendar.DAY_OF_WEEK, Integer.parseInt(weeklyAlarmDay));
                     c.set(Calendar.HOUR_OF_DAY, hour);
                     c.set(Calendar.MINUTE, minute);
                     // next week

@@ -26,21 +26,20 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 
 public class DeltaInfo {
     public interface ProgressListener {
-        public void onProgress(float progress, long current, long total);
-        public void setStatus(String status);
+        void onProgress(float progress, long current, long total);
+        void setStatus(String status);
     }
 
-    public class FileSizeMD5 {
+    public static class FileSizeMD5 {
         private final long size;
         private final String MD5;
 
@@ -58,7 +57,7 @@ public class DeltaInfo {
         }
     }
 
-    public class FileBase {
+    public static class FileBase {
         private final String name;
         private Object tag = null;
 
@@ -84,8 +83,8 @@ public class DeltaInfo {
     }
 
     public class FileUpdate extends FileBase {
-        private FileSizeMD5 update;
-        private FileSizeMD5 applied;
+        private final FileSizeMD5 update;
+        private final FileSizeMD5 applied;
 
         public FileUpdate(JSONObject object) throws JSONException {
             super(object);
@@ -115,9 +114,9 @@ public class DeltaInfo {
     }
 
     public class FileFull extends FileBase {
-        private FileSizeMD5 official;
-        private FileSizeMD5 store;
-        private FileSizeMD5 storeSigned;
+        private final FileSizeMD5 official;
+        private final FileSizeMD5 store;
+        private final FileSizeMD5 storeSigned;
 
         public FileFull(JSONObject object) throws JSONException {
             super(object);
@@ -178,13 +177,9 @@ public class DeltaInfo {
 
     public DeltaInfo(byte[] raw, boolean revoked) throws JSONException,
             NullPointerException {        
-        JSONObject object = null;
-        try {
-            object = new JSONObject(new String(raw, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            // Doesn't happen, UTF-8 is guaranteed to be available on Android
-        }
-        
+        JSONObject object;
+        object = new JSONObject(new String(raw, StandardCharsets.UTF_8));
+
         version = object.getInt("version");
         in = new FileFull(object.getJSONObject("in"));
         update = new FileUpdate(object.getJSONObject("update"));
@@ -232,34 +227,27 @@ public class DeltaInfo {
             progressListener.onProgress(getProgress(current, total), current, total);
 
         try {
-            FileInputStream is = new FileInputStream(file);
-            try {
+            try (FileInputStream is = new FileInputStream(file)) {
                 MessageDigest digest = MessageDigest.getInstance("MD5");
                 byte[] buffer = new byte[256 * 1024];
                 int r;
 
                 while ((r = is.read(buffer)) > 0) {
                     digest.update(buffer, 0, r);
-                    current += (long) r;
+                    current += r;
                     if (progressListener != null)
                         progressListener.onProgress(getProgress(current, total), current, total);
                 }
 
-                String MD5 = new BigInteger(1, digest.digest()).
-                        toString(16).toLowerCase(Locale.ENGLISH);
+                StringBuilder MD5 = new StringBuilder(new BigInteger(1, digest.digest()).
+                        toString(16).toLowerCase(Locale.ENGLISH));
                 while (MD5.length() < 32)
-                    MD5 = "0" + MD5;
-                ret = MD5;
-            } finally {
-                is.close();
+                    MD5.insert(0, "0");
+                ret = MD5.toString();
             }
-        } catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException | IOException e) {
             // No MD5 support (returns null)
-            Logger.ex(e);
-        } catch (FileNotFoundException e) {
             // The MD5 of a non-existing file is null
-            Logger.ex(e);
-        } catch (IOException e) {
             // Read or close error (returns null)
             Logger.ex(e);
         }

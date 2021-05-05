@@ -31,7 +31,7 @@ import android.telephony.TelephonyManager;
 
 public class NetworkState {
     public interface OnNetworkStateListener {
-        public void onNetworkState(boolean state);
+        void onNetworkState(boolean state);
     }
 
     public static final int ALLOW_UNKNOWN = 1;
@@ -49,8 +49,8 @@ public class NetworkState {
 
     private int flags = ALLOW_WIFI | ALLOW_ETHERNET;
 
-    private IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
+    private final IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             updateState();
@@ -166,7 +166,7 @@ public class NetworkState {
     public Boolean getState() {
         if (stateLast == null)
             return false;
-        return stateLast.booleanValue();
+        return stateLast;
     }
 
     public void updateFlags(int newFlags) {

@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2013-2014 Jorrit "Chainfire" Jongma
  * Copyright (C) 2013-2015 The OmniROM Project
+ * Copyright (C) 2020-2021 Yet Another AOSP Project
  */
 /*
  * This file is part of OpenDelta.
@@ -26,24 +27,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
-import java.net.UnknownHostException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Date;
 import java.util.zip.ZipFile;
 import javax.net.ssl.HttpsURLConnection;
 
@@ -75,7 +70,6 @@ import android.os.StatFs;
 import android.os.SystemClock;
 import android.os.UpdateEngine;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
 
 import eu.chainfire.opendelta.BatteryState.OnBatteryStateListener;
 import eu.chainfire.opendelta.DeltaInfo.ProgressListener;
@@ -190,7 +184,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private static final int NOTIFICATION_ERROR = 3;
 
     public static final String PREF_READY_FILENAME_NAME = "ready_filename";
-    public static final String PREF_READY_FILENAME_DEFAULT = null;
 
     public static final String PREF_LAST_CHECK_TIME_NAME = "last_check_time";
     public static final long PREF_LAST_CHECK_TIME_DEFAULT = 0L;
@@ -247,7 +240,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private SharedPreferences prefs = null;
     private Notification.Builder mBuilder;
     private boolean isProgressNotificationDismissed = false;
-    private long progressUpdateStart;
 
     // url override
     private boolean isUrlOverride = false;
@@ -257,23 +249,22 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
      * Using reflection voodoo instead calling the hidden class directly, to
      * dev/test outside of AOSP tree
      */
-    private boolean setPermissions(String path, int mode, int uid, int gid) {
+    private void setPermissions(String path, int uid) {
         try {
             Class<?> FileUtils = getClassLoader().loadClass(
                     "android.os.FileUtils");
             Method setPermissions = FileUtils.getDeclaredMethod(
-                    "setPermissions", new Class[] { String.class, int.class,
-                            int.class, int.class });
-            return ((Integer) setPermissions.invoke(
+                    "setPermissions", String.class, int.class,
+                    int.class, int.class);
+            setPermissions.invoke(
                     null,
-                    new Object[] { path, Integer.valueOf(mode),
-                            Integer.valueOf(uid), Integer.valueOf(gid) }) == 0);
+                    path, 420,
+                    uid, 2001);
         } catch (Exception e) {
             // A lot of voodoo could go wrong here, return failure instead of
             // crash
             Logger.ex(e);
         }
-        return false;
     }
 
     @Override
@@ -293,10 +284,10 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         config.getKeepScreenOn() ? PowerManager.SCREEN_DIM_WAKE_LOCK
                                 | PowerManager.ACQUIRE_CAUSES_WAKEUP
                                 : PowerManager.PARTIAL_WAKE_LOCK,
-                        "OpenDelta WakeLock");
+                        "OpenDelta:WakeLock");
         wifiLock = ((WifiManager) getSystemService(WIFI_SERVICE))
                 .createWifiLock(WifiManager.WIFI_MODE_FULL,
-                        "OpenDelta WifiLock");
+                        "OpenDelta:WifiLock");
 
         handlerThread = new HandlerThread("OpenDelta Service Thread");
         handlerThread.start();
@@ -318,7 +309,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
         batteryState = new BatteryState();
         batteryState.start(this, this,
-                Integer.valueOf(prefs.getString(SettingsActivity.PREF_BATTERY_LEVEL, "50")).intValue(),
+                Integer.parseInt(prefs.getString(SettingsActivity.PREF_BATTERY_LEVEL, "50")),
                 prefs.getBoolean(SettingsActivity.PREF_CHARGE_ONLY, true));
 
         screenState = new ScreenState();
@@ -358,8 +349,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             } else if (ACTION_NOTIFICATION_DELETED.equals(intent.getAction())) {
                 prefs.edit().putLong(PREF_LAST_SNOOZE_TIME_NAME,
                         System.currentTimeMillis()).commit();
-                String lastBuild = prefs.getString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT);
-                if (lastBuild != PREF_READY_FILENAME_DEFAULT) {
+                String lastBuild = prefs.getString(PREF_LATEST_FULL_NAME, null);
+                if (lastBuild != null) {
                     // only snooze until no newer build is available
                     Logger.i("Snoozing notification for " + lastBuild);
                     prefs.edit().putString(PREF_SNOOZE_UPDATE_NAME, lastBuild).commit();
@@ -485,21 +476,20 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             // which is just confusing
             checkOnly = PREF_AUTO_DOWNLOAD_CHECK;
         }
-        String filename = prefs.getString(PREF_READY_FILENAME_NAME,
-                PREF_READY_FILENAME_DEFAULT);
+        String filename = prefs.getString(PREF_READY_FILENAME_NAME, null);
 
-        if (filename != PREF_READY_FILENAME_DEFAULT) {
+        if (filename != null) {
             if (!(new File(filename)).exists()) {
                 filename = null;
             }
         }
 
-        boolean updateAvilable = updateAvailable();
+        boolean updateAvailable = updateAvailable();
         // if the file has been downloaded or creates anytime before
-        // this will aways be more important
+        // this will always be more important
         if (checkOnly == PREF_AUTO_DOWNLOAD_CHECK && filename == null) {
             Logger.d("Checking step done");
-            if (!updateAvilable) {
+            if (!updateAvailable) {
                 Logger.d("System up to date");
                 updateState(STATE_ACTION_NONE, null, null, null, null,
                         prefs.getLong(PREF_LAST_CHECK_TIME_NAME,
@@ -511,7 +501,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                                 PREF_LAST_CHECK_TIME_DEFAULT));
                 if (!userInitiated && notify) {
                     if (!isSnoozeNotification()) {
-                        startNotification(checkOnly);
+                        startNotification();
                     } else {
                         Logger.d("notification snoozed");
                     }
@@ -533,7 +523,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
             if (!userInitiated && notify) {
                 if (!isSnoozeNotification()) {
-                    startNotification(checkOnly);
+                    startNotification();
                 } else {
                     Logger.d("notification snoozed");
                 }
@@ -559,13 +549,13 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         }
     }
 
-    private void startNotification(int checkOnly) {
-        final String latestFull = prefs.getString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT);
-        if (latestFull == PREF_READY_FILENAME_DEFAULT) {
+    private void startNotification() {
+        final String latestFull = prefs.getString(PREF_LATEST_FULL_NAME, null);
+        if (latestFull == null) {
             return;
         }
-        String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
-        final boolean readyToFlash = flashFilename != PREF_READY_FILENAME_DEFAULT;
+        String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, null);
+        final boolean readyToFlash = flashFilename != null;
         if (readyToFlash) {
             flashFilename = new File(flashFilename).getName();
             flashFilename.substring(0, flashFilename.lastIndexOf('.'));
@@ -585,7 +575,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private void startABRebootNotification() {
-        String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
+        String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, null);
         flashFilename = new File(flashFilename).getName();
         flashFilename.substring(0, flashFilename.lastIndexOf('.'));
 
@@ -631,7 +621,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
     private HttpsURLConnection setupHttpsRequest(String urlStr){
         URL url;
-        HttpsURLConnection urlConnection = null;
+        HttpsURLConnection urlConnection;
         try {
             url = new URL(urlStr);
             urlConnection = (HttpsURLConnection) url.openConnection();
@@ -709,9 +699,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             if(bytes == null){
                 return null;
             }
-            String responseBody = new String(bytes, StandardCharsets.UTF_8);
 
-            return responseBody;
+            return new String(bytes, StandardCharsets.UTF_8);
         } catch (Exception e) {
             // Download failed for any number of reasons, timeouts, connection
             // drops, etc. Just log it in debugging mode.
@@ -753,8 +742,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 byte[] buffer = new byte[262144];
 
                 InputStream is = urlConnection.getInputStream();
-                FileOutputStream os = new FileOutputStream(f, false);
-                try {
+                try (FileOutputStream os = new FileOutputStream(f, false)) {
                     int r;
                     while ((r = is.read(buffer)) > 0) {
                         if (stopDownload) {
@@ -764,25 +752,23 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         if (digest != null)
                             digest.update(buffer, 0, r);
 
-                        recv += (long) r;
+                        recv += r;
                         if (progressListener != null)
                             progressListener.onProgress(
                                     ((float) recv / (float) len) * 100f, recv,
                                     len);
                     }
-                } finally {
-                    os.close();
                 }
 
                 if (digest != null) {
-                    String MD5 = new BigInteger(1, digest.digest())
-                    .toString(16).toLowerCase(Locale.ENGLISH);
+                    StringBuilder MD5 = new StringBuilder(new BigInteger(1, digest.digest())
+                            .toString(16).toLowerCase(Locale.ENGLISH));
                     while (MD5.length() < 32)
-                         MD5 = "0" + MD5;
-                    boolean md5Check = MD5.equals(matchMD5);
+                         MD5.insert(0, "0");
+                    boolean md5Check = MD5.toString().equals(matchMD5);
                     Logger.d("MD5=" + MD5 + " matchMD5=" + matchMD5);
-                    Logger.d("MD5.length=" + Integer.toString(MD5.length()) +
-                            " matchMD5.length=" + Integer.toString(matchMD5.length()));
+                    Logger.d("MD5.length=" + MD5.length() +
+                            " matchMD5.length=" + matchMD5.length());
                     if (!md5Check) {
                         Logger.i("MD5 check failed for " + url);
                     }
@@ -869,8 +855,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 byte[] buffer = new byte[262144];
 
                 InputStream is = urlConnection.getInputStream();
-                FileOutputStream os = new FileOutputStream(f, false);
-                try {
+                try (FileOutputStream os = new FileOutputStream(f, false)) {
                     int r;
                     while ((r = is.read(buffer)) > 0) {
                         if (stopDownload) {
@@ -880,14 +865,12 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         if (digest != null)
                             digest.update(buffer, 0, r);
 
-                        recv += (long) r;
+                        recv += r;
                         if (progressListener != null)
                             progressListener.onProgress(
                                     ((float) recv / (float) len) * 100f, recv,
                                     len);
                     }
-                } finally {
-                    os.close();
                 }
 
                 if (digest != null) {
@@ -897,8 +880,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                          MD5 = "0" + MD5;
                     boolean md5Check = MD5.equals(matchMD5);
                     Logger.d("MD5=" + MD5 + " matchMD5=" + matchMD5);
-                    Logger.d("MD5.length=" + Integer.toString(MD5.length()) +
-                            " matchMD5.length=" + Integer.toString(matchMD5.length()));
+                    Logger.d("MD5.length=" + MD5.length() +
+                            " matchMD5.length=" + matchMD5.length());
                     if (!md5Check) {
                         Logger.i("MD5 check failed for " + url);
                     }
@@ -946,7 +929,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private boolean isMatchingImage(String fileName) {
         try {
             Logger.d("Image check for file name: " + fileName);
-            if(fileName.endsWith(".zip") && fileName.indexOf(config.getDevice()) != -1) {
+            if(fileName.endsWith(".zip") && fileName.contains(config.getDevice())) {
                 String[] parts = fileName.split("-");
                 if (parts.length > 1) {
                     Logger.d("isMatchingImage: check " + fileName);
@@ -999,11 +982,11 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     Logger.d("fileName= " + fileName);
                     if (isMatchingImage(fileName))
                         latestBuild = fileName;
-                    if (urlOvr != null && urlOvr != "") {
+                    if (urlOvr != null && !urlOvr.equals("")) {
                         urlOverride = urlOvr;
                         Logger.d("url= " + urlOverride);
                     }
-                    if (md5Ovr != null && md5Ovr != "") {
+                    if (md5Ovr != null && !md5Ovr.equals("")) {
                         md5Override = md5Ovr;
                         Logger.d("md5 url= " + md5Override);
                     }
@@ -1105,22 +1088,19 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         final long _totalOut = totalOut;
         final long _start = start;
 
-        return new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        long current = _currentOut + _file.length();
-                        updateState(STATE_ACTION_APPLYING_PATCH,
-                                ((float) current / (float) _totalOut) * 100f,
-                                current, _totalOut, _display,
-                                SystemClock.elapsedRealtime() - _start);
+        return new Thread(() -> {
+            while (true) {
+                try {
+                    long current = _currentOut + _file.length();
+                    updateState(STATE_ACTION_APPLYING_PATCH,
+                            ((float) current / (float) _totalOut) * 100f,
+                            current, _totalOut, _display,
+                            SystemClock.elapsedRealtime() - _start);
 
-                        Thread.sleep(16);
-                    } catch (InterruptedException e) {
-                        // We're being told to quit
-                        break;
-                    }
+                    Thread.sleep(16);
+                } catch (InterruptedException e) {
+                    // We're being told to quit
+                    break;
                 }
             }
         });
@@ -1130,7 +1110,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             long start, long currentOut, long totalOut) {
         Logger.d("zipadjust [%s] --> [%s]", filenameIn, filenameOut);
 
-        // checking filesizes in the background as progress, because these
+        // checking file sizes in the background as progress, because these
         // native functions don't have callbacks (yet) to do this
 
         (new File(filenameOut)).delete();
@@ -1160,7 +1140,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         Logger.d("dedelta [%s] --> [%s] --> [%s]", filenameSource,
                 filenameDelta, filenameOut);
 
-        // checking filesizes in the background as progress, because these
+        // checking file sizes in the background as progress, because these
         // native functions don't have callbacks (yet) to do this
 
         (new File(filenameOut)).delete();
@@ -1237,7 +1217,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     // fallback to check only
                     checkOnly = PREF_AUTO_DOWNLOAD_CHECK;
                     updateAllowed = true;
-                    Logger.i("Auto-dwonload not possible - fallback to check only");
+                    Logger.i("Auto-download not possible - fallback to check only");
                 }
             }
         }
@@ -1373,8 +1353,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         return initialFile;
     }
 
-    private boolean downloadFiles(List<DeltaInfo> deltas, boolean getFull,
-            long totalDownloadSize, boolean force) {
+    private boolean downloadFiles(List<DeltaInfo> deltas,
+                                  long totalDownloadSize, boolean force) {
         // Download all the files we do not have yet
 
         DeltaInfo lastDelta = deltas.get(deltas.size() - 1);
@@ -1399,35 +1379,27 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     last[2] = now;
                 }
             }
-            public void setStatus(String s){
+            public void setStatus(String s) {
                 // do nothing
             }
         };
 
-        if (getFull) {
-            filename[0] = lastDelta.getOut().getName();
-            if (!downloadDeltaFile(config.getUrlBaseFull(), lastDelta.getOut(),
-                    lastDelta.getOut().getOfficial(), progressListener, force)) {
+        for (DeltaInfo di : deltas) {
+            filename[0] = di.getUpdate().getName();
+            if (!downloadDeltaFile(config.getUrlBaseUpdate(),
+                    di.getUpdate(), di.getUpdate().getUpdate(),
+                    progressListener, force)) {
                 return false;
             }
-        } else {
-            for (DeltaInfo di : deltas) {
-                filename[0] = di.getUpdate().getName();
-                if (!downloadDeltaFile(config.getUrlBaseUpdate(),
-                        di.getUpdate(), di.getUpdate().getUpdate(),
-                        progressListener, force)) {
-                    return false;
-                }
-                last[0] += di.getUpdate().getUpdate().getSize();
-            }
+            last[0] += di.getUpdate().getUpdate().getSize();
+        }
 
-            if (config.getApplySignature()) {
-                filename[0] = lastDelta.getSignature().getName();
-                if (!downloadDeltaFile(config.getUrlBaseUpdate(),
-                        lastDelta.getSignature(), lastDelta.getSignature()
-                        .getUpdate(), progressListener, force)) {
-                    return false;
-                }
+        if (config.getApplySignature()) {
+            filename[0] = lastDelta.getSignature().getName();
+            if (!downloadDeltaFile(config.getUrlBaseUpdate(),
+                    lastDelta.getSignature(), lastDelta.getSignature()
+                    .getUpdate(), progressListener, force)) {
+                return false;
             }
         }
         updateState(STATE_ACTION_DOWNLOADING, 100f, totalDownloadSize,
@@ -1463,8 +1435,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     /**
      * @param url - url to md5sum file
      * @param fn - file name
-     * @param ovr - wether direct link to md5sum is provided
-     * @returns true if md5sum matches the file
+     * @param ovr - whether direct link to md5sum is provided
+     * @return true if md5sum matches the file
      */
     private boolean checkFullBuildMd5Sum(String url, String fn, boolean ovr) {
         String urlSuffix = config.getUrlSuffix();
@@ -1554,8 +1526,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     Logger.d("dedelta error");
                     return false;
                 }
-                tempFile = (tempFile + 1) % 2;
-                current += lastDelta.getSignature().getApplied().getSize();
             }
         } finally {
             (new File(tempFiles[0])).delete();
@@ -1566,25 +1536,25 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private void writeString(OutputStream os, String s)
-            throws UnsupportedEncodingException, IOException {
-        os.write((s + "\n").getBytes("UTF-8"));
+            throws IOException {
+        os.write((s + "\n").getBytes(StandardCharsets.UTF_8));
     }
 
     private String handleUpdateCleanup() throws FileNotFoundException {
-        String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
-        String intialFile = prefs.getString(PREF_INITIAL_FILE, PREF_READY_FILENAME_DEFAULT);
+        String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, null);
+        String initialFile = prefs.getString(PREF_INITIAL_FILE, null);
         boolean fileFlash =  prefs.getBoolean(PREF_FILE_FLASH, false);
 
-        if (flashFilename == PREF_READY_FILENAME_DEFAULT
+        if (flashFilename == null
                 || (!fileFlash && !flashFilename.startsWith(config.getPathBase()))
                 || !new File(flashFilename).exists()) {
             throw new FileNotFoundException("flashUpdate - no valid file to flash found " + flashFilename);
         }
         // now delete the initial file
-        if (intialFile != null
-                && new File(intialFile).exists()
-                && intialFile.startsWith(config.getPathBase())){
-            new File(intialFile).delete();
+        if (initialFile != null
+                && new File(initialFile).exists()
+                && initialFile.startsWith(config.getPathBase())){
+            new File(initialFile).delete();
             Logger.d("flashUpdate - delete initial file");
         }
 
@@ -1594,8 +1564,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     protected void onUpdateCompleted(int status, int errorCode) {
         stopNotification();
         if (status == UpdateEngine.ErrorCodeConstants.SUCCESS) {
-            String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
-            if (!flashFilename.equals(PREF_READY_FILENAME_DEFAULT)) {
+            String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, null);
+            if (flashFilename != null) {
                 deleteOldFlashFile(flashFilename);
                 prefs.edit().putString(PREF_CURRENT_FILENAME_NAME, flashFilename).commit();
             }
@@ -1628,7 +1598,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
     private void flashABUpdate() {
         Logger.d("flashABUpdate");
-        String flashFilename = "";
+        String flashFilename;
         try {
             flashFilename = handleUpdateCleanup();
         } catch (Exception ex) {
@@ -1644,7 +1614,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         updateState(STATE_ACTION_AB_FLASH, 0f, 0L, 100L, _filename, null);
 
         isProgressNotificationDismissed = false;
-        progressUpdateStart = SystemClock.elapsedRealtime();
 
         mBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
         mBuilder.setSmallIcon(R.drawable.stat_notify_update)
@@ -1712,7 +1681,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         }
 
         boolean deltaSignature = prefs.getBoolean(PREF_DELTA_SIGNATURE, false);
-        String flashFilename = "";
+        String flashFilename;
         try {
             flashFilename = handleUpdateCleanup();
         } catch (Exception ex) {
@@ -1754,22 +1723,18 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 if (config.getInjectSignatureEnable() && deltaSignature) {
                     Logger.d("flashUpdate - create /cache/recovery/keys");
 
-                    FileOutputStream os = new FileOutputStream(
-                            "/cache/recovery/keys", false);
-                    try {
+                    try (FileOutputStream os = new FileOutputStream(
+                            "/cache/recovery/keys", false)) {
                         writeString(os, config.getInjectSignatureKeys());
-                    } finally {
-                        os.close();
                     }
-                    setPermissions("/cache/recovery/keys", 0644,
-                            Process.myUid(), 2001 /* AID_CACHE */);
+                    setPermissions("/cache/recovery/keys",
+                            Process.myUid()  /* AID_CACHE */);
                 }
 
                 Logger.d("flashUpdate - create /cache/recovery/openrecoveryscript");
 
-                FileOutputStream os = new FileOutputStream(
-                        "/cache/recovery/openrecoveryscript", false);
-                try {
+                try (FileOutputStream os = new FileOutputStream(
+                        "/cache/recovery/openrecoveryscript", false)) {
                     if (config.getInjectSignatureEnable() && deltaSignature) {
                         writeString(os, "cmd cat /res/keys > /res/keys_org");
                         writeString(os,
@@ -1794,12 +1759,10 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         }
                     }
                     writeString(os, "wipe cache");
-                } finally {
-                    os.close();
                 }
 
-                setPermissions("/cache/recovery/openrecoveryscript", 0644,
-                        Process.myUid(), 2001 /* AID_CACHE */);
+                setPermissions("/cache/recovery/openrecoveryscript",
+                        Process.myUid()  /* AID_CACHE */);
             }
 
             // CWM - ExtendedCommand - provide paths to both internal and
@@ -1816,9 +1779,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             if (!config.getSecureModeCurrent()) {
                 Logger.d("flashUpdate - create /cache/recovery/extendedcommand");
 
-                FileOutputStream os = new FileOutputStream(
-                        "/cache/recovery/extendedcommand", false);
-                try {
+                try (FileOutputStream os = new FileOutputStream(
+                        "/cache/recovery/extendedcommand", false)) {
                     writeString(os, String.format("install_zip(\"%s%s\");",
                             "/sdcard/", flashFilename));
                     writeString(os, String.format("install_zip(\"%s%s\");",
@@ -1831,12 +1793,10 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     }
                     writeString(os,
                             "run_program(\"/sbin/busybox\", \"rm\", \"-rf\", \"/cache/*\");");
-                } finally {
-                    os.close();
                 }
 
-                setPermissions("/cache/recovery/extendedcommand", 0644,
-                        Process.myUid(), 2001 /* AID_CACHE */);
+                setPermissions("/cache/recovery/extendedcommand",
+                        Process.myUid()  /* AID_CACHE */);
             } else {
                 (new File("/cache/recovery/extendedcommand")).delete();
             }
@@ -1854,9 +1814,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private boolean updateAvailable() {
-        final String latestFull = prefs.getString(UpdateService.PREF_LATEST_FULL_NAME, UpdateService.PREF_READY_FILENAME_DEFAULT);
-        final String latestDelta = prefs.getString(UpdateService.PREF_LATEST_DELTA_NAME, UpdateService.PREF_READY_FILENAME_DEFAULT);
-        return latestFull != PREF_READY_FILENAME_DEFAULT || latestDelta != PREF_READY_FILENAME_DEFAULT;
+        final String latestFull = prefs.getString(UpdateService.PREF_LATEST_FULL_NAME, null);
+        final String latestDelta = prefs.getString(UpdateService.PREF_LATEST_DELTA_NAME, null);
+        return latestFull != null || latestDelta != null;
     }
 
     private String getLatestFullMd5Sum(String md5Url) {
@@ -1893,35 +1853,27 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             progressListener.onProgress(getProgress(current, total), current, total);
 
         try {
-            FileInputStream is = new FileInputStream(file);
-            try {
+            try (FileInputStream is = new FileInputStream(file)) {
                 MessageDigest digest = MessageDigest.getInstance("MD5");
                 byte[] buffer = new byte[256 * 1024];
                 int r;
 
                 while ((r = is.read(buffer)) > 0) {
                     digest.update(buffer, 0, r);
-                    current += (long) r;
+                    current += r;
                     if (progressListener != null)
                         progressListener.onProgress(getProgress(current, total), current, total);
                 }
 
-                String MD5 = new BigInteger(1, digest.digest()).
-                        toString(16).toLowerCase(Locale.ENGLISH);
                 //while (MD5.length() < 32)
                 //     MD5 = "0" + MD5;
-                ret = MD5;
+                ret = new BigInteger(1, digest.digest()).
+                        toString(16).toLowerCase(Locale.ENGLISH);
                 Logger.d("md5sum from file is: " + ret);
-            } finally {
-                is.close();
             }
-        } catch (NoSuchAlgorithmException e) {
+        } catch (IOException | NoSuchAlgorithmException e) {
             // No MD5 support (returns null)
-            Logger.ex(e);
-        } catch (FileNotFoundException e) {
             // The MD5 of a non-existing file is null
-            Logger.ex(e);
-        } catch (IOException e) {
             // Read or close error (returns null)
             Logger.ex(e);
         }
@@ -1938,7 +1890,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
     private int getAutoDownloadValue() {
         String autoDownload = prefs.getString(SettingsActivity.PREF_AUTO_DOWNLOAD, getDefaultAutoDownloadValue());
-        return Integer.valueOf(autoDownload).intValue();
+        return Integer.parseInt(autoDownload);
     }
 
     private String getDefaultAutoDownloadValue() {
@@ -1960,7 +1912,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     public static boolean isProgressState(String state) {
-        if (state.equals(UpdateService.STATE_ACTION_DOWNLOADING) ||
+        return state.equals(UpdateService.STATE_ACTION_DOWNLOADING) ||
                 state.equals(UpdateService.STATE_ACTION_SEARCHING) ||
                 state.equals(UpdateService.STATE_ACTION_SEARCHING_MD5) ||
                 state.equals(UpdateService.STATE_ACTION_CHECKING) ||
@@ -1968,24 +1920,18 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 state.equals(UpdateService.STATE_ACTION_APPLYING) ||
                 state.equals(UpdateService.STATE_ACTION_APPLYING_MD5) ||
                 state.equals(UpdateService.STATE_ACTION_APPLYING_PATCH) ||
-                state.equals(UpdateService.STATE_ACTION_AB_FLASH)) {
-            return true;
-        }
-        return false;
+                state.equals(UpdateService.STATE_ACTION_AB_FLASH);
     }
 
     public static boolean isErrorState(String state) {
-        if (state.equals(UpdateService.STATE_ERROR_DOWNLOAD) ||
+        return state.equals(UpdateService.STATE_ERROR_DOWNLOAD) ||
                 state.equals(UpdateService.STATE_ERROR_DISK_SPACE) ||
                 state.equals(UpdateService.STATE_ERROR_UNKNOWN) ||
                 state.equals(UpdateService.STATE_ERROR_UNOFFICIAL) ||
                 state.equals(UpdateService.STATE_ERROR_CONNECTION) ||
                 state.equals(UpdateService.STATE_ERROR_AB_FLASH) ||
                 state.equals(UpdateService.STATE_ERROR_FLASH_FILE) ||
-                state.equals(UpdateService.STATE_ERROR_FLASH)) {
-            return true;
-        }
-        return false;
+                state.equals(UpdateService.STATE_ERROR_FLASH);
     }
 
     private boolean isSnoozeNotification() {
@@ -1994,9 +1940,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 - prefs.getLong(PREF_LAST_SNOOZE_TIME_NAME,
                         PREF_LAST_SNOOZE_TIME_DEFAULT)) <= SNOOZE_MS;
         if (timeSnooze) {
-            String lastBuild = prefs.getString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT);
-            String snoozeBuild = prefs.getString(PREF_SNOOZE_UPDATE_NAME, PREF_READY_FILENAME_DEFAULT);
-            if (lastBuild != PREF_READY_FILENAME_DEFAULT && snoozeBuild != PREF_READY_FILENAME_DEFAULT) {
+            String lastBuild = prefs.getString(PREF_LATEST_FULL_NAME, null);
+            String snoozeBuild = prefs.getString(PREF_SNOOZE_UPDATE_NAME, null);
+            if (lastBuild != null && snoozeBuild != null) {
                 // only snooze if time snoozed and no newer update available
                 if (!lastBuild.equals(snoozeBuild)) {
                     return false;
@@ -2007,12 +1953,12 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private void clearState() {
-        prefs.edit().putString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT).commit();
-        prefs.edit().putString(PREF_LATEST_DELTA_NAME, PREF_READY_FILENAME_DEFAULT).commit();
-        prefs.edit().putString(PREF_READY_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT).commit();
+        prefs.edit().putString(PREF_LATEST_FULL_NAME, null).commit();
+        prefs.edit().putString(PREF_LATEST_DELTA_NAME, null).commit();
+        prefs.edit().putString(PREF_READY_FILENAME_NAME, null).commit();
         prefs.edit().putLong(PREF_DOWNLOAD_SIZE, -1).commit();
         prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, false).commit();
-        prefs.edit().putString(PREF_INITIAL_FILE, PREF_READY_FILENAME_DEFAULT).commit();
+        prefs.edit().putString(PREF_INITIAL_FILE, null).commit();
     }
 
     private void shouldShowErrorNotification() {
@@ -2050,375 +1996,362 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         // TODO update notification with current step
         startForeground(NOTIFICATION_BUSY, notification);
 
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                boolean downloadFullBuild = false;
-                boolean force = userInitiated;
+        handler.post(() -> {
+            boolean downloadFullBuild = false;
 
-                stopDownload = false;
-                updateRunning = true;
+            stopDownload = false;
+            updateRunning = true;
 
-                try {
-                    List<DeltaInfo> deltas = new ArrayList<DeltaInfo>();
+            try {
+                List<DeltaInfo> deltas = new ArrayList<>();
 
-                    String flashFilename = null;
-                    (new File(config.getPathBase())).mkdir();
-                    (new File(config.getPathFlashAfterUpdate())).mkdir();
+                String flashFilename = null;
+                (new File(config.getPathBase())).mkdir();
+                (new File(config.getPathFlashAfterUpdate())).mkdir();
 
-                    clearState();
+                clearState();
 
-                    List<String> latestFullBuildWithUrl = getNewestFullBuild();
-                    String latestFullBuild = null;
-                    // if we dont even find a build on dl no sense to continue
-                    if (latestFullBuildWithUrl == null || latestFullBuildWithUrl.size() == 0) {
-                        Logger.d("no latest build found at " + config.getUrlBaseJson() +
-                                " for " + config.getDevice());
-                        return;
-                    }
-                    latestFullBuild = latestFullBuildWithUrl.get(0);
+                List<String> latestFullBuildWithUrl = getNewestFullBuild();
+                String latestFullBuild;
+                // if we don't even find a build on dl no sense to continue
+                if (latestFullBuildWithUrl == null || latestFullBuildWithUrl.size() == 0) {
+                    Logger.d("no latest build found at " + config.getUrlBaseJson() +
+                            " for " + config.getDevice());
+                    return;
+                }
+                latestFullBuild = latestFullBuildWithUrl.get(0);
 
-                    String latestFullFetch = null;
-                    String latestFullFetchMd5 = null;
-                    if (latestFullBuildWithUrl.size() < 3) {
-                        latestFullFetch = config.getUrlBaseFull() +
-                                latestFullBuild + config.getUrlSuffix();
-                        latestFullFetchMd5 = config.getUrlBaseFullMd5() +
-                                latestFullBuild + ".md5sum" + config.getUrlSuffix();
-                    }
-                    else {
-                        latestFullFetch = latestFullBuildWithUrl.get(1);
-                    }
-                    Logger.d("latest full build for device " + config.getDevice() + " is " + latestFullFetch);
-                    prefs.edit().putString(PREF_LATEST_FULL_NAME, latestFullBuild).commit();
+                String latestFullFetch = null;
+                String latestFullFetchMd5 = null;
+                if (latestFullBuildWithUrl.size() < 3) {
+                    latestFullFetch = config.getUrlBaseFull() +
+                            latestFullBuild + config.getUrlSuffix();
+                    latestFullFetchMd5 = config.getUrlBaseFullMd5() +
+                            latestFullBuild + ".md5sum" + config.getUrlSuffix();
+                }
+                else {
+                    latestFullFetch = latestFullBuildWithUrl.get(1);
+                }
+                Logger.d("latest full build for device " + config.getDevice() + " is " + latestFullFetch);
+                prefs.edit().putString(PREF_LATEST_FULL_NAME, latestFullBuild).commit();
 
-                    if (!Config.isABDevice()) {
-                        // Create a list of deltas to apply to get from our current
-                        // version to the latest
-                        String fetch = String.format(Locale.ENGLISH, "%s%s.delta",
-                                config.getUrlBaseDelta(),
-                                config.getFilenameBase());
+                if (!Config.isABDevice()) {
+                    // Create a list of deltas to apply to get from our current
+                    // version to the latest
+                    String fetch = String.format(Locale.ENGLISH, "%s%s.delta",
+                            config.getUrlBaseDelta(),
+                            config.getFilenameBase());
 
-                        while (true) {
-                            DeltaInfo delta = null;
-                            byte[] data = downloadUrlMemory(fetch);
+                    while (true) {
+                        DeltaInfo delta = null;
+                        byte[] data = downloadUrlMemory(fetch);
+                        if (data != null && data.length != 0) {
+                            try {
+                                delta = new DeltaInfo(data, false);
+                            } catch (JSONException | NullPointerException e) {
+                                // There's an error in the JSON. Could be bad JSON,
+                                // could be a 404 text, etc
+                                Logger.ex(e);
+                                delta = null;
+                            } // Download failed
+
+                        }
+
+                        if (delta == null) {
+                            // See if we have a revoked version instead, we
+                            // still need it for chaining future deltas, but
+                            // will not allow flashing this one
+                            data = downloadUrlMemory(fetch.replace(".delta",
+                                    ".delta_revoked"));
                             if (data != null && data.length != 0) {
                                 try {
-                                    delta = new DeltaInfo(data, false);
-                                } catch (JSONException e) {
-                                    // There's an error in the JSON. Could be bad JSON,
-                                    // could be a 404 text, etc
+                                    delta = new DeltaInfo(data, true);
+                                } catch (JSONException | NullPointerException e) {
+                                    // There's an error in the JSON. Could be bad
+                                    // JSON, could be a 404 text, etc
                                     Logger.ex(e);
                                     delta = null;
-                                } catch (NullPointerException e) {
-                                    // Download failed
-                                    Logger.ex(e);
-                                    delta = null;
-                                }
+                                } // Download failed
+
                             }
 
-                            if (delta == null) {
-                                // See if we have a revoked version instead, we
-                                // still need it for chaining future deltas, but
-                                // will not allow flashing this one
-                                data = downloadUrlMemory(fetch.replace(".delta",
-                                        ".delta_revoked"));
-                                if (data != null && data.length != 0) {
-                                    try {
-                                        delta = new DeltaInfo(data, true);
-                                    } catch (JSONException e) {
-                                        // There's an error in the JSON. Could be bad
-                                        // JSON, could be a 404 text, etc
-                                        Logger.ex(e);
-                                        delta = null;
-                                    } catch (NullPointerException e) {
-                                        // Download failed
-                                        Logger.ex(e);
-                                        delta = null;
-                                    }
-                                }
-
-                                // We didn't get a delta or a delta_revoked - end of
-                                // the delta availability chain
-                                if (delta == null)
-                                    break;
-                            }
-
-                            Logger.d("delta --> [%s]", delta.getOut().getName());
-                            fetch = String.format(Locale.ENGLISH, "%s%s.delta",
-                                    config.getUrlBaseDelta(), delta
-                                    .getOut().getName().replace(".zip", ""));
-                            deltas.add(delta);
+                            // We didn't get a delta or a delta_revoked - end of
+                            // the delta availability chain
+                            if (delta == null)
+                                break;
                         }
+
+                        Logger.d("delta --> [%s]", delta.getOut().getName());
+                        fetch = String.format(Locale.ENGLISH, "%s%s.delta",
+                                config.getUrlBaseDelta(), delta
+                                .getOut().getName().replace(".zip", ""));
+                        deltas.add(delta);
                     }
+                }
 
-                    if (deltas.size() > 0) {
-                        // See if we have done past work and have newer ZIPs
-                        // than the original of what's currently flashed
+                if (deltas.size() > 0) {
+                    // See if we have done past work and have newer ZIPs
+                    // than the original of what's currently flashed
 
-                        int last = -1;
-                        for (int i = deltas.size() - 1; i >= 0; i--) {
-                            DeltaInfo di = deltas.get(i);
-                            String fn = config.getPathBase() + di.getOut().getName();
-                            if (di.getOut()
-                                    .match(new File(fn),
-                                            true,
-                                            getMD5Progress(STATE_ACTION_CHECKING_MD5, di.getOut()
-                                                    .getName())) != null) {
-                                if (latestFullBuild.equals(di.getOut().getName())) {
-                                    boolean signedFile = di.getOut().isSignedFile(new File(fn));
-                                    Logger.d("match found (%s): %s", signedFile ? "delta" : "full", di.getOut().getName());
-                                    flashFilename = fn;
-                                    last = i;
-                                    prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, signedFile).commit();
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (last > -1) {
-                            for (int i = 0; i <= last; i++) {
-                                deltas.remove(0);
+                    int last = -1;
+                    for (int i = deltas.size() - 1; i >= 0; i--) {
+                        DeltaInfo di = deltas.get(i);
+                        String fn = config.getPathBase() + di.getOut().getName();
+                        if (di.getOut()
+                                .match(new File(fn),
+                                        true,
+                                        getMD5Progress(STATE_ACTION_CHECKING_MD5, di.getOut()
+                                                .getName())) != null) {
+                            if (latestFullBuild.equals(di.getOut().getName())) {
+                                boolean signedFile = di.getOut().isSignedFile(new File(fn));
+                                Logger.d("match found (%s): %s", signedFile ? "delta" : "full", di.getOut().getName());
+                                flashFilename = fn;
+                                last = i;
+                                prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, signedFile).commit();
+                                break;
                             }
                         }
                     }
 
-                    while ((deltas.size() > 0) && (deltas.get(deltas.size() - 1).isRevoked())) {
-                        // Make sure the last delta is not revoked
-                        deltas.remove(deltas.size() - 1);
+                    if (last > -1) {
+                        deltas.subList(0, last + 1).clear();
+                    }
+                }
+
+                while ((deltas.size() > 0) && (deltas.get(deltas.size() - 1).isRevoked())) {
+                    // Make sure the last delta is not revoked
+                    deltas.remove(deltas.size() - 1);
+                }
+
+                if (deltas.size() == 0) {
+                    // we found a matching zip created from deltas before
+                    if (flashFilename != null) {
+                        prefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
+                        return;
+                    }
+                    // only full download available
+                    final String latestFull = prefs.getString(PREF_LATEST_FULL_NAME, null);
+                    String currentVersionZip = config.getFilenameBase() +".zip";
+
+                    long currFileDate; // will store current build date as YYYYMMDD
+                    long latestFileDate; // will store latest build date as YYYYMMDD
+                    boolean updateAvailable = false;
+                    if (latestFull != null) {
+                        try {
+                            currFileDate = Long.parseLong(currentVersionZip.split("-")[4].substring(0, 8));
+                            latestFileDate = Long.parseLong(latestFull.split("-")[4].substring(0, 8));
+                            updateAvailable = latestFileDate > currFileDate;
+                        } catch (NumberFormatException exception) {
+                            // Just incase someone decides to make up his own zip / build name and F's this up
+                            Logger.d("Build name malformed");
+                            Logger.ex(exception);
+                        }
+                        downloadFullBuild = updateAvailable;
                     }
 
-                    if (deltas.size() == 0) {
-                        // we found a matching zip created from deltas before
-                        if (flashFilename != null) {
-                            prefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
-                            return;
-                        }
-                        // only full download available
-                        final String latestFull = prefs.getString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT);
-                        String latestFullZip = latestFull !=  PREF_READY_FILENAME_DEFAULT ? latestFull : null;
-                        String currentVersionZip = config.getFilenameBase() +".zip";
+                    if (!updateAvailable) {
+                        prefs.edit().putString(PREF_LATEST_FULL_NAME, null).commit();
+                    }
 
-                        Long currFileDate; // will store current build date as YYYYMMDD
-                        Long latestFileDate; // will store latest build date as YYYYMMDD
-                        boolean updateAvilable = false;
-                        if (latestFullZip != null) {
-                            try {
-                                currFileDate = Long.parseLong(currentVersionZip.split("-")[4].substring(0, 8));
-                                latestFileDate = Long.parseLong(latestFullZip.split("-")[4].substring(0, 8));
-                                updateAvilable = latestFileDate > currFileDate;
-                            } catch (NumberFormatException exception) {
-                                // Just incase someone decides to make up his own zip / build name and F's this up
-                                Logger.d("Build name malformed");
-                                Logger.ex(exception);
-                            }
-                            downloadFullBuild = updateAvilable;
-                        }
-
-                        if (!updateAvilable) {
-                            prefs.edit().putString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT).commit();
-                        }
-
-                        if (downloadFullBuild) {
-                            String fn = config.getPathBase() + latestFullBuild;
-                            if (new File(fn).exists()) {
-                                boolean directMD5 = latestFullBuildWithUrl.size() == 3;
-                                if (checkFullBuildMd5Sum(
-                                        (directMD5 ? latestFullBuildWithUrl.get(2) : latestFullFetchMd5),
-                                        fn, directMD5)) {
-                                    Logger.d("match found (full): " + fn);
-                                    prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
-                                    downloadFullBuild = false;
-                                } else {
-                                    Logger.d("md5sum check failed : " + fn);
-                                }
+                    if (downloadFullBuild) {
+                        String fn = config.getPathBase() + latestFullBuild;
+                        if (new File(fn).exists()) {
+                            boolean directMD5 = latestFullBuildWithUrl.size() == 3;
+                            if (checkFullBuildMd5Sum(
+                                    (directMD5 ? latestFullBuildWithUrl.get(2) : latestFullFetchMd5),
+                                    fn, directMD5)) {
+                                Logger.d("match found (full): " + fn);
+                                prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
+                                downloadFullBuild = false;
+                            } else {
+                                Logger.d("md5sum check failed : " + fn);
                             }
                         }
-                        if (updateAvilable && downloadFullBuild) {
-                            long size = getUrlDownloadSize(latestFullFetch);
-                            prefs.edit().putLong(PREF_DOWNLOAD_SIZE, size).commit();
-                        }
-                        Logger.d("check donne: latest full build available = " + prefs.getString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT) +
-                                " : updateAvilable = " + updateAvilable + " : downloadFullBuild = " + downloadFullBuild);
+                    }
+                    if (updateAvailable && downloadFullBuild) {
+                        long size = getUrlDownloadSize(latestFullFetch);
+                        prefs.edit().putLong(PREF_DOWNLOAD_SIZE, size).commit();
+                    }
+                    Logger.d("check donne: latest full build available = " + prefs.getString(PREF_LATEST_FULL_NAME, null) +
+                            " : updateAvailable = " + updateAvailable + " : downloadFullBuild = " + downloadFullBuild);
 
-                        if (checkOnly == PREF_AUTO_DOWNLOAD_CHECK) {
-                            return;
-                        }
+                    if (checkOnly == PREF_AUTO_DOWNLOAD_CHECK) {
+                        return;
+                    }
+                } else {
+                    DeltaInfo lastDelta = deltas.get(deltas.size() - 1);
+                    flashFilename = config.getPathBase() + lastDelta.getOut().getName();
+
+                    long deltaDownloadSize = getDeltaDownloadSize(deltas);
+                    long fullDownloadSize = getFullDownloadSize(deltas);
+
+                    Logger.d("download size --> deltas[%d] vs full[%d]", deltaDownloadSize,
+                            fullDownloadSize);
+
+                    // Find the currently flashed ZIP, or a newer one
+                    String initialFile;
+                    boolean initialFileNeedsProcessing;
+                    {
+                        boolean[] needsProcessing = new boolean[] {
+                                false
+                        };
+                        initialFile = findInitialFile(deltas, flashFilename, needsProcessing);
+                        initialFileNeedsProcessing = needsProcessing[0];
+                    }
+                    Logger.d("initial: %s", initialFile != null ? initialFile : "not found");
+
+                    // If we don't have a file to start out with, or the
+                    // combined deltas get big, just get the latest full ZIP
+                    boolean betterDownloadFullBuild = deltaDownloadSize > fullDownloadSize;
+
+                    final String latestFull = prefs.getString(PREF_LATEST_FULL_NAME, null);
+                    final String latestDelta = flashFilename;
+
+                    String latestDeltaZip = latestDelta != null ? new File(latestDelta).getName() : null;
+                    String latestFullZip = latestFull;
+                    String currentVersionZip = config.getFilenameBase() +".zip";
+                    boolean fullUpdatePossible = latestFullZip != null && Long.parseLong(latestFullZip.replaceAll("\\D+","")) > Long.parseLong(currentVersionZip.replaceAll("\\D+",""));
+                    boolean deltaUpdatePossible = initialFile != null && latestDeltaZip != null && Long.parseLong(latestDeltaZip.replaceAll("\\D+","")) > Long.parseLong(currentVersionZip.replaceAll("\\D+","")) && latestDeltaZip.equals(latestFullZip);
+
+                    // is the full version newer then what we could create with delta?
+                    if (latestFullZip.compareTo(latestDeltaZip) > 0) {
+                        betterDownloadFullBuild = true;
+                    }
+
+                    Logger.d("latestDeltaZip = " + latestDeltaZip + " currentVersionZip = " + currentVersionZip + " latestFullZip = " + latestFullZip);
+
+                    Logger.d("deltaUpdatePossible = " + deltaUpdatePossible + " fullUpdatePossible = " + fullUpdatePossible + " betterDownloadFullBuild = " + betterDownloadFullBuild);
+
+                    if (!deltaUpdatePossible || (betterDownloadFullBuild && fullUpdatePossible)) {
+                        downloadFullBuild = true;
+                    }
+                    boolean updateAvailable = fullUpdatePossible || deltaUpdatePossible;
+
+                    if (!updateAvailable) {
+                        prefs.edit().putString(PREF_LATEST_DELTA_NAME, null).commit();
+                        prefs.edit().putString(PREF_LATEST_FULL_NAME, null).commit();
                     } else {
-                        DeltaInfo lastDelta = deltas.get(deltas.size() - 1);
-                        flashFilename = config.getPathBase() + lastDelta.getOut().getName();
-
-                        long deltaDownloadSize = getDeltaDownloadSize(deltas);
-                        long fullDownloadSize = getFullDownloadSize(deltas);
-
-                        Logger.d("download size --> deltas[%d] vs full[%d]", deltaDownloadSize,
-                                fullDownloadSize);
-
-                        // Find the currently flashed ZIP, or a newer one
-                        String initialFile = null;
-                        boolean initialFileNeedsProcessing = false;
-                        {
-                            boolean[] needsProcessing = new boolean[] {
-                                    false
-                            };
-                            initialFile = findInitialFile(deltas, flashFilename, needsProcessing);
-                            initialFileNeedsProcessing = needsProcessing[0];
-                        }
-                        Logger.d("initial: %s", initialFile != null ? initialFile : "not found");
-
-                        // If we don't have a file to start out with, or the
-                        // combined deltas get big, just get the latest full ZIP
-                        boolean betterDownloadFullBuild = deltaDownloadSize > fullDownloadSize;
-
-                        final String latestFull = prefs.getString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT);
-                        final String latestDelta = flashFilename;
-
-                        String latestDeltaZip = latestDelta != PREF_READY_FILENAME_DEFAULT ? new File(latestDelta).getName() : null;
-                        String latestFullZip = latestFull !=  PREF_READY_FILENAME_DEFAULT ? latestFull : null;
-                        String currentVersionZip = config.getFilenameBase() +".zip";
-                        boolean fullUpdatePossible = latestFullZip != null && Long.parseLong(latestFullZip.replaceAll("\\D+","")) > Long.parseLong(currentVersionZip.replaceAll("\\D+",""));
-                        boolean deltaUpdatePossible = initialFile != null && latestDeltaZip != null && Long.parseLong(latestDeltaZip.replaceAll("\\D+","")) > Long.parseLong(currentVersionZip.replaceAll("\\D+","")) && latestDeltaZip.equals(latestFullZip);
-
-                        // is the full version newer then what we could create with delta?
-                        if (latestFullZip.compareTo(latestDeltaZip) > 0) {
-                            betterDownloadFullBuild = true;
-                        }
-
-                        Logger.d("latestDeltaZip = " + latestDeltaZip + " currentVersionZip = " + currentVersionZip + " latestFullZip = " + latestFullZip);
-
-                        Logger.d("deltaUpdatePossible = " + deltaUpdatePossible + " fullUpdatePossible = " + fullUpdatePossible + " betterDownloadFullBuild = " + betterDownloadFullBuild);
-
-                        if (!deltaUpdatePossible || (betterDownloadFullBuild && fullUpdatePossible)) {
-                            downloadFullBuild = true;
-                        }
-                        boolean updateAvilable = fullUpdatePossible || deltaUpdatePossible;
-
-                        if (!updateAvilable) {
-                            prefs.edit().putString(PREF_LATEST_DELTA_NAME, PREF_READY_FILENAME_DEFAULT).commit();
-                            prefs.edit().putString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT).commit();
-                        } else {
-                            if (downloadFullBuild) {
-                                prefs.edit().putString(PREF_LATEST_DELTA_NAME, PREF_READY_FILENAME_DEFAULT).commit();
-                            } else {
-                                prefs.edit().putString(PREF_LATEST_DELTA_NAME, new File(flashFilename).getName()).commit();
-                            }
-                        }
-
                         if (downloadFullBuild) {
-                            String fn = config.getPathBase() + latestFullBuild;
-                            if (new File(fn).exists()) {
-                                boolean directMD5 = latestFullBuildWithUrl.size() == 3;
-                                if (checkFullBuildMd5Sum(
-                                        (directMD5 ? latestFullBuildWithUrl.get(2) : latestFullFetchMd5),
-                                        fn, directMD5)) {
-                                    Logger.d("match found (full): " + fn);
-                                    prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
-                                    downloadFullBuild = false;
-                                } else {
-                                    Logger.d("md5sum check failed : " + fn);
-                                }
-                            }
-                        }
-                        if (updateAvilable) {
-                            if (deltaUpdatePossible) {
-                                prefs.edit().putLong(PREF_DOWNLOAD_SIZE, deltaDownloadSize).commit();
-                            } else if (downloadFullBuild) {
-                                prefs.edit().putLong(PREF_DOWNLOAD_SIZE, fullDownloadSize).commit();
-                            }
-                        }
-                        Logger.d("check donne: latest valid delta update = " + prefs.getString(PREF_LATEST_DELTA_NAME, PREF_READY_FILENAME_DEFAULT) +
-                                " : latest full build available = " + prefs.getString(PREF_LATEST_FULL_NAME, PREF_READY_FILENAME_DEFAULT) +
-                                " : updateAvilable = " + updateAvilable + " : downloadFullBuild = " + downloadFullBuild);
-
-                        long requiredSpace = getRequiredSpace(deltas, downloadFullBuild);
-                        long freeSpace = (new StatFs(config.getPathBase())).getAvailableBytes();
-                        Logger.d("requiredSpace = " + requiredSpace + " freeSpace = " + freeSpace);
-
-                        if (freeSpace < requiredSpace) {
-                            updateState(STATE_ERROR_DISK_SPACE, null, freeSpace, requiredSpace,
-                                    null, null);
-                            Logger.d("not enough space!");
-                            return;
-                        }
-
-                        if (checkOnly == PREF_AUTO_DOWNLOAD_CHECK) {
-                            return;
-                        }
-                        long downloadSize = downloadFullBuild ? fullDownloadSize : deltaDownloadSize;
-
-                        if (!downloadFullBuild && checkOnly > PREF_AUTO_DOWNLOAD_CHECK) {
-                            // Download all the files we do not have yet
-                            // getFull = false since full download is handled below
-                            if (!downloadFiles(deltas, false, downloadSize, force))
-                                return;
-
-                            // Reconstruct flashable ZIP
-                            if (!applyPatches(deltas, initialFile, initialFileNeedsProcessing))
-                                return;
-
-                            // Verify using MD5
-                            if (lastDelta.getOut().match(
-                                    new File(config.getPathBase() + lastDelta.getOut().getName()),
-                                    true,
-                                    getMD5Progress(STATE_ACTION_APPLYING_MD5, lastDelta.getOut()
-                                            .getName())) == null) {
-                                updateState(STATE_ERROR_UNKNOWN, null, null, null, null, null);
-                                Logger.d("final verification error");
-                                return;
-                            }
-                            Logger.d("final verification complete");
-
-                            // Cleanup
-                            for (DeltaInfo di : deltas) {
-                                (new File(config.getPathBase() + di.getUpdate().getName())).delete();
-                                (new File(config.getPathBase() + di.getSignature().getName())).delete();
-                                if (di != lastDelta)
-                                    (new File(config.getPathBase() + di.getOut().getName())).delete();
-                            }
-                            // we will not delete initialFile until flashing
-                            // else people building images and not flashing for 24h will loose
-                            // the possibility to do delta updates
-                            if (initialFile != null) {
-                                if (initialFile.startsWith(config.getPathBase())) {
-                                    prefs.edit().putString(PREF_INITIAL_FILE, initialFile).commit();
-                                }
-                            }
-                            prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, true).commit();
-                            prefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
+                            prefs.edit().putString(PREF_LATEST_DELTA_NAME, null).commit();
+                        } else {
+                            prefs.edit().putString(PREF_LATEST_DELTA_NAME, new File(flashFilename).getName()).commit();
                         }
                     }
-                    if (downloadFullBuild && checkOnly == PREF_AUTO_DOWNLOAD_FULL) {
-                        if (force || networkState.getState()) {
-                            String latestFullMd5 = getLatestFullMd5Sum(latestFullFetchMd5);
-                            if (latestFullMd5 != null) {
-                                downloadFullBuild(latestFullFetch, latestFullMd5, latestFullBuild); // download full
+
+                    if (downloadFullBuild) {
+                        String fn = config.getPathBase() + latestFullBuild;
+                        if (new File(fn).exists()) {
+                            boolean directMD5 = latestFullBuildWithUrl.size() == 3;
+                            if (checkFullBuildMd5Sum(
+                                    (directMD5 ? latestFullBuildWithUrl.get(2) : latestFullFetchMd5),
+                                    fn, directMD5)) {
+                                Logger.d("match found (full): " + fn);
+                                prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
+                                downloadFullBuild = false;
                             } else {
-                                updateState(STATE_ERROR_DOWNLOAD, null, null, null, null, null);
-                                Logger.d("aborting download due to md5sum not found");
+                                Logger.d("md5sum check failed : " + fn);
                             }
+                        }
+                    }
+                    if (updateAvailable) {
+                        if (deltaUpdatePossible) {
+                            prefs.edit().putLong(PREF_DOWNLOAD_SIZE, deltaDownloadSize).commit();
+                        } else if (downloadFullBuild) {
+                            prefs.edit().putLong(PREF_DOWNLOAD_SIZE, fullDownloadSize).commit();
+                        }
+                    }
+                    Logger.d("check donne: latest valid delta update = " + prefs.getString(PREF_LATEST_DELTA_NAME, null) +
+                            " : latest full build available = " + prefs.getString(PREF_LATEST_FULL_NAME, null) +
+                            " : updateAvailable = " + updateAvailable + " : downloadFullBuild = " + downloadFullBuild);
+
+                    long requiredSpace = getRequiredSpace(deltas, downloadFullBuild);
+                    long freeSpace = (new StatFs(config.getPathBase())).getAvailableBytes();
+                    Logger.d("requiredSpace = " + requiredSpace + " freeSpace = " + freeSpace);
+
+                    if (freeSpace < requiredSpace) {
+                        updateState(STATE_ERROR_DISK_SPACE, null, freeSpace, requiredSpace,
+                                null, null);
+                        Logger.d("not enough space!");
+                        return;
+                    }
+
+                    if (checkOnly == PREF_AUTO_DOWNLOAD_CHECK) {
+                        return;
+                    }
+                    long downloadSize = downloadFullBuild ? fullDownloadSize : deltaDownloadSize;
+
+                    if (!downloadFullBuild && checkOnly > PREF_AUTO_DOWNLOAD_CHECK) {
+                        // Download all the files we do not have yet
+                        // getFull = false since full download is handled below
+                        if (!downloadFiles(deltas, downloadSize, userInitiated))
+                            return;
+
+                        // Reconstruct flashable ZIP
+                        if (!applyPatches(deltas, initialFile, initialFileNeedsProcessing))
+                            return;
+
+                        // Verify using MD5
+                        if (lastDelta.getOut().match(
+                                new File(config.getPathBase() + lastDelta.getOut().getName()),
+                                true,
+                                getMD5Progress(STATE_ACTION_APPLYING_MD5, lastDelta.getOut()
+                                        .getName())) == null) {
+                            updateState(STATE_ERROR_UNKNOWN, null, null, null, null, null);
+                            Logger.d("final verification error");
+                            return;
+                        }
+                        Logger.d("final verification complete");
+
+                        // Cleanup
+                        for (DeltaInfo di : deltas) {
+                            (new File(config.getPathBase() + di.getUpdate().getName())).delete();
+                            (new File(config.getPathBase() + di.getSignature().getName())).delete();
+                            if (di != lastDelta)
+                                (new File(config.getPathBase() + di.getOut().getName())).delete();
+                        }
+                        // we will not delete initialFile until flashing
+                        // else people building images and not flashing for 24h will loose
+                        // the possibility to do delta updates
+                        if (initialFile != null) {
+                            if (initialFile.startsWith(config.getPathBase())) {
+                                prefs.edit().putString(PREF_INITIAL_FILE, initialFile).commit();
+                            }
+                        }
+                        prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, true).commit();
+                        prefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
+                    }
+                }
+                if (downloadFullBuild && checkOnly == PREF_AUTO_DOWNLOAD_FULL) {
+                    if (userInitiated || networkState.getState()) {
+                        String latestFullMd5 = getLatestFullMd5Sum(latestFullFetchMd5);
+                        if (latestFullMd5 != null) {
+                            downloadFullBuild(latestFullFetch, latestFullMd5, latestFullBuild); // download full
                         } else {
                             updateState(STATE_ERROR_DOWNLOAD, null, null, null, null, null);
-                            Logger.d("aborting download due to network state");
-                        }
-                    }
-                } finally {
-                    prefs.edit().putLong(PREF_LAST_CHECK_TIME_NAME, System.currentTimeMillis()).commit();
-                    stopForeground(true);
-                    if (wifiLock.isHeld()) wifiLock.release();
-                    if (wakeLock.isHeld()) wakeLock.release();
-
-                    if (isErrorState(state)) {
-                        failedUpdateCount++;
-                        clearState();
-                        if (!userInitiated) {
-                            shouldShowErrorNotification();
+                            Logger.d("aborting download due to md5sum not found");
                         }
                     } else {
-                        failedUpdateCount = 0;
-                        autoState(userInitiated, checkOnly, true);
+                        updateState(STATE_ERROR_DOWNLOAD, null, null, null, null, null);
+                        Logger.d("aborting download due to network state");
                     }
-                    updateRunning = false;
                 }
+            } finally {
+                prefs.edit().putLong(PREF_LAST_CHECK_TIME_NAME, System.currentTimeMillis()).commit();
+                stopForeground(true);
+                if (wifiLock.isHeld()) wifiLock.release();
+                if (wakeLock.isHeld()) wakeLock.release();
+
+                if (isErrorState(state)) {
+                    failedUpdateCount++;
+                    clearState();
+                    if (!userInitiated) {
+                        shouldShowErrorNotification();
+                    }
+                } else {
+                    failedUpdateCount = 0;
+                    autoState(userInitiated, checkOnly, true);
+                }
+                updateRunning = false;
             }
         });
     }
@@ -2436,28 +2369,15 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private void deleteOldFlashFile(String newFlashFilename) {
-        String oldFlashFilename = prefs.getString(PREF_CURRENT_FILENAME_NAME, PREF_READY_FILENAME_DEFAULT);
+        String oldFlashFilename = prefs.getString(PREF_CURRENT_FILENAME_NAME, null);
         Logger.d("delete oldFlashFilename " + oldFlashFilename + " " + newFlashFilename);
 
-        if (oldFlashFilename != PREF_READY_FILENAME_DEFAULT && !oldFlashFilename.equals(newFlashFilename)
+        if (oldFlashFilename != null && !oldFlashFilename.equals(newFlashFilename)
                 && oldFlashFilename.startsWith(config.getPathBase())) {
             File file = new File(oldFlashFilename);
             if (file.exists()) {
                 Logger.d("delete oldFlashFilename " + oldFlashFilename);
                 file.delete();
-            }
-        }
-    }
-
-    private void scanImageFiles() {
-        // for debugging purposes
-        String dataFolder = config.getPathBase();
-        File[] contents = new File(dataFolder).listFiles();
-        if (contents != null) {
-            for (File file : contents) {
-                if (file.isFile()) {
-                    Logger.d("image file: " + file.getName());
-                }
             }
         }
     }
@@ -2470,21 +2390,20 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         return config;
     }
 
-    private boolean setFlashFilename(String flashFilename) {
+    private void setFlashFilename(String flashFilename) {
         Logger.d("Flash file set: %s", flashFilename);
         File fn = new File(flashFilename);
         if (!fn.exists()) {
             updateState(STATE_ERROR_FLASH_FILE, null, null, null, null, null);
-            return false;
+            return;
         }
         if (!fn.getName().endsWith(".zip")) {
             updateState(STATE_ERROR_FLASH_FILE, null, null, null, null, null);
-            return false;
+            return;
         }
         Logger.d("Set flash possible: %s", flashFilename);
         prefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
         updateState(STATE_ACTION_FLASH_FILE_READY, null, null, null, (new File(flashFilename)).getName(), null);
-        return true;
     }
 
     private void createNotificationChannel() {

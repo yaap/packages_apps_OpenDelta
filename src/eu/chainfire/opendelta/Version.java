@@ -21,7 +21,7 @@ package eu.chainfire.opendelta;
 
 public class Version implements Comparable<Version> {
 
-    private String version;
+    private final String version;
 
     public final String get() {
         return this.version;

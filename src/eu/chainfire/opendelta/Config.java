@@ -82,13 +82,12 @@ public class Config {
      * Using reflection voodoo instead calling the hidden class directly, to
      * dev/test outside of AOSP tree
      */
-    private String getProperty(Context context, String key, String defValue) {
+    private String getProperty(Context context, String key) {
         try {
             Class<?> SystemProperties = context.getClassLoader().loadClass(
                     "android.os.SystemProperties");
-            Method get = SystemProperties.getMethod("get", new Class[] {
-                    String.class, String.class });
-            return (String) get.invoke(null, new Object[] { key, defValue });
+            Method get = SystemProperties.getMethod("get", String.class, String.class);
+            return (String) get.invoke(null, new Object[] { key, ""});
         } catch (Exception e) {
             // A lot of voodoo could go wrong here, return failure instead of
             // crash
@@ -103,9 +102,9 @@ public class Config {
         Resources res = context.getResources();
 
         property_version = getProperty(context,
-                res.getString(R.string.property_version), "");
+                res.getString(R.string.property_version));
         property_device = getProperty(context,
-                res.getString(R.string.property_device), "");
+                res.getString(R.string.property_device));
         filename_base = String.format(Locale.ENGLISH,
                 res.getString(R.string.filename_base), property_version);
 
@@ -137,7 +136,7 @@ public class Config {
         weekly_version_tag = res.getString(R.string.weekly_version_tag);
         security_version_tag = res.getString(R.string.security_version_tag);
         android_version = getProperty(context,
-                res.getString(R.string.android_version), "");
+                res.getString(R.string.android_version));
         filename_base_prefix = String.format(Locale.ENGLISH,
                 res.getString(R.string.filename_base), android_version);
         boolean keep_screen_on = false;
@@ -265,7 +264,7 @@ public class Config {
     }
 
     public List<String> getFlashAfterUpdateZIPs() {
-        List<String> extras = new ArrayList<String>();
+        List<String> extras = new ArrayList<>();
 
         File[] files = (new File(getPathFlashAfterUpdate())).listFiles();
         if (files != null) {
@@ -324,9 +323,9 @@ public class Config {
     }
 
     public boolean isOfficialVersion() {
-        return getVersion().indexOf(official_version_tag) != -1 ||
-                getVersion().indexOf(weekly_version_tag) != -1 ||
-                getVersion().indexOf(security_version_tag) != -1;
+        return getVersion().contains(official_version_tag) ||
+                getVersion().contains(weekly_version_tag) ||
+                getVersion().contains(security_version_tag);
     }
 
     public String getAndroidVersion() {

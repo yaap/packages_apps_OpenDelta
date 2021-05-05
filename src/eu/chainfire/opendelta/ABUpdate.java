@@ -20,7 +20,6 @@ import android.os.UpdateEngineCallback;
 import android.util.Log;
 
 import java.util.Enumeration;
-import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -46,28 +45,28 @@ class ABUpdate {
     private final String zipPath;
     private final boolean enableABPerfMode;
 
-    private ProgressListener mProgressListener;
+    private final ProgressListener mProgressListener;
 
-    private UpdateService updateservice;
+    private final UpdateService mUpdateService;
 
     private final UpdateEngineCallback mUpdateEngineCallback = new UpdateEngineCallback() {
         float lastPercent;
         int offset = 0;
         @Override
         public void onStatusUpdate(int status, float percent) {
-            if (!isInstallingUpdate(updateservice)) {
+            if (!isInstallingUpdate(mUpdateService)) {
                 return;
             }
             Logger.d("onStatusUpdate = " + status);
 
             if (status == UpdateEngine.UpdateStatusConstants.UPDATED_NEED_REBOOT) {
-                setInstallingUpdate(false, updateservice);
-                updateservice.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.SUCCESS, -1);
+                setInstallingUpdate(false, mUpdateService);
+                mUpdateService.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.SUCCESS, -1);
                 return;
             }
             if (status == UpdateEngine.UpdateStatusConstants.REPORTING_ERROR_EVENT) {
-                setInstallingUpdate(false, updateservice);
-                updateservice.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.ERROR, -1);
+                setInstallingUpdate(false, mUpdateService);
+                mUpdateService.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.ERROR, -1);
                 return;
             }
             if (lastPercent > percent) {
@@ -75,8 +74,8 @@ class ABUpdate {
             }
             lastPercent = percent;
             if (mProgressListener != null) {
-                mProgressListener.setStatus(updateservice.getString(updateservice.getResources().getIdentifier(
-                    "progress_status_" + status, "string", updateservice.getPackageName())));
+                mProgressListener.setStatus(mUpdateService.getString(mUpdateService.getResources().getIdentifier(
+                    "progress_status_" + status, "string", mUpdateService.getPackageName())));
                 mProgressListener.onProgress(percent * 50f + (float) offset,
                     (long) Math.round(percent * 50) + (long) offset, 100L);
             }
@@ -85,13 +84,13 @@ class ABUpdate {
         @Override
         public void onPayloadApplicationComplete(int errorCode) {
             Logger.d("onPayloadApplicationComplete = " + errorCode);
-            setInstallingUpdate(false, updateservice);
+            setInstallingUpdate(false, mUpdateService);
             if (errorCode == UpdateEngine.ErrorCodeConstants.UPDATED_BUT_NOT_ACTIVE) {
-                updateservice.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.SUCCESS, errorCode);
+                mUpdateService.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.SUCCESS, errorCode);
             } else if (errorCode != UpdateEngine.ErrorCodeConstants.SUCCESS) {
-                updateservice.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.ERROR, errorCode);
+                mUpdateService.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.ERROR, errorCode);
             } else {
-                updateservice.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.SUCCESS, -1);
+                mUpdateService.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.SUCCESS, -1);
             }
         }
     };
@@ -120,8 +119,8 @@ class ABUpdate {
                 UpdateService us) {
         this.zipPath = zipPath;
         this.mProgressListener = listener;
-        this.updateservice = us;
-        this.enableABPerfMode = updateservice.getConfig().getABPerfModeCurrent();
+        this.mUpdateService = us;
+        this.enableABPerfMode = mUpdateService.getConfig().getABPerfModeCurrent();
     }
 
     private boolean startUpdate() {

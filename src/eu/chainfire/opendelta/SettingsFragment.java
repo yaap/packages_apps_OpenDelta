@@ -43,7 +43,6 @@ import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 import android.text.Html;
 import android.text.format.DateFormat;
-import android.view.MenuItem;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -57,8 +56,6 @@ public class SettingsFragment extends PreferenceFragment implements
     private static final String KEY_SHOW_INFO = "show_info";
     private static final String PREF_CLEAN_FILES = "clear_files";
     private static final String PREF_FILE_FLASH_HINT_SHOWN = "file_flash_hint_shown";
-    private static final String KEY_CATEGORY_ADMIN = "category_admin";
-
 
     private Preference mNetworksConfig;
     private ListPreference mAutoDownload;
@@ -85,7 +82,7 @@ public class SettingsFragment extends PreferenceFragment implements
         mNetworksConfig = (Preference) findPreference(KEY_NETWORKS);
 
         String autoDownload = prefs.getString(SettingsActivity.PREF_AUTO_DOWNLOAD, getDefaultAutoDownloadValue());
-        int autoDownloadValue = Integer.valueOf(autoDownload).intValue();
+        int autoDownloadValue = Integer.valueOf(autoDownload);
         mAutoDownload = (ListPreference) findPreference(SettingsActivity.PREF_AUTO_DOWNLOAD);
         mAutoDownload.setOnPreferenceChangeListener(this);
         mAutoDownload.setValue(autoDownload);
@@ -195,7 +192,7 @@ public class SettingsFragment extends PreferenceFragment implements
             int idx = mAutoDownload.findIndexOfValue(value);
             mAutoDownload.setSummary(mAutoDownload.getEntries()[idx]);
             mAutoDownload.setValueIndex(idx);
-            int autoDownloadValue = Integer.valueOf(value).intValue();
+            int autoDownloadValue = Integer.valueOf(value);
             mAutoDownloadCategory
                     .setEnabled(autoDownloadValue > UpdateService.PREF_AUTO_DOWNLOAD_CHECK);
             mSchedulerMode
@@ -252,33 +249,24 @@ public class SettingsFragment extends PreferenceFragment implements
                                 getString(R.string.network_wifi),
                                 getString(R.string.network_ethernet),
                                 getString(R.string.network_unknown), },
-                        checkedItems, new OnMultiChoiceClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog,
-                                    int which, boolean isChecked) {
-                                checkedItems[which] = isChecked;
-                            }
-                        })
-                .setPositiveButton(android.R.string.ok, new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        int flags = 0;
-                        if (checkedItems[0])
-                            flags += NetworkState.ALLOW_2G;
-                        if (checkedItems[1])
-                            flags += NetworkState.ALLOW_3G;
-                        if (checkedItems[2])
-                            flags += NetworkState.ALLOW_4G;
-                        if (checkedItems[3])
-                            flags += NetworkState.ALLOW_WIFI;
-                        if (checkedItems[4])
-                            flags += NetworkState.ALLOW_ETHERNET;
-                        if (checkedItems[5])
-                            flags += NetworkState.ALLOW_UNKNOWN;
-                        prefs.edit()
-                                .putInt(UpdateService.PREF_AUTO_UPDATE_NETWORKS_NAME,
-                                        flags).commit();
-                    }
+                        checkedItems, (dialog, which, isChecked) -> checkedItems[which] = isChecked)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    int flags1 = 0;
+                    if (checkedItems[0])
+                        flags1 += NetworkState.ALLOW_2G;
+                    if (checkedItems[1])
+                        flags1 += NetworkState.ALLOW_3G;
+                    if (checkedItems[2])
+                        flags1 += NetworkState.ALLOW_4G;
+                    if (checkedItems[3])
+                        flags1 += NetworkState.ALLOW_WIFI;
+                    if (checkedItems[4])
+                        flags1 += NetworkState.ALLOW_ETHERNET;
+                    if (checkedItems[5])
+                        flags1 += NetworkState.ALLOW_UNKNOWN;
+                    prefs.edit()
+                            .putInt(UpdateService.PREF_AUTO_UPDATE_NETWORKS_NAME,
+                                    flags1).commit();
                 }).setNegativeButton(android.R.string.cancel, null)
                 .setCancelable(true).show();
     }
@@ -327,17 +315,17 @@ public class SettingsFragment extends PreferenceFragment implements
 
     private String[] getWeekdays() {
         DateFormatSymbols dfs = new DateFormatSymbols();
-        List<String> weekDayList = new ArrayList<String>();
+        List<String> weekDayList = new ArrayList<>();
         weekDayList.addAll(Arrays.asList(dfs.getWeekdays()).subList(1, dfs.getWeekdays().length));
         return weekDayList.toArray(new String[weekDayList.size()]);
     }
 
     private void clearState(SharedPreferences prefs) {
-        prefs.edit().putString(UpdateService.PREF_LATEST_FULL_NAME, UpdateService.PREF_READY_FILENAME_DEFAULT).commit();
-        prefs.edit().putString(UpdateService.PREF_LATEST_DELTA_NAME, UpdateService.PREF_READY_FILENAME_DEFAULT).commit();
-        prefs.edit().putString(UpdateService.PREF_READY_FILENAME_NAME, UpdateService.PREF_READY_FILENAME_DEFAULT).commit();
+        prefs.edit().putString(UpdateService.PREF_LATEST_FULL_NAME, null).commit();
+        prefs.edit().putString(UpdateService.PREF_LATEST_DELTA_NAME, null).commit();
+        prefs.edit().putString(UpdateService.PREF_READY_FILENAME_NAME, null).commit();
         prefs.edit().putLong(UpdateService.PREF_DOWNLOAD_SIZE, -1).commit();
         prefs.edit().putBoolean(UpdateService.PREF_DELTA_SIGNATURE, false).commit();
-        prefs.edit().putString(UpdateService.PREF_INITIAL_FILE, UpdateService.PREF_READY_FILENAME_DEFAULT).commit();
+        prefs.edit().putString(UpdateService.PREF_INITIAL_FILE, null).commit();
     }
 }

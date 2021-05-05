@@ -31,7 +31,7 @@ import android.os.BatteryManager;
 
 public class BatteryState implements OnSharedPreferenceChangeListener {
     public interface OnBatteryStateListener {
-        public void onBatteryState(boolean state);
+        void onBatteryState(boolean state);
     }
 
     private Context context = null;
@@ -41,8 +41,8 @@ public class BatteryState implements OnSharedPreferenceChangeListener {
     private int minLevel = 50;
     private boolean chargeOnly = true;
 
-    private IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
+    private final IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
@@ -95,13 +95,13 @@ public class BatteryState implements OnSharedPreferenceChangeListener {
     public Boolean getState() {
         if (stateLast == null)
             return false;
-        return stateLast.booleanValue();
+        return stateLast;
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
             String key) {
         chargeOnly = sharedPreferences.getBoolean(SettingsActivity.PREF_CHARGE_ONLY, true);
-        minLevel = Integer.valueOf(sharedPreferences.getString(SettingsActivity.PREF_BATTERY_LEVEL, "50")).intValue();
+        minLevel = Integer.parseInt(sharedPreferences.getString(SettingsActivity.PREF_BATTERY_LEVEL, "50"));
     }
 }
