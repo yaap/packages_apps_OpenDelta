@@ -10,13 +10,13 @@
     <string name="action_about">關於</string>
     <string name="state_action_none">您的系統已是最新版本。</string>
     <string name="state_action_checking">檢查更新中...</string>
-    <string name="state_action_checking_md5">校對檔案...</string>
+    <string name="state_action_checking_sum">校對檔案...</string>
     <string name="state_action_searching">正在搜尋檔案...</string>
-    <string name="state_action_searching_md5">校對檔案...</string>
+    <string name="state_action_searching_sum">校對檔案...</string>
     <string name="state_action_downloading">正在下載...</string>
     <string name="state_action_applying">正在修補...</string>
     <string name="state_action_applying_patch">正在修補...</string>
-    <string name="state_action_applying_md5">校對檔案...</string>
+    <string name="state_action_applying_sum">校對檔案...</string>
     <string name="state_action_ready">已準備安裝更新。</string>
     <string name="state_error_disk_space">儲存空間不足!</string>
     <string name="state_error_unknown">未知錯誤。</string>

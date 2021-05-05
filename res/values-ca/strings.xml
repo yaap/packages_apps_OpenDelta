@@ -10,13 +10,13 @@
     <string name="action_about">Sobre</string>
     <string name="state_action_none">El sistema està actualitzat.</string>
     <string name="state_action_checking">Comprovant si hi ha actualitzacions disponibles &#8230;</string>
-    <string name="state_action_checking_md5">Verificant arxiu &#8230;</string>
+    <string name="state_action_checking_sum">Verificant arxiu &#8230;</string>
     <string name="state_action_searching">Buscant arxius &#8230;</string>
-    <string name="state_action_searching_md5">Verificant arxiu &#8230;</string>
+    <string name="state_action_searching_sum">Verificant arxiu &#8230;</string>
     <string name="state_action_downloading">S\'està baixant &#8230;</string>
     <string name="state_action_applying">Apedaçant &#8230;</string>
     <string name="state_action_applying_patch">Apedaçant &#8230;</string>
-    <string name="state_action_applying_md5">Verificant arxiu &#8230;</string>
+    <string name="state_action_applying_sum">Verificant arxiu &#8230;</string>
     <string name="state_action_ready">Actualització llesta per instal·lar.</string>
     <string name="state_error_disk_space">No hi ha prou espai al disc!</string>
     <string name="state_error_unknown">Error desconegut.</string>

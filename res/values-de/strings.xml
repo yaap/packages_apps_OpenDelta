@@ -10,13 +10,13 @@
     <string name="action_about">Über</string>
     <string name="state_action_none">Dein System ist auf dem neuesten Stand.</string>
     <string name="state_action_checking">Suche nach Aktualisierungen &#8230;</string>
-    <string name="state_action_checking_md5">Überprüfe Datei &#8230;</string>
+    <string name="state_action_checking_sum">Überprüfe Datei &#8230;</string>
     <string name="state_action_searching">Suche nach Dateien &#8230;</string>
-    <string name="state_action_searching_md5">Überprüfe Datei &#8230;</string>
+    <string name="state_action_searching_sum">Überprüfe Datei &#8230;</string>
     <string name="state_action_downloading">Lade herunter &#8230;</string>
     <string name="state_action_applying">Spiele ein &#8230;</string>
     <string name="state_action_applying_patch">Spiele ein &#8230;</string>
-    <string name="state_action_applying_md5">Überprüfe Datei &#8230;</string>
+    <string name="state_action_applying_sum">Überprüfe Datei &#8230;</string>
     <string name="state_action_ready">Aktualisierung bereit zum aufspielen.</string>
     <string name="state_error_disk_space">Nicht genügend Speicherplatz vorhanden!</string>
     <string name="state_error_unknown">Unbekannter Fehler.</string>

@@ -10,13 +10,13 @@
     <string name="action_about">À propos</string>
     <string name="state_action_none">Votre système est à jour.</string>
     <string name="state_action_checking">Vérification des mises à jour&#8230;</string>
-    <string name="state_action_checking_md5">Vérification du fichier&#8230;</string>
+    <string name="state_action_checking_sum">Vérification du fichier&#8230;</string>
     <string name="state_action_searching">Recherche des fichiers&#8230;</string>
-    <string name="state_action_searching_md5">Vérification du fichier&#8230;</string>
+    <string name="state_action_searching_sum">Vérification du fichier&#8230;</string>
     <string name="state_action_downloading">Téléchargement&#8230;</string>
     <string name="state_action_applying">Mise à jour&#8230;</string>
     <string name="state_action_applying_patch">Mise à jour&#8230;</string>
-    <string name="state_action_applying_md5">Vérification du fichier&#8230;</string>
+    <string name="state_action_applying_sum">Vérification du fichier&#8230;</string>
     <string name="state_action_ready">Mise à jour prête à être installée.</string>
     <string name="state_error_disk_space">Espace mémoire insuffisant\u00A0!</string>
     <string name="state_error_unknown">Erreur inconnue.</string>

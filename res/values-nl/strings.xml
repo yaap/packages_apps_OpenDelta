@@ -10,13 +10,13 @@
     <string name="action_about">Over</string>
     <string name="state_action_none">Uw systeem is up to date.</string>
     <string name="state_action_checking">Controleren op updates &#8230;</string>
-    <string name="state_action_checking_md5">Bestand verifiëren &#8230;</string>
+    <string name="state_action_checking_sum">Bestand verifiëren &#8230;</string>
     <string name="state_action_searching">Bestanden zoeken &#8230;</string>
-    <string name="state_action_searching_md5">Bestand verifiëren &#8230;</string>
+    <string name="state_action_searching_sum">Bestand verifiëren &#8230;</string>
     <string name="state_action_downloading">Downloaden &#8230;</string>
     <string name="state_action_applying">Toepassen &#8230;</string>
     <string name="state_action_applying_patch">Toepassen &#8230;</string>
-    <string name="state_action_applying_md5">Bestand toepassen &#8230;</string>
+    <string name="state_action_applying_sum">Bestand toepassen &#8230;</string>
     <string name="state_action_ready">Update is klaar voor installatie.</string>
     <string name="state_error_disk_space">Onvoldoende schijfruimte!</string>
     <string name="state_error_unknown">Onbekende fout.</string>

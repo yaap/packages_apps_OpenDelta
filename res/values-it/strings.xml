@@ -10,13 +10,13 @@
     <string name="action_about">Informazioni</string>
     <string name="state_action_none">Il tuo sistema è aggiornato.</string>
     <string name="state_action_checking">Controllo aggiornamenti&#8230;</string>
-    <string name="state_action_checking_md5">Verifica file&#8230;</string>
+    <string name="state_action_checking_sum">Verifica file&#8230;</string>
     <string name="state_action_searching">Ricerca file&#8230;</string>
-    <string name="state_action_searching_md5">Verifica file&#8230;</string>
+    <string name="state_action_searching_sum">Verifica file&#8230;</string>
     <string name="state_action_downloading">In Download&#8230;</string>
     <string name="state_action_applying">Aggiornamento&#8230;</string>
     <string name="state_action_applying_patch">Aggiornamento&#8230;</string>
-    <string name="state_action_applying_md5">Verifica file&#8230;</string>
+    <string name="state_action_applying_sum">Verifica file&#8230;</string>
     <string name="state_action_ready">Aggiornamento pronto per essere flashato.</string>
     <string name="state_error_disk_space">Spazio di archiviazione insufficiente!</string>
     <string name="state_error_unknown">Errore sconosciuto.</string>

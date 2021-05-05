@@ -25,13 +25,13 @@
     </string>
     <string name="state_action_none">Your system is up to date</string>
     <string name="state_action_checking">Checking for updates &#8230;</string>
-    <string name="state_action_checking_md5">Verifying file &#8230;</string>
+    <string name="state_action_checking_sum">Verifying file &#8230;</string>
     <string name="state_action_searching">Searching for files &#8230;</string>
-    <string name="state_action_searching_md5">Verifying file &#8230;</string>
+    <string name="state_action_searching_sum">Verifying file &#8230;</string>
     <string name="state_action_downloading">Downloading &#8230;</string>
     <string name="state_action_applying">Patching &#8230;</string>
     <string name="state_action_applying_patch">Patching &#8230;</string>
-    <string name="state_action_applying_md5">Verifying file &#8230;</string>
+    <string name="state_action_applying_sum">Verifying file &#8230;</string>
     <string name="state_action_ready">Update ready to flash</string>
     <string name="state_error_disk_space">Not enough disk space</string>
     <string name="state_error_unknown">Unknown error</string>

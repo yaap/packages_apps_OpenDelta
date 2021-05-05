@@ -11,13 +11,13 @@
     <string name="action_about">关于</string>
     <string name="state_action_none">您的系统已是最新版本</string>
     <string name="state_action_checking">正在检查更新 &#8230;</string>
-    <string name="state_action_checking_md5">检验文件 &#8230;</string>
+    <string name="state_action_checking_sum">检验文件 &#8230;</string>
     <string name="state_action_searching">正在寻找文件 &#8230;</string>
-    <string name="state_action_searching_md5">校验文件 &#8230;</string>
+    <string name="state_action_searching_sum">校验文件 &#8230;</string>
     <string name="state_action_downloading">正在下载 &#8230;</string>
     <string name="state_action_applying">正在补丁 &#8230;</string>
     <string name="state_action_applying_patch">正在补丁 &#8230;</string>
-    <string name="state_action_applying_md5">正在检验文件 &#8230;</string>
+    <string name="state_action_applying_sum">正在检验文件 &#8230;</string>
     <string name="state_action_ready">更新已准备好刷入</string>
     <string name="state_error_disk_space">没有足够的储存空间</string>
     <string name="state_error_unknown">未知错误</string>

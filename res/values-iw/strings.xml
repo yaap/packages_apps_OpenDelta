@@ -10,13 +10,13 @@
     <string name="action_about">אודות</string>
     <string name="state_action_none">המערכת שלך מעודכנת.</string>
     <string name="state_action_checking">בודק אם קיימים עדכונים &#8230;</string>
-    <string name="state_action_checking_md5">מאמת קובץ &#8230;</string>
+    <string name="state_action_checking_sum">מאמת קובץ &#8230;</string>
     <string name="state_action_searching">מחפש קבצים &#8230;</string>
-    <string name="state_action_searching_md5">מאמת קובץ &#8230;</string>
+    <string name="state_action_searching_sum">מאמת קובץ &#8230;</string>
     <string name="state_action_downloading">מוריד &#8230;</string>
     <string name="state_action_applying">מתקן &#8230;</string>
     <string name="state_action_applying_patch">מתקן &#8230;</string>
-    <string name="state_action_applying_md5">מאמת קובץ &#8230;</string>
+    <string name="state_action_applying_sum">מאמת קובץ &#8230;</string>
     <string name="state_action_ready">עדכון מוכן לצריבה.</string>
     <string name="state_error_disk_space">אין מספיק מקום בדיסק!</string>
     <string name="state_error_unknown">שגיאה לא ידועה.</string>

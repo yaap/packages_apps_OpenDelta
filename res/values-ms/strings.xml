@@ -9,13 +9,13 @@
     <string name="action_about">Tentang</string>
     <string name="state_action_none">Sistem anda telah dikemas kini.</string>
     <string name="state_action_checking">Memeriksa untuk kemas kini &#8230;</string>
-    <string name="state_action_checking_md5">Mengesahkan fail &#8230;</string>
+    <string name="state_action_checking_sum">Mengesahkan fail &#8230;</string>
     <string name="state_action_searching">Mencari fail &#8230;</string>
-    <string name="state_action_searching_md5">Mengesahkan fail &#8230;</string>
+    <string name="state_action_searching_sum">Mengesahkan fail &#8230;</string>
     <string name="state_action_downloading">Memuat turun &#8230;</string>
     <string name="state_action_applying">Menampal &#8230;</string>
     <string name="state_action_applying_patch">Menampal &#8230;</string>
-    <string name="state_action_applying_md5">Mengesahkan fail &#8230;</string>
+    <string name="state_action_applying_sum">Mengesahkan fail &#8230;</string>
     <string name="state_action_ready">Kemas kini bersedia untuk flash.</string>
     <string name="state_error_disk_space">Ruang cakera tidak mencukupi!</string>
     <string name="state_error_unknown">Ralat tidak diketahui.</string>

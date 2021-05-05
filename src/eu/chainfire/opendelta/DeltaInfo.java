@@ -39,21 +39,21 @@ public class DeltaInfo {
         void setStatus(String status);
     }
 
-    public static class FileSizeMD5 {
+    public static class FileSizeSHA256 {
         private final long size;
-        private final String MD5;
+        private final String SHA256;
 
-        public FileSizeMD5(JSONObject object, String suffix) throws JSONException {
+        public FileSizeSHA256(JSONObject object, String suffix) throws JSONException {
             size = object.getLong("size" + (suffix != null ? "_" + suffix : ""));
-            MD5 = object.getString("md5" + (suffix != null ? "_" + suffix : ""));
+            SHA256 = object.getString("sha256" + (suffix != null ? "_" + suffix : ""));
         }
 
         public long getSize() {
             return size;
         }
 
-        public String getMD5() {
-            return MD5;
+        public String getSHA256() {
+            return SHA256;
         }
     }
 
@@ -77,36 +77,36 @@ public class DeltaInfo {
             this.tag = tag;
         }
 
-        public FileSizeMD5 match(File f, boolean checkMD5, ProgressListener progressListener) {
+        public FileSizeSHA256 match(File f, boolean checkSUM, ProgressListener progressListener) {
             return null;
         }
     }
 
     public class FileUpdate extends FileBase {
-        private final FileSizeMD5 update;
-        private final FileSizeMD5 applied;
+        private final FileSizeSHA256 update;
+        private final FileSizeSHA256 applied;
 
         public FileUpdate(JSONObject object) throws JSONException {
             super(object);
-            update = new FileSizeMD5(object, null);
-            applied = new FileSizeMD5(object, "applied");
+            update = new FileSizeSHA256(object, null);
+            applied = new FileSizeSHA256(object, "applied");
         }
 
-        public FileSizeMD5 getUpdate() {
+        public FileSizeSHA256 getUpdate() {
             return update;
         }
 
-        public FileSizeMD5 getApplied() {
+        public FileSizeSHA256 getApplied() {
             return applied;
         }
 
-        public FileSizeMD5 match(File f, boolean checkMD5, ProgressListener progressListener) {
+        public FileSizeSHA256 match(File f, boolean checkSUM, ProgressListener progressListener) {
             if (f.exists()) {
                 if (f.length() == getUpdate().getSize())
-                    if (!checkMD5 || getUpdate().getMD5().equals(getFileMD5(f, progressListener)))
+                    if (!checkSUM || getUpdate().getSHA256().equals(getFileSHA256(f, progressListener)))
                         return getUpdate();
                 if (f.length() == getApplied().getSize())
-                    if (!checkMD5 || getApplied().getMD5().equals(getFileMD5(f, progressListener)))
+                    if (!checkSUM || getApplied().getSHA256().equals(getFileSHA256(f, progressListener)))
                         return getApplied();
             }
             return null;
@@ -114,40 +114,40 @@ public class DeltaInfo {
     }
 
     public class FileFull extends FileBase {
-        private final FileSizeMD5 official;
-        private final FileSizeMD5 store;
-        private final FileSizeMD5 storeSigned;
+        private final FileSizeSHA256 official;
+        private final FileSizeSHA256 store;
+        private final FileSizeSHA256 storeSigned;
 
         public FileFull(JSONObject object) throws JSONException {
             super(object);
-            official = new FileSizeMD5(object, "official");
-            store = new FileSizeMD5(object, "store");
-            storeSigned = new FileSizeMD5(object, "store_signed");
+            official = new FileSizeSHA256(object, "official");
+            store = new FileSizeSHA256(object, "store");
+            storeSigned = new FileSizeSHA256(object, "store_signed");
         }
 
-        public FileSizeMD5 getOfficial() {
+        public FileSizeSHA256 getOfficial() {
             return official;
         }
 
-        public FileSizeMD5 getStore() {
+        public FileSizeSHA256 getStore() {
             return store;
         }
 
-        public FileSizeMD5 getStoreSigned() {
+        public FileSizeSHA256 getStoreSigned() {
             return storeSigned;
         }
 
-        public FileSizeMD5 match(File f, boolean checkMD5, ProgressListener progressListener) {
+        public FileSizeSHA256 match(File f, boolean checkSUM, ProgressListener progressListener) {
             if (f.exists()) {
                 if (f.length() == getOfficial().getSize())
-                    if (!checkMD5 || getOfficial().getMD5().equals(getFileMD5(f, progressListener)))
+                    if (!checkSUM || getOfficial().getSHA256().equals(getFileSHA256(f, progressListener)))
                         return getOfficial();
                 if (f.length() == getStore().getSize())
-                    if (!checkMD5 || getStore().getMD5().equals(getFileMD5(f, progressListener)))
+                    if (!checkSUM || getStore().getSHA256().equals(getFileSHA256(f, progressListener)))
                         return getStore();
                 if (f.length() == getStoreSigned().getSize())
-                    if (!checkMD5
-                            || getStoreSigned().getMD5().equals(getFileMD5(f, progressListener)))
+                    if (!checkSUM
+                            || getStoreSigned().getSHA256().equals(getFileSHA256(f, progressListener)))
                         return getStoreSigned();
             }
             return null;
@@ -218,7 +218,7 @@ public class DeltaInfo {
         return ((float) current / (float) total) * 100f;
     }
 
-    private String getFileMD5(File file, ProgressListener progressListener) {
+    private String getFileSHA256(File file, ProgressListener progressListener) {
         String ret = null;
 
         long current = 0;
@@ -228,7 +228,7 @@ public class DeltaInfo {
 
         try {
             try (FileInputStream is = new FileInputStream(file)) {
-                MessageDigest digest = MessageDigest.getInstance("MD5");
+                MessageDigest digest = MessageDigest.getInstance("SHA256");
                 byte[] buffer = new byte[256 * 1024];
                 int r;
 
@@ -239,15 +239,15 @@ public class DeltaInfo {
                         progressListener.onProgress(getProgress(current, total), current, total);
                 }
 
-                StringBuilder MD5 = new StringBuilder(new BigInteger(1, digest.digest()).
+                StringBuilder SUM = new StringBuilder(new BigInteger(1, digest.digest()).
                         toString(16).toLowerCase(Locale.ENGLISH));
-                while (MD5.length() < 32)
-                    MD5.insert(0, "0");
-                ret = MD5.toString();
+                while (SUM.length() < 32)
+                    SUM.insert(0, "0");
+                ret = SUM.toString();
             }
         } catch (NoSuchAlgorithmException | IOException e) {
-            // No MD5 support (returns null)
-            // The MD5 of a non-existing file is null
+            // No SHA256 support (returns null)
+            // The SHA256 of a non-existing file is null
             // Read or close error (returns null)
             Logger.ex(e);
         }

@@ -26,13 +26,13 @@
 
     <string name="state_action_none">Seu sistema está atualizado</string>
     <string name="state_action_checking">Procurando por atualizações &#8230;</string>
-    <string name="state_action_checking_md5">Verificando arquivo &#8230;</string>
+    <string name="state_action_checking_sum">Verificando arquivo &#8230;</string>
     <string name="state_action_searching">Procurando por arquivos &#8230;</string>
-    <string name="state_action_searching_md5">Verificando arquivo &#8230;</string>
+    <string name="state_action_searching_sum">Verificando arquivo &#8230;</string>
     <string name="state_action_downloading">Baixando &#8230;</string>
     <string name="state_action_applying">Aplicando Patches &#8230;</string>
     <string name="state_action_applying_patch">Patching &#8230;</string>
-    <string name="state_action_applying_md5">Verificando arquivo &#8230;</string>
+    <string name="state_action_applying_sum">Verificando arquivo &#8230;</string>
     <string name="state_action_ready">Uma atualização está disponível</string>
     <string name="state_error_disk_space">Espaço em disco insuficiente !</string>
     <string name="state_error_unknown">Erro desconhecido</string>

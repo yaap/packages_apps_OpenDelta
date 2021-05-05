@@ -10,13 +10,13 @@
     <string name="action_about">Névjegy</string>
     <string name="state_action_none">A rendszer naprakész.</string>
     <string name="state_action_checking">Frissítések keresése &#8230;</string>
-    <string name="state_action_checking_md5">Fájl ellenőrzése &#8230;</string>
+    <string name="state_action_checking_sum">Fájl ellenőrzése &#8230;</string>
     <string name="state_action_searching">Keresés a fájlok után &#8230;</string>
-    <string name="state_action_searching_md5">Fájl ellenőrzése &#8230;</string>
+    <string name="state_action_searching_sum">Fájl ellenőrzése &#8230;</string>
     <string name="state_action_downloading">Letöltés &#8230;</string>
     <string name="state_action_applying">Patchelés &#8230;</string>
     <string name="state_action_applying_patch">Patchelés &#8230;</string>
-    <string name="state_action_applying_md5">Fájl ellenőrzése &#8230;</string>
+    <string name="state_action_applying_sum">Fájl ellenőrzése &#8230;</string>
     <string name="state_action_ready">Frissítés flashelésre kész.</string>
     <string name="state_error_disk_space">Nincs elég tárhely!</string>
     <string name="state_error_unknown">Ismeretlen hiba.</string>

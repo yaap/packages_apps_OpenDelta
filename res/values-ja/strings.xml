@@ -10,13 +10,13 @@
     <string name="action_about">概要</string>
     <string name="state_action_none">お使いのシステムは最新です</string>
     <string name="state_action_checking">更新の確認中&#8230;</string>
-    <string name="state_action_checking_md5">ファイルの確認中&#8230;</string>
+    <string name="state_action_checking_sum">ファイルの確認中&#8230;</string>
     <string name="state_action_searching">ファイルの検索中&#8230;</string>
-    <string name="state_action_searching_md5">ファイルの確認中&#8230;</string>
+    <string name="state_action_searching_sum">ファイルの確認中&#8230;</string>
     <string name="state_action_downloading">ダウンロード中&#8230;</string>
     <string name="state_action_applying">適用中&#8230;</string>
     <string name="state_action_applying_patch">適用中&#8230;</string>
-    <string name="state_action_applying_md5">ファイルの確認中&#8230;</string>
+    <string name="state_action_applying_sum">ファイルの確認中&#8230;</string>
     <string name="state_action_ready">更新の書き込み準備ができました</string>
     <string name="state_error_disk_space">ディスク領域不足</string>
     <string name="state_error_unknown">不明なエラー</string>

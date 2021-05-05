@@ -9,13 +9,13 @@
     <string name="action_about">Om</string>
     <string name="state_action_none">Ditt system är uppdaterat.</string>
     <string name="state_action_checking">Söker efter uppdateringar&#8230;</string>
-    <string name="state_action_checking_md5">Verifierar fil&#8230;</string>
+    <string name="state_action_checking_sum">Verifierar fil&#8230;</string>
     <string name="state_action_searching">Söker efter filer&#8230;</string>
-    <string name="state_action_searching_md5">Verifierar fil&#8230;</string>
+    <string name="state_action_searching_sum">Verifierar fil&#8230;</string>
     <string name="state_action_downloading">Laddar ned&#8230;</string>
     <string name="state_action_applying">Sammanfogar&#8230;</string>
     <string name="state_action_applying_patch">Sammanfogar&#8230;</string>
-    <string name="state_action_applying_md5">Verifierar fil&#8230;</string>
+    <string name="state_action_applying_sum">Verifierar fil&#8230;</string>
     <string name="state_error_disk_space">Inte tillräckligt diskutrymme!</string>
     <string name="state_error_unknown">Okänt fel.</string>
     <string name="error_disk_space_sub" formatted="false">%d MiB tillgängligt, %d MiB behövs</string>

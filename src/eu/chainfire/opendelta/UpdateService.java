@@ -143,13 +143,13 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
     public static final String STATE_ACTION_NONE = "action_none";
     public static final String STATE_ACTION_CHECKING = "action_checking";
-    public static final String STATE_ACTION_CHECKING_MD5 = "action_checking_md5";
+    public static final String STATE_ACTION_CHECKING_SUM = "action_checking_sum";
     public static final String STATE_ACTION_SEARCHING = "action_searching";
-    public static final String STATE_ACTION_SEARCHING_MD5 = "action_searching_md5";
+    public static final String STATE_ACTION_SEARCHING_SUM = "action_searching_sum";
     public static final String STATE_ACTION_DOWNLOADING = "action_downloading";
     public static final String STATE_ACTION_APPLYING = "action_applying";
     public static final String STATE_ACTION_APPLYING_PATCH = "action_applying_patch";
-    public static final String STATE_ACTION_APPLYING_MD5 = "action_applying_md5";
+    public static final String STATE_ACTION_APPLYING_SUM = "action_applying_sum";
     public static final String STATE_ACTION_READY = "action_ready";
     public static final String STATE_ACTION_AB_FLASH = "action_ab_flash";
     public static final String STATE_ACTION_AB_FINISHED = "action_ab_finished";
@@ -243,7 +243,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
     // url override
     private boolean isUrlOverride = false;
-    private String md5UrlOvr = null;
+    private String sumUrlOvr = null;
 
     /*
      * Using reflection voodoo instead calling the hidden class directly, to
@@ -713,17 +713,17 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         }
     }
 
-    private boolean downloadUrlFile(String url, File f, String matchMD5,
+    private boolean downloadUrlFile(String url, File f, String matchSUM,
             DeltaInfo.ProgressListener progressListener) {
         Logger.d("download: %s", url);
 
         HttpsURLConnection urlConnection = null;
         MessageDigest digest = null;
-        if (matchMD5 != null) {
+        if (matchSUM != null) {
             try {
-                digest = MessageDigest.getInstance("MD5");
+                digest = MessageDigest.getInstance("SHA-256");
             } catch (NoSuchAlgorithmException e) {
-                // No MD5 algorithm support
+                // No SHA-256 algorithm support
                 Logger.ex(e);
             }
         }
@@ -761,18 +761,18 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 }
 
                 if (digest != null) {
-                    StringBuilder MD5 = new StringBuilder(new BigInteger(1, digest.digest())
+                    StringBuilder SUM = new StringBuilder(new BigInteger(1, digest.digest())
                             .toString(16).toLowerCase(Locale.ENGLISH));
-                    while (MD5.length() < 32)
-                         MD5.insert(0, "0");
-                    boolean md5Check = MD5.toString().equals(matchMD5);
-                    Logger.d("MD5=" + MD5 + " matchMD5=" + matchMD5);
-                    Logger.d("MD5.length=" + MD5.length() +
-                            " matchMD5.length=" + matchMD5.length());
-                    if (!md5Check) {
-                        Logger.i("MD5 check failed for " + url);
+                    while (SUM.length() < 64)
+                         SUM.insert(0, "0");
+                    boolean sumCheck = SUM.toString().equals(matchSUM);
+                    Logger.d("SUM=" + SUM + " matchSUM=" + matchSUM);
+                    Logger.d("SUM.length=" + SUM.length() +
+                            " matchSUM.length=" + matchSUM.length());
+                    if (!sumCheck) {
+                        Logger.i("SUM check failed for " + url);
                     }
-                    return md5Check;
+                    return sumCheck;
                 }
                 return true;
             }
@@ -790,17 +790,17 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private boolean downloadUrlFileUnknownSize(String url, final File f,
-            String matchMD5) {
+            String matchSUM) {
         Logger.d("download: %s", url);
 
         HttpsURLConnection urlConnection = null;
         MessageDigest digest = null;
         long len = 0;
-        if (matchMD5 != null) {
+        if (matchSUM != null) {
             try {
-                digest = MessageDigest.getInstance("MD5");
+                digest = MessageDigest.getInstance("SHA-256");
             } catch (NoSuchAlgorithmException e) {
-                // No MD5 algorithm support
+                // No SHA-256 algorithm support
                 Logger.ex(e);
             }
         }
@@ -874,18 +874,18 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 }
 
                 if (digest != null) {
-                    String MD5 = new BigInteger(1, digest.digest())
-                    .toString(16).toLowerCase(Locale.ENGLISH);
-                    while (MD5.length() < 32)
-                         MD5 = "0" + MD5;
-                    boolean md5Check = MD5.equals(matchMD5);
-                    Logger.d("MD5=" + MD5 + " matchMD5=" + matchMD5);
-                    Logger.d("MD5.length=" + MD5.length() +
-                            " matchMD5.length=" + matchMD5.length());
-                    if (!md5Check) {
-                        Logger.i("MD5 check failed for " + url);
+                    StringBuilder SUM = new StringBuilder(new BigInteger(1, digest.digest())
+                            .toString(16).toLowerCase(Locale.ENGLISH));
+                    while (SUM.length() < 64)
+                         SUM.insert(0, "0");
+                    boolean sumCheck = SUM.toString().equals(matchSUM);
+                    Logger.d("SUM=" + SUM + " matchSUM=" + matchSUM);
+                    Logger.d("SUM.length=" + SUM.length() +
+                            " matchSUM.length=" + matchSUM.length());
+                    if (!sumCheck) {
+                        Logger.i("SUM check failed for " + url);
                     }
-                    return md5Check;
+                    return sumCheck;
                 }
                 return true;
             }
@@ -958,13 +958,13 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             updateState(STATE_ERROR_DOWNLOAD, null, null, null, url, null);
             return null;
         }
-        JSONObject object = null;
+        JSONObject object;
         try {
             object = new JSONObject(buildData);
             JSONArray updatesList = object.getJSONArray("response");
             String latestBuild = null;
             String urlOverride = null;
-            String md5Override = null;
+            String sumOverride = null;
             for (int i = 0; i < updatesList.length(); i++) {
                 if (updatesList.isNull(i)) {
                     continue;
@@ -973,11 +973,11 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     JSONObject build = updatesList.getJSONObject(i);
                     String fileName = new File(build.getString("filename")).getName();
                     String urlOvr = null;
-                    String md5Ovr = null;
+                    String sumOvr = null;
                     if (build.has("url"))
                         urlOvr = build.getString("url");
-                    if (build.has("md5url"))
-                        md5Ovr = build.getString("md5url");
+                    if (build.has("sha256url"))
+                        sumOvr = build.getString("sha256url");
                     Logger.d("parsed from json:");
                     Logger.d("fileName= " + fileName);
                     if (isMatchingImage(fileName))
@@ -986,9 +986,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         urlOverride = urlOvr;
                         Logger.d("url= " + urlOverride);
                     }
-                    if (md5Ovr != null && !md5Ovr.equals("")) {
-                        md5Override = md5Ovr;
-                        Logger.d("md5 url= " + md5Override);
+                    if (sumOvr != null && !sumOvr.equals("")) {
+                        sumOverride = sumOvr;
+                        Logger.d("sha256 url= " + sumOverride);
                     }
                 } catch (JSONException e) {
                     Logger.ex(e);
@@ -1000,10 +1000,10 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 ret.add(latestBuild);
                 if (urlOverride != null) {
                     ret.add(urlOverride);
-                    if (md5Override != null) {
-                        ret.add(md5Override);
+                    if (sumOverride != null) {
+                        ret.add(sumOverride);
                         isUrlOverride = true;
-                        md5UrlOvr = md5Override;
+                        sumUrlOvr = sumOverride;
                     }
                 }
             }
@@ -1016,8 +1016,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         return null;
     }
 
-    private DeltaInfo.ProgressListener getMD5Progress(String state,
-            String filename) {
+    private DeltaInfo.ProgressListener getSUMProgress(String state,
+                                                      String filename) {
         final long[] last = new long[] { 0, SystemClock.elapsedRealtime() };
         final String _state = state;
         final String _filename = filename;
@@ -1032,7 +1032,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     last[0] = now;
                 }
             }
-            public void setStatus(String s){
+            public void setStatus(String s) {
                 // do nothing
             }
         };
@@ -1046,7 +1046,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private boolean downloadDeltaFile(String url_base,
-            DeltaInfo.FileBase fileBase, DeltaInfo.FileSizeMD5 match,
+            DeltaInfo.FileBase fileBase, DeltaInfo.FileSizeSHA256 match,
             DeltaInfo.ProgressListener progressListener, boolean force) {
         if (fileBase.getTag() == null) {
             if (force || networkState.getState()) {
@@ -1055,7 +1055,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 File f = new File(fn);
                 Logger.d("download: %s --> %s", url, fn);
 
-                if (downloadUrlFile(url, f, match.getMD5(), progressListener)) {
+                if (downloadUrlFile(url, f, match.getSHA256(), progressListener)) {
                     fileBase.setTag(fn);
                     Logger.d("success");
                     return true;
@@ -1241,7 +1241,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             if (di.getUpdate().match(
                     new File(fn),
                     true,
-                    getMD5Progress(STATE_ACTION_CHECKING_MD5, di.getUpdate()
+                    getSUMProgress(STATE_ACTION_CHECKING_SUM, di.getUpdate()
                             .getName())) == di.getUpdate().getUpdate()) {
                 di.getUpdate().setTag(fn);
             } else {
@@ -1257,7 +1257,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 if (lastDelta.getSignature().match(
                         new File(fn),
                         true,
-                        getMD5Progress(STATE_ACTION_CHECKING_MD5, lastDelta
+                        getSUMProgress(STATE_ACTION_CHECKING_SUM, lastDelta
                                 .getSignature().getName())) == lastDelta
                                 .getSignature().getUpdate()) {
                     lastDelta.getSignature().setTag(fn);
@@ -1325,7 +1325,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         String expectedLocation = config.getPathBase()
                 + firstDelta.getIn().getName();
         Logger.d("findInitialFile expectedLocation = " + expectedLocation);
-        DeltaInfo.FileSizeMD5 match = null;
+        DeltaInfo.FileSizeSHA256 match = null;
         if (expectedLocation.equals(possibleMatch)) {
             match = firstDelta.getIn().match(new File(expectedLocation), false,
                     null);
@@ -1338,7 +1338,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             match = firstDelta.getIn().match(
                     new File(expectedLocation),
                     true,
-                    getMD5Progress(STATE_ACTION_SEARCHING_MD5, firstDelta
+                    getSUMProgress(STATE_ACTION_SEARCHING_SUM, firstDelta
                             .getIn().getName()));
             if (match != null) {
                 initialFile = expectedLocation;
@@ -1408,15 +1408,15 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         return true;
     }
 
-    private boolean downloadFullBuild(String url, String md5Sum,
-            String imageName) {
+    private void downloadFullBuild(String url, String sha256Sum,
+                                   String imageName) {
         final String[] filename = new String[] { null };
         filename[0] = imageName;
         String fn = config.getPathBase() + imageName;
         File f = new File(fn);
         Logger.d("download: %s --> %s", url, fn);
 
-        if (downloadUrlFileUnknownSize(url, f, md5Sum)) {
+        if (downloadUrlFileUnknownSize(url, f, sha256Sum)) {
             Logger.d("success");
             prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
         } else {
@@ -1429,28 +1429,26 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             }
         }
 
-        return true;
     }
 
     /**
-     * @param url - url to md5sum file
+     * @param url - url to sha256sum file
      * @param fn - file name
-     * @param ovr - whether direct link to md5sum is provided
-     * @return true if md5sum matches the file
+     * @param ovr - whether direct link to sha256sum is provided
+     * @return true if sha256sum matches the file
      */
-    private boolean checkFullBuildMd5Sum(String url, String fn, boolean ovr) {
+    private boolean checkFullBuildSHA256Sum(String url, String fn, boolean ovr) {
         String urlSuffix = config.getUrlSuffix();
         if (!ovr && urlSuffix.length() > 0) {
             url += urlSuffix;
         }
-        String latestFullMd5 = downloadUrlMemoryAsString(url);
-        if (latestFullMd5 != null){
+        String latestFullSUM = downloadUrlMemoryAsString(url);
+        if (latestFullSUM != null){
             try {
-                String md5Part = latestFullMd5;
-                String fileMd5 = getFileMD5(new File(fn),
-                        getMD5Progress(STATE_ACTION_CHECKING_MD5,
+                String fileSUM = getFileSHA256(new File(fn),
+                        getSUMProgress(STATE_ACTION_CHECKING_SUM,
                         new File(fn).getName()));
-                if (md5Part.equals(fileMd5)) {
+                if (latestFullSUM.equals(fileSUM)) {
                     return true;
                 }
             } catch(Exception e) {
@@ -1819,20 +1817,20 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         return latestFull != null || latestDelta != null;
     }
 
-    private String getLatestFullMd5Sum(String md5Url) {
+    private String getLatestFullSHA256Sum(String sumUrl) {
         String urlSuffix = config.getUrlSuffix();
         if (isUrlOverride) {
-            md5Url = md5UrlOvr;
+            sumUrl = sumUrlOvr;
         } else if (urlSuffix.length() > 0) {
-            md5Url += config.getUrlSuffix();
+            sumUrl += config.getUrlSuffix();
         }
-        String latestFullMd5 = downloadUrlMemoryAsString(md5Url);
-        if (latestFullMd5 != null) {
-            String md5Part = latestFullMd5;
-            while (md5Part.length() > 32)
-                md5Part = md5Part.substring(0, md5Part.length() - 1);
-            Logger.d("getLatestFullMd5Sum - md5sum = " + md5Part);
-            return md5Part;
+        String latestFullSum = downloadUrlMemoryAsString(sumUrl);
+        if (latestFullSum != null) {
+            String sumPart = latestFullSum;
+            while (sumPart.length() > 64)
+                sumPart = sumPart.substring(0, sumPart.length() - 1);
+            Logger.d("getLatestFullSHA256Sum - sha256sum = " + sumPart);
+            return sumPart;
         }
         return null;
     }
@@ -1844,7 +1842,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     // need to locally here for the deltas == 0 case
-    private String getFileMD5(File file, ProgressListener progressListener) {
+    private String getFileSHA256(File file, ProgressListener progressListener) {
         String ret = null;
 
         long current = 0;
@@ -1854,7 +1852,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
         try {
             try (FileInputStream is = new FileInputStream(file)) {
-                MessageDigest digest = MessageDigest.getInstance("MD5");
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
                 byte[] buffer = new byte[256 * 1024];
                 int r;
 
@@ -1865,15 +1863,15 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         progressListener.onProgress(getProgress(current, total), current, total);
                 }
 
-                //while (MD5.length() < 32)
-                //     MD5 = "0" + MD5;
+                //while (SUM.length() < 32)
+                //     SUM = "0" + SUM;
                 ret = new BigInteger(1, digest.digest()).
                         toString(16).toLowerCase(Locale.ENGLISH);
-                Logger.d("md5sum from file is: " + ret);
+                Logger.d("sha256sum from file is: " + ret);
             }
         } catch (IOException | NoSuchAlgorithmException e) {
-            // No MD5 support (returns null)
-            // The MD5 of a non-existing file is null
+            // No SHA256 support (returns null)
+            // The SHA256 of a non-existing file is null
             // Read or close error (returns null)
             Logger.ex(e);
         }
@@ -1914,11 +1912,11 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     public static boolean isProgressState(String state) {
         return state.equals(UpdateService.STATE_ACTION_DOWNLOADING) ||
                 state.equals(UpdateService.STATE_ACTION_SEARCHING) ||
-                state.equals(UpdateService.STATE_ACTION_SEARCHING_MD5) ||
+                state.equals(UpdateService.STATE_ACTION_SEARCHING_SUM) ||
                 state.equals(UpdateService.STATE_ACTION_CHECKING) ||
-                state.equals(UpdateService.STATE_ACTION_CHECKING_MD5) ||
+                state.equals(UpdateService.STATE_ACTION_CHECKING_SUM) ||
                 state.equals(UpdateService.STATE_ACTION_APPLYING) ||
-                state.equals(UpdateService.STATE_ACTION_APPLYING_MD5) ||
+                state.equals(UpdateService.STATE_ACTION_APPLYING_SUM) ||
                 state.equals(UpdateService.STATE_ACTION_APPLYING_PATCH) ||
                 state.equals(UpdateService.STATE_ACTION_AB_FLASH);
     }
@@ -2021,13 +2019,13 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 }
                 latestFullBuild = latestFullBuildWithUrl.get(0);
 
-                String latestFullFetch = null;
-                String latestFullFetchMd5 = null;
+                String latestFullFetch;
+                String latestFullFetchSUM = null;
                 if (latestFullBuildWithUrl.size() < 3) {
                     latestFullFetch = config.getUrlBaseFull() +
                             latestFullBuild + config.getUrlSuffix();
-                    latestFullFetchMd5 = config.getUrlBaseFullMd5() +
-                            latestFullBuild + ".md5sum" + config.getUrlSuffix();
+                    latestFullFetchSUM = config.getUrlBaseFullSum() +
+                            latestFullBuild + ".sha256sum" + config.getUrlSuffix();
                 }
                 else {
                     latestFullFetch = latestFullBuildWithUrl.get(1);
@@ -2100,7 +2098,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         if (di.getOut()
                                 .match(new File(fn),
                                         true,
-                                        getMD5Progress(STATE_ACTION_CHECKING_MD5, di.getOut()
+                                        getSUMProgress(STATE_ACTION_CHECKING_SUM, di.getOut()
                                                 .getName())) != null) {
                             if (latestFullBuild.equals(di.getOut().getName())) {
                                 boolean signedFile = di.getOut().isSignedFile(new File(fn));
@@ -2156,15 +2154,15 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     if (downloadFullBuild) {
                         String fn = config.getPathBase() + latestFullBuild;
                         if (new File(fn).exists()) {
-                            boolean directMD5 = latestFullBuildWithUrl.size() == 3;
-                            if (checkFullBuildMd5Sum(
-                                    (directMD5 ? latestFullBuildWithUrl.get(2) : latestFullFetchMd5),
-                                    fn, directMD5)) {
+                            boolean directSUM = latestFullBuildWithUrl.size() == 3;
+                            if (checkFullBuildSHA256Sum(
+                                    (directSUM ? latestFullBuildWithUrl.get(2) : latestFullFetchSUM),
+                                    fn, directSUM)) {
                                 Logger.d("match found (full): " + fn);
                                 prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
                                 downloadFullBuild = false;
                             } else {
-                                Logger.d("md5sum check failed : " + fn);
+                                Logger.d("sha256sum check failed : " + fn);
                             }
                         }
                     }
@@ -2241,15 +2239,15 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     if (downloadFullBuild) {
                         String fn = config.getPathBase() + latestFullBuild;
                         if (new File(fn).exists()) {
-                            boolean directMD5 = latestFullBuildWithUrl.size() == 3;
-                            if (checkFullBuildMd5Sum(
-                                    (directMD5 ? latestFullBuildWithUrl.get(2) : latestFullFetchMd5),
-                                    fn, directMD5)) {
+                            boolean directSUM = latestFullBuildWithUrl.size() == 3;
+                            if (checkFullBuildSHA256Sum(
+                                    (directSUM ? latestFullBuildWithUrl.get(2) : latestFullFetchSUM),
+                                    fn, directSUM)) {
                                 Logger.d("match found (full): " + fn);
                                 prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
                                 downloadFullBuild = false;
                             } else {
-                                Logger.d("md5sum check failed : " + fn);
+                                Logger.d("sha256sum check failed : " + fn);
                             }
                         }
                     }
@@ -2290,11 +2288,11 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         if (!applyPatches(deltas, initialFile, initialFileNeedsProcessing))
                             return;
 
-                        // Verify using MD5
+                        // Verify using SHA256
                         if (lastDelta.getOut().match(
                                 new File(config.getPathBase() + lastDelta.getOut().getName()),
                                 true,
-                                getMD5Progress(STATE_ACTION_APPLYING_MD5, lastDelta.getOut()
+                                getSUMProgress(STATE_ACTION_APPLYING_SUM, lastDelta.getOut()
                                         .getName())) == null) {
                             updateState(STATE_ERROR_UNKNOWN, null, null, null, null, null);
                             Logger.d("final verification error");
@@ -2323,12 +2321,12 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 }
                 if (downloadFullBuild && checkOnly == PREF_AUTO_DOWNLOAD_FULL) {
                     if (userInitiated || networkState.getState()) {
-                        String latestFullMd5 = getLatestFullMd5Sum(latestFullFetchMd5);
-                        if (latestFullMd5 != null) {
-                            downloadFullBuild(latestFullFetch, latestFullMd5, latestFullBuild); // download full
+                        String latestFullSUM = getLatestFullSHA256Sum(latestFullFetchSUM);
+                        if (latestFullSUM != null) {
+                            downloadFullBuild(latestFullFetch, latestFullSUM, latestFullBuild); // download full
                         } else {
                             updateState(STATE_ERROR_DOWNLOAD, null, null, null, null, null);
-                            Logger.d("aborting download due to md5sum not found");
+                            Logger.d("aborting download due to sha256sum not found");
                         }
                     } else {
                         updateState(STATE_ERROR_DOWNLOAD, null, null, null, null, null);

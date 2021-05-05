@@ -10,13 +10,13 @@
     <string name="action_about">O aplikaci</string>
     <string name="state_action_none">Váš systém je aktuální.</string>
     <string name="state_action_checking">Kontroluji aktualizace &#8230;</string>
-    <string name="state_action_checking_md5">Ověřování souboru &#8230;</string>
+    <string name="state_action_checking_sum">Ověřování souboru &#8230;</string>
     <string name="state_action_searching">Hledání souborů &#8230;</string>
-    <string name="state_action_searching_md5">Ověřování souboru &#8230;</string>
+    <string name="state_action_searching_sum">Ověřování souboru &#8230;</string>
     <string name="state_action_downloading">Stahování &#8230;</string>
     <string name="state_action_applying">Provádění změn &#8230;</string>
     <string name="state_action_applying_patch">Provádění změn &#8230;</string>
-    <string name="state_action_applying_md5">Ověřování souboru &#8230;</string>
+    <string name="state_action_applying_sum">Ověřování souboru &#8230;</string>
     <string name="state_action_ready">Aktualizace je připravena na flash.</string>
     <string name="state_error_disk_space">Není dostatek místa na úložišti!</string>
     <string name="state_error_unknown">Neznámá chyba.</string>

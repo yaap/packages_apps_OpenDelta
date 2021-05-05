@@ -10,13 +10,13 @@
     <string name="action_about">Hakkında</string>
     <string name="state_action_none">Sisteminiz güncel</string>
     <string name="state_action_checking">Güncellemeler yoklanıyor &#8230;</string>
-    <string name="state_action_checking_md5">Dosya doğrulanıyor &#8230;</string>
+    <string name="state_action_checking_sum">Dosya doğrulanıyor &#8230;</string>
     <string name="state_action_searching">Dosyalar aranıyor &#8230;</string>
-    <string name="state_action_searching_md5">Dosya doğrulanıyor &#8230;</string>
+    <string name="state_action_searching_sum">Dosya doğrulanıyor &#8230;</string>
     <string name="state_action_downloading">İndiriliyor &#8230;</string>
     <string name="state_action_applying">Uygulanıyor &#8230;</string>
     <string name="state_action_applying_patch">Uygulanıyor &#8230;</string>
-    <string name="state_action_applying_md5">Dosya doğrulanıyor &#8230;</string>
+    <string name="state_action_applying_sum">Dosya doğrulanıyor &#8230;</string>
     <string name="state_action_ready">Güncelleme kurulmaya hazır</string>
     <string name="state_error_disk_space">Yeteri kadar yer yok</string>
     <string name="state_error_unknown">Bilinmeyen hatâ</string>

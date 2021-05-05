@@ -10,11 +10,11 @@
     <string name="action_about">Tietoja</string>
     <string name="state_action_none">Järjestelmäsi on ajan tasalla</string>
     <string name="state_action_checking">Tarkistetaan päivityksiä &#8230;</string>
-    <string name="state_action_checking_md5">Varmennetaan tiedostoa&#8230;</string>
+    <string name="state_action_checking_sum">Varmennetaan tiedostoa&#8230;</string>
     <string name="state_action_searching">Etsitään tiedostoja&#8230;</string>
-    <string name="state_action_searching_md5">Varmennetaan tiedostoa&#8230;</string>
+    <string name="state_action_searching_sum">Varmennetaan tiedostoa&#8230;</string>
     <string name="state_action_downloading">Ladataan&#8230;</string>
-    <string name="state_action_applying_md5">Varmennetaan tiedostoa&#8230;</string>
+    <string name="state_action_applying_sum">Varmennetaan tiedostoa&#8230;</string>
     <string name="state_action_ready">Päivitys on valmis asennettavaksi</string>
     <string name="state_error_disk_space">Ei tarpeeksi levytilaa</string>
     <string name="state_error_unknown">Tuntematon virhe</string>

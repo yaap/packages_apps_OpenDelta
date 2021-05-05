@@ -10,13 +10,13 @@
     <string name="action_about">O programu</string>
     <string name="state_action_none">Vaš sistem je posodobljen.</string>
     <string name="state_action_checking">Preverjanje za posodobitve &#8230;</string>
-    <string name="state_action_checking_md5">Preverjanje datoteke &#8230;</string>
+    <string name="state_action_checking_sum">Preverjanje datoteke &#8230;</string>
     <string name="state_action_searching">Iskanje datotek &#8230;</string>
-    <string name="state_action_searching_md5">Preverjanje datoteke &#8230;</string>
+    <string name="state_action_searching_sum">Preverjanje datoteke &#8230;</string>
     <string name="state_action_downloading">Prejemanje &#8230;</string>
     <string name="state_action_applying">Popravljanje &#8230;</string>
     <string name="state_action_applying_patch">Popravljanje &#8230;</string>
-    <string name="state_action_applying_md5">Preverjanje datoteke &#8230;</string>
+    <string name="state_action_applying_sum">Preverjanje datoteke &#8230;</string>
     <string name="state_action_ready">Posodobitev pripravljena za namestitev.</string>
     <string name="state_error_disk_space">Ni dovolj prostora na disku!</string>
     <string name="state_error_unknown">Neznana napaka.</string>

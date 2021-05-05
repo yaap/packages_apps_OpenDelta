@@ -10,13 +10,13 @@
     <string name="action_about">O aplikácii</string>
     <string name="state_action_none">Váš systém je aktuálny.</string>
     <string name="state_action_checking">Kontrolujú sa aktualizácie &#8230;</string>
-    <string name="state_action_checking_md5">Overuje sa súbor &#8230;</string>
+    <string name="state_action_checking_sum">Overuje sa súbor &#8230;</string>
     <string name="state_action_searching">Vyhľadávajú sa súbory &#8230;</string>
-    <string name="state_action_searching_md5">Overuje sa súbor &#8230;</string>
+    <string name="state_action_searching_sum">Overuje sa súbor &#8230;</string>
     <string name="state_action_downloading">Preberá sa &#8230;</string>
     <string name="state_action_applying">Aplikujú sa záplaty &#8230;</string>
     <string name="state_action_applying_patch">Aplikujú sa záplaty &#8230;</string>
-    <string name="state_action_applying_md5">Overuje sa súbor &#8230;</string>
+    <string name="state_action_applying_sum">Overuje sa súbor &#8230;</string>
     <string name="state_action_ready">Aktualizácia pripravená na flash.</string>
     <string name="state_error_disk_space">Nedostatok miesta na disku!</string>
     <string name="state_error_unknown">Neznáma chyba.</string>

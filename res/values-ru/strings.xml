@@ -10,13 +10,13 @@
     <string name="action_about">О программе</string>
     <string name="state_action_none">Установлена последняя версия ПО.</string>
     <string name="state_action_checking">Поиск обновлений &#8230;</string>
-    <string name="state_action_checking_md5">Проверка файла &#8230;</string>
+    <string name="state_action_checking_sum">Проверка файла &#8230;</string>
     <string name="state_action_searching">Поиск файлов &#8230;</string>
-    <string name="state_action_searching_md5">Проверка файла &#8230;</string>
+    <string name="state_action_searching_sum">Проверка файла &#8230;</string>
     <string name="state_action_downloading">Загрузка &#8230;</string>
     <string name="state_action_applying">Внесение изменений &#8230;</string>
     <string name="state_action_applying_patch">Внесение изменений &#8230;</string>
-    <string name="state_action_applying_md5">Проверка файла &#8230;</string>
+    <string name="state_action_applying_sum">Проверка файла &#8230;</string>
     <string name="state_action_ready">Обновление готово к установке.</string>
     <string name="state_error_disk_space">Недостаточно свободного места!</string>
     <string name="state_error_unknown">Неизвестная ошибка.</string>

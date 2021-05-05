@@ -10,13 +10,13 @@
     <string name="action_about">O aplikacji</string>
     <string name="state_action_none">Twój system jest aktualny.</string>
     <string name="state_action_checking">Wyszukiwanie aktualizacji &#8230;</string>
-    <string name="state_action_checking_md5">Weryfikacja pliku &#8230;</string>
+    <string name="state_action_checking_sum">Weryfikacja pliku &#8230;</string>
     <string name="state_action_searching">Wyszukiwanie plików &#8230;</string>
-    <string name="state_action_searching_md5">Weryfikacja pliku &#8230;</string>
+    <string name="state_action_searching_sum">Weryfikacja pliku &#8230;</string>
     <string name="state_action_downloading">Pobieranie &#8230;</string>
     <string name="state_action_applying">Patchowanie &#8230;</string>
     <string name="state_action_applying_patch">Patchowanie &#8230;</string>
-    <string name="state_action_applying_md5">Weryfikowanie pliku &#8230;</string>
+    <string name="state_action_applying_sum">Weryfikowanie pliku &#8230;</string>
     <string name="state_action_ready">Aktualizacja gotowa do wgrania</string>
     <string name="state_error_disk_space">Nie wystarczająco miejsca na dysku!</string>
     <string name="state_error_unknown">Nieznany błąd</string>

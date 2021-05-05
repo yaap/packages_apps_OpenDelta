@@ -10,13 +10,13 @@
     <string name="action_about">Om</string>
     <string name="state_action_none">Systemet er oppdatert.</string>
     <string name="state_action_checking">Sjekker etter oppdateringer&#8230;</string>
-    <string name="state_action_checking_md5">Kontrollerer fil...</string>
+    <string name="state_action_checking_sum">Kontrollerer fil...</string>
     <string name="state_action_searching">Søker etter filer...</string>
-    <string name="state_action_searching_md5">Kontrollerer fil...</string>
+    <string name="state_action_searching_sum">Kontrollerer fil...</string>
     <string name="state_action_downloading">Laster ned...</string>
     <string name="state_action_applying">Patcher &#8230;</string>
     <string name="state_action_applying_patch">Patcher &#8230;</string>
-    <string name="state_action_applying_md5">Kontrollerer fil...</string>
+    <string name="state_action_applying_sum">Kontrollerer fil...</string>
     <string name="state_action_ready">Oppdateringen klar å flashe.</string>
     <string name="state_error_disk_space">Ikke nok lagringsplass!</string>
     <string name="state_error_unknown">Ukjent feil.</string>

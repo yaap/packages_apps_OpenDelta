@@ -10,13 +10,13 @@
     <string name="action_about">더 많은 정보</string>
     <string name="state_action_none">시스템이 최신 상태입니다</string>
     <string name="state_action_checking">업데이트 확인하는 중...</string>
-    <string name="state_action_checking_md5">파일 확인하는 중...</string>
+    <string name="state_action_checking_sum">파일 확인하는 중...</string>
     <string name="state_action_searching">파일 찾는 중...</string>
-    <string name="state_action_searching_md5">파일 확인하는 중...</string>
+    <string name="state_action_searching_sum">파일 확인하는 중...</string>
     <string name="state_action_downloading">다운로드 중...</string>
     <string name="state_action_applying">패치 적용 중...</string>
     <string name="state_action_applying_patch">패치 적용 중...</string>
-    <string name="state_action_applying_md5">파일 확인하는 중...</string>
+    <string name="state_action_applying_sum">파일 확인하는 중...</string>
     <string name="state_action_ready">업데이트 플래싱 준비 됨</string>
     <string name="state_error_disk_space">저장소 공간이 충분하지 않습니다!</string>
     <string name="state_error_unknown">알 수 없는 오류</string>

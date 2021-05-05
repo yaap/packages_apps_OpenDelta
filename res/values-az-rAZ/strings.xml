@@ -10,13 +10,13 @@
     <string name="action_about">Haqqında</string>
     <string name="state_action_none">Sisteminiz yenilənmişdir.</string>
     <string name="state_action_checking">Təzələmələr yoxlanılır&#8230;</string>
-    <string name="state_action_checking_md5">Fayl təsdiqlənir &#8230;</string>
+    <string name="state_action_checking_sum">Fayl təsdiqlənir &#8230;</string>
     <string name="state_action_searching">Fayllar axtarılır&#8230;</string>
-    <string name="state_action_searching_md5">Fayllar təsdiqlənir&#8230;</string>
+    <string name="state_action_searching_sum">Fayllar təsdiqlənir&#8230;</string>
     <string name="state_action_downloading">Yüklənir &#8230;</string>
     <string name="state_action_applying">Yamaqlanır &#8230;</string>
     <string name="state_action_applying_patch">Yamaqlanır &#8230;</string>
-    <string name="state_action_applying_md5">Fayllar təsdiqlənir&#8230;</string>
+    <string name="state_action_applying_sum">Fayllar təsdiqlənir&#8230;</string>
     <string name="state_action_ready">Təzələmə yükləməyə hazırdır.</string>
     <string name="state_error_disk_space">Kifayət qədər yaddaş yoxdur!</string>
     <string name="state_error_unknown">Naməlum xəta.</string>

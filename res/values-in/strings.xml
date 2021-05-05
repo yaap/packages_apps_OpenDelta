@@ -10,13 +10,13 @@
     <string name="action_about">Tentang</string>
     <string name="state_action_none">Sistem Anda sudah yang terbaru</string>
     <string name="state_action_checking">Memeriksa pembaruan &#8230;</string>
-    <string name="state_action_checking_md5">Memverifikasi berkas &#8230;</string>
+    <string name="state_action_checking_sum">Memverifikasi berkas &#8230;</string>
     <string name="state_action_searching">Mencari berkas &#8230;</string>
-    <string name="state_action_searching_md5">Memverifikasi berkas &#8230;</string>
+    <string name="state_action_searching_sum">Memverifikasi berkas &#8230;</string>
     <string name="state_action_downloading">Mengunduh &#8230;</string>
     <string name="state_action_applying">Menambal &#8230;</string>
     <string name="state_action_applying_patch">Menambal &#8230;</string>
-    <string name="state_action_applying_md5">Memverifikasi berkas &#8230;</string>
+    <string name="state_action_applying_sum">Memverifikasi berkas &#8230;</string>
     <string name="state_action_ready">Pembaruan siap untuk diflash</string>
     <string name="state_error_disk_space">Kapasitas ruang tidak mencukupi</string>
     <string name="state_error_unknown">Kesalahan yang tidak diketahui</string>

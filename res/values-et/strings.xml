@@ -10,13 +10,13 @@
     <string name="action_about">Teave</string>
     <string name="state_action_none">Sinu süsteem on ajakohane</string>
     <string name="state_action_checking">Kontrollin uuendusi&#8230;</string>
-    <string name="state_action_checking_md5">Kinnitan faili&#8230;</string>
+    <string name="state_action_checking_sum">Kinnitan faili&#8230;</string>
     <string name="state_action_searching">Otsin faile&#8230;</string>
-    <string name="state_action_searching_md5">Kinnitan faili&#8230;</string>
+    <string name="state_action_searching_sum">Kinnitan faili&#8230;</string>
     <string name="state_action_downloading">Allalaadimine&#8230;</string>
     <string name="state_action_applying">Paikamine&#8230;</string>
     <string name="state_action_applying_patch">Paikamine&#8230;</string>
-    <string name="state_action_applying_md5">Kinnitan faili&#8230;</string>
+    <string name="state_action_applying_sum">Kinnitan faili&#8230;</string>
     <string name="state_action_ready">Uuendus on välgutamiseks valmis</string>
     <string name="state_error_disk_space">Pole piisavalt kettaruumi</string>
     <string name="state_error_unknown">Tundmatu viga</string>

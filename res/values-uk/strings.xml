@@ -10,13 +10,13 @@
     <string name="action_about">Про додаток</string>
     <string name="state_action_none">Установлена остання версія ПЗ.</string>
     <string name="state_action_checking">Перевірка оновлень&#8230;</string>
-    <string name="state_action_checking_md5">Верифікація файлу&#8230;</string>
+    <string name="state_action_checking_sum">Верифікація файлу&#8230;</string>
     <string name="state_action_searching">Пошук файлів&#8230;</string>
-    <string name="state_action_searching_md5">Верифікація файлу&#8230;</string>
+    <string name="state_action_searching_sum">Верифікація файлу&#8230;</string>
     <string name="state_action_downloading">Завантажується&#8230;</string>
     <string name="state_action_applying">Внесення змін &#8230;</string>
     <string name="state_action_applying_patch">Внесення змін &#8230;</string>
-    <string name="state_action_applying_md5">Верифікація файлу&#8230;</string>
+    <string name="state_action_applying_sum">Верифікація файлу&#8230;</string>
     <string name="state_action_ready">Оновлення готове до встановлення.</string>
     <string name="state_error_disk_space">Недостатньо місця на диску!</string>
     <string name="state_error_unknown">Невідома помилка.</string>

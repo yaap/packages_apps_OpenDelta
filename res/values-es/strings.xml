@@ -10,13 +10,13 @@
     <string name="action_about">Acerca de</string>
     <string name="state_action_none">El sistema está actualizado.</string>
     <string name="state_action_checking">Comprobando si hay actualizaciones disponibles &#8230;</string>
-    <string name="state_action_checking_md5">Verificando archivo &#8230;</string>
+    <string name="state_action_checking_sum">Verificando archivo &#8230;</string>
     <string name="state_action_searching">Buscando archivos &#8230;</string>
-    <string name="state_action_searching_md5">Verificando archivo &#8230;</string>
+    <string name="state_action_searching_sum">Verificando archivo &#8230;</string>
     <string name="state_action_downloading">Descargando &#8230;</string>
     <string name="state_action_applying">Parcheando &#8230;</string>
     <string name="state_action_applying_patch">Parcheando &#8230;</string>
-    <string name="state_action_applying_md5">Verificando archivo &#8230;</string>
+    <string name="state_action_applying_sum">Verificando archivo &#8230;</string>
     <string name="state_action_ready">Actualización lista para flashear.</string>
     <string name="state_error_disk_space">¡No hay espacio suficiente en el disco!</string>
     <string name="state_error_unknown">Error desconocido.</string>
