@@ -2,11 +2,6 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">Süsteemiuuendused</string>
-    <string name="action_networks">Võrgud</string>
-    <string name="title_networks">Automaatse allalaadimise võrgud</string>
-    <string name="network_wifi">Wi-Fi</string>
-    <string name="network_ethernet">Ethernet</string>
-    <string name="network_unknown">Muu</string>
     <string name="action_about">Teave</string>
     <string name="state_action_none">Sinu süsteem on ajakohane</string>
     <string name="state_action_checking">Kontrollin uuendusi&#8230;</string>
@@ -78,8 +73,6 @@
     <string name="scheduler_weekly">Iganädalane</string>
     <string name="scheduler_daily_time">Kellaaeg</string>
     <string name="scheduler_week_day">Päev</string>
-    <string name="networks_title">Võrgud</string>
-    <string name="networks_message">Laadi alla ainult võrgutüüpide puhul</string>
     <string name="category_flashing">Välgutamine</string>
     <string name="secure_mode_title">Turvaline režiim</string>
     <string name="state_error_connection">Andmeside puudub.</string>

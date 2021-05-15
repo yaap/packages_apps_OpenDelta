@@ -2,11 +2,6 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">系統更新</string>
-    <string name="action_networks">網路</string>
-    <string name="title_networks">自動下載網路</string>
-    <string name="network_wifi">Wi-Fi</string>
-    <string name="network_ethernet">乙太網路</string>
-    <string name="network_unknown">其他</string>
     <string name="action_about">關於</string>
     <string name="state_action_none">您的系統已是最新版本。</string>
     <string name="state_action_checking">檢查更新中...</string>
@@ -75,8 +70,6 @@
     <string name="scheduler_weekly">每周</string>
     <string name="scheduler_daily_time">時間</string>
     <string name="scheduler_week_day">星期</string>
-    <string name="networks_title">網路</string>
-    <string name="networks_message">只在特定網路模式進行下載</string>
     <string name="category_flashing">刷寫中</string>
     <string name="secure_mode_title">安全模式</string>
     <string name="state_error_connection">沒有資料連接</string>

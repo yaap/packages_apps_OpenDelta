@@ -2,11 +2,6 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">Sistem Təzələmələri</string>
-    <string name="action_networks">Şəbəkələr</string>
-    <string name="title_networks">Avto yükləmə şəbəkələri</string>
-    <string name="network_wifi">Wi-Fi</string>
-    <string name="network_ethernet">Ethernet</string>
-    <string name="network_unknown">Digər</string>
     <string name="action_about">Haqqında</string>
     <string name="state_action_none">Sisteminiz yenilənmişdir.</string>
     <string name="state_action_checking">Təzələmələr yoxlanılır&#8230;</string>
@@ -74,8 +69,6 @@
     <string name="scheduler_weekly">Həftəlik</string>
     <string name="scheduler_daily_time">Vaxt</string>
     <string name="scheduler_week_day">Gün</string>
-    <string name="networks_title">Şəbəkələr</string>
-    <string name="networks_message">Yalnız şəbəkə tipləri üzərində yükləmə</string>
     <string name="category_flashing">Yüklənir</string>
     <string name="secure_mode_title">Təhlükəsiz mod</string>
     <string name="state_error_connection">Data əlaqəsi yoxdur.</string>

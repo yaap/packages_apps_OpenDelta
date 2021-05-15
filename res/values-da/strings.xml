@@ -2,10 +2,6 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">Systemopdateringer</string>
-    <string name="action_networks">Netværk</string>
-    <string name="network_wifi">Wi-Fi</string>
-    <string name="network_ethernet">Ethernet</string>
-    <string name="network_unknown">Andre</string>
     <string name="action_about">Om</string>
     <string name="state_action_checking">Søger efter opdateringer &#8230;</string>
     <string name="state_action_checking_sum">Kontrollerer fil &#8230;</string>

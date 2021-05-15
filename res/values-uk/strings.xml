@@ -2,11 +2,6 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">Оновлення системи</string>
-    <string name="action_networks">Мережі</string>
-    <string name="title_networks">Автоматичне завантаження мереж</string>
-    <string name="network_wifi">Wi-Fi</string>
-    <string name="network_ethernet">Ethernet</string>
-    <string name="network_unknown">Інші</string>
     <string name="action_about">Про додаток</string>
     <string name="state_action_none">Установлена остання версія ПЗ.</string>
     <string name="state_action_checking">Перевірка оновлень&#8230;</string>
@@ -74,8 +69,6 @@
     <string name="scheduler_weekly">Щотижнево</string>
     <string name="scheduler_daily_time">Час</string>
     <string name="scheduler_week_day">День</string>
-    <string name="networks_title">Мережі</string>
-    <string name="networks_message">Завантажувати оновлення тільки через мережі вказаних типів</string>
     <string name="category_flashing">Встановлення</string>
     <string name="secure_mode_title">Безпечний режим</string>
     <string name="state_error_connection">Підключення до інтернету відсутнє.</string>

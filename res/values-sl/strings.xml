@@ -2,11 +2,6 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">Sistemske posodobitve</string>
-    <string name="action_networks">Omrežja</string>
-    <string name="title_networks">Samodejno prejmi omrežja</string>
-    <string name="network_wifi">Wi-Fi</string>
-    <string name="network_ethernet">Ethernet</string>
-    <string name="network_unknown">Drugo</string>
     <string name="action_about">O programu</string>
     <string name="state_action_none">Vaš sistem je posodobljen.</string>
     <string name="state_action_checking">Preverjanje za posodobitve &#8230;</string>
@@ -74,8 +69,6 @@
     <string name="scheduler_weekly">Tedensko</string>
     <string name="scheduler_daily_time">Čas</string>
     <string name="scheduler_week_day">Dan</string>
-    <string name="networks_title">Omrežja</string>
-    <string name="networks_message">Prejmi samo ob vrstah omrežja</string>
     <string name="category_flashing">Nameščanje</string>
     <string name="secure_mode_title">Varni način</string>
     <string name="state_error_connection">Ni podatkovne povezave.</string>

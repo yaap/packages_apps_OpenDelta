@@ -2,11 +2,6 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">Systemoppdateringer</string>
-    <string name="action_networks">Nettverk</string>
-    <string name="title_networks">Automatisk nettverksnedlasting</string>
-    <string name="network_wifi">Trådløst nett</string>
-    <string name="network_ethernet">Ethernet</string>
-    <string name="network_unknown">Annet</string>
     <string name="action_about">Om</string>
     <string name="state_action_none">Systemet er oppdatert.</string>
     <string name="state_action_checking">Sjekker etter oppdateringer&#8230;</string>
@@ -74,8 +69,6 @@
     <string name="scheduler_weekly">Ukentlig</string>
     <string name="scheduler_daily_time">Klokkeslett</string>
     <string name="scheduler_week_day">Dag</string>
-    <string name="networks_title">Nettverk</string>
-    <string name="networks_message">Nedlastning bare på nettverkstyper</string>
     <string name="category_flashing">Flasher</string>
     <string name="secure_mode_title">Sikker modus</string>
     <string name="state_error_connection">Ingen datatilkobling.</string>

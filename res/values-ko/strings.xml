@@ -2,11 +2,6 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">시스템 업데이트</string>
-    <string name="action_networks">네트워크</string>
-    <string name="title_networks">자동 다운로드 네트워크</string>
-    <string name="network_wifi">Wi-Fi</string>
-    <string name="network_ethernet">이더넷</string>
-    <string name="network_unknown">기타</string>
     <string name="action_about">더 많은 정보</string>
     <string name="state_action_none">시스템이 최신 상태입니다</string>
     <string name="state_action_checking">업데이트 확인하는 중...</string>
@@ -71,8 +66,6 @@
     <string name="scheduler_weekly">매주</string>
     <string name="scheduler_daily_time">시간</string>
     <string name="scheduler_week_day">일</string>
-    <string name="networks_title">네트워크</string>
-    <string name="networks_message">네트워크 종류에 한해서 다운로드</string>
     <string name="category_flashing">플래싱</string>
     <string name="secure_mode_title">보안 모드</string>
     <string name="state_error_connection">데이터 연결 없음.</string>

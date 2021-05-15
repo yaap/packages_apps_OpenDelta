@@ -2,11 +2,6 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">Järjestelmäpäivitykset</string>
-    <string name="action_networks">Verkot</string>
-    <string name="title_networks">Automaattisen latauksen verkot</string>
-    <string name="network_wifi">Wi-Fi</string>
-    <string name="network_ethernet">Ethernet</string>
-    <string name="network_unknown">Muu</string>
     <string name="action_about">Tietoja</string>
     <string name="state_action_none">Järjestelmäsi on ajan tasalla</string>
     <string name="state_action_checking">Tarkistetaan päivityksiä &#8230;</string>
@@ -66,8 +61,6 @@
     <string name="scheduler_weekly">Viikottain</string>
     <string name="scheduler_daily_time">Aika</string>
     <string name="scheduler_week_day">Päivä</string>
-    <string name="networks_title">Verkot</string>
-    <string name="networks_message">Lataa vain näissä verkoissa</string>
     <string name="category_flashing">Asennus</string>
     <string name="state_error_connection">Ei datayhteyttä.</string>
     <string name="category_admin">Huolto</string>

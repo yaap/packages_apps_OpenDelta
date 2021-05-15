@@ -2,11 +2,6 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">עדכוני מערכת</string>
-    <string name="action_networks">רשתות</string>
-    <string name="title_networks">רשתות הורדה אוטומטית</string>
-    <string name="network_wifi">רשת אלחוטית</string>
-    <string name="network_ethernet">אינטרנט</string>
-    <string name="network_unknown">שונות</string>
     <string name="action_about">אודות</string>
     <string name="state_action_none">המערכת שלך מעודכנת.</string>
     <string name="state_action_checking">בודק אם קיימים עדכונים &#8230;</string>
@@ -70,8 +65,6 @@
     <string name="scheduler_weekly">שבועי</string>
     <string name="scheduler_daily_time">זמן</string>
     <string name="scheduler_week_day">יום</string>
-    <string name="networks_title">רשתות</string>
-    <string name="networks_message">הורד רק על סוגי רשתות</string>
     <string name="category_flashing">צורב</string>
     <string name="secure_mode_title">מצב מאובטח</string>
     <string name="state_error_connection">אין חיבור הנתונים.</string>

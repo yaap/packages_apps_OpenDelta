@@ -2,11 +2,6 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">Systeem update</string>
-    <string name="action_networks">Netwerken</string>
-    <string name="title_networks">Automatisch download op de volgende netwerken</string>
-    <string name="network_wifi">Wi-Fi</string>
-    <string name="network_ethernet">Bedraad</string>
-    <string name="network_unknown">Anders</string>
     <string name="action_about">Over</string>
     <string name="state_action_none">Uw systeem is up to date.</string>
     <string name="state_action_checking">Controleren op updates &#8230;</string>
@@ -74,8 +69,6 @@
     <string name="scheduler_weekly">Wekelijks</string>
     <string name="scheduler_daily_time">Tijd</string>
     <string name="scheduler_week_day">Dag</string>
-    <string name="networks_title">Netwerken</string>
-    <string name="networks_message">Download alleen op netwerken typen</string>
     <string name="category_flashing">Installeren</string>
     <string name="secure_mode_title">Veilige modus</string>
     <string name="state_error_connection">Geen data connectie.</string>

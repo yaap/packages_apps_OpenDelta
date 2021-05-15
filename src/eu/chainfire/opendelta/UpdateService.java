@@ -198,9 +198,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
     private static final long SNOOZE_MS = 24 * AlarmManager.INTERVAL_HOUR;
 
-    public static final String PREF_AUTO_UPDATE_NETWORKS_NAME = "auto_update_networks";
-    public static final int PREF_AUTO_UPDATE_NETWORKS_DEFAULT = NetworkState.ALLOW_WIFI
-            | NetworkState.ALLOW_ETHERNET;
+    public static final String PREF_AUTO_UPDATE_METERED_NETWORKS = "auto_update_metered_networks";
 
     public static final String PREF_LATEST_FULL_NAME = "latest_full_name";
     public static final String PREF_LATEST_DELTA_NAME = "latest_delta_name";
@@ -303,9 +301,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             scheduler.start();
         }
         networkState = new NetworkState();
-        networkState.start(this, this, prefs.getInt(
-                PREF_AUTO_UPDATE_NETWORKS_NAME,
-                PREF_AUTO_UPDATE_NETWORKS_DEFAULT));
+        networkState.start(this, this, prefs.getBoolean(
+                PREF_AUTO_UPDATE_METERED_NETWORKS, false));
 
         batteryState = new BatteryState();
         batteryState.start(this, this,
@@ -439,10 +436,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             String key) {
         Logger.d("onSharedPreferenceChanged " + key);
 
-        if (PREF_AUTO_UPDATE_NETWORKS_NAME.equals(key)) {
-            networkState.updateFlags(sharedPreferences.getInt(
-                    PREF_AUTO_UPDATE_NETWORKS_NAME,
-                    PREF_AUTO_UPDATE_NETWORKS_DEFAULT));
+        if (PREF_AUTO_UPDATE_METERED_NETWORKS.equals(key)) {
+            networkState.setMeteredAllowed(sharedPreferences.getBoolean(
+                    PREF_AUTO_UPDATE_METERED_NETWORKS, false));
         }
         if (PREF_STOP_DOWNLOAD.equals(key)) {
             stopDownload = true;

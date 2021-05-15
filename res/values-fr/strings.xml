@@ -2,11 +2,6 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">Mise à jour système</string>
-    <string name="action_networks">Réseau</string>
-    <string name="title_networks">Télécharger automatiquement sur les réseaux</string>
-    <string name="network_wifi">Wi-Fi</string>
-    <string name="network_ethernet">Ethernet</string>
-    <string name="network_unknown">Autres</string>
     <string name="action_about">À propos</string>
     <string name="state_action_none">Votre système est à jour.</string>
     <string name="state_action_checking">Vérification des mises à jour&#8230;</string>
@@ -78,8 +73,6 @@
     <string name="scheduler_weekly">Hebdomadaire</string>
     <string name="scheduler_daily_time">Heure</string>
     <string name="scheduler_week_day">Jour</string>
-    <string name="networks_title">Réseaux</string>
-    <string name="networks_message">Télécharger uniquement sur certains réseaux</string>
     <string name="category_flashing">Installation en cours</string>
     <string name="secure_mode_title">Mode sécurisé</string>
     <string name="state_error_connection">Aucune connexion réseau.</string>

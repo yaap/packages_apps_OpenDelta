@@ -3,14 +3,6 @@
 
     <string name="app_name">OpenDelta</string>
     <string name="title">System updates</string>
-    <string name="action_networks">Networks</string>
-    <string name="title_networks">Auto download networks</string>
-    <string name="network_2g" translatable="false" >2G</string>
-    <string name="network_3g" translatable="false" >3G</string>
-    <string name="network_4g" translatable="false" >4G</string>
-    <string name="network_wifi">Wi-Fi</string>
-    <string name="network_ethernet">Ethernet</string>
-    <string name="network_unknown">Other</string>
     <string name="action_about">About</string>
     <string name="about_content" translatable="false" >
 <![CDATA[
@@ -102,8 +94,8 @@
     <string name="scheduler_weekly">Weekly</string>
     <string name="scheduler_daily_time">Time</string>
     <string name="scheduler_week_day">Day</string>
-    <string name="networks_title">Networks</string>
-    <string name="networks_message">Download only on networks types</string>
+    <string name="metered_networks_title">Metered networks</string>
+    <string name="metered_networks_message">Allow auto downloading on metered networks</string>
     <string name="category_flashing">Flashing</string>
     <string name="secure_mode_title">Secure mode</string>
     <string name="state_error_connection">No data connection.</string>

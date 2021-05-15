@@ -2,11 +2,6 @@
 <resources>
     <string name="app_name">BukaDelta</string>
     <string name="title">Pembaruan sistem</string>
-    <string name="action_networks">Jaringan</string>
-    <string name="title_networks">Jaringan otomatis unduh</string>
-    <string name="network_wifi">Wifi</string>
-    <string name="network_ethernet">Internet</string>
-    <string name="network_unknown">Lain</string>
     <string name="action_about">Tentang</string>
     <string name="state_action_none">Sistem Anda sudah yang terbaru</string>
     <string name="state_action_checking">Memeriksa pembaruan &#8230;</string>
@@ -74,8 +69,6 @@
     <string name="scheduler_weekly">Mingguan</string>
     <string name="scheduler_daily_time">Waktu</string>
     <string name="scheduler_week_day">Hari</string>
-    <string name="networks_title">Jaringan</string>
-    <string name="networks_message">Mengunduh hanya pada jenis jaringan</string>
     <string name="category_flashing">Berkedip</string>
     <string name="secure_mode_title">Mode aman</string>
     <string name="state_error_connection">Tidak ada koneksi data.</string>

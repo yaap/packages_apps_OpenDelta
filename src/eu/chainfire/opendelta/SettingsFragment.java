@@ -48,7 +48,7 @@ import android.widget.Toast;
 
 public class SettingsFragment extends PreferenceFragment implements
         OnPreferenceChangeListener, OnTimeSetListener {
-    private static final String KEY_NETWORKS = "networks_config";
+    private static final String KEY_NETWORKS = "metered_networks_config";
     private static final String KEY_SECURE_MODE = "secure_mode";
     private static final String KEY_AB_PERF_MODE = "ab_perf_mode";
     private static final String KEY_CATEGORY_DOWNLOAD = "category_download";
@@ -57,7 +57,7 @@ public class SettingsFragment extends PreferenceFragment implements
     private static final String PREF_CLEAN_FILES = "clear_files";
     private static final String PREF_FILE_FLASH_HINT_SHOWN = "file_flash_hint_shown";
 
-    private Preference mNetworksConfig;
+    private SwitchPreference mNetworksConfig;
     private ListPreference mAutoDownload;
     private ListPreference mBatteryLevel;
     private SwitchPreference mChargeOnly;
@@ -79,7 +79,8 @@ public class SettingsFragment extends PreferenceFragment implements
         mConfig = Config.getInstance(getContext());
 
         addPreferencesFromResource(R.xml.settings);
-        mNetworksConfig = (Preference) findPreference(KEY_NETWORKS);
+        mNetworksConfig = (SwitchPreference) findPreference(KEY_NETWORKS);
+        mNetworksConfig.setChecked(prefs.getBoolean(UpdateService.PREF_AUTO_UPDATE_METERED_NETWORKS, false));
 
         String autoDownload = prefs.getString(SettingsActivity.PREF_AUTO_DOWNLOAD, getDefaultAutoDownloadValue());
         int autoDownloadValue = Integer.valueOf(autoDownload);
@@ -138,9 +139,10 @@ public class SettingsFragment extends PreferenceFragment implements
 
     @Override
     public boolean onPreferenceTreeClick(Preference preference) {
-
         if (preference == mNetworksConfig) {
-            showNetworks();
+            boolean value = ((SwitchPreference) preference).isChecked();
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+            prefs.edit().putBoolean(UpdateService.PREF_AUTO_UPDATE_METERED_NETWORKS, value).commit();
             return true;
         } else if (preference == mChargeOnly) {
             boolean value = ((SwitchPreference) preference).isChecked();
@@ -224,51 +226,6 @@ public class SettingsFragment extends PreferenceFragment implements
             return true;
         }
         return false;
-    }
-
-    private void showNetworks() {
-        final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(getContext());
-
-        int flags = prefs.getInt(UpdateService.PREF_AUTO_UPDATE_NETWORKS_NAME,
-                UpdateService.PREF_AUTO_UPDATE_NETWORKS_DEFAULT);
-        final boolean[] checkedItems = new boolean[] {
-                (flags & NetworkState.ALLOW_2G) == NetworkState.ALLOW_2G,
-                (flags & NetworkState.ALLOW_3G) == NetworkState.ALLOW_3G,
-                (flags & NetworkState.ALLOW_4G) == NetworkState.ALLOW_4G,
-                (flags & NetworkState.ALLOW_WIFI) == NetworkState.ALLOW_WIFI,
-                (flags & NetworkState.ALLOW_ETHERNET) == NetworkState.ALLOW_ETHERNET,
-                (flags & NetworkState.ALLOW_UNKNOWN) == NetworkState.ALLOW_UNKNOWN };
-
-        (new AlertDialog.Builder(getContext()))
-                .setTitle(R.string.title_networks)
-                .setMultiChoiceItems(
-                        new CharSequence[] { getString(R.string.network_2g),
-                                getString(R.string.network_3g),
-                                getString(R.string.network_4g),
-                                getString(R.string.network_wifi),
-                                getString(R.string.network_ethernet),
-                                getString(R.string.network_unknown), },
-                        checkedItems, (dialog, which, isChecked) -> checkedItems[which] = isChecked)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    int flags1 = 0;
-                    if (checkedItems[0])
-                        flags1 += NetworkState.ALLOW_2G;
-                    if (checkedItems[1])
-                        flags1 += NetworkState.ALLOW_3G;
-                    if (checkedItems[2])
-                        flags1 += NetworkState.ALLOW_4G;
-                    if (checkedItems[3])
-                        flags1 += NetworkState.ALLOW_WIFI;
-                    if (checkedItems[4])
-                        flags1 += NetworkState.ALLOW_ETHERNET;
-                    if (checkedItems[5])
-                        flags1 += NetworkState.ALLOW_UNKNOWN;
-                    prefs.edit()
-                            .putInt(UpdateService.PREF_AUTO_UPDATE_NETWORKS_NAME,
-                                    flags1).commit();
-                }).setNegativeButton(android.R.string.cancel, null)
-                .setCancelable(true).show();
     }
 
     @Override

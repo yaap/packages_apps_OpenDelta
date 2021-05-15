@@ -67,11 +67,12 @@
 	<PreferenceCategory
 		android:key="category_download"
 		android:title="@string/category_download" >
-		<Preference
-			android:key="networks_config"
+		<SwitchPreference
+			android:defaultValue="false"
+			android:key="metered_networks_config"
 			android:persistent="false"
-			android:summary="@string/networks_message"
-			android:title="@string/networks_title" />
+			android:summary="@string/metered_networks_message"
+			android:title="@string/metered_networks_title" />
 
 		<SwitchPreference
 			android:defaultValue="true"

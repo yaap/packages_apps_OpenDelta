@@ -2,10 +2,6 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">Systemuppdateringar</string>
-    <string name="action_networks">Nätverk</string>
-    <string name="network_wifi">Wi-Fi</string>
-    <string name="network_ethernet">Ethernet</string>
-    <string name="network_unknown">Annat</string>
     <string name="action_about">Om</string>
     <string name="state_action_none">Ditt system är uppdaterat.</string>
     <string name="state_action_checking">Söker efter uppdateringar&#8230;</string>
@@ -58,7 +54,6 @@
     <string name="scheduler_weekly">Veckovis</string>
     <string name="scheduler_daily_time">Tid</string>
     <string name="scheduler_week_day">Dag</string>
-    <string name="networks_title">Nätverk</string>
     <string name="category_flashing">Blinkande</string>
     <string name="secure_mode_title">Säkert läge</string>
     <string name="state_error_connection">Ingen dataanslutning.</string>

@@ -2,11 +2,6 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">Aktualizace systému</string>
-    <string name="action_networks">Sítě</string>
-    <string name="title_networks">Sítě pro autom. stažení</string>
-    <string name="network_wifi">Wi-Fi</string>
-    <string name="network_ethernet">Ethernet</string>
-    <string name="network_unknown">Ostatní</string>
     <string name="action_about">O aplikaci</string>
     <string name="state_action_none">Váš systém je aktuální.</string>
     <string name="state_action_checking">Kontroluji aktualizace &#8230;</string>
@@ -81,8 +76,6 @@
     <string name="scheduler_weekly">Týdně</string>
     <string name="scheduler_daily_time">Čas</string>
     <string name="scheduler_week_day">Den</string>
-    <string name="networks_title">Sítě</string>
-    <string name="networks_message">Stáhnout pouze na těchto sítích</string>
     <string name="category_flashing">Flashing</string>
     <string name="secure_mode_title">Bezpečný režim</string>
     <string name="state_error_connection">Žádné datové připojení.</string>

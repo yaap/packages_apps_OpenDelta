@@ -2,11 +2,6 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">Обновление телефона</string>
-    <string name="action_networks">Сети для обновлений</string>
-    <string name="title_networks">Сети для автозагрузки</string>
-    <string name="network_wifi">Wi-Fi</string>
-    <string name="network_ethernet">Ethernet</string>
-    <string name="network_unknown">Другие</string>
     <string name="action_about">О программе</string>
     <string name="state_action_none">Установлена последняя версия ПО.</string>
     <string name="state_action_checking">Поиск обновлений &#8230;</string>
@@ -79,8 +74,6 @@
     <string name="scheduler_weekly">Еженедельно</string>
     <string name="scheduler_daily_time">Время</string>
     <string name="scheduler_week_day">День</string>
-    <string name="networks_title">Сети</string>
-    <string name="networks_message">Загружать обновления только по сетям указанных типов</string>
     <string name="category_flashing">Установка</string>
     <string name="secure_mode_title">Защищенный режим</string>
     <string name="state_error_connection">Нет подключения к интернету.</string>

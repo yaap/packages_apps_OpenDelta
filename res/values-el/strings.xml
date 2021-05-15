@@ -2,11 +2,6 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">Ενημερώσεις συστήματος</string>
-    <string name="action_networks">Δίκτυα</string>
-    <string name="title_networks">Αυτόματη λήψη διαθεσίμων δικτύων</string>
-    <string name="network_wifi">Wi-Fi</string>
-    <string name="network_ethernet">Ethernet</string>
-    <string name="network_unknown">Άλλο</string>
     <string name="action_about">Περί</string>
     <string name="state_action_none">Το σύστημά σας είναι ενημερωμένο</string>
     <string name="state_action_checking">Έλεγχος για ενημερώσεις &#8230;</string>
@@ -73,8 +68,6 @@
     <string name="scheduler_weekly">Εβδομαδιαία</string>
     <string name="scheduler_daily_time">Ώρα</string>
     <string name="scheduler_week_day">Ημέρα</string>
-    <string name="networks_title">Δίκτυα</string>
-    <string name="networks_message">Λήψη σε όλους τους τύπους δικτύων</string>
     <string name="category_flashing">Εγκατάσταση</string>
     <string name="secure_mode_title">Λειτουργία ασφαλείας</string>
     <string name="state_error_connection">Δεν υπάρχει σύνδεση δεδομένων.</string>

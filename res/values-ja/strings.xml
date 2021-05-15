@@ -2,11 +2,6 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">システムアップデート</string>
-    <string name="action_networks">ネットワーク</string>
-    <string name="title_networks">自動ダウンロードネットワーク</string>
-    <string name="network_wifi">Wi-Fi</string>
-    <string name="network_ethernet">イーサネット</string>
-    <string name="network_unknown">その他</string>
     <string name="action_about">概要</string>
     <string name="state_action_none">お使いのシステムは最新です</string>
     <string name="state_action_checking">更新の確認中&#8230;</string>
@@ -79,8 +74,6 @@
     <string name="scheduler_weekly">毎週</string>
     <string name="scheduler_daily_time">時刻</string>
     <string name="scheduler_week_day">日付</string>
-    <string name="networks_title">ネットワーク</string>
-    <string name="networks_message">特定のネットワークモードでのみダウンロードする</string>
     <string name="category_flashing">書き込み</string>
     <string name="secure_mode_title">セキュアモード</string>
     <string name="state_error_connection">データ接続がありません</string>

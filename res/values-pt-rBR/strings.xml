@@ -2,11 +2,6 @@
 <resources>
     <string name="app_name">OpenDelta</string>
     <string name="title">Atualizações do sistema</string>
-    <string name="action_networks">Redes</string>
-    <string name="title_networks">Redes de download automático</string>
-    <string name="network_wifi">Wi-Fi</string>
-    <string name="network_ethernet">Internet</string>
-    <string name="network_unknown">Outras</string>
     <string name="action_about">Sobre</string>
     <string name="state_action_none">Seu sistema está atualizado.</string>
     <string name="state_action_checking">Verificando atualizações&#8230;</string>
@@ -81,8 +76,6 @@
     <string name="scheduler_weekly">Semanalmente</string>
     <string name="scheduler_daily_time">Hora</string>
     <string name="scheduler_week_day">Dia</string>
-    <string name="networks_title">Redes</string>
-    <string name="networks_message">Baixar somente nos tipos de redes</string>
     <string name="category_flashing">Atualizando</string>
     <string name="secure_mode_title">Modo seguro</string>
     <string name="state_error_connection">Nenhuma conexão de dados.</string>
