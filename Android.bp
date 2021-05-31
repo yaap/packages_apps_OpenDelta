@@ -1,0 +1,17 @@
+android_app {
+    name: "OpenDelta",
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+    static_libs: [
+        "androidx.core_core",
+        "androidx.cardview_cardview",
+        "androidx.preference_preference",
+    ],
+    privileged: true,
+    jni_libs: ["libopendelta"],
+    required: ["libopendelta"],
+    optimize: {
+        enabled: false,
+    },
+    platform_apis: true,
+}

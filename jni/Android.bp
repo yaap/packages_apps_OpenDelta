@@ -1,0 +1,54 @@
+cc_library_shared {
+    name: "libopendelta",
+    cflags: [
+        "-Ofast",
+        "-Wno-unused-parameter",
+        "-Wno-unused-function",
+        "-Wno-sign-compare",
+    ],
+    srcs: [
+        "xdelta3-3.0.7/xdelta3.c",
+        "zipadjust.c",
+        "delta.c",
+        "delta_jni.c",
+    ],
+    host_ldlibs: ["-lz"],
+    include_dirs: ["external/zlib"],
+    shared_libs: ["libz"],
+}
+
+cc_binary {
+    name: "dedelta",
+    cflags: [
+        "-Ofast",
+        "-Wno-unused-parameter",
+        "-Wno-unused-function",
+        "-Wno-sign-compare",
+    ],
+    srcs: [
+        "xdelta3-3.0.7/xdelta3.c",
+        "delta.c",
+        "delta_run.c",
+    ],
+    host_ldlibs: ["-lz"],
+
+    include_dirs: ["external/zlib"],
+    shared_libs: ["libz"],
+}
+
+cc_binary {
+    name: "zipadjust",
+    cflags: [
+        "-Ofast",
+        "-Wno-unused-parameter",
+        "-Wno-unused-function",
+        "-Wno-sign-compare",
+    ],
+    srcs: [
+        "zipadjust.c",
+        "zipadjust_run.c",
+    ],
+    host_ldlibs: ["-lz"],
+    include_dirs: ["external/zlib"],
+    shared_libs: ["libz"],
+}
