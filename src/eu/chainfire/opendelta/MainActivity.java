@@ -233,7 +233,6 @@ public class MainActivity extends Activity {
             boolean enableProgress = false;
             boolean disableCheckNow = false;
             boolean disableDataSpeed = false;
-            boolean disableFileFlash = !mPrefs.getBoolean(SettingsActivity.PREF_FILE_FLASH, false);
             long lastCheckedSaved = mPrefs.getLong(UpdateService.PREF_LAST_CHECK_TIME_NAME,
                     UpdateService.PREF_LAST_CHECK_TIME_DEFAULT);
             String lastCheckedText = lastCheckedSaved != UpdateService.PREF_LAST_CHECK_TIME_DEFAULT ?
@@ -512,7 +511,7 @@ public class MainActivity extends Activity {
             buildNow.setVisibility(!enableBuild || enableFlash ? View.GONE : View.VISIBLE);
             stopNow.setVisibility(enableStop ? View.VISIBLE : View.GONE);
             rebootNow.setVisibility(enableReboot ? View.VISIBLE : View.GONE);
-            mFileFlashButton.setVisibility((disableCheckNow || disableFileFlash) ? View.GONE : View.VISIBLE);
+            mFileFlashButton.setVisibility(disableCheckNow ? View.GONE : View.VISIBLE);
             mProgressEndSpace.setVisibility(enableStop ? View.VISIBLE : View.GONE);
         }
     };
@@ -534,8 +533,6 @@ public class MainActivity extends Activity {
         super.onResume();
         handleProgressBar();
         updateInfoVisibility();
-        mFileFlashButton.setVisibility(
-                mPrefs.getBoolean(SettingsActivity.PREF_FILE_FLASH, false) ? View.VISIBLE : View.GONE);
     }
 
     public void onButtonCheckNowClick(View v) {

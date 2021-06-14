@@ -103,8 +103,6 @@
     <string name="button_select_file">Soubor</string>
     <string name="state_error_ab_flash_title">Nelze nainstalovat aktualizaci AB</string>
     <string name="state_error_flash_title">Nelze nainstalovat aktualizaci</string>
-    <string name="file_flash_support_title">Místní soubor instalace</string>
-    <string name="file_flash_support_summary">Povolit výběr místního souboru ZIP</string>
     <string name="flash_file_notice_title">Místní soubor instalace</string>
     <string name="flash_file_notice_message"><b>Upozornění:</b> Neexistuje kontrola, zda je vybraný soubor ZIP vhodný pro vaše zařízení!\n\n<b>Instalace nesprávného souboru ZIP může vést k nefunkčnosti zařízení!</b></string>
     <string name="channel_name">Postup aktualizace</string>

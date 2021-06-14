@@ -127,8 +127,6 @@
     <string name="button_select_file">File</string>
     <string name="state_error_ab_flash_title">Can not flash AB update</string>
     <string name="state_error_flash_title">Can not flash update</string>
-    <string name="file_flash_support_title">Local file flash</string>
-    <string name="file_flash_support_summary">Enable selecting a local ZIP file</string>
     <string name="flash_file_notice_title">Local file flash</string>
     <string name="flash_file_notice_message"><b>Attention:</b> There will be no checks if the selected ZIP file is suitable for your device!\n\n<b>Flashing the wrong ZIP can lead to a non functional device!</b></string>
     <string name="channel_name">Update progress</string>

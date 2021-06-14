@@ -29,7 +29,6 @@ public class SettingsActivity extends Activity {
     public static final String PREF_BATTERY_LEVEL = "battery_level_string";
     public static final String PREF_SCREEN_STATE_OFF = "screen_state_off";
     public static final String PREF_START_HINT_SHOWN = "start_hint_shown";
-    public static final String PREF_FILE_FLASH = "file_flash_support";
 
     public static final String PREF_SCHEDULER_MODE = "scheduler_mode";
     public static final String PREF_SCHEDULER_MODE_SMART = String.valueOf(0);

@@ -55,7 +55,6 @@ public class SettingsFragment extends PreferenceFragment implements
     private static final String KEY_CATEGORY_FLASHING = "category_flashing";
     private static final String KEY_SHOW_INFO = "show_info";
     private static final String PREF_CLEAN_FILES = "clear_files";
-    private static final String PREF_FILE_FLASH_HINT_SHOWN = "file_flash_hint_shown";
 
     private SwitchPreference mNetworksConfig;
     private ListPreference mAutoDownload;
@@ -69,7 +68,6 @@ public class SettingsFragment extends PreferenceFragment implements
     private Preference mSchedulerDailyTime;
     private Preference mCleanFiles;
     private ListPreference mScheduleWeekDay;
-    private SwitchPreference mFileFlash;
     private SwitchPreference mShowInfo;
 
     @Override
@@ -100,7 +98,6 @@ public class SettingsFragment extends PreferenceFragment implements
         mABPerfMode = (SwitchPreference) findPreference(KEY_AB_PERF_MODE);
         mABPerfMode.setChecked(mConfig.getABPerfModeCurrent());
         mABPerfMode.setOnPreferenceChangeListener(this);
-        mFileFlash = (SwitchPreference) findPreference(SettingsActivity.PREF_FILE_FLASH);
         mShowInfo = (SwitchPreference) findPreference(KEY_SHOW_INFO);
         mShowInfo.setChecked(mConfig.getShowInfo());
 
@@ -110,7 +107,6 @@ public class SettingsFragment extends PreferenceFragment implements
 
         if (!Config.isABDevice()) {
             flashingCategory.removePreference(mABPerfMode);
-            flashingCategory.removePreference(mFileFlash);
         }
 
         mAutoDownloadCategory
@@ -171,17 +167,6 @@ public class SettingsFragment extends PreferenceFragment implements
             prefs.edit().putBoolean(SettingsActivity.PREF_START_HINT_SHOWN, false).commit();
             Toast.makeText(getContext(), String.format(getString(R.string.clean_files_feedback),
                     numDeletedFiles), Toast.LENGTH_LONG).show();
-            return true;
-        } else if (preference == mFileFlash) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-            if (!prefs.getBoolean(PREF_FILE_FLASH_HINT_SHOWN, false)) {
-                (new AlertDialog.Builder(getContext()))
-                        .setTitle(R.string.flash_file_notice_title)
-                        .setMessage(R.string.flash_file_notice_message)
-                        .setCancelable(true)
-                        .setPositiveButton(android.R.string.ok, null).show();
-            }
-            prefs.edit().putBoolean(PREF_FILE_FLASH_HINT_SHOWN, true).commit();
             return true;
         }
         return false;

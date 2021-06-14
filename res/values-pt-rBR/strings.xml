@@ -103,8 +103,6 @@
     <string name="button_select_file">Arquivo</string>
     <string name="state_error_ab_flash_title">Não foi possível instalar a atualização AB</string>
     <string name="state_error_flash_title">Não foi possível instalar a atualização</string>
-    <string name="file_flash_support_title">Flash local do arquivo</string>
-    <string name="file_flash_support_summary">Habilitar seleção de um arquivo ZIP local</string>
     <string name="flash_file_notice_title">Flash local do arquivo</string>
     <string name="flash_file_notice_message"><b>Atenção:</b> Não haverá nenhuma verificação se o arquivo ZIP selecionado é adequado para o seu dispositivo!\n\n<b>Piscar o ZIP errado pode levar a um dispositivo não funcional!</b></string>
     <string name="channel_name">Atualização em andamento</string>

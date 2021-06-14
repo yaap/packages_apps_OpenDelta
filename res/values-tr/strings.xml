@@ -104,8 +104,6 @@
     <string name="button_select_file">Dosya</string>
     <string name="state_error_ab_flash_title">AB güncellemesi kurulamıyor</string>
     <string name="state_error_flash_title">Güncelleme kurulamıyor</string>
-    <string name="file_flash_support_title">Yerel dosya kurma</string>
-    <string name="file_flash_support_summary">Yerel bir ZIP dosyasını seçmenize imkân sağlar</string>
     <string name="flash_file_notice_title">Yerel dosya kurma</string>
     <string name="flash_file_notice_message"><b>Dikkat:</b> Seçilen ZIP dosyasının cihazınıza uygun olup olmadığına dâir herhangi bir yoklama olmayacaktır!\n\n<b>Yanlış bir ZIP dosyasını kurmak cihazınızı kullanılamaz hâle getirebilir!</b></string>
     <string name="channel_name">Güncelleme ilerlemesi</string>
