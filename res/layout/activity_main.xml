@@ -218,8 +218,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onButtonSelectFileClick"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp"
             android:text="@string/button_select_file"
             android:visibility="gone" />
 
@@ -229,8 +229,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onButtonFlashNowClick"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp"
             android:visibility="invisible"
             android:text="@string/button_flash_now"/>
 
@@ -240,8 +240,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onButtonBuildNowClick"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp"
             android:visibility="invisible"
             android:text="@string/button_build_delta"/>
 
@@ -251,8 +251,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onButtonCheckNowClick"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp"
             android:visibility="invisible"
             android:text="@string/button_check_short"/>
 
@@ -262,8 +262,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onButtonRebootNowClick"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp"
             android:visibility="invisible"
             android:text="@string/button_reboot_short"/>
     </LinearLayout>
