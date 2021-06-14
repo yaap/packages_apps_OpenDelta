@@ -1613,6 +1613,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         mBuilder.setSmallIcon(R.drawable.stat_notify_update)
                 .setContentTitle(getString(R.string.state_action_ab_flash))
                 .setShowWhen(true)
+                .setOngoing(true)
                 .setContentIntent(getNotificationIntent(false))
                 .setDeleteIntent(getProgressNotificationIntent())
                 .setContentText(_filename);
@@ -1985,6 +1986,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 .setContentTitle(getString(R.string.title))
                 .setContentText(notificationText)
                 .setShowWhen(false)
+                .setOngoing(true)
                 .setContentIntent(getNotificationIntent(false))
                 .build();
         // TODO update notification with current step
