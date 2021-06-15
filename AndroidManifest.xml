@@ -41,6 +41,7 @@
 
         <activity
             android:name="eu.chainfire.opendelta.MainActivity"
+            android:configChanges="orientation"
             android:label="@string/title"
             android:launchMode="singleInstance"
             android:theme="@style/Theme.OpenDelta" >
