@@ -30,6 +30,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -655,6 +656,10 @@ public class MainActivity extends Activity {
                         UpdateService.PREF_STOP_DOWNLOAD,
                         !mPrefs.getBoolean(UpdateService.PREF_STOP_DOWNLOAD,
                                 false)).commit();
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null)
+            notificationManager.cancel(UpdateService.NOTIFICATION_BUSY);
     }
 
     private void requestPermissions() {

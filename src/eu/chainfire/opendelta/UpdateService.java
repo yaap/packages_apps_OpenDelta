@@ -174,14 +174,16 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private static final String ACTION_UPDATE = "eu.chainfire.opendelta.action.UPDATE";
     private static final String ACTION_PROGRESS_NOTIFICATION_DISMISSED =
             "eu.chainfire.opendelta.action.ACTION_PROGRESS_NOTIFICATION_DISMISSED";
+    private static final String ACTION_DOWNLOAD_NOTIFICATION_DISMISSED =
+            "eu.chainfire.opendelta.action.ACTION_DOWNLOAD_NOTIFICATION_DISMISSED";
     static final String ACTION_CLEAR_INSTALL_RUNNING =
             "eu.chainfire.opendelta.action.ACTION_CLEAR_INSTALL_RUNNING";
     private static final String ACTION_FLASH_FILE = "eu.chainfire.opendelta.action.FLASH_FILE";
 
     private static final String NOTIFICATION_CHANNEL_ID = "eu.chainfire.opendelta.notification";
-    private static final int NOTIFICATION_BUSY = 1;
-    private static final int NOTIFICATION_UPDATE = 2;
-    private static final int NOTIFICATION_ERROR = 3;
+    public static final int NOTIFICATION_BUSY = 1;
+    public static final int NOTIFICATION_UPDATE = 2;
+    public static final int NOTIFICATION_ERROR = 3;
 
     public static final String PREF_READY_FILENAME_NAME = "ready_filename";
 
@@ -236,8 +238,10 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private boolean updateRunning;
     private int failedUpdateCount;
     private SharedPreferences prefs = null;
-    private Notification.Builder mBuilder;
+    private Notification.Builder mFlashNotificationBuilder;
+    private Notification.Builder mDownloadNotificationBuilder;
     private boolean isProgressNotificationDismissed = false;
+    private boolean isDownloadNotificationDismissed = false;
 
     // url override
     private boolean isUrlOverride = false;
@@ -354,6 +358,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 }
             } else if (ACTION_PROGRESS_NOTIFICATION_DISMISSED.equals(intent.getAction())) {
                 isProgressNotificationDismissed = true;
+            } else if (ACTION_DOWNLOAD_NOTIFICATION_DISMISSED.equals(intent.getAction())) {
+                isDownloadNotificationDismissed = true;
+                notificationManager.cancel(NOTIFICATION_BUSY);
             } else if (ACTION_BUILD.equals(intent.getAction())) {
                 if (checkPermissions()) {
                     checkForUpdates(true, PREF_AUTO_DOWNLOAD_FULL);
@@ -529,8 +536,14 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
     private PendingIntent getProgressNotificationIntent() {
         Intent notificationIntent = new Intent(this, UpdateService.class);
-            notificationIntent.setAction(ACTION_PROGRESS_NOTIFICATION_DISMISSED);
-            return PendingIntent.getService(this, 0, notificationIntent, 0);
+        notificationIntent.setAction(ACTION_PROGRESS_NOTIFICATION_DISMISSED);
+        return PendingIntent.getService(this, 0, notificationIntent, 0);
+    }
+
+    private PendingIntent getDownloadNotificationIntent() {
+        Intent notificationIntent = new Intent(this, UpdateService.class);
+        notificationIntent.setAction(ACTION_DOWNLOAD_NOTIFICATION_DISMISSED);
+        return PendingIntent.getService(this, 0, notificationIntent, 0);
     }
 
     private PendingIntent getNotificationIntent(boolean delete) {
@@ -837,6 +850,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         updateState(STATE_ACTION_DOWNLOADING, progress,
                                 current, total, f.getName(),
                                 SystemClock.elapsedRealtime() - last[3]);
+                        setDownloadNotificationProgress(progress, current, total,
+                                SystemClock.elapsedRealtime() - last[3]);
                         last[2] = now;
                     }
                 }
@@ -862,10 +877,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                             digest.update(buffer, 0, r);
 
                         recv += r;
-                        if (progressListener != null)
-                            progressListener.onProgress(
-                                    ((float) recv / (float) len) * 100f, recv,
-                                    len);
+                        progressListener.onProgress(
+                                ((float) recv / (float) len) * 100f, recv,
+                                len);
                     }
                 }
 
@@ -952,6 +966,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         String buildData = downloadUrlMemoryAsString(url);
         if (buildData == null || buildData.length() == 0) {
             updateState(STATE_ERROR_DOWNLOAD, null, null, null, url, null);
+            notificationManager.cancel(NOTIFICATION_BUSY);
             return null;
         }
         JSONObject object;
@@ -1063,6 +1078,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                         updateState(STATE_ERROR_DOWNLOAD, null, null, null,
                                 fn, null);
                         Logger.d("download error");
+                        notificationManager.cancel(NOTIFICATION_BUSY);
                     }
                     return false;
                 }
@@ -1372,6 +1388,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     updateState(STATE_ACTION_DOWNLOADING, progress, current,
                             total, filename[0], SystemClock.elapsedRealtime()
                             - last[3]);
+                    setDownloadNotificationProgress(progress, current, total,
+                            SystemClock.elapsedRealtime() - last[3]);
                     last[2] = now;
                 }
             }
@@ -1422,6 +1440,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             } else {
                 Logger.d("download error");
                 updateState(STATE_ERROR_DOWNLOAD, null, null, null, url, null);
+                notificationManager.cancel(NOTIFICATION_BUSY);
             }
         }
 
@@ -1570,10 +1589,10 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         }
     }
 
-    private synchronized void setNotificationProgress(int percent, int sec) {
+    private synchronized void setFlashNotificationProgress(int percent, int sec) {
         if (!isProgressNotificationDismissed) {
             // max progress is 100%
-            mBuilder.setProgress(100, percent, false);
+            mFlashNotificationBuilder.setProgress(100, percent, false);
             String sub;
             if (percent > 0) {
                 sub = String.format(Locale.ENGLISH,
@@ -1584,9 +1603,44 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                                         "%2d%%",
                                         percent);
             }
-            mBuilder.setSubText(sub);
+            mFlashNotificationBuilder.setSubText(sub);
             notificationManager.notify(
-                        NOTIFICATION_UPDATE, mBuilder.build());
+                        NOTIFICATION_UPDATE, mFlashNotificationBuilder.build());
+        }
+    }
+
+    private synchronized void setDownloadNotificationProgress(float progress, long current, long total, long ms) {
+        if (!isDownloadNotificationDismissed) {
+            // max progress is 100%
+            int percent = Math.round(progress);
+            mDownloadNotificationBuilder.setProgress(100, percent, false);
+            // long --> int overflows FTL (progress.setXXX)
+            boolean progressInK = false;
+            if (total > 1024L * 1024L * 1024L) {
+                progressInK = true;
+                current /= 1024L;
+                total /= 1024L;
+            }
+            String sub = "";
+            if ((ms > 500) && (current > 0) && (total > 0)) {
+                float kibps = ((float) current / 1024f)
+                        / ((float) ms / 1000f);
+                if (progressInK)
+                    kibps *= 1024f;
+                int sec = (int) (((((float) total / (float) current) * (float) ms) - ms) / 1000f);
+                if (kibps < 10000) {
+                    sub = String.format(Locale.ENGLISH,
+                            "%2d%%, %.0f KiB/s, %02d:%02d",
+                            percent, kibps, sec / 60, sec % 60);
+                } else {
+                    sub = String.format(Locale.ENGLISH,
+                            "%2d%%, %.0f MiB/s, %02d:%02d",
+                            percent, kibps / 1024f, sec / 60, sec % 60);
+                }
+            }
+            if (!sub.equals("")) mDownloadNotificationBuilder.setSubText(sub);
+            notificationManager.notify(
+                    NOTIFICATION_BUSY, mDownloadNotificationBuilder.build());
         }
     }
 
@@ -1609,8 +1663,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
         isProgressNotificationDismissed = false;
 
-        mBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
-        mBuilder.setSmallIcon(R.drawable.stat_notify_update)
+        mFlashNotificationBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
+        mFlashNotificationBuilder.setSmallIcon(R.drawable.stat_notify_update)
                 .setContentTitle(getString(R.string.state_action_ab_flash))
                 .setShowWhen(true)
                 .setOngoing(true)
@@ -1618,7 +1672,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 .setDeleteIntent(getProgressNotificationIntent())
                 .setContentText(_filename);
 
-        setNotificationProgress(0, 0);
+        setFlashNotificationProgress(0, 0);
 
         try {
             ZipFile zipFile = new ZipFile(flashFilename);
@@ -1637,7 +1691,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                             int sec = (int) (((((float) total / (float) current) * (float) ms) - ms) / 1000f);
                             updateState(STATE_ACTION_AB_FLASH, progress, current, total, this.status,
                                     ms);
-                            setNotificationProgress((int) progress, sec);
+                            setFlashNotificationProgress((int) progress, sec);
                             last[0] = now;
                         }
                     }
@@ -1977,20 +2031,18 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         wakeLock.acquire();
         wifiLock.acquire();
 
+        isDownloadNotificationDismissed = false;
         String notificationText = getString(R.string.state_action_checking);
         if (checkOnly > PREF_AUTO_DOWNLOAD_CHECK) {
             notificationText = getString(R.string.state_action_downloading);
         }
-        Notification notification = (new Notification.Builder(this, NOTIFICATION_CHANNEL_ID))
-                .setSmallIcon(R.drawable.stat_notify_update)
-                .setContentTitle(getString(R.string.title))
-                .setContentText(notificationText)
+        mDownloadNotificationBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
+        mDownloadNotificationBuilder.setSmallIcon(R.drawable.stat_notify_update)
+                .setContentTitle(notificationText)
                 .setShowWhen(false)
                 .setOngoing(true)
                 .setContentIntent(getNotificationIntent(false))
-                .build();
-        // TODO update notification with current step
-        startForeground(NOTIFICATION_BUSY, notification);
+                .setDeleteIntent(getDownloadNotificationIntent());
 
         handler.post(() -> {
             boolean downloadFullBuild = false;
