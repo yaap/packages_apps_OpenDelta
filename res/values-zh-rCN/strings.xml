@@ -67,7 +67,7 @@
     <string name="notify_title_error">检查更新时出错</string>
     <string name="notify_title_flash">更新已准备好刷入</string>
     <string name="notify_title_download">更新已准备好下载</string>
-    <string name="notify_eta_remaining"  formatted="false">剩余 %2d%%, %02d:%02d </string>
+    <string name="notify_eta_remaining"  formatted="false">剩余 %2d%% · %02d:%02d </string>
     <string name="last_checked_never_title_new">按 \'检查\' 开始</string>
     <string name="screen_state_title">关闭屏幕</string>
     <string name="screen_state_message">仅当屏幕关闭时才进行下载</string>

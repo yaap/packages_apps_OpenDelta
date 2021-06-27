@@ -62,7 +62,7 @@
     <string name="notify_title_error">Problème lors de la vérification des mises à jour</string>
     <string name="notify_title_flash">Mise à jour prête à installer</string>
     <string name="notify_title_download">Mise à jour prête à télécharger</string>
-    <string name="notify_eta_remaining" formatted="false">%2d%%, %02d:%02d restant</string>
+    <string name="notify_eta_remaining" formatted="false">%2d%% · %02d:%02d restant</string>
     <string name="last_checked_never_title_new">Appuyez sur « Vérifier » pour démarrer</string>
     <string name="screen_state_title">Écran éteint</string>
     <string name="screen_state_message">Télécharger uniquement si l\'écran est éteint</string>

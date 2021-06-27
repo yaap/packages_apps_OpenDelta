@@ -449,6 +449,8 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         }
         if (PREF_STOP_DOWNLOAD.equals(key)) {
             stopDownload = true;
+            if (notificationManager != null)
+                notificationManager.cancel(NOTIFICATION_BUSY);
         }
         if (SettingsActivity.PREF_AUTO_DOWNLOAD.equals(key)) {
             int autoDownload = getAutoDownloadValue();
@@ -1593,15 +1595,11 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         if (!isProgressNotificationDismissed) {
             // max progress is 100%
             mFlashNotificationBuilder.setProgress(100, percent, false);
-            String sub;
+            String sub = "0%";
             if (percent > 0) {
                 sub = String.format(Locale.ENGLISH,
                                         getString(R.string.notify_eta_remaining),
                                         percent, sec / 60, sec % 60);
-            } else {
-                sub = String.format(Locale.ENGLISH,
-                                        "%2d%%",
-                                        percent);
             }
             mFlashNotificationBuilder.setSubText(sub);
             notificationManager.notify(
@@ -1630,15 +1628,17 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 int sec = (int) (((((float) total / (float) current) * (float) ms) - ms) / 1000f);
                 if (kibps < 10000) {
                     sub = String.format(Locale.ENGLISH,
-                            "%2d%%, %.0f KiB/s, %02d:%02d",
+                            "%2d%% · %.0f KiB/s · %02d:%02d",
                             percent, kibps, sec / 60, sec % 60);
                 } else {
                     sub = String.format(Locale.ENGLISH,
-                            "%2d%%, %.0f MiB/s, %02d:%02d",
+                            "%2d%% · %.0f MiB/s · %02d:%02d",
                             percent, kibps / 1024f, sec / 60, sec % 60);
                 }
             }
-            if (!sub.equals("")) mDownloadNotificationBuilder.setSubText(sub);
+            if (sub.isEmpty()) sub = String.format(Locale.ENGLISH,
+                    "%2d%%", percent);
+            mDownloadNotificationBuilder.setSubText(sub);
             notificationManager.notify(
                     NOTIFICATION_BUSY, mDownloadNotificationBuilder.build());
         }

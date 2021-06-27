@@ -62,7 +62,7 @@
     <string name="notify_title_error">Uuenduste kontrollimisel esines probleem</string>
     <string name="notify_title_flash">Uuendus on välgutamiseks valmis</string>
     <string name="notify_title_download">Uuendus on allalaadimiseks valmis</string>
-    <string name="notify_eta_remaining" formatted="false">%2d%%, %02d:%02d jäänud</string>
+    <string name="notify_eta_remaining" formatted="false">%2d%% · %02d:%02d jäänud</string>
     <string name="last_checked_never_title_new">Alustamiseks vajuta \"Kontrolli\"</string>
     <string name="screen_state_title">Ekraan väljas</string>
     <string name="screen_state_message">Laadi alla ainult siis, kui kuva on väljas</string>

@@ -65,7 +65,7 @@
     <string name="notify_title_error">Problém při kontrole aktualizací</string>
     <string name="notify_title_flash">Aktualizace je připravena na flash</string>
     <string name="notify_title_download">Aktualizace je k dispozici ke stažení</string>
-    <string name="notify_eta_remaining" formatted="false">Zbývá %2d%%, %02d:%02d</string>
+    <string name="notify_eta_remaining" formatted="false">Zbývá %2d%% · %02d:%02d</string>
     <string name="last_checked_never_title_new">Stiskněte tlačítko \'Zkontrolovat\' pro zahájení</string>
     <string name="screen_state_title">Vypnutá obrazovka</string>
     <string name="screen_state_message">Stahovat pouze při vypnuté obrazovce</string>

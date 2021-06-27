@@ -66,7 +66,7 @@
     <string name="notify_title_error">Güncelleme yoklama hatâsı</string>
     <string name="notify_title_flash">Güncelleme kurulmaya hazır</string>
     <string name="notify_title_download">Güncelleme indirilmeye hazır</string>
-    <string name="notify_eta_remaining" formatted="false">%2d%%, %02d:%02d kaldı</string>
+    <string name="notify_eta_remaining" formatted="false">%2d%% · %02d:%02d kaldı</string>
     <string name="last_checked_never_title_new">Başlatmak için \'Yokla\' düğmesine dokunun</string>
     <string name="screen_state_title">Ekran kapalı</string>
     <string name="screen_state_message">Sadece ekran kapalıyken indirir</string>

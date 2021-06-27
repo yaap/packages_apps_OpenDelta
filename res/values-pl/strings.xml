@@ -63,7 +63,7 @@
     <string name="notify_title_error">Problem podczas sprawdzania aktualizacji</string>
     <string name="notify_title_flash">Aktualizacja gotowa do wgrania</string>
     <string name="notify_title_download">Aktualizacja gotowa do pobrania</string>
-    <string name="notify_eta_remaining" formatted="false">pozostało %2d%%, %02d:%02d</string>
+    <string name="notify_eta_remaining" formatted="false">pozostało %2d%% · %02d:%02d</string>
     <string name="last_checked_never_title_new">Naciśnij przycisk \"Sprawdź\", aby rozpocząć</string>
     <string name="screen_state_title">Wyłącz ekran</string>
     <string name="screen_state_message">Pobierz tylko kiedy ekran jest wyłączony</string>

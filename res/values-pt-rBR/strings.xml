@@ -65,7 +65,7 @@
     <string name="notify_title_error">Problema de verificação da atualização</string>
     <string name="notify_title_flash">Pronto para a atualização</string>
     <string name="notify_title_download">Pronto para baixar a atualização</string>
-    <string name="notify_eta_remaining" formatted="false">%2d%%, %02d:%02d restantes</string>
+    <string name="notify_eta_remaining" formatted="false">%2d%% · %02d:%02d restantes</string>
     <string name="last_checked_never_title_new">Pressione \'Verificar\' para iniciar</string>
     <string name="screen_state_title">Tela desligada</string>
     <string name="screen_state_message">Baixar somente quando a tela estiver desligada</string>

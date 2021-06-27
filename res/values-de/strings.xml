@@ -65,7 +65,7 @@
     <string name="notify_title_error">Problem beim überprüfen auf Aktualisierungen</string>
     <string name="notify_title_flash">Aktualisierung bereit zum aufspielen</string>
     <string name="notify_title_download">Aktualisierung bereit zum herunterladen</string>
-    <string name="notify_eta_remaining" formatted="false">%2d%%, %02d:%02d verbleibend</string>
+    <string name="notify_eta_remaining" formatted="false">%2d%% · %02d:%02d verbleibend</string>
     <string name="last_checked_never_title_new">\'Prüfen\' drücken, um zu starten</string>
     <string name="screen_state_title">Bildschirm aus</string>
     <string name="screen_state_message">Herunterladen nur wenn Bildschirm ausgeschaltet ist</string>

@@ -63,7 +63,7 @@
     <string name="notify_title_error">更新確認中に問題発生</string>
     <string name="notify_title_flash">更新の書き込み準備ができました</string>
     <string name="notify_title_download">更新のダウンロードの準備ができました</string>
-    <string name="notify_eta_remaining" formatted="false">残り %2d%%, %02d:%02d</string>
+    <string name="notify_eta_remaining" formatted="false">残り %2d%% · %02d:%02d</string>
     <string name="last_checked_never_title_new">「確認」を押して開始</string>
     <string name="screen_state_title">画面消灯</string>
     <string name="screen_state_message">画面消灯時のみダウンロードする</string>
