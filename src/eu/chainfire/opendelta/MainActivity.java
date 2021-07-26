@@ -26,7 +26,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.AlertDialog;
@@ -48,6 +47,7 @@ import android.os.PowerManager;
 import android.os.UpdateEngine;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
+import android.provider.Settings;
 import android.text.Html;
 import android.text.format.Formatter;
 import android.text.TextUtils;
@@ -91,7 +91,7 @@ public class MainActivity extends Activity {
     private TextView mInfoText;
     private ImageView mInfoImage;
 
-    private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 0;
+    private static final int PERMISSIONS_REQUEST_MANAGE_EXTERNAL_STORAGE = 0;
     private static final int ACTIVITY_SELECT_FLASH_FILE = 1;
     private static final String COLON = ":";
 
@@ -243,7 +243,7 @@ public class MainActivity extends Activity {
             String versionType = "";
             try {
                 versionType = versionParts[3];
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
 
             String state = intent.getStringExtra(UpdateService.EXTRA_STATE);
@@ -547,7 +547,6 @@ public class MainActivity extends Activity {
         }
     }
 
-
     public void onButtonCheckNowClick(View v) {
         mPrefs.edit().putBoolean(SettingsActivity.PREF_START_HINT_SHOWN, true).commit();
         UpdateService.startCheck(this);
@@ -658,13 +657,14 @@ public class MainActivity extends Activity {
     }
 
     private void requestPermissions() {
-        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED ||
-                checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE },
-                    PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+        if (!Environment.isExternalStorageManager()) {
+            // should never reach here if it's a system priv-app
+            // this permission is granted by default
+            // this block exists in case the user manually revoked that perm
+            Uri uri = Uri.fromParts("package", getPackageName(), null);
+            Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+            intent.setData(uri);
+            startActivityForResult(intent, PERMISSIONS_REQUEST_MANAGE_EXTERNAL_STORAGE);
         } else {
             mPermOk = true;
             UpdateService.start(this);
@@ -686,17 +686,6 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE) {// If request is cancelled, the result arrays are empty.
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                mPermOk = true;
-                UpdateService.start(this);
-            }
-        }
-    }
-
-    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == ACTIVITY_SELECT_FLASH_FILE && resultCode == Activity.RESULT_OK) {
             Uri uri = data.getData();
@@ -709,6 +698,10 @@ public class MainActivity extends Activity {
                 i.putExtra(UpdateService.EXTRA_STATE, UpdateService.STATE_ERROR_FLASH_FILE);
                 sendStickyBroadcast(i);
             }
+        } else if (requestCode == PERMISSIONS_REQUEST_MANAGE_EXTERNAL_STORAGE
+                && resultCode == Activity.RESULT_OK) {
+            mPermOk = Environment.isExternalStorageManager();
+            UpdateService.start(this);
         }
     }
 

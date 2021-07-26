@@ -2405,10 +2405,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private boolean checkPermissions() {
-        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED ||
-                checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
+        if (!Environment.isExternalStorageManager()) {
             Logger.d("checkPermissions failed");
             updateState(STATE_ERROR_PERMISSIONS, null, null, null, null, null);
             return false;
