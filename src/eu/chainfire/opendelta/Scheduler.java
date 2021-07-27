@@ -50,7 +50,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
+
+import androidx.preference.PreferenceManager;
+
 import eu.chainfire.opendelta.ScreenState.OnScreenStateListener;
 
 import java.text.SimpleDateFormat;
@@ -269,7 +271,7 @@ public class Scheduler implements OnScreenStateListener,
                     alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
                             c.getTimeInMillis(), AlarmManager.INTERVAL_DAY,
                             alarmCustom);
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             }
             if (weeklyAlarm && dailyAlarmTime != null && weeklyAlarmDay != null) {
@@ -293,7 +295,7 @@ public class Scheduler implements OnScreenStateListener,
                     alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
                             c.getTimeInMillis(), AlarmManager.INTERVAL_DAY * 7,
                             alarmCustom);
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             }
         }

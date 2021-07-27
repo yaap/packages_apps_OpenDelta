@@ -26,7 +26,8 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Environment;
 import android.os.SystemProperties;
-import android.preference.PreferenceManager;
+
+import androidx.preference.PreferenceManager;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -151,7 +152,7 @@ public class Config {
                     }
                 }
             }
-        } catch (Resources.NotFoundException e) {
+        } catch (Resources.NotFoundException ignored) {
         }
         this.keep_screen_on = keep_screen_on;
 

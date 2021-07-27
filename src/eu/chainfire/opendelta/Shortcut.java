@@ -10,6 +10,7 @@ public class Shortcut extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // TODO: Get rid of this deprecation. See ShortcutManager
         Intent intent = new Intent();
         intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, new Intent(this, MainActivity.class));
         intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, this.getResources().getString(R.string.title));

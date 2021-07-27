@@ -31,8 +31,6 @@ import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -45,7 +43,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.os.UpdateEngine;
-import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
 import android.provider.Settings;
 import android.text.Html;
@@ -59,6 +56,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.preference.PreferenceManager;
 
 public class MainActivity extends Activity {
     private TextView title = null;
@@ -161,7 +160,7 @@ public class MainActivity extends Activity {
                 .setMessage(
                         Html.fromHtml(getString(R.string.about_content)
                                 .replace("_COPYRIGHT_OPENDELTA_", opendelta)
-                                .replace("_COPYRIGHT_XDELTA_", xdelta)))
+                                .replace("_COPYRIGHT_XDELTA_", xdelta), Html.FROM_HTML_MODE_LEGACY))
                 .setNeutralButton(android.R.string.ok, null)
                 .setCancelable(true).show();
         TextView textView = dialog
@@ -172,26 +171,29 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        case android.R.id.home:
+        // Do not use res IDs in a switch case
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
             finish();
             return true;
-        case R.id.settings:
+        }
+        if (id == R.id.settings) {
             Intent settingsActivity = new Intent(this, SettingsActivity.class);
             startActivity(settingsActivity);
             return true;
-        case R.id.changelog:
+        }
+        if (id == R.id.changelog) {
             Intent changelogActivity = new Intent(Intent.ACTION_VIEW,
                     Uri.parse(config.getUrlBaseJson().replace(
-                    config.getDevice() + ".json", "Changelog.txt")));
+                            config.getDevice() + ".json", "Changelog.txt")));
             startActivity(changelogActivity);
             return true;
-        case R.id.action_about:
+        }
+        if (id == R.id.action_about) {
             showAbout();
             return true;
-        default:
-            return super.onOptionsItemSelected(item);
         }
+        return super.onOptionsItemSelected(item);
     }
 
     private final IntentFilter updateFilter = new IntentFilter(
@@ -589,12 +591,14 @@ public class MainActivity extends Activity {
             if (!config.getSecureModeCurrent()
                     && !config.getShownRecoveryWarningNotSecure()) {
                 message = Html
-                        .fromHtml(getString(R.string.recovery_notice_description_not_secure));
+                        .fromHtml(getString(R.string.recovery_notice_description_not_secure),
+                                Html.FROM_HTML_MODE_LEGACY);
                 config.setShownRecoveryWarningNotSecure();
             } else if (config.getSecureModeCurrent()
                     && !config.getShownRecoveryWarningSecure()) {
                 message = Html
-                        .fromHtml(getString(R.string.recovery_notice_description_secure));
+                        .fromHtml(getString(R.string.recovery_notice_description_secure),
+                                Html.FROM_HTML_MODE_LEGACY);
                 config.setShownRecoveryWarningSecure();
             }
 
@@ -605,13 +609,7 @@ public class MainActivity extends Activity {
                         .setCancelable(true)
                         .setNegativeButton(android.R.string.cancel, null)
                         .setPositiveButton(android.R.string.ok,
-                                new OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog,
-                                            int which) {
-                                        next.run();
-                                    }
-                                }).show();
+                                (dialog, which) -> next.run()).show();
             } else {
                 next.run();
             }
@@ -631,7 +629,8 @@ public class MainActivity extends Activity {
                 (new AlertDialog.Builder(MainActivity.this))
                         .setTitle(R.string.flash_after_update_notice_title)
                         .setMessage(
-                                Html.fromHtml(getString(R.string.flash_after_update_notice_description)))
+                                Html.fromHtml(getString(R.string.flash_after_update_notice_description),
+                                        Html.FROM_HTML_MODE_LEGACY))
                         .setCancelable(true)
                         .setNegativeButton(android.R.string.cancel, null)
                         .setPositiveButton(android.R.string.ok, (dialog, which) -> next.run()).show();

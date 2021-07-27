@@ -172,7 +172,7 @@ class ABUpdate {
      * @param zipFile input zip file
      * @param entryPath full path of the entry
      * @return the offset of the compressed, or -1 if not found
-     * @throws IOException
+     * @throws IOException for IO errors
      * @throws IllegalArgumentException if the given entry is not found
      */
     public static long getZipEntryOffset(ZipFile zipFile, String entryPath)
