@@ -8,7 +8,7 @@
 	<string name="property_version">ro.modversion</string>
 
 	<!-- Property to read for device identifier -->
-	<string name="property_device">ro.build.product</string>
+	<string name="property_device">ro.yaap.device</string>
 
 	<!-- %s is expanded to property_version value. .zip, .delta, .update, .sign extensions added when needed -->
 	<string name="filename_base">YAAP-%s</string>
