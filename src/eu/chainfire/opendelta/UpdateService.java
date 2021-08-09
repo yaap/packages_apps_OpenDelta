@@ -908,6 +908,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             return false;
         } finally {
             updateState(STATE_ACTION_DOWNLOADING, 100f, len, len, null, null);
+            notificationManager.cancel(NOTIFICATION_BUSY);
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
