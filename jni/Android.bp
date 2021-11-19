@@ -15,6 +15,7 @@ cc_library_shared {
     host_ldlibs: ["-lz"],
     include_dirs: ["external/zlib"],
     shared_libs: ["libz"],
+    header_libs: ["jni_headers"],
 }
 
 cc_binary {
