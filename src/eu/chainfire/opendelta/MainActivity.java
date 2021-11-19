@@ -560,7 +560,7 @@ public class MainActivity extends Activity {
             Logger.d("[%s] required beyond this point", UpdateService.PERMISSION_REBOOT);
             return;
         }
-        ((PowerManager) getSystemService(Context.POWER_SERVICE)).advancedReboot(null);
+        ((PowerManager) getSystemService(Context.POWER_SERVICE)).rebootCustom(null);
     }
 
     public void onButtonBuildNowClick(View v) {
