@@ -29,7 +29,7 @@
     <application
         android:name="eu.chainfire.opendelta.Application"
         android:allowBackup="true"
-        android:icon="@drawable/yaap_logo"
+        android:icon="@mipmap/yaap"
         android:label="@string/app_name"
         android:appComponentFactory="androidx.core.app.CoreComponentFactory"
         android:requiredForAllUsers="true"
