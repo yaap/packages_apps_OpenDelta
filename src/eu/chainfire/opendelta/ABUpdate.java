@@ -49,14 +49,13 @@ class ABUpdate {
 
     private final UpdateService mUpdateService;
 
+    private boolean mBound;
+
     private final UpdateEngineCallback mUpdateEngineCallback = new UpdateEngineCallback() {
         float lastPercent;
         int offset = 0;
         @Override
         public void onStatusUpdate(int status, float percent) {
-            if (!isInstallingUpdate(mUpdateService)) {
-                return;
-            }
             Logger.d("onStatusUpdate = " + status);
 
             if (status == UpdateEngine.UpdateStatusConstants.UPDATED_NEED_REBOOT) {
@@ -64,15 +63,17 @@ class ABUpdate {
                 mUpdateService.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.SUCCESS, -1);
                 return;
             }
+
             if (status == UpdateEngine.UpdateStatusConstants.REPORTING_ERROR_EVENT) {
                 setInstallingUpdate(false, mUpdateService);
                 mUpdateService.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.ERROR, -1);
                 return;
             }
+
             if (lastPercent > percent) {
                 offset = 50;
             }
-            lastPercent = percent;
+
             if (mProgressListener != null) {
                 mProgressListener.setStatus(mUpdateService.getString(mUpdateService.getResources().getIdentifier(
                     "progress_status_" + status, "string", mUpdateService.getPackageName())));
@@ -105,6 +106,13 @@ class ABUpdate {
         return isInstallingUpdate(us);
     }
 
+    static synchronized boolean resume(String zipPath, ProgressListener listener,
+            UpdateService us) {
+        ABUpdate installer = new ABUpdate(zipPath, listener, us);
+        setInstallingUpdate(installer.bindCallbacks(), us);
+        return isInstallingUpdate(us);
+    }
+
     static synchronized boolean isInstallingUpdate(UpdateService us) {
         return us.getPrefs()
                 .getBoolean(PREFS_IS_INSTALLING_UPDATE, false);
@@ -121,6 +129,21 @@ class ABUpdate {
         this.mProgressListener = listener;
         this.mUpdateService = us;
         this.enableABPerfMode = mUpdateService.getConfig().getABPerfModeCurrent();
+    }
+
+    private boolean bindCallbacks() {
+        UpdateEngine updateEngine = new UpdateEngine();
+        return bindCallbacks(updateEngine);
+    }
+
+    private boolean bindCallbacks(UpdateEngine updateEngine) {
+        if (mBound) return true;
+        mBound = updateEngine.bind(mUpdateEngineCallback);
+        if (!mBound) {
+            Log.e(TAG, "Could not bind UpdateEngineCallback");
+            return false;
+        }
+        return true;
     }
 
     private boolean startUpdate() {
@@ -154,7 +177,7 @@ class ABUpdate {
 
         UpdateEngine updateEngine = new UpdateEngine();
         updateEngine.setPerformanceMode(enableABPerfMode);
-        updateEngine.bind(mUpdateEngineCallback);
+        if (!bindCallbacks(updateEngine)) return false;
         String zipFileUri = "file://" + file.getAbsolutePath();
         updateEngine.applyPayload(zipFileUri, offset, 0, headerKeyValuePairs);
 

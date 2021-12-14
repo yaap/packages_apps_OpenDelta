@@ -77,8 +77,8 @@ import eu.chainfire.opendelta.Scheduler.OnWantUpdateCheckListener;
 import eu.chainfire.opendelta.ScreenState.OnScreenStateListener;
 
 public class UpdateService extends Service implements OnNetworkStateListener,
-OnBatteryStateListener, OnScreenStateListener,
-OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
+        OnBatteryStateListener, OnScreenStateListener,
+        OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private static final int HTTP_READ_TIMEOUT = 30000;
     private static final int HTTP_CONNECTION_TIMEOUT = 30000;
 
@@ -171,10 +171,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private static final String ACTION_NOTIFICATION_DELETED = "eu.chainfire.opendelta.action.NOTIFICATION_DELETED";
     private static final String ACTION_BUILD = "eu.chainfire.opendelta.action.BUILD";
     private static final String ACTION_UPDATE = "eu.chainfire.opendelta.action.UPDATE";
-    private static final String ACTION_PROGRESS_NOTIFICATION_DISMISSED =
-            "eu.chainfire.opendelta.action.ACTION_PROGRESS_NOTIFICATION_DISMISSED";
-    private static final String ACTION_DOWNLOAD_NOTIFICATION_DISMISSED =
-            "eu.chainfire.opendelta.action.ACTION_DOWNLOAD_NOTIFICATION_DISMISSED";
     static final String ACTION_CLEAR_INSTALL_RUNNING =
             "eu.chainfire.opendelta.action.ACTION_CLEAR_INSTALL_RUNNING";
     private static final String ACTION_FLASH_FILE = "eu.chainfire.opendelta.action.FLASH_FILE";
@@ -194,6 +190,9 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     // we only snooze until a new build
     private static final String PREF_SNOOZE_UPDATE_NAME = "last_snooze_update";
 
+    private static final String PREF_PENDING_REBOOT = "pending_reboot";
+
+    private static final String PREF_CURRENT_AB_FILENAME_NAME = "current_ab_filename";
     public static final String PREF_CURRENT_FILENAME_NAME = "current_filename";
     public static final String PREF_FILE_FLASH = "file_flash";
 
@@ -239,12 +238,32 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private SharedPreferences prefs = null;
     private Notification.Builder mFlashNotificationBuilder;
     private Notification.Builder mDownloadNotificationBuilder;
-    private boolean isProgressNotificationDismissed = false;
-    private boolean isDownloadNotificationDismissed = false;
 
     // url override
     private boolean isUrlOverride = false;
     private String sumUrlOvr = null;
+
+    private long[] mLastProgressTime;
+    private final DeltaInfo.ProgressListener mProgressListener = new DeltaInfo.ProgressListener() {
+        private String status;
+
+        @Override
+        public void onProgress(float progress, long current, long total) {
+            long now = SystemClock.elapsedRealtime();
+            if (now >= mLastProgressTime[0] + 16L) {
+                long ms = SystemClock.elapsedRealtime() - mLastProgressTime[1];
+                int sec = (int) (((((float) total / (float) current) * (float) ms) - ms) / 1000f);
+                updateState(STATE_ACTION_AB_FLASH, progress, current, total, this.status,
+                        ms);
+                setFlashNotificationProgress((int) progress, sec);
+                mLastProgressTime[0] = now;
+            }
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+    };
 
     /*
      * Using reflection voodoo instead calling the hidden class directly, to
@@ -263,7 +282,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     uid, 2001);
         } catch (Exception e) {
             // A lot of voodoo could go wrong here, return failure instead of
-            // crash
+            // crashing
             Logger.ex(e);
         }
     }
@@ -333,16 +352,12 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             if (ACTION_CHECK.equals(intent.getAction())) {
-                if (checkPermissions()) {
+                if (checkPermissions())
                     checkForUpdates(true, PREF_AUTO_DOWNLOAD_CHECK);
-                }
             } else if (ACTION_FLASH.equals(intent.getAction())) {
                 if (checkPermissions()) {
-                    if(Config.isABDevice()) {
-                        flashABUpdate();
-                    } else {
-                        flashUpdate();
-                    }
+                    if (Config.isABDevice()) flashABUpdate();
+                    else flashUpdate();
                 }
             } else if (ACTION_ALARM.equals(intent.getAction())) {
                 scheduler.alarm(intent.getIntExtra(EXTRA_ALARM_ID, -1));
@@ -355,18 +370,13 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                     Logger.i("Snoozing notification for " + lastBuild);
                     prefs.edit().putString(PREF_SNOOZE_UPDATE_NAME, lastBuild).commit();
                 }
-            } else if (ACTION_PROGRESS_NOTIFICATION_DISMISSED.equals(intent.getAction())) {
-                isProgressNotificationDismissed = true;
-            } else if (ACTION_DOWNLOAD_NOTIFICATION_DISMISSED.equals(intent.getAction())) {
-                isDownloadNotificationDismissed = true;
-                notificationManager.cancel(NOTIFICATION_BUSY);
             } else if (ACTION_BUILD.equals(intent.getAction())) {
-                if (checkPermissions()) {
+                if (checkPermissions())
                     checkForUpdates(true, PREF_AUTO_DOWNLOAD_FULL);
-                }
             } else if (ACTION_UPDATE.equals(intent.getAction())) {
                 autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
             } else if (ACTION_CLEAR_INSTALL_RUNNING.equals(intent.getAction())) {
+                prefs.edit().putBoolean(PREF_PENDING_REBOOT, false).commit();
                 ABUpdate.setInstallingUpdate(false, this);
             } else if (ACTION_FLASH_FILE.equals(intent.getAction())) {
                 if (intent.hasExtra(EXTRA_FILENAME)) {
@@ -377,7 +387,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 autoState(false, PREF_AUTO_DOWNLOAD_CHECK, false);
             }
         }
-
         return START_STICKY;
     }
 
@@ -473,6 +482,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         if (isErrorState(this.state)) {
             return;
         }
+
         if (stopDownload) {
             // stop download is only possible in the download step
             // that means must have done a check step before
@@ -480,6 +490,25 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             // which is just confusing
             checkOnly = PREF_AUTO_DOWNLOAD_CHECK;
         }
+
+        // Check if we're currently installing an A/B update
+        if (Config.isABDevice() && ABUpdate.isInstallingUpdate(this)) {
+            // resume listening to progress
+            final String flashFilename = prefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
+            final String _filename = new File(flashFilename).getName();
+            if (mLastProgressTime == null)
+                mLastProgressTime = new long[] { 0, SystemClock.elapsedRealtime() };
+            mProgressListener.setStatus(_filename);
+            updateState(STATE_ACTION_AB_FLASH, 0f, 0L, 100L, _filename, null);
+            if (!ABUpdate.resume(flashFilename, mProgressListener, this)) {
+                stopNotification();
+                updateState(STATE_ERROR_AB_FLASH, null, null, null, null, null);
+            } else {
+                newFlashNotification(_filename);
+            }
+            return;
+        }
+
         String filename = prefs.getString(PREF_READY_FILENAME_NAME, null);
 
         if (filename != null) {
@@ -488,12 +517,19 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             }
         }
 
-        boolean updateAvailable = updateAvailable();
+        // Check if a previous update was done already
+        if (prefs.getBoolean(PREF_PENDING_REBOOT, false)) {
+            filename = prefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
+            startABRebootNotification(filename);
+            updateState(STATE_ACTION_AB_FINISHED, null, null, null, null, null);
+            return;
+        }
+
         // if the file has been downloaded or creates anytime before
         // this will always be more important
         if (checkOnly == PREF_AUTO_DOWNLOAD_CHECK && filename == null) {
             Logger.d("Checking step done");
-            if (!updateAvailable) {
+            if (!updateAvailable()) {
                 Logger.d("System up to date");
                 updateState(STATE_ACTION_NONE, null, null, null, null,
                         prefs.getLong(PREF_LAST_CHECK_TIME_NAME,
@@ -535,18 +571,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         }
     }
 
-    private PendingIntent getProgressNotificationIntent() {
-        Intent notificationIntent = new Intent(this, UpdateService.class);
-        notificationIntent.setAction(ACTION_PROGRESS_NOTIFICATION_DISMISSED);
-        return PendingIntent.getService(this, 0, notificationIntent, 0);
-    }
-
-    private PendingIntent getDownloadNotificationIntent() {
-        Intent notificationIntent = new Intent(this, UpdateService.class);
-        notificationIntent.setAction(ACTION_DOWNLOAD_NOTIFICATION_DISMISSED);
-        return PendingIntent.getService(this, 0, notificationIntent, 0);
-    }
-
     private PendingIntent getNotificationIntent(boolean delete) {
         if (delete) {
             Intent notificationIntent = new Intent(this, UpdateService.class);
@@ -584,8 +608,19 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 .setContentText(notifyFileName).build());
     }
 
-    private void startABRebootNotification() {
-        String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, null);
+    private void newFlashNotification(String filename) {
+        mFlashNotificationBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
+        mFlashNotificationBuilder.setSmallIcon(R.drawable.stat_notify_update)
+                .setContentTitle(getString(R.string.state_action_ab_flash))
+                .setShowWhen(true)
+                .setOngoing(true)
+                .setContentIntent(getNotificationIntent(false))
+                .setContentText(filename);
+        setFlashNotificationProgress(0, 0);
+    }
+
+    private void startABRebootNotification(String filename) {
+        String flashFilename = filename;
         flashFilename = new File(flashFilename).getName();
         flashFilename.substring(0, flashFilename.lastIndexOf('.'));
 
@@ -658,7 +693,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         HttpsURLConnection urlConnection = null;
         try {
             urlConnection = setupHttpsRequest(url);
-            if(urlConnection == null) {
+            if (urlConnection == null) {
                 return null;
             }
 
@@ -693,7 +728,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         HttpsURLConnection urlConnection = null;
         try {
             urlConnection = setupHttpsRequest(url);
-            if(urlConnection == null){
+            if (urlConnection == null){
                 return null;
             }
 
@@ -706,7 +741,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             }
 
             byte[] bytes = byteArray.toByteArray();
-            if(bytes == null){
+            if (bytes == null){
                 return null;
             }
 
@@ -743,7 +778,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
 
         try {
             urlConnection = setupHttpsRequest(url);
-            if(urlConnection == null){
+            if (urlConnection == null){
                 return false;
             }
             long len = urlConnection.getContentLength();
@@ -821,7 +856,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         try {
             updateState(STATE_ACTION_DOWNLOADING, 0f, 0L, 0L, f.getName(), null);
             urlConnection = setupHttpsRequest(url);
-            if(urlConnection == null){
+            if (urlConnection == null){
                 return false;
             }
 
@@ -921,7 +956,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         HttpsURLConnection urlConnection = null;
         try {
             urlConnection = setupHttpsRequest(url);
-            if(urlConnection == null){
+            if (urlConnection == null){
                 return 0;
             }
 
@@ -941,7 +976,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     private boolean isMatchingImage(String fileName) {
         try {
             Logger.d("Image check for file name: " + fileName);
-            if(fileName.endsWith(".zip") && fileName.contains(config.getDevice())) {
+            if (fileName.endsWith(".zip") && fileName.contains(config.getDevice())) {
                 String[] parts = fileName.split("-");
                 if (parts.length > 1) {
                     Logger.d("isMatchingImage: check " + fileName);
@@ -1579,12 +1614,13 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     protected void onUpdateCompleted(int status, int errorCode) {
         stopNotification();
         if (status == UpdateEngine.ErrorCodeConstants.SUCCESS) {
+            prefs.edit().putBoolean(PREF_PENDING_REBOOT, true).commit();
             String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, null);
             if (flashFilename != null) {
                 deleteOldFlashFile(flashFilename);
                 prefs.edit().putString(PREF_CURRENT_FILENAME_NAME, flashFilename).commit();
             }
-            startABRebootNotification();
+            startABRebootNotification(flashFilename);
             updateState(STATE_ACTION_AB_FINISHED, null, null, null, null, null);
         } else {
             updateState(STATE_ERROR_AB_FLASH, null, null, null, null, null, errorCode);
@@ -1592,56 +1628,52 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
     }
 
     private synchronized void setFlashNotificationProgress(int percent, int sec) {
-        if (!isProgressNotificationDismissed) {
-            // max progress is 100%
-            mFlashNotificationBuilder.setProgress(100, percent, false);
-            String sub = "0%";
-            if (percent > 0) {
-                sub = String.format(Locale.ENGLISH,
-                                        getString(R.string.notify_eta_remaining),
-                                        percent, sec / 60, sec % 60);
-            }
-            mFlashNotificationBuilder.setSubText(sub);
-            notificationManager.notify(
-                        NOTIFICATION_UPDATE, mFlashNotificationBuilder.build());
+        // max progress is 100%
+        mFlashNotificationBuilder.setProgress(100, percent, false);
+        String sub = "0%";
+        if (percent > 0) {
+            sub = String.format(Locale.ENGLISH,
+                                    getString(R.string.notify_eta_remaining),
+                                    percent, sec / 60, sec % 60);
         }
+        mFlashNotificationBuilder.setSubText(sub);
+        notificationManager.notify(
+                    NOTIFICATION_UPDATE, mFlashNotificationBuilder.build());
     }
 
     private synchronized void setDownloadNotificationProgress(float progress, long current, long total, long ms) {
-        if (!isDownloadNotificationDismissed) {
-            // max progress is 100%
-            int percent = Math.round(progress);
-            mDownloadNotificationBuilder.setProgress(100, percent, false);
-            // long --> int overflows FTL (progress.setXXX)
-            boolean progressInK = false;
-            if (total > 1024L * 1024L * 1024L) {
-                progressInK = true;
-                current /= 1024L;
-                total /= 1024L;
-            }
-            String sub = "";
-            if ((ms > 500) && (current > 0) && (total > 0)) {
-                float kibps = ((float) current / 1024f)
-                        / ((float) ms / 1000f);
-                if (progressInK)
-                    kibps *= 1024f;
-                int sec = (int) (((((float) total / (float) current) * (float) ms) - ms) / 1000f);
-                if (kibps < 10000) {
-                    sub = String.format(Locale.ENGLISH,
-                            "%2d%% · %.0f KiB/s · %02d:%02d",
-                            percent, kibps, sec / 60, sec % 60);
-                } else {
-                    sub = String.format(Locale.ENGLISH,
-                            "%2d%% · %.0f MiB/s · %02d:%02d",
-                            percent, kibps / 1024f, sec / 60, sec % 60);
-                }
-            }
-            if (sub.isEmpty()) sub = String.format(Locale.ENGLISH,
-                    "%2d%%", percent);
-            mDownloadNotificationBuilder.setSubText(sub);
-            notificationManager.notify(
-                    NOTIFICATION_BUSY, mDownloadNotificationBuilder.build());
+        // max progress is 100%
+        int percent = Math.round(progress);
+        mDownloadNotificationBuilder.setProgress(100, percent, false);
+        // long --> int overflows FTL (progress.setXXX)
+        boolean progressInK = false;
+        if (total > 1024L * 1024L * 1024L) {
+            progressInK = true;
+            current /= 1024L;
+            total /= 1024L;
         }
+        String sub = "";
+        if ((ms > 500) && (current > 0) && (total > 0)) {
+            float kibps = ((float) current / 1024f)
+                    / ((float) ms / 1000f);
+            if (progressInK)
+                kibps *= 1024f;
+            int sec = (int) (((((float) total / (float) current) * (float) ms) - ms) / 1000f);
+            if (kibps < 10000) {
+                sub = String.format(Locale.ENGLISH,
+                        "%2d%% · %.0f KiB/s · %02d:%02d",
+                        percent, kibps, sec / 60, sec % 60);
+            } else {
+                sub = String.format(Locale.ENGLISH,
+                        "%2d%% · %.0f MiB/s · %02d:%02d",
+                        percent, kibps / 1024f, sec / 60, sec % 60);
+            }
+        }
+        if (sub.isEmpty()) sub = String.format(Locale.ENGLISH,
+                "%2d%%", percent);
+        mDownloadNotificationBuilder.setSubText(sub);
+        notificationManager.notify(
+                NOTIFICATION_BUSY, mDownloadNotificationBuilder.build());
     }
 
     private void flashABUpdate() {
@@ -1655,52 +1687,25 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
             return;
         }
 
+        // Save the filename for resuming
+        prefs.edit().putString(PREF_CURRENT_AB_FILENAME_NAME, flashFilename).commit();
+
         // Clear the Download size to hide while flashing
         prefs.edit().putLong(PREF_DOWNLOAD_SIZE, -1).commit();
 
         final String _filename = new File(flashFilename).getName();
         updateState(STATE_ACTION_AB_FLASH, 0f, 0L, 100L, _filename, null);
 
-        isProgressNotificationDismissed = false;
-
-        mFlashNotificationBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
-        mFlashNotificationBuilder.setSmallIcon(R.drawable.stat_notify_update)
-                .setContentTitle(getString(R.string.state_action_ab_flash))
-                .setShowWhen(true)
-                .setOngoing(true)
-                .setContentIntent(getNotificationIntent(false))
-                .setDeleteIntent(getProgressNotificationIntent())
-                .setContentText(_filename);
-
-        setFlashNotificationProgress(0, 0);
+        newFlashNotification(_filename);
 
         try {
             ZipFile zipFile = new ZipFile(flashFilename);
             boolean isABUpdate = ABUpdate.isABUpdate(zipFile);
             zipFile.close();
             if (isABUpdate) {
-                final long[] last = new long[] { 0, SystemClock.elapsedRealtime() };
-
-                DeltaInfo.ProgressListener listener = new DeltaInfo.ProgressListener() {
-                    private String status;
-                    @Override
-                    public void onProgress(float progress, long current, long total) {
-                        long now = SystemClock.elapsedRealtime();
-                        if (now >= last[0] + 16L) {
-                            long ms = SystemClock.elapsedRealtime() - last[1];
-                            int sec = (int) (((((float) total / (float) current) * (float) ms) - ms) / 1000f);
-                            updateState(STATE_ACTION_AB_FLASH, progress, current, total, this.status,
-                                    ms);
-                            setFlashNotificationProgress((int) progress, sec);
-                            last[0] = now;
-                        }
-                    }
-                    public void setStatus(String status) {
-                        this.status = status;
-                    }
-                };
-                listener.setStatus(_filename);
-                if(!ABUpdate.start(flashFilename, listener, this)) {
+                mLastProgressTime = new long[] { 0, SystemClock.elapsedRealtime() };
+                mProgressListener.setStatus(_filename);
+                if (!ABUpdate.start(flashFilename, mProgressListener, this)) {
                     stopNotification();
                     updateState(STATE_ERROR_AB_FLASH, null, null, null, null, null);
                 }
@@ -2031,7 +2036,6 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
         wakeLock.acquire();
         wifiLock.acquire();
 
-        isDownloadNotificationDismissed = false;
         String notificationText = getString(R.string.state_action_checking);
         if (checkOnly > PREF_AUTO_DOWNLOAD_CHECK) {
             notificationText = getString(R.string.state_action_downloading);
@@ -2041,8 +2045,7 @@ OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
                 .setContentTitle(notificationText)
                 .setShowWhen(false)
                 .setOngoing(true)
-                .setContentIntent(getNotificationIntent(false))
-                .setDeleteIntent(getDownloadNotificationIntent());
+                .setContentIntent(getNotificationIntent(false));
 
         handler.post(() -> {
             boolean downloadFullBuild = false;
