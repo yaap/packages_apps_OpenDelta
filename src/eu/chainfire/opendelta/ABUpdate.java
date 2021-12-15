@@ -52,33 +52,39 @@ class ABUpdate {
     private boolean mBound;
 
     private final UpdateEngineCallback mUpdateEngineCallback = new UpdateEngineCallback() {
-        float lastPercent;
-        int offset = 0;
         @Override
         public void onStatusUpdate(int status, float percent) {
             Logger.d("onStatusUpdate = " + status);
+            // downloading stage: 0% - 30%
+            int offset = 0;
+            int weight = 30;
 
-            if (status == UpdateEngine.UpdateStatusConstants.UPDATED_NEED_REBOOT) {
-                setInstallingUpdate(false, mUpdateService);
-                mUpdateService.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.SUCCESS, -1);
-                return;
-            }
-
-            if (status == UpdateEngine.UpdateStatusConstants.REPORTING_ERROR_EVENT) {
-                setInstallingUpdate(false, mUpdateService);
-                mUpdateService.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.ERROR, -1);
-                return;
-            }
-
-            if (lastPercent > percent) {
-                offset = 50;
+            switch (status) {
+                case UpdateEngine.UpdateStatusConstants.UPDATED_NEED_REBOOT:
+                    setInstallingUpdate(false, mUpdateService);
+                    mUpdateService.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.SUCCESS, -1);
+                    return;
+                case UpdateEngine.UpdateStatusConstants.REPORTING_ERROR_EVENT:
+                    setInstallingUpdate(false, mUpdateService);
+                    mUpdateService.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.ERROR, -1);
+                    return;
+                case UpdateEngine.UpdateStatusConstants.VERIFYING:
+                    // verifying stage: 30% - 35%
+                    offset = 30;
+                    weight = 5;
+                    break;
+                case UpdateEngine.UpdateStatusConstants.FINALIZING:
+                    // finalizing stage: 35% - 100%
+                    offset = 35;
+                    weight = 65;
+                    break;
             }
 
             if (mProgressListener != null) {
                 mProgressListener.setStatus(mUpdateService.getString(mUpdateService.getResources().getIdentifier(
                     "progress_status_" + status, "string", mUpdateService.getPackageName())));
-                mProgressListener.onProgress(percent * 50f + (float) offset,
-                    (long) Math.round(percent * 50) + (long) offset, 100L);
+                mProgressListener.onProgress(percent * (float) weight + (float) offset,
+                    (long) Math.round(percent * weight) + (long) offset, 100L);
             }
         }
 
