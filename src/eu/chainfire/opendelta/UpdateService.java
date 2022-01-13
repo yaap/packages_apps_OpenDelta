@@ -190,7 +190,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     // we only snooze until a new build
     private static final String PREF_SNOOZE_UPDATE_NAME = "last_snooze_update";
 
-    private static final String PREF_PENDING_REBOOT = "pending_reboot";
+    public static final String PREF_PENDING_REBOOT = "pending_reboot";
 
     private static final String PREF_CURRENT_AB_FILENAME_NAME = "current_ab_filename";
     public static final String PREF_CURRENT_FILENAME_NAME = "current_filename";
@@ -376,7 +376,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             } else if (ACTION_UPDATE.equals(intent.getAction())) {
                 autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
             } else if (ACTION_CLEAR_INSTALL_RUNNING.equals(intent.getAction())) {
-                prefs.edit().putBoolean(PREF_PENDING_REBOOT, false).commit();
                 ABUpdate.setInstallingUpdate(false, this);
             } else if (ACTION_FLASH_FILE.equals(intent.getAction())) {
                 if (intent.hasExtra(EXTRA_FILENAME)) {
@@ -519,9 +518,9 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
         // Check if a previous update was done already
         if (prefs.getBoolean(PREF_PENDING_REBOOT, false)) {
-            filename = prefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
-            startABRebootNotification(filename);
-            updateState(STATE_ACTION_AB_FINISHED, null, null, null, null, null);
+            final String lastFilename = prefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
+            prefs.edit().putBoolean(PREF_PENDING_REBOOT, false).commit();
+            ABUpdate.pokeStatus(lastFilename, this);
             return;
         }
 

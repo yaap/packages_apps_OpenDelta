@@ -24,11 +24,15 @@ package eu.chainfire.opendelta;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.UserManager;
+import android.preference.PreferenceManager;
 
 public class BootCompleteReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().remove(UpdateService.PREF_PENDING_REBOOT).commit();
         UserManager um = UserManager.get(context);
         if (um.isAdminUser()) {
             UpdateService.startClearRunningInstall(context);

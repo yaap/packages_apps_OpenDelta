@@ -48,7 +48,7 @@ class ABUpdate {
     private final ProgressListener mProgressListener;
 
     private final UpdateService mUpdateService;
-
+    private final UpdateEngine mUpdateEngine;
     private boolean mBound;
 
     private final UpdateEngineCallback mUpdateEngineCallback = new UpdateEngineCallback() {
@@ -129,22 +129,23 @@ class ABUpdate {
                 .putBoolean(PREFS_IS_INSTALLING_UPDATE, installing).commit();
     }
 
+    static synchronized void pokeStatus(String zipPath, UpdateService us) {
+        ABUpdate installer = new ABUpdate(zipPath, null, us);
+        installer.bindCallbacks();
+    }
+
     private ABUpdate(String zipPath, ProgressListener listener,
-                UpdateService us) {
+            UpdateService us) {
         this.zipPath = zipPath;
         this.mProgressListener = listener;
         this.mUpdateService = us;
         this.enableABPerfMode = mUpdateService.getConfig().getABPerfModeCurrent();
+        this.mUpdateEngine = new UpdateEngine();
     }
 
     private boolean bindCallbacks() {
-        UpdateEngine updateEngine = new UpdateEngine();
-        return bindCallbacks(updateEngine);
-    }
-
-    private boolean bindCallbacks(UpdateEngine updateEngine) {
         if (mBound) return true;
-        mBound = updateEngine.bind(mUpdateEngineCallback);
+        mBound = mUpdateEngine.bind(mUpdateEngineCallback);
         if (!mBound) {
             Log.e(TAG, "Could not bind UpdateEngineCallback");
             return false;
@@ -181,11 +182,10 @@ class ABUpdate {
             return false;
         }
 
-        UpdateEngine updateEngine = new UpdateEngine();
-        updateEngine.setPerformanceMode(enableABPerfMode);
-        if (!bindCallbacks(updateEngine)) return false;
+        mUpdateEngine.setPerformanceMode(enableABPerfMode);
+        if (!bindCallbacks()) return false;
         String zipFileUri = "file://" + file.getAbsolutePath();
-        updateEngine.applyPayload(zipFileUri, offset, 0, headerKeyValuePairs);
+        mUpdateEngine.applyPayload(zipFileUri, offset, 0, headerKeyValuePairs);
 
         return true;
     }
