@@ -37,6 +37,9 @@
 	<!-- Applies whole-file signature delta. Adds one extra delta step. Required if recovery verifies signatures -->
 	<item name="apply_signature" type="bool">false</item>
 
+	<!-- Applies to A-only devices only, should be overlayed from DT -->
+	<item name="use_twrp" type="bool">false</item>
+
 	<!-- (TWRP) Set this to false if the keys below aren't your ROM's -->
 	<item name="inject_signature_enable" type="bool">false</item>
 

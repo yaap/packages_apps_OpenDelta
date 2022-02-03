@@ -33,6 +33,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.net.URL;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -65,6 +66,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.RecoverySystem;
 import android.os.StatFs;
 import android.os.SystemClock;
 import android.os.UpdateEngine;
@@ -150,6 +152,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     public static final String STATE_ACTION_APPLYING_PATCH = "action_applying_patch";
     public static final String STATE_ACTION_APPLYING_SUM = "action_applying_sum";
     public static final String STATE_ACTION_READY = "action_ready";
+    public static final String STATE_ACTION_A_FLASH = "action_a_flash";
     public static final String STATE_ACTION_AB_FLASH = "action_ab_flash";
     public static final String STATE_ACTION_AB_FINISHED = "action_ab_finished";
     public static final String STATE_ERROR_DISK_SPACE = "error_disk_space";
@@ -1772,7 +1775,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             // As such, flashing the ZIP without checking the whole-file
             // signature coming from a secure location would be a security
             // risk.
-            {
+            if (config.getUseTWRP()) {
                 if (config.getInjectSignatureEnable() && deltaSignature) {
                     Logger.d("flashUpdate - create /cache/recovery/keys");
 
@@ -1816,51 +1819,44 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
                 setPermissions("/cache/recovery/openrecoveryscript",
                         Process.myUid()  /* AID_CACHE */);
-            }
 
-            // CWM - ExtendedCommand - provide paths to both internal and
-            // external storage locations, it's nigh impossible to know in
-            // practice which will be correct, not just because the internal
-            // storage location varies based on the external storage being
-            // present, but also because it's not uncommon for community-built
-            // versions to have them reversed. It'll give some horrible looking
-            // results, but it seems to continue installing even if one ZIP
-            // fails and produce the wanted result. Better than nothing ...
-            //
-            // We don't generate a CWM script in secure mode, because it
-            // doesn't support checking our custom signatures
-            if (!config.getSecureModeCurrent()) {
-                Logger.d("flashUpdate - create /cache/recovery/extendedcommand");
-
-                try (FileOutputStream os = new FileOutputStream(
-                        "/cache/recovery/extendedcommand", false)) {
-                    writeString(os, String.format("install_zip(\"%s%s\");",
-                            "/sdcard/", flashFilename));
-                    writeString(os, String.format("install_zip(\"%s%s\");",
-                            "/emmc/", flashFilename));
-                    for (String file : extras) {
-                        writeString(os, String.format("install_zip(\"%s%s\");",
-                                "/sdcard/", file));
-                        writeString(os, String.format("install_zip(\"%s%s\");",
-                                "/emmc/", file));
-                    }
-                    writeString(os,
-                            "run_program(\"/sbin/busybox\", \"rm\", \"-rf\", \"/cache/*\");");
-                }
-
-                setPermissions("/cache/recovery/extendedcommand",
-                        Process.myUid()  /* AID_CACHE */);
+                Logger.d("flashUpdate - reboot to recovery");
+                ((PowerManager) getSystemService(Context.POWER_SERVICE))
+                        .rebootCustom(PowerManager.REBOOT_RECOVERY);
             } else {
-                (new File("/cache/recovery/extendedcommand")).delete();
+                // AOSP recovery and derivatives
+                // First copy the file to cache and decrypt it
+                // Finally tell RecoverySystem to flash it via recovery
+                FileChannel srcCh = null;
+                FileChannel dstCh = null;
+                File dst = new File(path_sd + "ota_package.zip.uncrypt");
+                dst.setReadable(true, false);
+                dst.setWritable(true, false);
+                dst.setExecutable(true, false);
+                try {
+                    Logger.d("flashUpdate - copying A-only OTA package: "
+                            + dst.getAbsolutePath());
+                    File src = new File(path_sd + flashFilename);
+                    srcCh = new FileInputStream(src).getChannel();
+                    dstCh = new FileOutputStream(dst, false).getChannel();
+                    dstCh.transferFrom(srcCh, 0, srcCh.size());
+                    srcCh.close(); srcCh = null;
+                    dstCh.close(); dstCh = null;
+                    Logger.d("flashUpdate - installing A-only OTA package");
+                    RecoverySystem.installPackage(this, dst);
+                } catch (Exception e) {
+                    dst.delete();
+                    Logger.d("flashUpdate - Could not install OTA package:");
+                    Logger.ex(e);
+                    updateState(STATE_ERROR_FLASH, null, null, null, null, null);
+                } finally {
+                    if (srcCh != null) srcCh.close();
+                    if (dstCh != null) dstCh.close();
+                }
             }
-
-            Logger.d("flashUpdate - reboot to recovery");
-
-            ((PowerManager) getSystemService(Context.POWER_SERVICE)).rebootCustom(PowerManager.REBOOT_RECOVERY);
         } catch (Exception e) {
             // We have failed to write something. There's not really anything
-            // else to do at
-            // at this stage than give up. No reason to crash though.
+            // else to do at this stage than give up. No reason to crash though.
             Logger.ex(e);
             updateState(STATE_ERROR_FLASH, null, null, null, null, null);
         }

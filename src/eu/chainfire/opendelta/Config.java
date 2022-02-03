@@ -67,6 +67,7 @@ public class Config {
     private final String url_base_full_sum;
     private final String url_base_suffix;
     private final boolean apply_signature;
+    private final boolean use_twrp;
     private final boolean inject_signature_enable;
     private final String inject_signature_keys;
     private final boolean secure_mode_enable;
@@ -125,6 +126,7 @@ public class Config {
                 res.getString(R.string.url_base_full_sum), property_device);
         url_base_suffix = res.getString(R.string.url_base_suffix);
         apply_signature = res.getBoolean(R.bool.apply_signature);
+        use_twrp = res.getBoolean(R.bool.use_twrp);
         inject_signature_enable = res
                 .getBoolean(R.bool.inject_signature_enable);
         inject_signature_keys = res.getString(R.string.inject_signature_keys);
@@ -168,6 +170,7 @@ public class Config {
         Logger.d("url_base_full_sum: %s", url_base_full_sum);
         Logger.d("url_base_json: %s", url_base_json);
         Logger.d("apply_signature: %d", apply_signature ? 1 : 0);
+        Logger.d("use_twrp: %d", use_twrp ? 1 : 0);
         Logger.d("inject_signature_enable: %d", inject_signature_enable ? 1 : 0);
         Logger.d("inject_signature_keys: %s", inject_signature_keys);
         Logger.d("secure_mode_enable: %d", secure_mode_enable ? 1 : 0);
@@ -209,6 +212,10 @@ public class Config {
 
     public boolean getApplySignature() {
         return apply_signature;
+    }
+
+    public boolean getUseTWRP() {
+        return use_twrp;
     }
 
     public boolean getInjectSignatureEnable() {
