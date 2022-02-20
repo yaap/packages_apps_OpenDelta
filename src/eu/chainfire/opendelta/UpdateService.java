@@ -188,6 +188,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     public static final String PREF_LAST_CHECK_TIME_NAME = "last_check_time";
     public static final long PREF_LAST_CHECK_TIME_DEFAULT = 0L;
 
+    private static final String PREF_LAST_DOWNLOAD_TIME = "last_spent_download_time";
     private static final String PREF_LAST_SNOOZE_TIME_NAME = "last_snooze_time";
     private static final long PREF_LAST_SNOOZE_TIME_DEFAULT = 0L;
     // we only snooze until a new build
@@ -666,7 +667,11 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         notificationManager.cancel(NOTIFICATION_ERROR);
     }
 
-    private HttpsURLConnection setupHttpsRequest(String urlStr){
+    private HttpsURLConnection setupHttpsRequest(String urlStr) {
+        return setupHttpsRequest(urlStr, 0);
+    }
+
+    private HttpsURLConnection setupHttpsRequest(String urlStr, long offset) {
         URL url;
         HttpsURLConnection urlConnection;
         try {
@@ -676,9 +681,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             urlConnection.setReadTimeout(HTTP_READ_TIMEOUT);
             urlConnection.setRequestMethod("GET");
             urlConnection.setDoInput(true);
+            if (offset > 0)
+                urlConnection.setRequestProperty("Range", "bytes=" + offset + "-");
             urlConnection.connect();
             int code = urlConnection.getResponseCode();
-            if (code != HttpsURLConnection.HTTP_OK) {
+            if (code != HttpsURLConnection.HTTP_OK
+                    && code != HttpsURLConnection.HTTP_PARTIAL) {
                 Logger.d("response: %d", code);
                 return null;
             }
@@ -852,31 +860,37 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             }
         }
 
-        if (f.exists())
-            f.delete();
+        long offset = 0;
+        if (f.exists()) offset = f.length();
 
         try {
-            updateState(STATE_ACTION_DOWNLOADING, 0f, 0L, 0L, f.getName(), null);
+            final String userFN = f.getName().substring(0, f.getName().length() - 5);
+            updateState(STATE_ACTION_DOWNLOADING, 0f, 0L, 0L, userFN, null);
             urlConnection = setupHttpsRequest(url);
-            if (urlConnection == null){
-                return false;
-            }
+            if (urlConnection == null) return false;
 
             len = urlConnection.getContentLength();
+            if (offset > 0 && offset != len) {
+                urlConnection.disconnect();
+                urlConnection = setupHttpsRequest(url, offset);
+                if (urlConnection == null) return false;
+            }
 
-            updateState(STATE_ACTION_DOWNLOADING, 0f, 0L, len, f.getName(), null);
+            updateState(STATE_ACTION_DOWNLOADING, 0f, 0L, len, userFN, null);
 
             long freeSpace = (new StatFs(config.getPathBase()))
                     .getAvailableBytes();
-            if (freeSpace < len) {
+            if (freeSpace < len - offset) {
                 updateState(STATE_ERROR_DISK_SPACE, null, freeSpace, len, null,
                         null);
                 Logger.d("not enough space!");
                 return false;
             }
 
-            final long[] last = new long[] { 0, len, 0,
-                    SystemClock.elapsedRealtime() };
+            long lastTime = SystemClock.elapsedRealtime();
+            if (offset > 0)
+                lastTime -= prefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
+            final long[] last = new long[] { 0, len, 0, lastTime };
             DeltaInfo.ProgressListener progressListener = new DeltaInfo.ProgressListener() {
                 @Override
                 public void onProgress(float progress, long current, long total) {
@@ -884,13 +898,13 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     total = last[1];
                     progress = ((float) current / (float) total) * 100f;
                     long now = SystemClock.elapsedRealtime();
-                    if (now >= last[2] + 16L) {
+                    if (now >= last[2] + 250L) {
                         updateState(STATE_ACTION_DOWNLOADING, progress,
-                                current, total, f.getName(),
-                                SystemClock.elapsedRealtime() - last[3]);
-                        setDownloadNotificationProgress(progress, current, total,
-                                SystemClock.elapsedRealtime() - last[3]);
+                                current, total, userFN, now - last[3]);
+                        setDownloadNotificationProgress(progress, current,
+                                total,now - last[3]);
                         last[2] = now;
+                        prefs.edit().putLong(PREF_LAST_DOWNLOAD_TIME, now - last[3]).apply();
                     }
                 }
 
@@ -899,43 +913,42 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 }
             };
 
-            long recv = 0;
+            long recv = offset;
             if ((len > 0) && (len < 4L * 1024L * 1024L * 1024L)) {
                 byte[] buffer = new byte[262144];
 
                 InputStream is = urlConnection.getInputStream();
-                try (FileOutputStream os = new FileOutputStream(f, false)) {
+                try (FileOutputStream os = new FileOutputStream(f, offset > 0)) {
                     int r;
                     while ((r = is.read(buffer)) > 0) {
                         if (stopDownload) {
                             return false;
                         }
                         os.write(buffer, 0, r);
-                        if (digest != null)
+                        if (offset == 0 && digest != null)
                             digest.update(buffer, 0, r);
 
                         recv += r;
                         progressListener.onProgress(
-                                ((float) recv / (float) len) * 100f, recv,
-                                len);
+                                ((float) recv / (float) len) * 100f,
+                                recv, len);
                     }
                 }
 
-                if (digest != null) {
-                    StringBuilder SUM = new StringBuilder(new BigInteger(1, digest.digest())
-                            .toString(16).toLowerCase(Locale.ENGLISH));
-                    while (SUM.length() < 64)
-                         SUM.insert(0, "0");
-                    boolean sumCheck = SUM.toString().equals(matchSUM);
-                    Logger.d("SUM=" + SUM + " matchSUM=" + matchSUM);
-                    Logger.d("SUM.length=" + SUM.length() +
-                            " matchSUM.length=" + matchSUM.length());
-                    if (!sumCheck) {
-                        Logger.i("SUM check failed for " + url);
-                    }
-                    return sumCheck;
+                if (offset > 0) digest = getDigestForFile(f);
+                if (digest == null) return false;
+                StringBuilder SUM = new StringBuilder(new BigInteger(1, digest.digest())
+                        .toString(16).toLowerCase(Locale.ENGLISH));
+                while (SUM.length() < 64)
+                     SUM.insert(0, "0");
+                boolean sumCheck = SUM.toString().equals(matchSUM);
+                Logger.d("SUM=" + SUM + " matchSUM=" + matchSUM);
+                Logger.d("SUM.length=" + SUM.length() +
+                        " matchSUM.length=" + matchSUM.length());
+                if (!sumCheck) {
+                    Logger.i("SUM check failed for " + url);
                 }
-                return true;
+                return sumCheck;
             }
             return false;
         } catch (Exception e) {
@@ -995,6 +1008,24 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             Logger.ex(e);
         }
         return false;
+    }
+
+    private MessageDigest getDigestForFile(File file) throws IOException {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            // No SHA-256 algorithm support
+            Logger.ex(e);
+            return null;
+        }
+        FileInputStream fis = new FileInputStream(file);
+        byte[] byteArray = new byte[1024];
+        int bytesCount;
+        while ((bytesCount = fis.read(byteArray)) != -1)
+            digest.update(byteArray, 0, bytesCount);
+        fis.close();
+        return digest;
     }
 
     private List<String> getNewestFullBuild() {
@@ -1466,16 +1497,17 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         final String[] filename = new String[] { null };
         filename[0] = imageName;
         String fn = config.getPathBase() + imageName;
-        File f = new File(fn);
+        File f = new File(fn + ".part");
         Logger.d("download: %s --> %s", url, fn);
 
-        if (downloadUrlFileUnknownSize(url, f, sha256Sum)) {
+        if (downloadUrlFileUnknownSize(url, f, sha256Sum)
+                && f.renameTo(new File(fn))) {
             Logger.d("success");
             prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
         } else {
-            f.delete();
             if (stopDownload) {
                 Logger.d("download stopped");
+                f.delete();
             } else {
                 Logger.d("download error");
                 updateState(STATE_ERROR_DOWNLOAD, null, null, null, url, null);
