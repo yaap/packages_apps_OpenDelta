@@ -1693,7 +1693,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             if (progressInK)
                 kibps *= 1024f;
             int sec = (int) (((((float) total / (float) current) * (float) ms) - ms) / 1000f);
-            if (kibps < 10000) {
+            if (kibps < 1024) {
                 sub = String.format(Locale.ENGLISH,
                         "%2d%% · %.0f KiB/s · %02d:%02d",
                         percent, kibps, sec / 60, sec % 60);

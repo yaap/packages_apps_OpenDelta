@@ -468,7 +468,7 @@ public class MainActivity extends Activity {
                                     "%02d:%02d",
                                     sec / 60, sec % 60);
                         } else {
-                            if (kibps < 10000) {
+                            if (kibps < 1024) {
                                 sub2 = String.format(Locale.ENGLISH,
                                         "%.0f KiB/s, %02d:%02d",
                                         kibps, sec / 60, sec % 60);
