@@ -947,6 +947,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                         " matchSUM.length=" + matchSUM.length());
                 if (!sumCheck) {
                     Logger.i("SUM check failed for " + url);
+                    // if sum does not match when done, get rid
+                    f.delete();
                 }
                 return sumCheck;
             }
