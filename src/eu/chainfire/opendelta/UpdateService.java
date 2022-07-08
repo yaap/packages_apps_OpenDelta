@@ -860,6 +860,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             }
         }
 
+        long lastTime = SystemClock.elapsedRealtime();
         long offset = 0;
         if (f.exists()) offset = f.length();
 
@@ -887,7 +888,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 return false;
             }
 
-            long lastTime = SystemClock.elapsedRealtime();
             if (offset > 0)
                 lastTime -= prefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
             final long[] last = new long[] { 0, len, 0, lastTime };
@@ -904,7 +904,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                         setDownloadNotificationProgress(progress, current,
                                 total,now - last[3]);
                         last[2] = now;
-                        prefs.edit().putLong(PREF_LAST_DOWNLOAD_TIME, now - last[3]).apply();
                     }
                 }
 
@@ -957,6 +956,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             // Download failed for any number of reasons, timeouts, connection
             // drops, etc. Just log it in debugging mode.
             Logger.ex(e);
+            prefs.edit().putLong(PREF_LAST_DOWNLOAD_TIME,
+                    SystemClock.elapsedRealtime() - lastTime).apply();
             return false;
         } finally {
             updateState(STATE_ACTION_DOWNLOADING, 100f, len, len, null, null);
