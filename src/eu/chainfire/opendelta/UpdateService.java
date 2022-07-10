@@ -1501,11 +1501,21 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
     private void downloadFullBuild(String url, String sha256Sum,
                                    String imageName) {
-        final String[] filename = new String[] { null };
-        filename[0] = imageName;
         String fn = config.getPathBase() + imageName;
         File f = new File(fn + ".part");
         Logger.d("download: %s --> %s", url, fn);
+
+        // get rid of old .part files if any
+        File[] files = new File(config.getPathBase()).listFiles();
+        if (files != null) {
+            for (File file : files) {
+                String currName = file.getName();
+                if (file.isFile() && currName.endsWith(".part")
+                        && !currName.equals(f.getName())) {
+                    file.delete();
+                }
+            }
+        }
 
         if (downloadUrlFileUnknownSize(url, f, sha256Sum)
                 && f.renameTo(new File(fn))) {
@@ -2257,7 +2267,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                         long size = getUrlDownloadSize(latestFullFetch);
                         prefs.edit().putLong(PREF_DOWNLOAD_SIZE, size).commit();
                     }
-                    Logger.d("check donne: latest full build available = " + prefs.getString(PREF_LATEST_FULL_NAME, null) +
+                    Logger.d("check done: latest full build available = " + prefs.getString(PREF_LATEST_FULL_NAME, null) +
                             " : updateAvailable = " + updateAvailable + " : downloadFullBuild = " + downloadFullBuild);
 
                     if (checkOnly == PREF_AUTO_DOWNLOAD_CHECK) {
@@ -2345,7 +2355,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                             prefs.edit().putLong(PREF_DOWNLOAD_SIZE, fullDownloadSize).commit();
                         }
                     }
-                    Logger.d("check donne: latest valid delta update = " + prefs.getString(PREF_LATEST_DELTA_NAME, null) +
+                    Logger.d("check done: latest valid delta update = " + prefs.getString(PREF_LATEST_DELTA_NAME, null) +
                             " : latest full build available = " + prefs.getString(PREF_LATEST_FULL_NAME, null) +
                             " : updateAvailable = " + updateAvailable + " : downloadFullBuild = " + downloadFullBuild);
 
