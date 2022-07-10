@@ -849,6 +849,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         Logger.d("download: %s", url);
 
         HttpsURLConnection urlConnection = null;
+        InputStream is = null;
+        FileOutputStream os = null;
         MessageDigest digest = null;
         long len = 0;
         if (matchSUM != null) {
@@ -871,7 +873,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             if (urlConnection == null) return false;
 
             len = urlConnection.getContentLength();
-            if (offset > 0 && offset != len) {
+            if (offset > 0 && offset < len) {
                 urlConnection.disconnect();
                 urlConnection = setupHttpsRequest(url, offset);
                 if (urlConnection == null) return false;
@@ -916,22 +918,21 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             if ((len > 0) && (len < 4L * 1024L * 1024L * 1024L)) {
                 byte[] buffer = new byte[262144];
 
-                InputStream is = urlConnection.getInputStream();
-                try (FileOutputStream os = new FileOutputStream(f, offset > 0)) {
-                    int r;
-                    while ((r = is.read(buffer)) > 0) {
-                        if (stopDownload) {
-                            return false;
-                        }
-                        os.write(buffer, 0, r);
-                        if (offset == 0 && digest != null)
-                            digest.update(buffer, 0, r);
-
-                        recv += r;
-                        progressListener.onProgress(
-                                ((float) recv / (float) len) * 100f,
-                                recv, len);
+                is = urlConnection.getInputStream();
+                os = new FileOutputStream(f, offset > 0);
+                int r;
+                while ((r = is.read(buffer)) > 0) {
+                    if (stopDownload) {
+                        return false;
                     }
+                    os.write(buffer, 0, r);
+                    if (offset == 0 && digest != null)
+                        digest.update(buffer, 0, r);
+
+                    recv += r;
+                    progressListener.onProgress(
+                            ((float) recv / (float) len) * 100f,
+                            recv, len);
                 }
 
                 if (offset > 0) digest = getDigestForFile(f);
@@ -958,13 +959,16 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             Logger.ex(e);
             prefs.edit().putLong(PREF_LAST_DOWNLOAD_TIME,
                     SystemClock.elapsedRealtime() - lastTime).apply();
+            if (urlConnection != null) urlConnection.disconnect();
+            try { if (is != null) is.close(); } catch (IOException ignored) {}
+            try { if (os != null) os.close(); } catch (IOException ignored) {}
             return false;
         } finally {
             updateState(STATE_ACTION_DOWNLOADING, 100f, len, len, null, null);
             notificationManager.cancel(NOTIFICATION_BUSY);
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
+            if (urlConnection != null) urlConnection.disconnect();
+            try { if (is != null) is.close(); } catch (IOException ignored) {}
+            try { if (os != null) os.close(); } catch (IOException ignored) {}
         }
     }
 
