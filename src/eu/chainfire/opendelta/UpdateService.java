@@ -819,7 +819,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     StringBuilder SUM = new StringBuilder(new BigInteger(1, digest.digest())
                             .toString(16).toLowerCase(Locale.ENGLISH));
                     while (SUM.length() < 64)
-                         SUM.insert(0, "0");
+                        SUM.insert(0, "0");
                     boolean sumCheck = SUM.toString().equals(matchSUM);
                     Logger.d("SUM=" + SUM + " matchSUM=" + matchSUM);
                     Logger.d("SUM.length=" + SUM.length() +
@@ -935,13 +935,17 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                             recv, len);
                 }
 
-                if (offset > 0) digest = getDigestForFile(f);
-                if (digest == null) return false;
-                StringBuilder SUM = new StringBuilder(new BigInteger(1, digest.digest())
-                        .toString(16).toLowerCase(Locale.ENGLISH));
+                String SUM;
+                if (offset > 0) {
+                    SUM = getFileSHA256(f, getSUMProgress(STATE_ACTION_CHECKING_SUM, f.getName()));
+                } else {
+                    if (digest == null) return false;
+                    SUM = new BigInteger(1, digest.digest())
+                            .toString(16).toLowerCase(Locale.ENGLISH);
+                }
                 while (SUM.length() < 64)
-                     SUM.insert(0, "0");
-                boolean sumCheck = SUM.toString().equals(matchSUM);
+                    SUM += "0";
+                boolean sumCheck = SUM.equals(matchSUM);
                 Logger.d("SUM=" + SUM + " matchSUM=" + matchSUM);
                 Logger.d("SUM.length=" + SUM.length() +
                         " matchSUM.length=" + matchSUM.length());
@@ -1015,24 +1019,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             Logger.ex(e);
         }
         return false;
-    }
-
-    private MessageDigest getDigestForFile(File file) throws IOException {
-        MessageDigest digest;
-        try {
-            digest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            // No SHA-256 algorithm support
-            Logger.ex(e);
-            return null;
-        }
-        FileInputStream fis = new FileInputStream(file);
-        byte[] byteArray = new byte[1024];
-        int bytesCount;
-        while ((bytesCount = fis.read(byteArray)) != -1)
-            digest.update(byteArray, 0, bytesCount);
-        fis.close();
-        return digest;
     }
 
     private List<String> getNewestFullBuild() {
@@ -1531,34 +1517,71 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 notificationManager.cancel(NOTIFICATION_BUSY);
             }
         }
-
     }
 
     /**
      * @param url - url to sha256sum file
      * @param fn - file name
-     * @param ovr - whether direct link to sha256sum is provided
      * @return true if sha256sum matches the file
      */
-    private boolean checkFullBuildSHA256Sum(String url, String fn, boolean ovr) {
-        String urlSuffix = config.getUrlSuffix();
-        if (!ovr && urlSuffix.length() > 0) {
-            url += urlSuffix;
-        }
-        String latestFullSUM = downloadUrlMemoryAsString(url);
+    private boolean checkFullBuildSHA256Sum(String url, String fn) {
+        final String latestFullSUM = getLatestFullSHA256Sum(url);
+        final File file = new File(fn);
         if (latestFullSUM != null){
             try {
-                String fileSUM = getFileSHA256(new File(fn),
+                String fileSUM = getFileSHA256(
+                        file,
                         getSUMProgress(STATE_ACTION_CHECKING_SUM,
-                        new File(fn).getName()));
-                if (latestFullSUM.equals(fileSUM)) {
-                    return true;
-                }
+                        file.getName()));
+                boolean sumCheck = fileSUM.equals(latestFullSUM);
+                Logger.d("fileSUM=" + fileSUM + " latestFullSUM=" + latestFullSUM);
+                Logger.d("fileSUM.length=" + fileSUM.length() +
+                        " latestFullSUM.length=" + latestFullSUM.length());
+                if (sumCheck) return true;
+                Logger.i("fileSUM check failed for " + url);
             } catch(Exception e) {
                 // WTH knows what can comes from the server
             }
         }
         return false;
+    }
+
+    private String getFileSHA256(File file, ProgressListener progressListener) {
+        String ret = null;
+        int count = 0;
+
+        long total = file.length();
+        if (progressListener != null)
+            progressListener.onProgress(getProgress(0, total), 0, total);
+
+        try {
+            try (FileInputStream is = new FileInputStream(file)) {
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                byte[] buffer = new byte[1024];
+                int r = 0;
+
+                while ((r = is.read(buffer)) > 0) {
+                    digest.update(buffer, 0, r);
+                    count += r;
+                    if (progressListener != null)
+                        progressListener.onProgress(getProgress(count, total), count, total);
+                }
+
+                StringBuilder SUM = new StringBuilder(new BigInteger(1, digest.digest())
+                        .toString(16).toLowerCase(Locale.ENGLISH));
+                ret = SUM.toString();
+            }
+        } catch (IOException | NoSuchAlgorithmException e) {
+            // No SHA256 support (returns null)
+            // The SHA256 of a non-existing file is null
+            // Read or close error (returns null)
+            Logger.ex(e);
+        }
+
+        if (progressListener != null)
+            progressListener.onProgress(getProgress(total, total), total, total);
+
+        return ret;
     }
 
     private boolean applyPatches(List<DeltaInfo> deltas, String initialFile,
@@ -1941,47 +1964,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         return ((float) current / (float) total) * 100f;
     }
 
-    // need to locally here for the deltas == 0 case
-    private String getFileSHA256(File file, ProgressListener progressListener) {
-        String ret = null;
-
-        long current = 0;
-        long total = file.length();
-        if (progressListener != null)
-            progressListener.onProgress(getProgress(current, total), current, total);
-
-        try {
-            try (FileInputStream is = new FileInputStream(file)) {
-                MessageDigest digest = MessageDigest.getInstance("SHA-256");
-                byte[] buffer = new byte[256 * 1024];
-                int r;
-
-                while ((r = is.read(buffer)) > 0) {
-                    digest.update(buffer, 0, r);
-                    current += r;
-                    if (progressListener != null)
-                        progressListener.onProgress(getProgress(current, total), current, total);
-                }
-
-                //while (SUM.length() < 32)
-                //     SUM = "0" + SUM;
-                ret = new BigInteger(1, digest.digest()).
-                        toString(16).toLowerCase(Locale.ENGLISH);
-                Logger.d("sha256sum from file is: " + ret);
-            }
-        } catch (IOException | NoSuchAlgorithmException e) {
-            // No SHA256 support (returns null)
-            // The SHA256 of a non-existing file is null
-            // Read or close error (returns null)
-            Logger.ex(e);
-        }
-
-        if (progressListener != null)
-            progressListener.onProgress(getProgress(total, total), total, total);
-
-        return ret;
-    }
-
     private boolean isSupportedVersion() {
         return config.isOfficialVersion();
     }
@@ -2126,6 +2108,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 }
                 else {
                     latestFullFetch = latestFullBuildWithUrl.get(1);
+                    latestFullFetchSUM = latestFullBuildWithUrl.get(2);
                 }
                 Logger.d("latest full build for device " + config.getDevice() + " is " + latestFullFetch);
                 prefs.edit().putString(PREF_LATEST_FULL_NAME, latestFullBuild).commit();
@@ -2249,19 +2232,9 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     }
 
                     if (downloadFullBuild) {
-                        String fn = config.getPathBase() + latestFullBuild;
-                        if (new File(fn).exists()) {
-                            boolean directSUM = latestFullBuildWithUrl.size() == 3;
-                            if (checkFullBuildSHA256Sum(
-                                    (directSUM ? latestFullBuildWithUrl.get(2) : latestFullFetchSUM),
-                                    fn, directSUM)) {
-                                Logger.d("match found (full): " + fn);
-                                prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
-                                downloadFullBuild = false;
-                            } else {
-                                Logger.d("sha256sum check failed : " + fn);
-                            }
-                        }
+                        boolean directSUM = latestFullBuildWithUrl.size() == 3;
+                        if (checkExistingFullBuild(latestFullBuildWithUrl,
+                                latestFullFetchSUM, directSUM)) return;
                     }
                     if (updateAvailable && downloadFullBuild) {
                         long size = getUrlDownloadSize(latestFullFetch);
@@ -2334,19 +2307,9 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     }
 
                     if (downloadFullBuild) {
-                        String fn = config.getPathBase() + latestFullBuild;
-                        if (new File(fn).exists()) {
-                            boolean directSUM = latestFullBuildWithUrl.size() == 3;
-                            if (checkFullBuildSHA256Sum(
-                                    (directSUM ? latestFullBuildWithUrl.get(2) : latestFullFetchSUM),
-                                    fn, directSUM)) {
-                                Logger.d("match found (full): " + fn);
-                                prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
-                                downloadFullBuild = false;
-                            } else {
-                                Logger.d("sha256sum check failed : " + fn);
-                            }
-                        }
+                        boolean directSUM = latestFullBuildWithUrl.size() == 3;
+                        if (checkExistingFullBuild(latestFullBuildWithUrl,
+                                latestFullFetchSUM, directSUM)) return;
                     }
                     if (updateAvailable) {
                         if (deltaUpdatePossible) {
@@ -2449,6 +2412,24 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 updateRunning = false;
             }
         });
+    }
+
+    private boolean checkExistingFullBuild(List<String> latestFullBuildWithUrl,
+                                           String latestFullFetchSUM,
+                                           boolean directSUM) {
+        String fn = config.getPathBase() + latestFullBuildWithUrl.get(0);
+        File file = new File(fn);
+        if (file.exists()) {
+            if (checkFullBuildSHA256Sum(latestFullFetchSUM, fn)) {
+                Logger.d("match found (full): " + fn);
+                // full zip exists and is valid - flash ready state
+                prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
+                return true;
+            }
+            // get rid of rubbish
+            file.delete();
+        }
+        return false;
     }
 
     private boolean checkPermissions() {
