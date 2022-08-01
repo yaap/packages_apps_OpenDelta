@@ -1667,6 +1667,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         if (flashFilename == null
                 || (!fileFlash && !flashFilename.startsWith(config.getPathBase()))
                 || !new File(flashFilename).exists()) {
+            clearState();
             throw new FileNotFoundException("flashUpdate - no valid file to flash found " + flashFilename);
         }
         // now delete the initial file
@@ -2022,12 +2023,14 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     }
 
     private void clearState() {
-        prefs.edit().putString(PREF_LATEST_FULL_NAME, null).commit();
-        prefs.edit().putString(PREF_LATEST_DELTA_NAME, null).commit();
-        prefs.edit().putString(PREF_READY_FILENAME_NAME, null).commit();
-        prefs.edit().putLong(PREF_DOWNLOAD_SIZE, -1).commit();
-        prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, false).commit();
-        prefs.edit().putString(PREF_INITIAL_FILE, null).commit();
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(PREF_LATEST_FULL_NAME, null);
+        editor.putString(PREF_LATEST_DELTA_NAME, null);
+        editor.putString(PREF_READY_FILENAME_NAME, null);
+        editor.putLong(PREF_DOWNLOAD_SIZE, -1);
+        editor.putBoolean(PREF_DELTA_SIGNATURE, false);
+        editor.putString(PREF_INITIAL_FILE, null);
+        editor.commit();
     }
 
     private void shouldShowErrorNotification() {
