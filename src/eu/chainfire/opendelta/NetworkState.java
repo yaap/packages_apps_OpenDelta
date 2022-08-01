@@ -64,7 +64,7 @@ public class NetworkState {
         }
     }
 
-    public boolean start(Context context, OnNetworkStateListener onNetworkStateListener, boolean metered) {
+    public boolean start(Context context, OnNetworkStateListener onNetworkStateListener) {
         if (this.context == null) {
             this.context = context;
             this.onNetworkStateListener = onNetworkStateListener;

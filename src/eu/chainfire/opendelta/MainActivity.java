@@ -695,7 +695,7 @@ public class MainActivity extends Activity {
             } else {
                 Intent i = new Intent(UpdateService.BROADCAST_INTENT);
                 i.putExtra(UpdateService.EXTRA_STATE, UpdateService.STATE_ERROR_FLASH_FILE);
-                sendStickyBroadcast(i);
+                sendBroadcast(i);
             }
         } else if (requestCode == PERMISSIONS_REQUEST_MANAGE_EXTERNAL_STORAGE
                 && resultCode == Activity.RESULT_OK) {
@@ -725,7 +725,7 @@ public class MainActivity extends Activity {
                     return Environment.getExternalStorageDirectory() + "/" + split[1];
                 }
                 if ("home".equalsIgnoreCase(type)) {
-                    return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/" + split[1];
+                    return this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS) + "/" + split[1];
                 }
             }
             // DownloadsProvider
@@ -733,7 +733,7 @@ public class MainActivity extends Activity {
                 Logger.d("isDownloadsDocument: %s", uri.getPath());
                 String fileName = getFileNameColumn(uri);
                 if (fileName != null) {
-                    return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + fileName;
+                    return this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) + "/" + fileName;
                 }
             }
         }
@@ -765,7 +765,7 @@ public class MainActivity extends Activity {
         } catch (android.content.ActivityNotFoundException ex) {
             Intent i = new Intent(UpdateService.BROADCAST_INTENT);
             i.putExtra(UpdateService.EXTRA_STATE, UpdateService.STATE_ERROR_FLASH_FILE);
-            sendStickyBroadcast(i);
+            sendBroadcast(i);
         }
     }
 

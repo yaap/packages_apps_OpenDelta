@@ -37,7 +37,6 @@ import androidx.preference.Preference.OnPreferenceChangeListener;
 import androidx.preference.PreferenceFragment;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceManager;
-import androidx.preference.PreferenceScreen;
 import android.text.Html;
 import android.text.format.DateFormat;
 import android.widget.TimePicker;
@@ -134,7 +133,7 @@ public class SettingsFragment extends PreferenceFragment implements
         if (preference == mNetworksConfig) {
             boolean value = ((SwitchPreference) preference).isChecked();
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-            prefs.edit().putBoolean(UpdateService.PREF_AUTO_UPDATE_METERED_NETWORKS, value).commit();
+            prefs.edit().putBoolean(UpdateService.PREF_AUTO_UPDATE_METERED_NETWORKS, value).apply();
             return true;
         } else if (preference == mChargeOnly) {
             boolean value = ((SwitchPreference) preference).isChecked();
@@ -160,7 +159,7 @@ public class SettingsFragment extends PreferenceFragment implements
             int numDeletedFiles = cleanFiles();
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
             clearState(prefs);
-            prefs.edit().putBoolean(SettingsActivity.PREF_START_HINT_SHOWN, false).commit();
+            prefs.edit().putBoolean(SettingsActivity.PREF_START_HINT_SHOWN, false).apply();
             Toast.makeText(getContext(), String.format(getString(R.string.clean_files_feedback),
                     numDeletedFiles), Toast.LENGTH_LONG).show();
             return true;
@@ -215,7 +214,7 @@ public class SettingsFragment extends PreferenceFragment implements
                 .getDefaultSharedPreferences(getContext());
         String prefValue = String.format(Locale.ENGLISH, "%02d:%02d",
                 hourOfDay, minute);
-        prefs.edit().putString(SettingsActivity.PREF_SCHEDULER_DAILY_TIME, prefValue).commit();
+        prefs.edit().putString(SettingsActivity.PREF_SCHEDULER_DAILY_TIME, prefValue).apply();
         mSchedulerDailyTime.setSummary(prefValue);
     }
 

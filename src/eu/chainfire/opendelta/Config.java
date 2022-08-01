@@ -110,8 +110,8 @@ public class Config {
         filename_base = String.format(Locale.ENGLISH,
                 res.getString(R.string.filename_base), property_version);
 
-        path_base = String.format(Locale.ENGLISH, "%s%s%s%s", Environment
-                .getExternalStorageDirectory().getAbsolutePath(),
+        path_base = String.format(Locale.ENGLISH, "%s%s%s%s",
+                Environment.getExternalStorageDirectory().getAbsolutePath(),
                 File.separator, res.getString(R.string.path_base),
                 File.separator);
         path_flash_after_update = String.format(Locale.ENGLISH, "%s%s%s",
@@ -243,15 +243,12 @@ public class Config {
 
     public boolean getSecureModeCurrent() {
         return getSecureModeEnable()
-                && prefs.getBoolean(PREF_SECURE_MODE_NAME,
-                        getSecureModeDefault());
+                && prefs.getBoolean(PREF_SECURE_MODE_NAME, getSecureModeDefault());
     }
 
-    public boolean setSecureModeCurrent(boolean enable) {
-        prefs.edit()
-                .putBoolean(PREF_SECURE_MODE_NAME,
+    public void setSecureModeCurrent(boolean enable) {
+        prefs.edit().putBoolean(PREF_SECURE_MODE_NAME,
                         getSecureModeEnable() && enable).commit();
-        return getSecureModeCurrent();
     }
 
     public boolean getABPerfModeCurrent() {
@@ -259,8 +256,7 @@ public class Config {
     }
 
     public void setABPerfModeCurrent(boolean enable) {
-        prefs.edit()
-                .putBoolean(PREF_AB_PERF_MODE_NAME, enable).commit();
+        prefs.edit().putBoolean(PREF_AB_PERF_MODE_NAME, enable).commit();
     }
 
     public boolean getShowInfo() {
@@ -300,8 +296,7 @@ public class Config {
     }
 
     public boolean getShownRecoveryWarningNotSecure() {
-        return prefs.getBoolean(PREF_SHOWN_RECOVERY_WARNING_NOT_SECURE_NAME,
-                false);
+        return prefs.getBoolean(PREF_SHOWN_RECOVERY_WARNING_NOT_SECURE_NAME, false);
     }
 
     public void setShownRecoveryWarningNotSecure() {
