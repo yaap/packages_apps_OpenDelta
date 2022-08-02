@@ -23,6 +23,7 @@
     <string name="state_action_searching">Searching for files &#8230;</string>
     <string name="state_action_searching_sum">Verifying file &#8230;</string>
     <string name="state_action_downloading">Downloading &#8230;</string>
+    <string name="state_action_downloading_paused">Downloading paused</string> 
     <string name="state_action_applying">Patching &#8230;</string>
     <string name="state_action_applying_patch">Patching &#8230;</string>
     <string name="state_action_applying_sum">Verifying file &#8230;</string>
@@ -38,6 +39,9 @@
     <string name="button_check_short">Check</string>
     <string name="button_check_now">Check for update &#8230;</string>
     <string name="button_flash_now">Flash</string>
+    <string name="button_pause_text">Pause</string>
+    <string name="button_resume_text">Resume</string>
+    <string name="button_stop_text">Cancel</string>
     <string name="state_action_ab_flash">Installing AB Update &#8230;</string>
     <string name="state_action_ab_finished">Done Installing. Reboot Now &#8230;</string>
     <string name="button_reboot_short">Reboot</string>
@@ -62,6 +66,7 @@
     <string name="state_action_build_delta">Delta update is possible</string>
     <string name="state_action_build_full">Full update is possible</string>
     <string name="state_error_download">Download problem</string>
+    <string name="state_error_download_resume">Download problem (resume-able)</string>
     <string name="text_current_version_header_title">Current version</string>
     <string name="text_last_checked_header_title">Last checked</string>
     <string name="text_update_version_title">Update version</string>

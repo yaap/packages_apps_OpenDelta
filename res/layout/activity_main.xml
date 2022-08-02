@@ -57,15 +57,6 @@
             android:max="1"
             android:progress="0" />
 
-        <ImageButton
-            android:id="@+id/button_stop"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_gravity="center_vertical"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/button_stop"
-            android:onClick="onButtonStopClick"
-            android:src="@android:drawable/ic_menu_close_clear_cancel" />
     </LinearLayout>
 
     <LinearLayout
@@ -94,12 +85,6 @@
             android:gravity="end"
             android:singleLine="true"
             android:textAppearance="@style/OtherText" />
-
-        <Space
-            android:id="@+id/progress_end_margin"
-            android:layout_width="32dp"
-            android:layout_height="wrap_content"
-            android:visibility="gone" />
 
     </LinearLayout>
 
@@ -212,6 +197,30 @@
             android:layout_height="wrap_content"
             android:layout_weight="1" />
 
+        <!-- Download buttons -->
+        <Button
+            android:id="@+id/button_stop"
+            style="@style/ActionPrimaryButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onButtonStopClick"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp"
+            android:visibility="gone"
+            android:text="@string/button_stop_text"/>
+
+        <Button
+            android:id="@+id/button_pause"
+            style="@style/ActionPrimaryButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onButtonPauseClick"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp"
+            android:visibility="gone"
+            android:text="@string/button_pause_text" />
+
+        <!-- Operation buttons -->
         <Button
             android:id="@+id/button_select_file"
             style="@style/ActionPrimaryButton"

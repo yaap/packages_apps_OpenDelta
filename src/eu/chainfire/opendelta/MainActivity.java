@@ -67,7 +67,8 @@ public class MainActivity extends Activity {
     private Button flashNow = null;
     private TextView updateVersion = null;
     private Button buildNow = null;
-    private ImageButton stopNow = null;
+    private Button stopNow = null;
+    private Button pauseNow = null;
     private Button rebootNow = null;
     private TextView currentVersion = null;
     private TextView currentVersionHeader;
@@ -122,6 +123,7 @@ public class MainActivity extends Activity {
         updateVersion = findViewById(R.id.text_update_version);
         buildNow = findViewById(R.id.button_build_delta);
         stopNow = findViewById(R.id.button_stop);
+        pauseNow = findViewById(R.id.button_pause);
         currentVersion = findViewById(R.id.text_current_version);
         currentVersionHeader = findViewById(R.id.text_current_version_header);
         lastChecked = findViewById(R.id.text_last_checked);
@@ -129,7 +131,6 @@ public class MainActivity extends Activity {
         downloadSize = findViewById(R.id.text_download_size);
         downloadSizeHeader = findViewById(R.id.text_download_size_header);
         mProgressPercent = findViewById(R.id.progress_percent);
-        mProgressEndSpace = findViewById(R.id.progress_end_margin);
         mFileFlashButton = findViewById(R.id.button_select_file);
         mUpdateVersionTitle = findViewById(R.id.text_update_version_header);
         mExtraText = findViewById(R.id.extra_text);
@@ -229,7 +230,8 @@ public class MainActivity extends Activity {
             boolean enableCheck = false;
             boolean enableFlash = false;
             boolean enableBuild = false;
-            boolean enableStop = false;
+            boolean enableDownload = false;
+            boolean enableResume = false;
             boolean enableReboot = false;
             boolean deltaUpdatePossible;
             boolean fullUpdatePossible;
@@ -412,18 +414,24 @@ public class MainActivity extends Activity {
                 enableProgress = true;
                 if (UpdateService.STATE_ACTION_AB_FLASH.equals(state)) {
                     disableDataSpeed = true;
+                } else if (UpdateService.STATE_ACTION_DOWNLOADING.equals(state)) {
+                    mPrefs.edit().putInt(UpdateService.PREF_STOP_DOWNLOAD, -1).commit();
+                    disableCheckNow = true;
+                    enableDownload = true;
+                } else if (UpdateService.STATE_ERROR_DOWNLOAD_RESUME.equals(state) ||
+                           UpdateService.STATE_ACTION_DOWNLOADING_PAUSED.equals(state)) {
+                    disableCheckNow = true;
+                    enableDownload = true;
+                    enableResume = true;
                 }
-                if (UpdateService.STATE_ACTION_DOWNLOADING.equals(state)) {
-                    enableStop = true;
-                }
-                current = intent.getLongExtra(UpdateService.EXTRA_CURRENT,
-                        current);
+
+                current = intent.getLongExtra(UpdateService.EXTRA_CURRENT, current);
                 total = intent.getLongExtra(UpdateService.EXTRA_TOTAL, total);
                 progress.setIndeterminate(false);
 
                 long downloadSize = mPrefs.getLong(
                         UpdateService.PREF_DOWNLOAD_SIZE, -1);
-                if(downloadSize == -1) {
+                if (downloadSize == -1) {
                     downloadSizeText = "";
                 } else if (downloadSize == 0) {
                     downloadSizeText = getString(R.string.text_download_size_unknown);
@@ -458,12 +466,10 @@ public class MainActivity extends Activity {
                                 intent.getFloatExtra(UpdateService.EXTRA_PROGRESS, 0));
 
                     if ((ms > 500) && (current > 0) && (total > 0)) {
-                        float kibps = ((float) current / 1024f)
-                                / ((float) ms / 1000f);
-                        if (progressInK)
-                            kibps *= 1024f;
+                        float kibps = ((float) current / 1024f) / ((float) ms / 1000f);
+                        if (progressInK) kibps *= 1024f;
                         int sec = (int) (((((float) total / (float) current) * (float) ms) - ms) / 1000f);
-                        if(disableDataSpeed) {
+                        if (disableDataSpeed) {
                             sub2 = String.format(Locale.ENGLISH,
                                     "%02d:%02d",
                                     sec / 60, sec % 60);
@@ -486,16 +492,18 @@ public class MainActivity extends Activity {
             MainActivity.this.mSub2.setText(sub2);
             MainActivity.this.mProgressPercent.setText(progressPercent);
             MainActivity.this.updateVersion.setText(updateVersion);
-            MainActivity.this.mUpdateVersionTitle
-                .setText(TextUtils.isEmpty(updateVersion) ? "" : (getString(R.string.text_update_version_title) + COLON));
+            MainActivity.this.mUpdateVersionTitle.setText(TextUtils.isEmpty(updateVersion)
+                    ? "" : (getString(R.string.text_update_version_title) + COLON));
             MainActivity.this.currentVersion.setText(config.getFilenameBase());
-            MainActivity.this.currentVersionHeader.setText(String.format("%s%s", getString(R.string.text_current_version_header_title), COLON));
+            MainActivity.this.currentVersionHeader.setText(String.format("%s%s",
+                    getString(R.string.text_current_version_header_title), COLON));
             MainActivity.this.lastChecked.setText(lastCheckedText);
-            MainActivity.this.lastCheckedHeader.setText(String.format("%s%s", getString(R.string.text_last_checked_header_title), COLON));
+            MainActivity.this.lastCheckedHeader.setText(String.format("%s%s",
+                    getString(R.string.text_last_checked_header_title), COLON));
             MainActivity.this.mExtraText.setText(extraText);
             MainActivity.this.downloadSize.setText(downloadSizeText);
-            MainActivity.this.downloadSizeHeader
-                .setText(TextUtils.isEmpty(downloadSizeText) ? "" : (getString(R.string.text_download_size_header_title) + COLON));
+            MainActivity.this.downloadSizeHeader.setText(TextUtils.isEmpty(downloadSizeText)
+                    ? "" : (getString(R.string.text_download_size_header_title) + COLON));
 
             mProgressCurrent = (int) current;
             mProgressMax = (int) total;
@@ -508,14 +516,18 @@ public class MainActivity extends Activity {
             flashNow.setEnabled(mPermOk && enableFlash);
             rebootNow.setEnabled(enableReboot);
             mFileFlashButton.setEnabled(mPermOk && enableCheck);
-
             checkNow.setVisibility(disableCheckNow ? View.GONE : View.VISIBLE);
             flashNow.setVisibility(enableFlash ? View.VISIBLE : View.GONE);
             buildNow.setVisibility(!enableBuild || enableFlash ? View.GONE : View.VISIBLE);
-            stopNow.setVisibility(enableStop ? View.VISIBLE : View.GONE);
             rebootNow.setVisibility(enableReboot ? View.VISIBLE : View.GONE);
             mFileFlashButton.setVisibility(disableCheckNow ? View.GONE : View.VISIBLE);
-            mProgressEndSpace.setVisibility(enableStop ? View.VISIBLE : View.GONE);
+
+            // download buttons
+            final int vis = enableDownload ? View.VISIBLE : View.GONE;
+            stopNow.setVisibility(vis);
+            pauseNow.setVisibility(vis);
+            pauseNow.setText(getString(enableResume ? R.string.button_resume_text 
+                                                    : R.string.button_pause_text));
         }
     };
 
@@ -576,7 +588,17 @@ public class MainActivity extends Activity {
     }
 
     public void onButtonStopClick(View v) {
-        stopDownload();
+        mPrefs.edit().putInt(UpdateService.PREF_STOP_DOWNLOAD,
+                UpdateService.PREF_STOP_DOWNLOAD_STOP).commit();
+    }
+
+    public void onButtonPauseClick(View v) {
+        final boolean isResume = ((Button) v).getText().toString()
+                .equals(getString(R.string.button_resume_text));
+        mPrefs.edit().putInt(UpdateService.PREF_STOP_DOWNLOAD,
+        isResume ? UpdateService.PREF_STOP_DOWNLOAD_RESUME
+                 : UpdateService.PREF_STOP_DOWNLOAD_PAUSE).commit();
+        if (isResume) UpdateService.startBuild(this);
     }
 
     private final Runnable flashRecoveryWarning = new Runnable() {
@@ -647,14 +669,6 @@ public class MainActivity extends Activity {
         UpdateService.startFlash(MainActivity.this);
     };
 
-    private void stopDownload() {
-        mPrefs.edit()
-                .putBoolean(
-                        UpdateService.PREF_STOP_DOWNLOAD,
-                        !mPrefs.getBoolean(UpdateService.PREF_STOP_DOWNLOAD,
-                                false)).commit();
-    }
-
     private void requestPermissions() {
         if (!Environment.isExternalStorageManager()) {
             // should never reach here if it's a system priv-app
@@ -671,9 +685,10 @@ public class MainActivity extends Activity {
     }
 
     private void handleProgressBar() {
-        progress.setProgress(mProgressCurrent);
-        progress.setMax(mProgressMax);
         progress.setVisibility(mProgressEnabled ? View.VISIBLE : View.INVISIBLE);
+        if (!mProgressEnabled) return;
+        progress.setMax(mProgressMax);
+        progress.setProgress(mProgressCurrent);
     }
 
     private void updateInfoVisibility() {
