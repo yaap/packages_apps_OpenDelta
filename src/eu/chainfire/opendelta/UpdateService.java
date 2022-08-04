@@ -177,6 +177,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     static final String ACTION_CLEAR_INSTALL_RUNNING =
             "eu.chainfire.opendelta.action.ACTION_CLEAR_INSTALL_RUNNING";
     private static final String ACTION_FLASH_FILE = "eu.chainfire.opendelta.action.FLASH_FILE";
+    private static final String ACTION_DOWNLOAD_STOP = "eu.chainfire.opendelta.action.DOWNLOAD_STOP";
+    private static final String ACTION_DOWNLOAD_PAUSE = "eu.chainfire.opendelta.action.DOWNLOAD_PAUSE";
 
     private static final String NOTIFICATION_CHANNEL_ID = "eu.chainfire.opendelta.notification";
     public static final int NOTIFICATION_BUSY = 1;
@@ -399,6 +401,13 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     String flashFilename = intent.getStringExtra(EXTRA_FILENAME);
                     setFlashFilename(flashFilename);
                 }
+            } else if (ACTION_DOWNLOAD_STOP.equals(intent.getAction())) {
+                prefs.edit().putInt(PREF_STOP_DOWNLOAD, PREF_STOP_DOWNLOAD_STOP).commit();
+            } else if (ACTION_DOWNLOAD_PAUSE.equals(intent.getAction())) {
+                final boolean isPaused = state.equals(STATE_ACTION_DOWNLOADING_PAUSED) ||
+                                         state.equals(STATE_ERROR_DOWNLOAD_RESUME);
+                prefs.edit().putInt(PREF_STOP_DOWNLOAD,
+                        isPaused ? PREF_STOP_DOWNLOAD_RESUME : PREF_STOP_DOWNLOAD_PAUSE).commit();
             } else {
                 autoState(false, PREF_AUTO_DOWNLOAD_CHECK, false);
             }
@@ -476,19 +485,24 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 break;
             case PREF_STOP_DOWNLOAD:
                 stopDownload = sharedPreferences.getInt(PREF_STOP_DOWNLOAD, -1);
-                // TODO: Add support to pause / resume from the notification
                 if (notificationManager != null)
-                    notificationManager.cancel(NOTIFICATION_BUSY);
-                // if we have a paused download in progress we need to manually stop it
-                if (stopDownload == PREF_STOP_DOWNLOAD_STOP &&
-                    (state == STATE_ERROR_DOWNLOAD_RESUME ||
-                     state == STATE_ACTION_DOWNLOADING_PAUSED)) {
-                    // to do so we just need to resume remove the file and update state
-                    File[] files = new File(config.getPathBase()).listFiles();
-                    for (File file : files)
-                        if (file.isFile() && file.getName().endsWith(".part"))
-                            file.delete();
+                        notificationManager.cancel(NOTIFICATION_BUSY);
+                if (stopDownload == PREF_STOP_DOWNLOAD_STOP) {
+                    // if we have a paused download in progress we need to manually stop it
+                    if (state.equals(STATE_ERROR_DOWNLOAD_RESUME) ||
+                        state.equals(STATE_ACTION_DOWNLOADING_PAUSED)) {
+                        // to do so we just need to resume remove the file and update state
+                        File[] files = new File(config.getPathBase()).listFiles();
+                        for (File file : files)
+                            if (file.isFile() && file.getName().endsWith(".part"))
+                                file.delete();
+                        autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
+                    }
+                } else if (stopDownload == PREF_STOP_DOWNLOAD_PAUSE) {
                     autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
+                } else {
+                    // resume
+                    startBuild(this);
                 }
                 break;
             case SettingsActivity.PREF_AUTO_DOWNLOAD:
@@ -549,7 +563,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         }
 
         // let's check if we have a .part file that is still latest
-        stopDownload = -1;
         List<String> latestFullBuildWithUrl = getNewestFullBuild();
         String latestFullBuild;
         // if we don't even find a build on dl no sense to continue
@@ -585,6 +598,10 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 final Long lastTime = prefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
                 final float progress = ((float) current / (float) total) * 100f;
                 updateState(STATE_ACTION_DOWNLOADING_PAUSED, progress, current, total, latestFullBuild, lastTime);
+                // display paused notification with the proper title
+                newDownloadNotification(true, getString(R.string.state_action_downloading_paused));
+                mDownloadNotificationBuilder.setProgress(100, Math.round(progress), false);
+                notificationManager.notify(NOTIFICATION_BUSY, mDownloadNotificationBuilder.build());
                 return;
             }
         }
@@ -681,6 +698,37 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 .setContentIntent(getNotificationIntent(false))
                 .setContentText(filename);
         setFlashNotificationProgress(0, 0);
+    }
+
+    private void newDownloadNotification(boolean isPaused, String title) {
+        List<Notification.Action> actions = new ArrayList<>();
+        // actions
+        Intent stopIntent = new Intent(this, UpdateService.class);
+        stopIntent.setAction(ACTION_DOWNLOAD_STOP);
+        PendingIntent sPI = PendingIntent.getService(this, 0, stopIntent, PendingIntent.FLAG_MUTABLE);
+        Intent pauseIntent = new Intent(this, UpdateService.class);
+        pauseIntent.setAction(ACTION_DOWNLOAD_PAUSE);
+        PendingIntent cPI = PendingIntent.getService(this, 0, pauseIntent, PendingIntent.FLAG_MUTABLE);
+        actions.add(new Notification.Action.Builder(
+            0,
+            getResources().getText(R.string.button_stop_text, ""),
+            sPI
+        ).build());
+        actions.add(new Notification.Action.Builder(
+            0,
+            getResources().getText(isPaused
+                    ? R.string.button_resume_text
+                    : R.string.button_pause_text),
+            cPI
+        ).build());
+        mDownloadNotificationBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
+        mDownloadNotificationBuilder.setSmallIcon(R.drawable.stat_notify_update)
+                .setContentTitle(title)
+                .setShowWhen(false)
+                .setOngoing(true)
+                .setContentIntent(getNotificationIntent(false));
+        for (Notification.Action action : actions)
+            mDownloadNotificationBuilder.addAction(action);
     }
 
     private void startABRebootNotification(String filename) {
@@ -1586,6 +1634,15 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                                                 : STATE_ERROR_DOWNLOAD_RESUME;
                 Logger.d("download " + (isPause ? "paused" : "error"));
                 updateState(newState, progress, current, total, imageName, lastTime);
+                // display paused notification with the proper title
+                if (notificationManager != null)
+                    notificationManager.cancel(NOTIFICATION_BUSY);
+                String title = getString(isPause
+                        ? R.string.state_action_downloading_paused
+                        : R.string.state_error_download_resume);
+                newDownloadNotification(true, title);
+                mDownloadNotificationBuilder.setProgress(100, Math.round(progress), false);
+                notificationManager.notify(NOTIFICATION_BUSY, mDownloadNotificationBuilder.build());
             }
         }
     }
@@ -2130,16 +2187,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         wakeLock.acquire();
         wifiLock.acquire();
 
-        String notificationText = getString(R.string.state_action_checking);
-        if (checkOnly > PREF_AUTO_DOWNLOAD_CHECK) {
-            notificationText = getString(R.string.state_action_downloading);
-        }
-        mDownloadNotificationBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
-        mDownloadNotificationBuilder.setSmallIcon(R.drawable.stat_notify_update)
-                .setContentTitle(notificationText)
-                .setShowWhen(false)
-                .setOngoing(true)
-                .setContentIntent(getNotificationIntent(false));
+        newDownloadNotification(false,
+                getString(R.string.state_action_downloading));
 
         handler.post(() -> {
             boolean downloadFullBuild = false;

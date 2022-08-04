@@ -90,6 +90,7 @@ public class MainActivity extends Activity {
     private TextView mExtraText;
     private TextView mInfoText;
     private ImageView mInfoImage;
+    private boolean mFileSelection;
 
     private static final int PERMISSIONS_REQUEST_MANAGE_EXTERNAL_STORAGE = 0;
     private static final int ACTIVITY_SELECT_FLASH_FILE = 1;
@@ -548,6 +549,8 @@ public class MainActivity extends Activity {
         super.onResume();
         handleProgressBar();
         updateInfoVisibility();
+        if (!mFileSelection) UpdateService.startCheck(this);
+        else mFileSelection = false;
     }
 
     @Override
@@ -598,7 +601,6 @@ public class MainActivity extends Activity {
         mPrefs.edit().putInt(UpdateService.PREF_STOP_DOWNLOAD,
         isResume ? UpdateService.PREF_STOP_DOWNLOAD_RESUME
                  : UpdateService.PREF_STOP_DOWNLOAD_PAUSE).commit();
-        if (isResume) UpdateService.startBuild(this);
     }
 
     private final Runnable flashRecoveryWarning = new Runnable() {
@@ -768,6 +770,7 @@ public class MainActivity extends Activity {
     }
 
     public void onButtonSelectFileClick(View v) {
+        mFileSelection = true;
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.setType("application/zip");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
