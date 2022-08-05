@@ -263,8 +263,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             if (now >= mLastProgressTime[0] + 16L) {
                 long ms = SystemClock.elapsedRealtime() - mLastProgressTime[1];
                 int sec = (int) (((((float) total / (float) current) * (float) ms) - ms) / 1000f);
-                updateState(STATE_ACTION_AB_FLASH, progress, current, total, this.status,
-                        ms);
+                updateState(STATE_ACTION_AB_FLASH, progress, current, total, this.status, ms);
                 setFlashNotificationProgress((int) progress, sec);
                 mLastProgressTime[0] = now;
             }
@@ -396,6 +395,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
             } else if (ACTION_CLEAR_INSTALL_RUNNING.equals(intent.getAction())) {
                 ABUpdate.setInstallingUpdate(false, this);
+                updateRunning = false;
             } else if (ACTION_FLASH_FILE.equals(intent.getAction())) {
                 if (intent.hasExtra(EXTRA_FILENAME)) {
                     String flashFilename = intent.getStringExtra(EXTRA_FILENAME);
@@ -537,7 +537,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 mLastProgressTime = new long[] { 0, SystemClock.elapsedRealtime() };
             mProgressListener.setStatus(_filename);
             updateState(STATE_ACTION_AB_FLASH, 0f, 0L, 100L, _filename, null);
-            if (!ABUpdate.resume(flashFilename, mProgressListener, this)) {
+            updateRunning = ABUpdate.resume(flashFilename, mProgressListener, this);
+            if (!updateRunning) {
                 stopNotification();
                 updateState(STATE_ERROR_AB_FLASH);
             } else {
@@ -1026,6 +1027,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
             long recv = offset;
             if ((len > 0) && (len < 4L * 1024L * 1024L * 1024L)) {
+                updateRunning = true;
                 byte[] buffer = new byte[262144];
 
                 is = urlConnection.getInputStream();
@@ -1060,6 +1062,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 Logger.d("SUM.length=" + SUM.length() +
                         " matchSUM.length=" + matchSUM.length());
                 if (!sumCheck) {
+                    updateRunning = false;
                     Logger.i("SUM check failed for " + url);
                     // if sum does not match when done, get rid
                     f.delete();
@@ -1071,6 +1074,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         } catch (Exception e) {
             // Download failed for any number of reasons, timeouts, connection
             // drops, etc. Just log it in debugging mode.
+            updateRunning = false;
             Logger.ex(e);
             prefs.edit().putLong(PREF_LAST_DOWNLOAD_TIME,
                     SystemClock.elapsedRealtime() - lastTime).apply();
@@ -1079,6 +1083,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             try { if (os != null) os.close(); } catch (IOException ignored) {}
             return false;
         } finally {
+            updateRunning = false;
             notificationManager.cancel(NOTIFICATION_BUSY);
             if (urlConnection != null) urlConnection.disconnect();
             try { if (is != null) is.close(); } catch (IOException ignored) {}
@@ -1364,6 +1369,14 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         if ((networkState == null) || (batteryState == null)
                 || (screenState == null))
             return false;
+
+        // Check if a previous update was done already
+        if (prefs.getBoolean(PREF_PENDING_REBOOT, false) ||
+            ABUpdate.isInstallingUpdate(this)) {
+            final String lastFilename = prefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
+            ABUpdate.pokeStatus(lastFilename, this);
+            return false;
+        }
 
         Logger.d("checkForUpdates checkOnly = " + checkOnly + " updateRunning = " + updateRunning + " userInitiated = " + userInitiated +
                 " networkState.getState() = " + networkState.getState() + " batteryState.getState() = " + batteryState.getState() +
@@ -1815,6 +1828,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
     protected void onUpdateCompleted(int status, int errorCode) {
         stopNotification();
+        updateRunning = false;
         if (status == UpdateEngine.ErrorCodeConstants.SUCCESS) {
             prefs.edit().putBoolean(PREF_PENDING_REBOOT, true).commit();
             String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, null);
@@ -1885,6 +1899,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             flashFilename = handleUpdateCleanup();
         } catch (Exception ex) {
             updateState(STATE_ERROR_AB_FLASH);
+            updateRunning = false;
             Logger.ex(ex);
             return;
         }
@@ -1907,16 +1922,20 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             if (isABUpdate) {
                 mLastProgressTime = new long[] { 0, SystemClock.elapsedRealtime() };
                 mProgressListener.setStatus(_filename);
+                updateRunning = true;
                 if (!ABUpdate.start(flashFilename, mProgressListener, this)) {
                     stopNotification();
                     updateState(STATE_ERROR_AB_FLASH);
+                    updateRunning = false;
                 }
             } else {
                 stopNotification();
                 updateState(STATE_ERROR_AB_FLASH);
+                updateRunning = false;
             }
         } catch (Exception ex) {
             Logger.ex(ex);
+            updateRunning = false;
         }
     }
 
