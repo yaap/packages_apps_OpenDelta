@@ -528,6 +528,18 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             return;
         }
 
+        // Check if a previous update was done already
+        if (prefs.getBoolean(PREF_PENDING_REBOOT, false) ||
+            this.state.equals(STATE_ACTION_AB_FINISHED)) {
+            updateState(STATE_ACTION_AB_FINISHED);
+            return;
+        }
+        if (ABUpdate.isInstallingUpdate(this)) {
+            final String lastFilename = prefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
+            ABUpdate.pokeStatus(lastFilename, this);
+            return;
+        }
+
         // Check if we're currently installing an A/B update
         if (Config.isABDevice() && ABUpdate.isInstallingUpdate(this)) {
             // resume listening to progress
@@ -553,14 +565,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             if (!(new File(filename)).exists()) {
                 filename = null;
             }
-        }
-
-        // Check if a previous update was done already
-        if (prefs.getBoolean(PREF_PENDING_REBOOT, false)) {
-            final String lastFilename = prefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
-            prefs.edit().putBoolean(PREF_PENDING_REBOOT, false).apply();
-            ABUpdate.pokeStatus(lastFilename, this);
-            return;
         }
 
         // let's check if we have a .part file that is still latest
@@ -1371,8 +1375,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             return false;
 
         // Check if a previous update was done already
-        if (prefs.getBoolean(PREF_PENDING_REBOOT, false) ||
-            ABUpdate.isInstallingUpdate(this)) {
+        if (this.state.equals(STATE_ACTION_AB_FINISHED)) return false;
+        if (prefs.getBoolean(PREF_PENDING_REBOOT, false)) {
+            updateState(STATE_ACTION_AB_FINISHED);
+            return false;
+        }
+        if (ABUpdate.isInstallingUpdate(this)) {
             final String lastFilename = prefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
             ABUpdate.pokeStatus(lastFilename, this);
             return false;
@@ -1827,6 +1835,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     }
 
     protected void onUpdateCompleted(int status, int errorCode) {
+        Logger.d("onUpdateCompleted status = " + status);
         stopNotification();
         updateRunning = false;
         if (status == UpdateEngine.ErrorCodeConstants.SUCCESS) {
