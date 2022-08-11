@@ -226,33 +226,33 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     public static final String PREF_AUTO_DOWNLOAD_CHECK_STRING = String.valueOf(PREF_AUTO_DOWNLOAD_CHECK);
     public static final String PREF_AUTO_DOWNLOAD_DISABLED_STRING = String.valueOf(PREF_AUTO_DOWNLOAD_DISABLED);
 
-    private Config config;
+    private Config mConfig;
 
-    private HandlerThread handlerThread;
-    private Handler handler;
+    private HandlerThread mHandlerThread;
+    private Handler mHandler;
 
-    private String state = STATE_ACTION_NONE;
+    private String mState = STATE_ACTION_NONE;
 
-    private NetworkState networkState = null;
-    private BatteryState batteryState = null;
-    private ScreenState screenState = null;
+    private NetworkState mNetworkState;
+    private BatteryState mBatteryState;
+    private ScreenState mScreenState;
 
-    private Scheduler scheduler = null;
+    private Scheduler mScheduler;
 
-    private PowerManager.WakeLock wakeLock = null;
-    private WifiManager.WifiLock wifiLock = null;
+    private PowerManager.WakeLock mWakeLock;
+    private WifiManager.WifiLock mWifiLock;
 
-    private NotificationManager notificationManager = null;
-    private boolean updateRunning;
-    private int stopDownload = -1;
-    private int failedUpdateCount;
-    private SharedPreferences prefs = null;
+    private NotificationManager mNotificationManager;
+    private boolean mIsUpdateRunning;
+    private int mStopDownload = -1;
+    private int mFailedUpdateCount;
+    private SharedPreferences mPrefs;
     private Notification.Builder mFlashNotificationBuilder;
     private Notification.Builder mDownloadNotificationBuilder;
 
     // url override
-    private boolean isUrlOverride = false;
-    private String sumUrlOvr = null;
+    private boolean mIsUrlOverride;
+    private String mSumUrlOvr;
 
     private long[] mLastProgressTime;
     private final DeltaInfo.ProgressListener mProgressListener = new DeltaInfo.ProgressListener() {
@@ -307,62 +307,62 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     public void onCreate() {
         super.onCreate();
 
-        config = Config.getInstance(this);
+        mConfig = Config.getInstance(this);
 
-        wakeLock = ((PowerManager) getSystemService(POWER_SERVICE))
+        mWakeLock = ((PowerManager) getSystemService(POWER_SERVICE))
                 .newWakeLock(
-                        config.getKeepScreenOn() ? PowerManager.SCREEN_DIM_WAKE_LOCK
+                        mConfig.getKeepScreenOn() ? PowerManager.SCREEN_DIM_WAKE_LOCK
                                 | PowerManager.ACQUIRE_CAUSES_WAKEUP
                                 : PowerManager.PARTIAL_WAKE_LOCK,
                         "OpenDelta:WakeLock");
-        wifiLock = ((WifiManager) getSystemService(WIFI_SERVICE))
+        mWifiLock = ((WifiManager) getSystemService(WIFI_SERVICE))
                 .createWifiLock(WifiManager.WIFI_MODE_FULL,
                         "OpenDelta:WifiLock");
 
-        handlerThread = new HandlerThread("OpenDelta Service Thread");
-        handlerThread.start();
-        handler = new Handler(handlerThread.getLooper());
+        mHandlerThread = new HandlerThread("OpenDelta Service Thread");
+        mHandlerThread.start();
+        mHandler = new Handler(mHandlerThread.getLooper());
 
-        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         createNotificationChannel();
 
-        scheduler = new Scheduler(this, this);
+        mScheduler = new Scheduler(this, this);
         int autoDownload = getAutoDownloadValue();
         if (autoDownload != PREF_AUTO_DOWNLOAD_DISABLED) {
-            scheduler.start();
+            mScheduler.start();
         }
-        networkState = new NetworkState();
-        networkState.start(this, this);
+        mNetworkState = new NetworkState();
+        mNetworkState.start(this, this);
 
-        batteryState = new BatteryState();
-        batteryState.start(this, this,
-                Integer.parseInt(prefs.getString(SettingsActivity.PREF_BATTERY_LEVEL, "50")),
-                prefs.getBoolean(SettingsActivity.PREF_CHARGE_ONLY, true));
+        mBatteryState = new BatteryState();
+        mBatteryState.start(this, this,
+                Integer.parseInt(mPrefs.getString(SettingsActivity.PREF_BATTERY_LEVEL, "50")),
+                mPrefs.getBoolean(SettingsActivity.PREF_CHARGE_ONLY, true));
 
-        screenState = new ScreenState();
-        screenState.start(this, this);
+        mScreenState = new ScreenState();
+        mScreenState.start(this, this);
 
         try {
-            stopDownload = prefs.getInt(PREF_STOP_DOWNLOAD, -1);
+            mStopDownload = mPrefs.getInt(PREF_STOP_DOWNLOAD, -1);
         } catch (Exception e) {
             // we probably failed converting the old bool to int
             // done for migration purposes
-            prefs.edit().remove(PREF_STOP_DOWNLOAD).commit();
-            prefs.edit().putInt(PREF_STOP_DOWNLOAD, -1).apply();
-            stopDownload = -1;
+            mPrefs.edit().remove(PREF_STOP_DOWNLOAD).commit();
+            mPrefs.edit().putInt(PREF_STOP_DOWNLOAD, -1).apply();
+            mStopDownload = -1;
         }
 
-        prefs.registerOnSharedPreferenceChangeListener(this);
+        mPrefs.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     public void onDestroy() {
-        prefs.unregisterOnSharedPreferenceChangeListener(this);
-        networkState.stop();
-        batteryState.stop();
-        screenState.stop();
-        handlerThread.quitSafely();
+        mPrefs.unregisterOnSharedPreferenceChangeListener(this);
+        mNetworkState.stop();
+        mBatteryState.stop();
+        mScreenState.stop();
+        mHandlerThread.quitSafely();
 
         super.onDestroy();
     }
@@ -379,15 +379,15 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     else flashUpdate();
                 }
             } else if (ACTION_ALARM.equals(intent.getAction())) {
-                scheduler.alarm(intent.getIntExtra(EXTRA_ALARM_ID, -1));
+                mScheduler.alarm(intent.getIntExtra(EXTRA_ALARM_ID, -1));
             } else if (ACTION_NOTIFICATION_DELETED.equals(intent.getAction())) {
-                prefs.edit().putLong(PREF_LAST_SNOOZE_TIME_NAME,
+                mPrefs.edit().putLong(PREF_LAST_SNOOZE_TIME_NAME,
                         System.currentTimeMillis()).apply();
-                String lastBuild = prefs.getString(PREF_LATEST_FULL_NAME, null);
+                String lastBuild = mPrefs.getString(PREF_LATEST_FULL_NAME, null);
                 if (lastBuild != null) {
                     // only snooze until no newer build is available
                     Logger.i("Snoozing notification for " + lastBuild);
-                    prefs.edit().putString(PREF_SNOOZE_UPDATE_NAME, lastBuild).apply();
+                    mPrefs.edit().putString(PREF_SNOOZE_UPDATE_NAME, lastBuild).apply();
                 }
             } else if (ACTION_BUILD.equals(intent.getAction())) {
                 if (checkPermissions())
@@ -396,18 +396,18 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
             } else if (ACTION_CLEAR_INSTALL_RUNNING.equals(intent.getAction())) {
                 ABUpdate.setInstallingUpdate(false, this);
-                updateRunning = false;
+                mIsUpdateRunning = false;
             } else if (ACTION_FLASH_FILE.equals(intent.getAction())) {
                 if (intent.hasExtra(EXTRA_FILENAME)) {
                     String flashFilename = intent.getStringExtra(EXTRA_FILENAME);
                     setFlashFilename(flashFilename);
                 }
             } else if (ACTION_DOWNLOAD_STOP.equals(intent.getAction())) {
-                prefs.edit().putInt(PREF_STOP_DOWNLOAD, PREF_STOP_DOWNLOAD_STOP).commit();
+                mPrefs.edit().putInt(PREF_STOP_DOWNLOAD, PREF_STOP_DOWNLOAD_STOP).commit();
             } else if (ACTION_DOWNLOAD_PAUSE.equals(intent.getAction())) {
-                final boolean isPaused = state.equals(STATE_ACTION_DOWNLOADING_PAUSED) ||
-                                         state.equals(STATE_ERROR_DOWNLOAD_RESUME);
-                prefs.edit().putInt(PREF_STOP_DOWNLOAD,
+                final boolean isPaused = mState.equals(STATE_ACTION_DOWNLOADING_PAUSED) ||
+                                         mState.equals(STATE_ERROR_DOWNLOAD_RESUME);
+                mPrefs.edit().putInt(PREF_STOP_DOWNLOAD,
                         isPaused ? PREF_STOP_DOWNLOAD_RESUME : PREF_STOP_DOWNLOAD_PAUSE).commit();
             } else {
                 autoState(false, PREF_AUTO_DOWNLOAD_CHECK, false);
@@ -427,7 +427,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
     private synchronized void updateState(String state, Float progress,
             Long current, Long total, String filename, Long ms, int errorCode) {
-        this.state = state;
+        mState = state;
 
         Intent i = new Intent(BROADCAST_INTENT);
         i.putExtra(EXTRA_STATE, state);
@@ -459,13 +459,13 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     @Override
     public void onScreenState(boolean state) {
         Logger.d("screen state --> %d", state ? 1 : 0);
-        scheduler.onScreenState(state);
+        mScheduler.onScreenState(state);
     }
 
     @Override
     public boolean onWantUpdateCheck() {
-        if (isProgressState(state)) {
-            Logger.i("Blocked scheduler requests while running in state " + state);
+        if (isProgressState(mState)) {
+            Logger.i("Blocked scheduler requests while running in state " + mState);
             return false;
         }
         Logger.i("Scheduler requests check for updates");
@@ -481,25 +481,25 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         Logger.d("onSharedPreferenceChanged " + key);
         switch (key) {
             case PREF_AUTO_UPDATE_METERED_NETWORKS:
-                networkState.setMeteredAllowed(sharedPreferences.getBoolean(
+                mNetworkState.setMeteredAllowed(sharedPreferences.getBoolean(
                         PREF_AUTO_UPDATE_METERED_NETWORKS, false));
                 break;
             case PREF_STOP_DOWNLOAD:
-                stopDownload = sharedPreferences.getInt(PREF_STOP_DOWNLOAD, -1);
-                if (notificationManager != null)
-                        notificationManager.cancel(NOTIFICATION_BUSY);
-                if (stopDownload == PREF_STOP_DOWNLOAD_STOP) {
+                mStopDownload = sharedPreferences.getInt(PREF_STOP_DOWNLOAD, -1);
+                if (mNotificationManager != null)
+                        mNotificationManager.cancel(NOTIFICATION_BUSY);
+                if (mStopDownload == PREF_STOP_DOWNLOAD_STOP) {
                     // if we have a paused download in progress we need to manually stop it
-                    if (state.equals(STATE_ERROR_DOWNLOAD_RESUME) ||
-                        state.equals(STATE_ACTION_DOWNLOADING_PAUSED)) {
+                    if (mState.equals(STATE_ERROR_DOWNLOAD_RESUME) ||
+                        mState.equals(STATE_ACTION_DOWNLOADING_PAUSED)) {
                         // to do so we just need to resume remove the file and update state
-                        File[] files = new File(config.getPathBase()).listFiles();
+                        File[] files = new File(mConfig.getPathBase()).listFiles();
                         for (File file : files)
                             if (file.isFile() && file.getName().endsWith(".part"))
                                 file.delete();
                         autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
                     }
-                } else if (stopDownload == PREF_STOP_DOWNLOAD_PAUSE) {
+                } else if (mStopDownload == PREF_STOP_DOWNLOAD_PAUSE) {
                     autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
                 } else {
                     // resume
@@ -509,34 +509,34 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             case SettingsActivity.PREF_AUTO_DOWNLOAD:
                 int autoDownload = getAutoDownloadValue();
                 if (autoDownload == PREF_AUTO_DOWNLOAD_DISABLED)
-                    scheduler.stop();
+                    mScheduler.stop();
                 else
-                    scheduler.start();
+                    mScheduler.start();
                 break;
             default:
                 break;
         }
-        if (batteryState != null)
-            batteryState.onSharedPreferenceChanged(sharedPreferences, key);
-        if (scheduler != null)
-            scheduler.onSharedPreferenceChanged(sharedPreferences, key);
+        if (mBatteryState != null)
+            mBatteryState.onSharedPreferenceChanged(sharedPreferences, key);
+        if (mScheduler != null)
+            mScheduler.onSharedPreferenceChanged(sharedPreferences, key);
     }
 
     private void autoState(boolean userInitiated, int checkOnly, boolean notify) {
-        Logger.d("autoState state = " + this.state + " userInitiated = " + userInitiated + " checkOnly = " + checkOnly);
+        Logger.d("autoState state = " + mState + " userInitiated = " + userInitiated + " checkOnly = " + checkOnly);
 
-        if (isErrorState(this.state)) {
+        if (isErrorState(mState)) {
             return;
         }
 
         // Check if a previous update was done already
-        if (prefs.getBoolean(PREF_PENDING_REBOOT, false) ||
-            this.state.equals(STATE_ACTION_AB_FINISHED)) {
+        if (mPrefs.getBoolean(PREF_PENDING_REBOOT, false) ||
+            mState.equals(STATE_ACTION_AB_FINISHED)) {
             updateState(STATE_ACTION_AB_FINISHED);
             return;
         }
         if (ABUpdate.isInstallingUpdate(this)) {
-            final String lastFilename = prefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
+            final String lastFilename = mPrefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
             ABUpdate.pokeStatus(lastFilename, this);
             return;
         }
@@ -544,14 +544,14 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         // Check if we're currently installing an A/B update
         if (Config.isABDevice() && ABUpdate.isInstallingUpdate(this)) {
             // resume listening to progress
-            final String flashFilename = prefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
+            final String flashFilename = mPrefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
             final String _filename = new File(flashFilename).getName();
             if (mLastProgressTime == null)
                 mLastProgressTime = new long[] { 0, SystemClock.elapsedRealtime() };
             mProgressListener.setStatus(_filename);
             updateState(STATE_ACTION_AB_FLASH, 0f, 0L, 100L, _filename, null);
-            updateRunning = ABUpdate.resume(flashFilename, mProgressListener, this);
-            if (!updateRunning) {
+            mIsUpdateRunning = ABUpdate.resume(flashFilename, mProgressListener, this);
+            if (!mIsUpdateRunning) {
                 stopNotification();
                 updateState(STATE_ERROR_AB_FLASH);
             } else {
@@ -560,7 +560,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             return;
         }
 
-        String filename = prefs.getString(PREF_READY_FILENAME_NAME, null);
+        String filename = mPrefs.getString(PREF_READY_FILENAME_NAME, null);
 
         if (filename != null) {
             if (!(new File(filename)).exists()) {
@@ -575,7 +575,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         if (latestFullBuildWithUrl != null && latestFullBuildWithUrl.size() != 0) {
             latestFullBuild = latestFullBuildWithUrl.get(0);
             File found = null;
-            File[] files = new File(config.getPathBase()).listFiles();
+            File[] files = new File(mConfig.getPathBase()).listFiles();
             for (File file : files) {
                 String currName = file.getName();
                 if (file.isFile() && currName.endsWith(".part")) {
@@ -587,12 +587,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             }
             if (found != null) {
                 // prefer the preference, if it's reset - get from server
-                Long total = prefs.getLong(PREF_DOWNLOAD_SIZE, -1);
+                Long total = mPrefs.getLong(PREF_DOWNLOAD_SIZE, -1);
                 if (total == -1) {
                     String latestFullFetch;
                     if (latestFullBuildWithUrl.size() < 3) {
-                        latestFullFetch = config.getUrlBaseFull() +
-                                latestFullBuild + config.getUrlSuffix();
+                        latestFullFetch = mConfig.getUrlBaseFull() +
+                                latestFullBuild + mConfig.getUrlSuffix();
                     } else {
                         latestFullFetch = latestFullBuildWithUrl.get(1);
                     }
@@ -601,13 +601,13 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     else total = 1500000000L; // default to 1.5 GB
                 }
                 final Long current = found.length();
-                final Long lastTime = prefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
+                final Long lastTime = mPrefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
                 final float progress = ((float) current / (float) total) * 100f;
                 updateState(STATE_ACTION_DOWNLOADING_PAUSED, progress, current, total, latestFullBuild, lastTime);
                 // display paused notification with the proper title
                 newDownloadNotification(true, getString(R.string.state_action_downloading_paused));
                 mDownloadNotificationBuilder.setProgress(100, Math.round(progress), false);
-                notificationManager.notify(NOTIFICATION_BUSY, mDownloadNotificationBuilder.build());
+                mNotificationManager.notify(NOTIFICATION_BUSY, mDownloadNotificationBuilder.build());
                 return;
             }
         }
@@ -619,12 +619,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             if (!updateAvailable()) {
                 Logger.d("System up to date");
                 updateState(STATE_ACTION_NONE, null, null, null, null,
-                        prefs.getLong(PREF_LAST_CHECK_TIME_NAME,
+                        mPrefs.getLong(PREF_LAST_CHECK_TIME_NAME,
                                 PREF_LAST_CHECK_TIME_DEFAULT));
             } else {
                 Logger.d("Update available");
                 updateState(STATE_ACTION_BUILD, null, null, null, null,
-                        prefs.getLong(PREF_LAST_CHECK_TIME_NAME,
+                        mPrefs.getLong(PREF_LAST_CHECK_TIME_NAME,
                                 PREF_LAST_CHECK_TIME_DEFAULT));
                 if (!userInitiated && notify) {
                     if (!isSnoozeNotification()) {
@@ -640,12 +640,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         if (filename == null) {
             Logger.d("System up to date");
             updateState(STATE_ACTION_NONE, null, null, null, null,
-                    prefs.getLong(PREF_LAST_CHECK_TIME_NAME,
+                    mPrefs.getLong(PREF_LAST_CHECK_TIME_NAME,
                             PREF_LAST_CHECK_TIME_DEFAULT));
         } else {
             Logger.d("Update found: %s", filename);
             updateState(STATE_ACTION_READY, null, null, null, (new File(
-                    filename)).getName(), prefs.getLong(
+                    filename)).getName(), mPrefs.getLong(
                             PREF_LAST_CHECK_TIME_NAME, PREF_LAST_CHECK_TIME_DEFAULT));
 
             if (!userInitiated && notify) {
@@ -671,11 +671,11 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     }
 
     private void startNotification() {
-        final String latestFull = prefs.getString(PREF_LATEST_FULL_NAME, null);
+        final String latestFull = mPrefs.getString(PREF_LATEST_FULL_NAME, null);
         if (latestFull == null) {
             return;
         }
-        String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, null);
+        String flashFilename = mPrefs.getString(PREF_READY_FILENAME_NAME, null);
         final boolean readyToFlash = flashFilename != null;
         if (readyToFlash) {
             flashFilename = new File(flashFilename).getName();
@@ -684,7 +684,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
         String notifyFileName = readyToFlash ? flashFilename : latestFull.substring(0, latestFull.lastIndexOf('.'));
 
-        notificationManager.notify(
+        mNotificationManager.notify(
                 NOTIFICATION_UPDATE,
                 (new Notification.Builder(this, NOTIFICATION_CHANNEL_ID))
                 .setSmallIcon(R.drawable.stat_notify_update)
@@ -742,7 +742,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         flashFilename = new File(flashFilename).getName();
         flashFilename.substring(0, flashFilename.lastIndexOf('.'));
 
-        notificationManager.notify(
+        mNotificationManager.notify(
                 NOTIFICATION_UPDATE,
                 (new Notification.Builder(this, NOTIFICATION_CHANNEL_ID))
                 .setSmallIcon(R.drawable.stat_notify_update)
@@ -754,20 +754,20 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     }
 
     private void stopNotification() {
-        notificationManager.cancel(NOTIFICATION_UPDATE);
+        mNotificationManager.cancel(NOTIFICATION_UPDATE);
     }
 
     private void startErrorNotification() {
         String errorStateString = null;
         try {
             errorStateString = getString(getResources().getIdentifier(
-                    "state_" + state, "string", getPackageName()));
+                    "state_" + mState, "string", getPackageName()));
         } catch (Exception e) {
             // String for this state could not be found (displays empty string)
             Logger.ex(e);
         }
         if (errorStateString != null) {
-            notificationManager.notify(
+            mNotificationManager.notify(
                     NOTIFICATION_ERROR,
                     (new Notification.Builder(this, NOTIFICATION_CHANNEL_ID))
                     .setSmallIcon(R.drawable.stat_notify_error)
@@ -779,7 +779,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     }
 
     private void stopErrorNotification() {
-        notificationManager.cancel(NOTIFICATION_ERROR);
+        mNotificationManager.cancel(NOTIFICATION_ERROR);
     }
 
     private HttpsURLConnection setupHttpsRequest(String urlStr) {
@@ -914,7 +914,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 try (FileOutputStream os = new FileOutputStream(f, false)) {
                     int r;
                     while ((r = is.read(buffer)) > 0) {
-                        if (stopDownload >= 0) {
+                        if (mStopDownload >= 0) {
                             return false;
                         }
                         os.write(buffer, 0, r);
@@ -987,7 +987,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             if (urlConnection == null) return false;
 
             len = urlConnection.getContentLength();
-            prefs.edit().putLong(PREF_DOWNLOAD_SIZE, len).apply();
+            mPrefs.edit().putLong(PREF_DOWNLOAD_SIZE, len).apply();
             if (offset > 0 && offset < len) {
                 urlConnection.disconnect();
                 urlConnection = setupHttpsRequest(url, offset);
@@ -997,7 +997,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
             updateState(STATE_ACTION_DOWNLOADING, 0f, 0L, len, userFN, null);
 
-            long freeSpace = (new StatFs(config.getPathBase()))
+            long freeSpace = (new StatFs(mConfig.getPathBase()))
                     .getAvailableBytes();
             if (freeSpace < len - offset) {
                 updateState(STATE_ERROR_DISK_SPACE, null, freeSpace, len, null,
@@ -1007,7 +1007,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             }
 
             if (offset > 0)
-                lastTime -= prefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
+                lastTime -= mPrefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
             final long[] last = new long[] { 0, len, 0, lastTime };
             DeltaInfo.ProgressListener progressListener = new DeltaInfo.ProgressListener() {
                 @Override
@@ -1032,14 +1032,14 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
             long recv = offset;
             if ((len > 0) && (len < 4L * 1024L * 1024L * 1024L)) {
-                updateRunning = true;
+                mIsUpdateRunning = true;
                 byte[] buffer = new byte[262144];
 
                 is = urlConnection.getInputStream();
                 os = new FileOutputStream(f, offset > 0);
                 int r;
                 while ((r = is.read(buffer)) > 0) {
-                    if (stopDownload >= 0) {
+                    if (mStopDownload >= 0) {
                         return false;
                     }
                     os.write(buffer, 0, r);
@@ -1067,7 +1067,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 Logger.d("SUM.length=" + SUM.length() +
                         " matchSUM.length=" + matchSUM.length());
                 if (!sumCheck) {
-                    updateRunning = false;
+                    mIsUpdateRunning = false;
                     Logger.i("SUM check failed for " + url);
                     // if sum does not match when done, get rid
                     f.delete();
@@ -1079,17 +1079,17 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         } catch (Exception e) {
             // Download failed for any number of reasons, timeouts, connection
             // drops, etc. Just log it in debugging mode.
-            updateRunning = false;
+            mIsUpdateRunning = false;
             Logger.ex(e);
-            prefs.edit().putLong(PREF_LAST_DOWNLOAD_TIME,
+            mPrefs.edit().putLong(PREF_LAST_DOWNLOAD_TIME,
                     SystemClock.elapsedRealtime() - lastTime).apply();
             if (urlConnection != null) urlConnection.disconnect();
             try { if (is != null) is.close(); } catch (IOException ignored) {}
             try { if (os != null) os.close(); } catch (IOException ignored) {}
             return false;
         } finally {
-            updateRunning = false;
-            notificationManager.cancel(NOTIFICATION_BUSY);
+            mIsUpdateRunning = false;
+            mNotificationManager.cancel(NOTIFICATION_BUSY);
             if (urlConnection != null) urlConnection.disconnect();
             try { if (is != null) is.close(); } catch (IOException ignored) {}
             try { if (os != null) os.close(); } catch (IOException ignored) {}
@@ -1122,12 +1122,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     private boolean isMatchingImage(String fileName) {
         try {
             Logger.d("Image check for file name: " + fileName);
-            if (fileName.endsWith(".zip") && fileName.contains(config.getDevice())) {
+            if (fileName.endsWith(".zip") && fileName.contains(mConfig.getDevice())) {
                 String[] parts = fileName.split("-");
                 if (parts.length > 1) {
                     Logger.d("isMatchingImage: check " + fileName);
                     String version = parts[1];
-                    Version current = new Version(config.getAndroidVersion());
+                    Version current = new Version(mConfig.getAndroidVersion());
                     Version fileVersion = new Version(version);
                     if (fileVersion.compareTo(current) >= 0) {
                         Logger.d("isMatchingImage: ok " + fileName);
@@ -1144,12 +1144,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     private List<String> getNewestFullBuild() {
         Logger.d("Checking for latest full build");
 
-        String url = config.getUrlBaseJson();
+        String url = mConfig.getUrlBaseJson();
 
         String buildData = downloadUrlMemoryAsString(url);
         if (buildData == null || buildData.length() == 0) {
             updateState(STATE_ERROR_DOWNLOAD, null, null, null, url, null);
-            notificationManager.cancel(NOTIFICATION_BUSY);
+            mNotificationManager.cancel(NOTIFICATION_BUSY);
             return null;
         }
         JSONObject object;
@@ -1196,8 +1196,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     ret.add(urlOverride);
                     if (sumOverride != null) {
                         ret.add(sumOverride);
-                        isUrlOverride = true;
-                        sumUrlOvr = sumOverride;
+                        mIsUrlOverride = true;
+                        mSumUrlOvr = sumOverride;
                     }
                 }
             }
@@ -1206,7 +1206,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         } catch (Exception e) {
             Logger.ex(e);
         }
-        updateState(STATE_ERROR_UNOFFICIAL, null, null, null, config.getVersion(), null);
+        updateState(STATE_ERROR_UNOFFICIAL, null, null, null, mConfig.getVersion(), null);
         return null;
     }
 
@@ -1243,9 +1243,9 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             DeltaInfo.FileBase fileBase, DeltaInfo.FileSizeSHA256 match,
             DeltaInfo.ProgressListener progressListener, boolean force) {
         if (fileBase.getTag() == null) {
-            if (force || networkState.getState()) {
+            if (force || mNetworkState.getState()) {
                 String url = url_base + fileBase.getName();
-                String fn = config.getPathBase() + fileBase.getName();
+                String fn = mConfig.getPathBase() + fileBase.getName();
                 File f = new File(fn);
                 Logger.d("download: %s --> %s", url, fn);
 
@@ -1255,13 +1255,13 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     return true;
                 } else {
                     f.delete();
-                    if (stopDownload >= 0) {
+                    if (mStopDownload >= 0) {
                         Logger.d("download stopped");
                     } else {
                         updateState(STATE_ERROR_DOWNLOAD, null, null, null,
                                 fn, null);
                         Logger.d("download error");
-                        notificationManager.cancel(NOTIFICATION_BUSY);
+                        mNotificationManager.cancel(NOTIFICATION_BUSY);
                     }
                     return false;
                 }
@@ -1371,27 +1371,27 @@ public class UpdateService extends Service implements OnNetworkStateListener,
          * cause the amount of data transferred for checking is not very large
          */
 
-        if ((networkState == null) || (batteryState == null)
-                || (screenState == null))
+        if ((mNetworkState == null) || (mBatteryState == null)
+                || (mScreenState == null))
             return false;
 
         // Check if a previous update was done already
-        if (this.state.equals(STATE_ACTION_AB_FINISHED)) return false;
-        if (prefs.getBoolean(PREF_PENDING_REBOOT, false)) {
+        if (mState.equals(STATE_ACTION_AB_FINISHED)) return false;
+        if (mPrefs.getBoolean(PREF_PENDING_REBOOT, false)) {
             updateState(STATE_ACTION_AB_FINISHED);
             return false;
         }
         if (ABUpdate.isInstallingUpdate(this)) {
-            final String lastFilename = prefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
+            final String lastFilename = mPrefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
             ABUpdate.pokeStatus(lastFilename, this);
             return false;
         }
 
-        Logger.d("checkForUpdates checkOnly = " + checkOnly + " updateRunning = " + updateRunning + " userInitiated = " + userInitiated +
-                " networkState.getState() = " + networkState.getState() + " batteryState.getState() = " + batteryState.getState() +
-                " screenState.getState() = " + screenState.getState());
+        Logger.d("checkForUpdates checkOnly = " + checkOnly + " mIsUpdateRunning = " + mIsUpdateRunning + " userInitiated = " + userInitiated +
+                " mNetworkState.getState() = " + mNetworkState.getState() + " mBatteryState.getState() = " + mBatteryState.getState() +
+                " mScreenState.getState() = " + mScreenState.getState());
 
-        if (updateRunning) {
+        if (mIsUpdateRunning) {
             Logger.i("Ignoring request to check for updates - busy");
             return false;
         }
@@ -1400,15 +1400,15 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         stopErrorNotification();
 
         // so we have a time even in the error case
-        prefs.edit().putLong(PREF_LAST_CHECK_TIME_NAME, System.currentTimeMillis()).apply();
+        mPrefs.edit().putLong(PREF_LAST_CHECK_TIME_NAME, System.currentTimeMillis()).apply();
 
         if (!isSupportedVersion()) {
             // TODO - to be more generic this should maybe use the info from getNewestFullBuild
-            updateState(STATE_ERROR_UNOFFICIAL, null, null, null, config.getVersion(), null);
-            Logger.i("Ignoring request to check for updates - not compatible for update! " + config.getVersion());
+            updateState(STATE_ERROR_UNOFFICIAL, null, null, null, mConfig.getVersion(), null);
+            Logger.i("Ignoring request to check for updates - not compatible for update! " + mConfig.getVersion());
             return false;
         }
-        if (!networkState.isConnected()) {
+        if (!mNetworkState.isConnected()) {
             updateState(STATE_ERROR_CONNECTION);
             Logger.i("Ignoring request to check for updates - no data connection");
             return false;
@@ -1418,8 +1418,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             updateAllowed = checkOnly >= PREF_AUTO_DOWNLOAD_CHECK;
             if (checkOnly > PREF_AUTO_DOWNLOAD_CHECK) {
                 // must confirm to all if we may auto download
-                updateAllowed = networkState.getState()
-                        && batteryState.getState() && isScreenStateEnabled();
+                updateAllowed = mNetworkState.getState()
+                        && mBatteryState.getState() && isScreenStateEnabled();
                 if (!updateAllowed) {
                     // fallback to check only
                     checkOnly = PREF_AUTO_DOWNLOAD_CHECK;
@@ -1444,7 +1444,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
         long deltaDownloadSize = 0L;
         for (DeltaInfo di : deltas) {
-            String fn = config.getPathBase() + di.getUpdate().getName();
+            String fn = mConfig.getPathBase() + di.getUpdate().getName();
             if (di.getUpdate().match(
                     new File(fn),
                     true,
@@ -1458,8 +1458,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
         DeltaInfo lastDelta = deltas.get(deltas.size() - 1);
         {
-            if (config.getApplySignature()) {
-                String fn = config.getPathBase()
+            if (mConfig.getApplySignature()) {
+                String fn = mConfig.getPathBase()
                         + lastDelta.getSignature().getName();
                 if (lastDelta.getSignature().match(
                         new File(fn),
@@ -1501,7 +1501,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     requiredSpace += sizeOnDisk(di.getUpdate().getUpdate()
                             .getSize());
             }
-            if (config.getApplySignature()) {
+            if (mConfig.getApplySignature()) {
                 requiredSpace += sizeOnDisk(lastDelta.getSignature()
                         .getUpdate().getSize());
             }
@@ -1529,7 +1529,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         String initialFile = null;
 
         // Check if an original flashable ZIP is in our preferred location
-        String expectedLocation = config.getPathBase()
+        String expectedLocation = mConfig.getPathBase()
                 + firstDelta.getIn().getName();
         Logger.d("findInitialFile expectedLocation = " + expectedLocation);
         DeltaInfo.FileSizeSHA256 match = null;
@@ -1595,7 +1595,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
         for (DeltaInfo di : deltas) {
             filename[0] = di.getUpdate().getName();
-            if (!downloadDeltaFile(config.getUrlBaseUpdate(),
+            if (!downloadDeltaFile(mConfig.getUrlBaseUpdate(),
                     di.getUpdate(), di.getUpdate().getUpdate(),
                     progressListener, force)) {
                 return false;
@@ -1603,9 +1603,9 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             last[0] += di.getUpdate().getUpdate().getSize();
         }
 
-        if (config.getApplySignature()) {
+        if (mConfig.getApplySignature()) {
             filename[0] = lastDelta.getSignature().getName();
-            if (!downloadDeltaFile(config.getUrlBaseUpdate(),
+            if (!downloadDeltaFile(mConfig.getUrlBaseUpdate(),
                     lastDelta.getSignature(), lastDelta.getSignature()
                     .getUpdate(), progressListener, force)) {
                 return false;
@@ -1619,12 +1619,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
     private void downloadFullBuild(String url, String sha256Sum,
                                    String imageName) {
-        String fn = config.getPathBase() + imageName;
+        String fn = mConfig.getPathBase() + imageName;
         File f = new File(fn + ".part");
         Logger.d("download: %s --> %s", url, fn);
 
         // get rid of old .part files if any
-        File[] files = new File(config.getPathBase()).listFiles();
+        File[] files = new File(mConfig.getPathBase()).listFiles();
         if (files != null) {
             for (File file : files) {
                 String currName = file.getName();
@@ -1638,33 +1638,33 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         if (downloadUrlFileUnknownSize(url, f, sha256Sum)
                 && f.renameTo(new File(fn))) {
             Logger.d("success");
-            prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
+            mPrefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
         } else {
-            if (stopDownload == PREF_STOP_DOWNLOAD_STOP) {
+            if (mStopDownload == PREF_STOP_DOWNLOAD_STOP) {
                 f.delete();
                 Logger.d("download stopped");
                 autoState(false, PREF_AUTO_DOWNLOAD_DISABLED, false);
-            } else if (stopDownload != PREF_STOP_DOWNLOAD_RESUME &&
-                       !state.equals(STATE_ERROR_DOWNLOAD)) {
+            } else if (mStopDownload != PREF_STOP_DOWNLOAD_RESUME &&
+                       !mState.equals(STATE_ERROR_DOWNLOAD)) {
                 // either pause or error
                 final Long current = f.length();
-                final Long total = prefs.getLong(PREF_DOWNLOAD_SIZE, 1500000000L /* 1.5GB */);;
-                final Long lastTime = prefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
+                final Long total = mPrefs.getLong(PREF_DOWNLOAD_SIZE, 1500000000L /* 1.5GB */);;
+                final Long lastTime = mPrefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
                 final float progress = ((float) current / (float) total) * 100f;
-                final boolean isPause = stopDownload == PREF_STOP_DOWNLOAD_PAUSE;
+                final boolean isPause = mStopDownload == PREF_STOP_DOWNLOAD_PAUSE;
                 final String newState = isPause ? STATE_ACTION_DOWNLOADING_PAUSED
                                                 : STATE_ERROR_DOWNLOAD_RESUME;
                 Logger.d("download " + (isPause ? "paused" : "error"));
                 updateState(newState, progress, current, total, imageName, lastTime);
                 // display paused notification with the proper title
-                if (notificationManager != null)
-                    notificationManager.cancel(NOTIFICATION_BUSY);
+                if (mNotificationManager != null)
+                    mNotificationManager.cancel(NOTIFICATION_BUSY);
                 String title = getString(isPause
                         ? R.string.state_action_downloading_paused
                         : R.string.state_error_download_resume);
                 newDownloadNotification(true, title);
                 mDownloadNotificationBuilder.setProgress(100, Math.round(progress), false);
-                notificationManager.notify(NOTIFICATION_BUSY, mDownloadNotificationBuilder.build());
+                mNotificationManager.notify(NOTIFICATION_BUSY, mDownloadNotificationBuilder.build());
             }
         }
     }
@@ -1741,8 +1741,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         DeltaInfo lastDelta = deltas.get(deltas.size() - 1);
 
         int tempFile = 0;
-        String[] tempFiles = new String[] { config.getPathBase() + "temp1",
-                config.getPathBase() + "temp2" };
+        String[] tempFiles = new String[] { mConfig.getPathBase() + "temp1",
+                mConfig.getPathBase() + "temp2" };
         try {
             long start = SystemClock.elapsedRealtime();
             long current = 0L;
@@ -1752,7 +1752,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 total += firstDelta.getIn().getStore().getSize();
             for (DeltaInfo di : deltas)
                 total += di.getUpdate().getApplied().getSize();
-            if (config.getApplySignature())
+            if (mConfig.getApplySignature())
                 total += lastDelta.getSignature().getApplied().getSize();
 
             if (initialFileNeedsProcessing) {
@@ -1772,11 +1772,11 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 if (!initialFileNeedsProcessing && (di == firstDelta))
                     inFile = initialFile;
                 String outFile = tempFiles[tempFile];
-                if (!config.getApplySignature() && (di == lastDelta))
-                    outFile = config.getPathBase()
+                if (!mConfig.getApplySignature() && (di == lastDelta))
+                    outFile = mConfig.getPathBase()
                     + lastDelta.getOut().getName();
 
-                if (!dedelta(inFile, config.getPathBase()
+                if (!dedelta(inFile, mConfig.getPathBase()
                         + di.getUpdate().getName(), outFile, start, current,
                         total)) {
                     updateState(STATE_ERROR_UNKNOWN, null, null, null, null,
@@ -1788,11 +1788,11 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 current += di.getUpdate().getApplied().getSize();
             }
 
-            if (config.getApplySignature()) {
+            if (mConfig.getApplySignature()) {
                 if (!dedelta(tempFiles[(tempFile + 1) % 2],
-                        config.getPathBase()
+                        mConfig.getPathBase()
                         + lastDelta.getSignature().getName(),
-                        config.getPathBase() + lastDelta.getOut().getName(),
+                        mConfig.getPathBase() + lastDelta.getOut().getName(),
                         start, current, total)) {
                     updateState(STATE_ERROR_UNKNOWN, null, null, null, null,
                             null);
@@ -1814,12 +1814,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     }
 
     private String handleUpdateCleanup() throws FileNotFoundException {
-        String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, null);
-        String initialFile = prefs.getString(PREF_INITIAL_FILE, null);
-        boolean fileFlash =  prefs.getBoolean(PREF_FILE_FLASH, true);
+        String flashFilename = mPrefs.getString(PREF_READY_FILENAME_NAME, null);
+        String initialFile = mPrefs.getString(PREF_INITIAL_FILE, null);
+        boolean fileFlash =  mPrefs.getBoolean(PREF_FILE_FLASH, true);
 
         if (flashFilename == null
-                || (!fileFlash && !flashFilename.startsWith(config.getPathBase()))
+                || (!fileFlash && !flashFilename.startsWith(mConfig.getPathBase()))
                 || !new File(flashFilename).exists()) {
             clearState();
             throw new FileNotFoundException("flashUpdate - no valid file to flash found " + flashFilename);
@@ -1827,7 +1827,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         // now delete the initial file
         if (initialFile != null
                 && new File(initialFile).exists()
-                && initialFile.startsWith(config.getPathBase())){
+                && initialFile.startsWith(mConfig.getPathBase())){
             new File(initialFile).delete();
             Logger.d("flashUpdate - delete initial file");
         }
@@ -1838,13 +1838,13 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     protected void onUpdateCompleted(int status, int errorCode) {
         Logger.d("onUpdateCompleted status = " + status);
         stopNotification();
-        updateRunning = false;
+        mIsUpdateRunning = false;
         if (status == UpdateEngine.ErrorCodeConstants.SUCCESS) {
-            prefs.edit().putBoolean(PREF_PENDING_REBOOT, true).commit();
-            String flashFilename = prefs.getString(PREF_READY_FILENAME_NAME, null);
+            mPrefs.edit().putBoolean(PREF_PENDING_REBOOT, true).commit();
+            String flashFilename = mPrefs.getString(PREF_READY_FILENAME_NAME, null);
             if (flashFilename != null) {
                 deleteOldFlashFile(flashFilename);
-                prefs.edit().putString(PREF_CURRENT_FILENAME_NAME, flashFilename).commit();
+                mPrefs.edit().putString(PREF_CURRENT_FILENAME_NAME, flashFilename).commit();
             }
             startABRebootNotification(flashFilename);
             updateState(STATE_ACTION_AB_FINISHED);
@@ -1863,7 +1863,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                                     percent, sec / 60, sec % 60);
         }
         mFlashNotificationBuilder.setSubText(sub);
-        notificationManager.notify(
+        mNotificationManager.notify(
                     NOTIFICATION_UPDATE, mFlashNotificationBuilder.build());
     }
 
@@ -1898,7 +1898,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         if (sub.isEmpty()) sub = String.format(Locale.ENGLISH,
                 "%2d%%", percent);
         mDownloadNotificationBuilder.setSubText(sub);
-        notificationManager.notify(
+        mNotificationManager.notify(
                 NOTIFICATION_BUSY, mDownloadNotificationBuilder.build());
     }
 
@@ -1909,16 +1909,16 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             flashFilename = handleUpdateCleanup();
         } catch (Exception ex) {
             updateState(STATE_ERROR_AB_FLASH);
-            updateRunning = false;
+            mIsUpdateRunning = false;
             Logger.ex(ex);
             return;
         }
 
         // Save the filename for resuming
-        prefs.edit().putString(PREF_CURRENT_AB_FILENAME_NAME, flashFilename).commit();
+        mPrefs.edit().putString(PREF_CURRENT_AB_FILENAME_NAME, flashFilename).commit();
 
         // Clear the Download size to hide while flashing
-        prefs.edit().putLong(PREF_DOWNLOAD_SIZE, -1).commit();
+        mPrefs.edit().putLong(PREF_DOWNLOAD_SIZE, -1).commit();
 
         final String _filename = new File(flashFilename).getName();
         updateState(STATE_ACTION_AB_FLASH, 0f, 0L, 100L, _filename, null);
@@ -1932,20 +1932,20 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             if (isABUpdate) {
                 mLastProgressTime = new long[] { 0, SystemClock.elapsedRealtime() };
                 mProgressListener.setStatus(_filename);
-                updateRunning = true;
+                mIsUpdateRunning = true;
                 if (!ABUpdate.start(flashFilename, mProgressListener, this)) {
                     stopNotification();
                     updateState(STATE_ERROR_AB_FLASH);
-                    updateRunning = false;
+                    mIsUpdateRunning = false;
                 }
             } else {
                 stopNotification();
                 updateState(STATE_ERROR_AB_FLASH);
-                updateRunning = false;
+                mIsUpdateRunning = false;
             }
         } catch (Exception ex) {
             Logger.ex(ex);
-            updateRunning = false;
+            mIsUpdateRunning = false;
         }
     }
 
@@ -1965,7 +1965,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             return;
         }
 
-        boolean deltaSignature = prefs.getBoolean(PREF_DELTA_SIGNATURE, false);
+        boolean deltaSignature = mPrefs.getBoolean(PREF_DELTA_SIGNATURE, false);
         String flashFilename;
         try {
             flashFilename = handleUpdateCleanup();
@@ -1976,7 +1976,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         }
 
         deleteOldFlashFile(flashFilename);
-        prefs.edit().putString(PREF_CURRENT_FILENAME_NAME, flashFilename).commit();
+        mPrefs.edit().putString(PREF_CURRENT_FILENAME_NAME, flashFilename).commit();
         clearState();
 
         // Remove the path to the storage from the filename, so we get a path
@@ -1986,7 +1986,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         flashFilename = flashFilename.substring(path_sd.length());
 
         // Find additional ZIPs to flash, strip path to sd
-        List<String> extras = config.getFlashAfterUpdateZIPs();
+        List<String> extras = mConfig.getFlashAfterUpdateZIPs();
         for (int i = 0; i < extras.size(); i++) {
             extras.set(i, extras.get(i).substring(path_sd.length()));
         }
@@ -2004,13 +2004,13 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             // As such, flashing the ZIP without checking the whole-file
             // signature coming from a secure location would be a security
             // risk.
-            if (config.getUseTWRP()) {
-                if (config.getInjectSignatureEnable() && deltaSignature) {
+            if (mConfig.getUseTWRP()) {
+                if (mConfig.getInjectSignatureEnable() && deltaSignature) {
                     Logger.d("flashUpdate - create /cache/recovery/keys");
 
                     try (FileOutputStream os = new FileOutputStream(
                             "/cache/recovery/keys", false)) {
-                        writeString(os, config.getInjectSignatureKeys());
+                        writeString(os, mConfig.getInjectSignatureKeys());
                     }
                     setPermissions("/cache/recovery/keys",
                             Process.myUid()  /* AID_CACHE */);
@@ -2020,7 +2020,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
                 try (FileOutputStream os = new FileOutputStream(
                         "/cache/recovery/openrecoveryscript", false)) {
-                    if (config.getInjectSignatureEnable() && deltaSignature) {
+                    if (mConfig.getInjectSignatureEnable() && deltaSignature) {
                         writeString(os, "cmd cat /res/keys > /res/keys_org");
                         writeString(os,
                                 "cmd cat /cache/recovery/keys > /res/keys");
@@ -2036,7 +2036,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                                 String.format("install %s", flashFilename));
                     }
 
-                    if (!config.getSecureModeCurrent()) {
+                    if (!mConfig.getSecureModeCurrent()) {
                         // any program could have placed these ZIPs, so ignore
                         // them in secure mode
                         for (String file : extras) {
@@ -2086,17 +2086,17 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     }
 
     private boolean updateAvailable() {
-        final String latestFull = prefs.getString(UpdateService.PREF_LATEST_FULL_NAME, null);
-        final String latestDelta = prefs.getString(UpdateService.PREF_LATEST_DELTA_NAME, null);
+        final String latestFull = mPrefs.getString(UpdateService.PREF_LATEST_FULL_NAME, null);
+        final String latestDelta = mPrefs.getString(UpdateService.PREF_LATEST_DELTA_NAME, null);
         return latestFull != null || latestDelta != null;
     }
 
     private String getLatestFullSHA256Sum(String sumUrl) {
-        String urlSuffix = config.getUrlSuffix();
-        if (isUrlOverride) {
-            sumUrl = sumUrlOvr;
+        String urlSuffix = mConfig.getUrlSuffix();
+        if (mIsUrlOverride) {
+            sumUrl = mSumUrlOvr;
         } else if (urlSuffix.length() > 0) {
-            sumUrl += config.getUrlSuffix();
+            sumUrl += mConfig.getUrlSuffix();
         }
         String latestFullSum = downloadUrlMemoryAsString(sumUrl);
         if (latestFullSum != null) {
@@ -2116,11 +2116,11 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     }
 
     private boolean isSupportedVersion() {
-        return config.isOfficialVersion();
+        return mConfig.isOfficialVersion();
     }
 
     private int getAutoDownloadValue() {
-        String autoDownload = prefs.getString(SettingsActivity.PREF_AUTO_DOWNLOAD, getDefaultAutoDownloadValue());
+        String autoDownload = mPrefs.getString(SettingsActivity.PREF_AUTO_DOWNLOAD, getDefaultAutoDownloadValue());
         return Integer.parseInt(autoDownload);
     }
 
@@ -2129,11 +2129,11 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     }
 
     private boolean isScreenStateEnabled() {
-        if (screenState == null) {
+        if (mScreenState == null) {
             return false;
         }
-        boolean screenStateValue = screenState.getState();
-        boolean prefValue = prefs.getBoolean(SettingsActivity.PREF_SCREEN_STATE_OFF, true);
+        boolean screenStateValue = mScreenState.getState();
+        boolean prefValue = mPrefs.getBoolean(SettingsActivity.PREF_SCREEN_STATE_OFF, true);
         if (prefValue) {
             // only when screen off
             return !screenStateValue;
@@ -2169,11 +2169,11 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     private boolean isSnoozeNotification() {
         // check if we're snoozed, using abs for clock changes
         boolean timeSnooze = Math.abs(System.currentTimeMillis()
-                - prefs.getLong(PREF_LAST_SNOOZE_TIME_NAME,
+                - mPrefs.getLong(PREF_LAST_SNOOZE_TIME_NAME,
                         PREF_LAST_SNOOZE_TIME_DEFAULT)) <= SNOOZE_MS;
         if (timeSnooze) {
-            String lastBuild = prefs.getString(PREF_LATEST_FULL_NAME, null);
-            String snoozeBuild = prefs.getString(PREF_SNOOZE_UPDATE_NAME, null);
+            String lastBuild = mPrefs.getString(PREF_LATEST_FULL_NAME, null);
+            String snoozeBuild = mPrefs.getString(PREF_SNOOZE_UPDATE_NAME, null);
             if (lastBuild != null && snoozeBuild != null) {
                 // only snooze if time snoozed and no newer update available
                 if (!lastBuild.equals(snoozeBuild)) {
@@ -2185,7 +2185,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     }
 
     private void clearState() {
-        SharedPreferences.Editor editor = prefs.edit();
+        SharedPreferences.Editor editor = mPrefs.edit();
         editor.putString(PREF_LATEST_FULL_NAME, null);
         editor.putString(PREF_LATEST_DELTA_NAME, null);
         editor.putString(PREF_READY_FILENAME_NAME, null);
@@ -2197,16 +2197,16 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     }
 
     private void shouldShowErrorNotification() {
-        boolean dailyAlarm = prefs.getString(SettingsActivity.PREF_SCHEDULER_MODE, SettingsActivity.PREF_SCHEDULER_MODE_SMART)
+        boolean dailyAlarm = mPrefs.getString(SettingsActivity.PREF_SCHEDULER_MODE, SettingsActivity.PREF_SCHEDULER_MODE_SMART)
                 .equals(SettingsActivity.PREF_SCHEDULER_MODE_DAILY);
 
-        if (dailyAlarm || failedUpdateCount >= 4) {
+        if (dailyAlarm || mFailedUpdateCount >= 4) {
             // if from scheduler show a notification cause user should
             // see that something went wrong
             // if we check only daily always show - if smart mode wait for 4
             // consecutive failure - would be about 24h
             startErrorNotification();
-            failedUpdateCount = 0;
+            mFailedUpdateCount = 0;
         }
     }
 
@@ -2214,24 +2214,24 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         Logger.d("checkForUpdatesAsync " + getPrefs().getAll());
 
         updateState(STATE_ACTION_CHECKING);
-        wakeLock.acquire();
-        wifiLock.acquire();
+        mWakeLock.acquire();
+        mWifiLock.acquire();
 
         newDownloadNotification(false,
                 getString(R.string.state_action_downloading));
 
-        handler.post(() -> {
+        mHandler.post(() -> {
             boolean downloadFullBuild = false;
 
-            stopDownload = -1;
-            updateRunning = true;
+            mStopDownload = -1;
+            mIsUpdateRunning = true;
 
             try {
                 List<DeltaInfo> deltas = new ArrayList<>();
 
                 String flashFilename = null;
-                (new File(config.getPathBase())).mkdir();
-                (new File(config.getPathFlashAfterUpdate())).mkdir();
+                (new File(mConfig.getPathBase())).mkdir();
+                (new File(mConfig.getPathFlashAfterUpdate())).mkdir();
 
                 clearState();
 
@@ -2239,8 +2239,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 String latestFullBuild;
                 // if we don't even find a build on dl no sense to continue
                 if (latestFullBuildWithUrl == null || latestFullBuildWithUrl.size() == 0) {
-                    Logger.d("no latest build found at " + config.getUrlBaseJson() +
-                            " for " + config.getDevice());
+                    Logger.d("no latest build found at " + mConfig.getUrlBaseJson() +
+                            " for " + mConfig.getDevice());
                     return;
                 }
                 latestFullBuild = latestFullBuildWithUrl.get(0);
@@ -2248,29 +2248,29 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 String latestFullFetch;
                 String latestFullFetchSUM;
                 if (latestFullBuildWithUrl.size() < 3) {
-                    latestFullFetch = config.getUrlBaseFull() +
-                            latestFullBuild + config.getUrlSuffix();
-                    latestFullFetchSUM = config.getUrlBaseFullSum() +
-                            latestFullBuild + ".sha256sum" + config.getUrlSuffix();
+                    latestFullFetch = mConfig.getUrlBaseFull() +
+                            latestFullBuild + mConfig.getUrlSuffix();
+                    latestFullFetchSUM = mConfig.getUrlBaseFullSum() +
+                            latestFullBuild + ".sha256sum" + mConfig.getUrlSuffix();
                 } else {
                     latestFullFetch = latestFullBuildWithUrl.get(1);
                     latestFullFetchSUM = latestFullBuildWithUrl.get(2);
                 }
-                Logger.d("latest full build for device " + config.getDevice() + " is " + latestFullFetch);
-                prefs.edit().putString(PREF_LATEST_FULL_NAME, latestFullBuild).commit();
+                Logger.d("latest full build for device " + mConfig.getDevice() + " is " + latestFullFetch);
+                mPrefs.edit().putString(PREF_LATEST_FULL_NAME, latestFullBuild).commit();
 
                 // also update the changelog
                 final String changelog = downloadUrlMemoryAsString(
-                        config.getUrlBaseJson().replace(
-                        config.getDevice() + ".json", "Changelog.txt"));
-                prefs.edit().putString(PREF_LATEST_CHANGELOG, changelog).commit();
+                        mConfig.getUrlBaseJson().replace(
+                        mConfig.getDevice() + ".json", "Changelog.txt"));
+                mPrefs.edit().putString(PREF_LATEST_CHANGELOG, changelog).commit();
 
                 if (!Config.isABDevice()) {
                     // Create a list of deltas to apply to get from our current
                     // version to the latest
                     String fetch = String.format(Locale.ENGLISH, "%s%s.delta",
-                            config.getUrlBaseDelta(),
-                            config.getFilenameBase());
+                            mConfig.getUrlBaseDelta(),
+                            mConfig.getFilenameBase());
 
                     while (true) {
                         DeltaInfo delta = null;
@@ -2313,7 +2313,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
                         Logger.d("delta --> [%s]", delta.getOut().getName());
                         fetch = String.format(Locale.ENGLISH, "%s%s.delta",
-                                config.getUrlBaseDelta(), delta
+                                mConfig.getUrlBaseDelta(), delta
                                 .getOut().getName().replace(".zip", ""));
                         deltas.add(delta);
                     }
@@ -2326,7 +2326,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     int last = -1;
                     for (int i = deltas.size() - 1; i >= 0; i--) {
                         DeltaInfo di = deltas.get(i);
-                        String fn = config.getPathBase() + di.getOut().getName();
+                        String fn = mConfig.getPathBase() + di.getOut().getName();
                         if (di.getOut()
                                 .match(new File(fn),
                                         true,
@@ -2337,7 +2337,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                                 Logger.d("match found (%s): %s", signedFile ? "delta" : "full", di.getOut().getName());
                                 flashFilename = fn;
                                 last = i;
-                                prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, signedFile).commit();
+                                mPrefs.edit().putBoolean(PREF_DELTA_SIGNATURE, signedFile).commit();
                                 break;
                             }
                         }
@@ -2356,12 +2356,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 if (deltas.size() == 0) {
                     // we found a matching zip created from deltas before
                     if (flashFilename != null) {
-                        prefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
+                        mPrefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
                         return;
                     }
                     // only full download available
-                    final String latestFull = prefs.getString(PREF_LATEST_FULL_NAME, null);
-                    String currentVersionZip = config.getFilenameBase() +".zip";
+                    final String latestFull = mPrefs.getString(PREF_LATEST_FULL_NAME, null);
+                    String currentVersionZip = mConfig.getFilenameBase() +".zip";
 
                     long currFileDate; // will store current build date as YYYYMMDD
                     long latestFileDate; // will store the latest build date as YYYYMMDD
@@ -2380,7 +2380,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     }
 
                     if (!updateAvailable) {
-                        prefs.edit().putString(PREF_LATEST_FULL_NAME, null).commit();
+                        mPrefs.edit().putString(PREF_LATEST_FULL_NAME, null).commit();
                     }
 
                     if (downloadFullBuild) {
@@ -2389,9 +2389,9 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     }
                     if (updateAvailable && downloadFullBuild) {
                         long size = getUrlDownloadSize(latestFullFetch);
-                        prefs.edit().putLong(PREF_DOWNLOAD_SIZE, size).commit();
+                        mPrefs.edit().putLong(PREF_DOWNLOAD_SIZE, size).commit();
                     }
-                    Logger.d("check done: latest full build available = " + prefs.getString(PREF_LATEST_FULL_NAME, null) +
+                    Logger.d("check done: latest full build available = " + mPrefs.getString(PREF_LATEST_FULL_NAME, null) +
                             " : updateAvailable = " + updateAvailable + " : downloadFullBuild = " + downloadFullBuild);
 
                     if (checkOnly == PREF_AUTO_DOWNLOAD_CHECK) {
@@ -2399,7 +2399,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     }
                 } else {
                     DeltaInfo lastDelta = deltas.get(deltas.size() - 1);
-                    flashFilename = config.getPathBase() + lastDelta.getOut().getName();
+                    flashFilename = mConfig.getPathBase() + lastDelta.getOut().getName();
 
                     long deltaDownloadSize = getDeltaDownloadSize(deltas);
                     long fullDownloadSize = getFullDownloadSize(deltas);
@@ -2423,11 +2423,11 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     // combined deltas get big, just get the latest full ZIP
                     boolean betterDownloadFullBuild = deltaDownloadSize > fullDownloadSize;
 
-                    final String latestFull = prefs.getString(PREF_LATEST_FULL_NAME, null);
+                    final String latestFull = mPrefs.getString(PREF_LATEST_FULL_NAME, null);
                     final String latestDelta = flashFilename;
 
                     String latestDeltaZip = latestDelta != null ? new File(latestDelta).getName() : null;
-                    String currentVersionZip = config.getFilenameBase() +".zip";
+                    String currentVersionZip = mConfig.getFilenameBase() +".zip";
                     boolean fullUpdatePossible = latestFull != null && Long.parseLong(latestFull.replaceAll("\\D+","")) > Long.parseLong(currentVersionZip.replaceAll("\\D+",""));
                     boolean deltaUpdatePossible = initialFile != null && latestDeltaZip != null && Long.parseLong(latestDeltaZip.replaceAll("\\D+","")) > Long.parseLong(currentVersionZip.replaceAll("\\D+","")) && latestDeltaZip.equals(latestFull);
 
@@ -2446,13 +2446,13 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     boolean updateAvailable = fullUpdatePossible || deltaUpdatePossible;
 
                     if (!updateAvailable) {
-                        prefs.edit().putString(PREF_LATEST_DELTA_NAME, null).commit();
-                        prefs.edit().putString(PREF_LATEST_FULL_NAME, null).commit();
+                        mPrefs.edit().putString(PREF_LATEST_DELTA_NAME, null).commit();
+                        mPrefs.edit().putString(PREF_LATEST_FULL_NAME, null).commit();
                     } else {
                         if (downloadFullBuild) {
-                            prefs.edit().putString(PREF_LATEST_DELTA_NAME, null).commit();
+                            mPrefs.edit().putString(PREF_LATEST_DELTA_NAME, null).commit();
                         } else {
-                            prefs.edit().putString(PREF_LATEST_DELTA_NAME, new File(flashFilename).getName()).commit();
+                            mPrefs.edit().putString(PREF_LATEST_DELTA_NAME, new File(flashFilename).getName()).commit();
                         }
                     }
 
@@ -2462,17 +2462,17 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     }
                     if (updateAvailable) {
                         if (deltaUpdatePossible) {
-                            prefs.edit().putLong(PREF_DOWNLOAD_SIZE, deltaDownloadSize).commit();
+                            mPrefs.edit().putLong(PREF_DOWNLOAD_SIZE, deltaDownloadSize).commit();
                         } else if (downloadFullBuild) {
-                            prefs.edit().putLong(PREF_DOWNLOAD_SIZE, fullDownloadSize).commit();
+                            mPrefs.edit().putLong(PREF_DOWNLOAD_SIZE, fullDownloadSize).commit();
                         }
                     }
-                    Logger.d("check done: latest valid delta update = " + prefs.getString(PREF_LATEST_DELTA_NAME, null) +
-                            " : latest full build available = " + prefs.getString(PREF_LATEST_FULL_NAME, null) +
+                    Logger.d("check done: latest valid delta update = " + mPrefs.getString(PREF_LATEST_DELTA_NAME, null) +
+                            " : latest full build available = " + mPrefs.getString(PREF_LATEST_FULL_NAME, null) +
                             " : updateAvailable = " + updateAvailable + " : downloadFullBuild = " + downloadFullBuild);
 
                     long requiredSpace = getRequiredSpace(deltas, downloadFullBuild);
-                    long freeSpace = (new StatFs(config.getPathBase())).getAvailableBytes();
+                    long freeSpace = (new StatFs(mConfig.getPathBase())).getAvailableBytes();
                     Logger.d("requiredSpace = " + requiredSpace + " freeSpace = " + freeSpace);
 
                     if (freeSpace < requiredSpace) {
@@ -2499,7 +2499,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
                         // Verify using SHA256
                         if (lastDelta.getOut().match(
-                                new File(config.getPathBase() + lastDelta.getOut().getName()),
+                                new File(mConfig.getPathBase() + lastDelta.getOut().getName()),
                                 true,
                                 getSUMProgress(STATE_ACTION_APPLYING_SUM, lastDelta.getOut()
                                         .getName())) == null) {
@@ -2511,25 +2511,25 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
                         // Cleanup
                         for (DeltaInfo di : deltas) {
-                            (new File(config.getPathBase() + di.getUpdate().getName())).delete();
-                            (new File(config.getPathBase() + di.getSignature().getName())).delete();
+                            (new File(mConfig.getPathBase() + di.getUpdate().getName())).delete();
+                            (new File(mConfig.getPathBase() + di.getSignature().getName())).delete();
                             if (di != lastDelta)
-                                (new File(config.getPathBase() + di.getOut().getName())).delete();
+                                (new File(mConfig.getPathBase() + di.getOut().getName())).delete();
                         }
                         // we will not delete initialFile until flashing
                         // else people building images and not flashing for 24h will lose
                         // the possibility to do delta updates
                         if (initialFile != null) {
-                            if (initialFile.startsWith(config.getPathBase())) {
-                                prefs.edit().putString(PREF_INITIAL_FILE, initialFile).commit();
+                            if (initialFile.startsWith(mConfig.getPathBase())) {
+                                mPrefs.edit().putString(PREF_INITIAL_FILE, initialFile).commit();
                             }
                         }
-                        prefs.edit().putBoolean(PREF_DELTA_SIGNATURE, true).commit();
-                        prefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
+                        mPrefs.edit().putBoolean(PREF_DELTA_SIGNATURE, true).commit();
+                        mPrefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
                     }
                 }
                 if (downloadFullBuild && checkOnly == PREF_AUTO_DOWNLOAD_FULL) {
-                    if (userInitiated || networkState.getState()) {
+                    if (userInitiated || mNetworkState.getState()) {
                         String latestFullSUM = getLatestFullSHA256Sum(latestFullFetchSUM);
                         if (latestFullSUM != null) {
                             downloadFullBuild(latestFullFetch, latestFullSUM, latestFullBuild); // download full
@@ -2543,35 +2543,35 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     }
                 }
             } finally {
-                prefs.edit().putLong(PREF_LAST_CHECK_TIME_NAME, System.currentTimeMillis()).commit();
+                mPrefs.edit().putLong(PREF_LAST_CHECK_TIME_NAME, System.currentTimeMillis()).commit();
                 stopForeground(true);
-                if (wifiLock.isHeld()) wifiLock.release();
-                if (wakeLock.isHeld()) wakeLock.release();
+                if (mWifiLock.isHeld()) mWifiLock.release();
+                if (mWakeLock.isHeld()) mWakeLock.release();
 
-                if (isErrorState(state)) {
-                    failedUpdateCount++;
+                if (isErrorState(mState)) {
+                    mFailedUpdateCount++;
                     clearState();
                     if (!userInitiated) {
                         shouldShowErrorNotification();
                     }
                 } else {
-                    failedUpdateCount = 0;
+                    mFailedUpdateCount = 0;
                     autoState(userInitiated, checkOnly, true);
                 }
-                updateRunning = false;
+                mIsUpdateRunning = false;
             }
         });
     }
 
     private boolean checkExistingFullBuild(List<String> latestFullBuildWithUrl,
                                            String latestFullFetchSUM) {
-        String fn = config.getPathBase() + latestFullBuildWithUrl.get(0);
+        String fn = mConfig.getPathBase() + latestFullBuildWithUrl.get(0);
         File file = new File(fn);
         if (file.exists()) {
             if (checkFullBuildSHA256Sum(latestFullFetchSUM, fn)) {
                 Logger.d("match found (full): " + fn);
                 // full zip exists and is valid - flash ready state
-                prefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
+                mPrefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
                 return true;
             }
             // get rid of rubbish
@@ -2590,11 +2590,11 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     }
 
     private void deleteOldFlashFile(String newFlashFilename) {
-        String oldFlashFilename = prefs.getString(PREF_CURRENT_FILENAME_NAME, null);
+        String oldFlashFilename = mPrefs.getString(PREF_CURRENT_FILENAME_NAME, null);
         Logger.d("delete oldFlashFilename " + oldFlashFilename + " " + newFlashFilename);
 
         if (oldFlashFilename != null && !oldFlashFilename.equals(newFlashFilename)
-                && oldFlashFilename.startsWith(config.getPathBase())) {
+                && oldFlashFilename.startsWith(mConfig.getPathBase())) {
             File file = new File(oldFlashFilename);
             if (file.exists()) {
                 Logger.d("delete oldFlashFilename " + oldFlashFilename);
@@ -2604,11 +2604,11 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     }
 
     public SharedPreferences getPrefs() {
-        return prefs;
+        return mPrefs;
     }
 
     public Config getConfig() {
-        return config;
+        return mConfig;
     }
 
     private void setFlashFilename(String flashFilename) {
@@ -2623,7 +2623,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             return;
         }
         Logger.d("Set flash possible: %s", flashFilename);
-        prefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
+        mPrefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
         updateState(STATE_ACTION_FLASH_FILE_READY, null, null, null, (new File(flashFilename)).getName(), null);
     }
 
@@ -2633,6 +2633,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         int importance = NotificationManager.IMPORTANCE_LOW;
         NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance);
         channel.setDescription(description);
-        notificationManager.createNotificationChannel(channel);
+        mNotificationManager.createNotificationChannel(channel);
     }
 }
