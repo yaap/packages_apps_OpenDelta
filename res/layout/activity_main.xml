@@ -8,6 +8,13 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
+    <Toolbar
+        android:id="@+id/action_bar"
+        style="?android:attr/actionBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="?android:attr/actionBarTheme" />
+
     <TextView
         android:id="@+id/text_title"
         android:layout_width="match_parent"
@@ -50,6 +57,8 @@
         <ProgressBar
             android:id="@+id/progress_bar"
             style="?android:attr/progressBarStyleHorizontal"
+            android:progressTint="?android:attr/colorAccent"
+            android:indeterminateTint="?android:attr/colorAccent"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -182,6 +191,10 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="10dp" />
 
     <LinearLayout
         android:layout_width="match_parent"

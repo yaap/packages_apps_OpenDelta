@@ -58,6 +58,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Space;
 import android.widget.TextView;
+import android.widget.Toolbar;
 
 import androidx.preference.PreferenceManager;
 
@@ -104,20 +105,18 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-
-        try {
-            getActionBar().setIcon(
-                    getPackageManager().getApplicationIcon(
-                            "com.android.settings"));
-        } catch (NameNotFoundException e) {
-            // The standard Settings package is not present, so we can't snatch
-            // its icon
-            Logger.ex(e);
-        }
-        getActionBar().setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_TITLE);
-
         setContentView(R.layout.activity_main);
+
+        final Toolbar toolbar = findViewById(R.id.action_bar);
+        setActionBar(toolbar);
+
+        // Enable title and home button by default
+        final ActionBar actionBar = getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(false);
+
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         mTitle = findViewById(R.id.text_title);
         mSub = findViewById(R.id.progress_text);

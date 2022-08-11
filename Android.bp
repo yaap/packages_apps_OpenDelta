@@ -2,6 +2,9 @@ android_app {
     name: "OpenDelta",
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
+    defaults: [
+        "SettingsLibDefaults",
+    ],
     static_libs: [
         "androidx.core_core",
         "androidx.cardview_cardview",

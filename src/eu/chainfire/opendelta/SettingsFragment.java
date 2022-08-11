@@ -30,17 +30,19 @@ import android.app.TimePickerDialog;
 import android.app.TimePickerDialog.OnTimeSetListener;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.format.DateFormat;
+import android.view.MenuItem;
+import android.widget.TimePicker;
+import android.widget.Toast;
+
 import androidx.preference.SwitchPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.Preference.OnPreferenceChangeListener;
-import androidx.preference.PreferenceFragment;
 import androidx.preference.PreferenceCategory;
+import androidx.preference.PreferenceFragment;
 import androidx.preference.PreferenceManager;
-import android.text.Html;
-import android.text.format.DateFormat;
-import android.widget.TimePicker;
-import android.widget.Toast;
 
 public class SettingsFragment extends PreferenceFragment implements
         OnPreferenceChangeListener, OnTimeSetListener {
@@ -206,6 +208,16 @@ public class SettingsFragment extends PreferenceFragment implements
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Respond to the action bar's Up/Home button
+        if (item.getItemId() == android.R.id.home) {
+            getActivity().finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
