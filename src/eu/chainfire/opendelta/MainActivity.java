@@ -66,6 +66,7 @@ public class MainActivity extends Activity {
     private static final int ACTIVITY_SELECT_FLASH_FILE = 1;
 
     private Config mConfig;
+    private String mState;
     private TextView mTitle;
     private TextView mSub;
     private ProgressBar mProgress;
@@ -93,6 +94,7 @@ public class MainActivity extends Activity {
     private ImageView mInfoImage;
     private TextView mProgressPercent;
     private View mProgressEndSpace;
+    private long mLastProgressUpdate;
     private int mProgressCurrent = 0;
     private int mProgressMax = 1;
     private boolean mProgressEnabled;
@@ -279,7 +281,52 @@ public class MainActivity extends Activity {
                 // don't spill for progress
                 if (!UpdateService.isProgressState(state)) {
                     Logger.d("onReceive state = " + state);
+                } else if (state.equals(mState)) {
+                    // same progress state as before.
+                    // save a lot of time by only updating progress
+                    final long ms = intent.getLongExtra(UpdateService.EXTRA_MS, 0);
+                    mLastProgressUpdate = ms;
+                    disableDataSpeed = UpdateService.STATE_ACTION_AB_FLASH.equals(state);
+                    current = intent.getLongExtra(UpdateService.EXTRA_CURRENT, current);
+                    total = intent.getLongExtra(UpdateService.EXTRA_TOTAL, total);
+                    // long --> int overflows FTL (progress.setXXX)
+                    boolean progressInK = false;
+                    if (total > 1024L * 1024L * 1024L) {
+                        progressInK = true;
+                        current /= 1024L;
+                        total /= 1024L;
+                    }
+                    progressPercent = String.format(Locale.ENGLISH, "%.0f %%",
+                                intent.getFloatExtra(UpdateService.EXTRA_PROGRESS, 0));
+                    if ((ms > 500) && (current > 0) && (total > 0)) {
+                        float kibps = ((float) current / 1024f) / ((float) ms / 1000f);
+                        if (progressInK) kibps *= 1024f;
+                        int sec = (int) (((((float) total / (float) current) * (float) ms) - ms) / 1000f);
+                        if (disableDataSpeed) {
+                            sub2 = String.format(Locale.ENGLISH,
+                                    "%02d:%02d",
+                                    sec / 60, sec % 60);
+                        } else {
+                            if (kibps < 1024) {
+                                sub2 = String.format(Locale.ENGLISH,
+                                        "%.0f KiB/s, %02d:%02d",
+                                        kibps, sec / 60, sec % 60);
+                            } else {
+                                sub2 = String.format(Locale.ENGLISH,
+                                        "%.0f MiB/s, %02d:%02d",
+                                        kibps / 1024f, sec / 60, sec % 60);
+                            }
+                        }
+                    }
+                    mSub2.setText(sub2);
+                    mProgressPercent.setText(progressPercent);
+                    mProgressCurrent = (int) current;
+                    mProgressMax = (int) total;
+                    mProgressEnabled = true;
+                    handleProgressBar();
+                    return;
                 }
+                mState = state;
             }
 
             if (UpdateService.STATE_ERROR_DISK_SPACE.equals(state)) {

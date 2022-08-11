@@ -261,7 +261,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         @Override
         public void onProgress(float progress, long current, long total) {
             long now = SystemClock.elapsedRealtime();
-            if (now >= mLastProgressTime[0] + 16L) {
+            if (now >= mLastProgressTime[0] + 250L) {
                 long ms = SystemClock.elapsedRealtime() - mLastProgressTime[1];
                 int sec = (int) (((((float) total / (float) current) * (float) ms) - ms) / 1000f);
                 updateState(STATE_ACTION_AB_FLASH, progress, current, total, this.status, ms);
@@ -1579,7 +1579,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 total = last[1];
                 progress = ((float) current / (float) total) * 100f;
                 long now = SystemClock.elapsedRealtime();
-                if (now >= last[2] + 16L) {
+                if (now >= last[2] + 250L) {
                     updateState(STATE_ACTION_DOWNLOADING, progress, current,
                             total, filename[0], SystemClock.elapsedRealtime()
                             - last[3]);
