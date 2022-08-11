@@ -50,11 +50,13 @@ import android.text.format.Formatter;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Space;
 import android.widget.TextView;
 
 import androidx.preference.PreferenceManager;
@@ -76,6 +78,10 @@ public class MainActivity extends Activity {
     private TextView lastCheckedHeader = null;
     private TextView downloadSizeHeader = null;
     private TextView downloadSize = null;
+    private Space downloadSizeSpacer = null;
+    private TextView changelogHeader = null;
+    private TextView changelog = null;
+    private Space changelogPlaceholder = null;
     private Config config;
     private boolean mPermOk;
     private TextView mSub2;
@@ -131,12 +137,18 @@ public class MainActivity extends Activity {
         lastCheckedHeader = findViewById(R.id.text_last_checked_header);
         downloadSize = findViewById(R.id.text_download_size);
         downloadSizeHeader = findViewById(R.id.text_download_size_header);
+        downloadSizeSpacer = findViewById(R.id.download_size_spacer);
+        changelog = findViewById(R.id.text_changelog);
+        changelogHeader = findViewById(R.id.text_changelog_header);
+        changelogPlaceholder = findViewById(R.id.changelog_placeholder);
         mProgressPercent = findViewById(R.id.progress_percent);
         mFileFlashButton = findViewById(R.id.button_select_file);
         mUpdateVersionTitle = findViewById(R.id.text_update_version_header);
         mExtraText = findViewById(R.id.extra_text);
         mInfoText = findViewById(R.id.info_text);
         mInfoImage = findViewById(R.id.info_image);
+
+        changelog.setMovementMethod(new ScrollingMovementMethod());
 
         config = Config.getInstance(this);
         mPermOk = false;
@@ -239,6 +251,7 @@ public class MainActivity extends Activity {
             boolean enableProgress = false;
             boolean disableCheckNow = false;
             boolean disableDataSpeed = false;
+            boolean enableChangelog = false;
             long lastCheckedSaved = mPrefs.getLong(UpdateService.PREF_LAST_CHECK_TIME_NAME,
                     UpdateService.PREF_LAST_CHECK_TIME_DEFAULT);
             String lastCheckedText = lastCheckedSaved != UpdateService.PREF_LAST_CHECK_TIME_DEFAULT ?
@@ -327,6 +340,7 @@ public class MainActivity extends Activity {
             } else if (UpdateService.STATE_ACTION_READY.equals(state)) {
                 enableCheck = true;
                 enableFlash = true;
+                enableChangelog = true;
                 progress.setIndeterminate(false);
 
                 final String flashImage = mPrefs.getString(
@@ -354,6 +368,7 @@ public class MainActivity extends Activity {
             } else if (UpdateService.STATE_ACTION_AB_FINISHED.equals(state)) {
                 enableReboot = true;
                 disableCheckNow = true;
+                enableChangelog = true;
                 progress.setIndeterminate(false);
 
                 final String flashImage = mPrefs.getString(
@@ -388,18 +403,20 @@ public class MainActivity extends Activity {
                     String latestDeltaBase = latestDelta.substring(0,
                             latestDelta.lastIndexOf('.'));
                     enableBuild = true;
+                    enableChangelog = true;
                     updateVersion = latestDeltaBase;
                     title = getString(R.string.state_action_build_delta);
                 } else if (fullUpdatePossible) {
                     String latestFullBase = latestFull.substring(0,
                             latestFull.lastIndexOf('.'));
                     enableBuild = true;
+                    enableChangelog = true;
                     updateVersion = latestFullBase;
                     title = getString(R.string.state_action_build_full);
                 }
                 long downloadSize = mPrefs.getLong(
                         UpdateService.PREF_DOWNLOAD_SIZE, -1);
-                if(downloadSize == -1) {
+                if (downloadSize == -1) {
                     downloadSizeText = "";
                 } else if (downloadSize == 0) {
                     downloadSizeText = getString(R.string.text_download_size_unknown);
@@ -412,6 +429,7 @@ public class MainActivity extends Activity {
                 progress.setIndeterminate(true);
                 current = 1;
             } else {
+                enableChangelog = true;
                 enableProgress = true;
                 if (UpdateService.STATE_ACTION_AB_FLASH.equals(state)) {
                     disableDataSpeed = true;
@@ -492,19 +510,18 @@ public class MainActivity extends Activity {
             MainActivity.this.sub.setText(sub);
             MainActivity.this.mSub2.setText(sub2);
             MainActivity.this.mProgressPercent.setText(progressPercent);
-            MainActivity.this.updateVersion.setText(updateVersion);
-            MainActivity.this.mUpdateVersionTitle.setText(TextUtils.isEmpty(updateVersion)
-                    ? "" : (getString(R.string.text_update_version_title) + COLON));
+            final boolean hideVersion = TextUtils.isEmpty(updateVersion);
+            if (!hideVersion) MainActivity.this.updateVersion.setText(updateVersion);
+            MainActivity.this.updateVersion.setVisibility(hideVersion ? View.GONE : View.VISIBLE);
+            MainActivity.this.mUpdateVersionTitle.setVisibility(hideVersion ? View.GONE : View.VISIBLE);
             MainActivity.this.currentVersion.setText(config.getFilenameBase());
-            MainActivity.this.currentVersionHeader.setText(String.format("%s%s",
-                    getString(R.string.text_current_version_header_title), COLON));
             MainActivity.this.lastChecked.setText(lastCheckedText);
-            MainActivity.this.lastCheckedHeader.setText(String.format("%s%s",
-                    getString(R.string.text_last_checked_header_title), COLON));
             MainActivity.this.mExtraText.setText(extraText);
-            MainActivity.this.downloadSize.setText(downloadSizeText);
-            MainActivity.this.downloadSizeHeader.setText(TextUtils.isEmpty(downloadSizeText)
-                    ? "" : (getString(R.string.text_download_size_header_title) + COLON));
+            final boolean hideSize = TextUtils.isEmpty(downloadSizeText);
+            if (!hideSize) MainActivity.this.downloadSize.setText(downloadSizeText);
+            MainActivity.this.downloadSize.setVisibility(hideSize ? View.GONE : View.VISIBLE);
+            MainActivity.this.downloadSizeHeader.setVisibility(hideSize ? View.GONE : View.VISIBLE);
+            MainActivity.this.downloadSizeSpacer.setVisibility(hideSize ? View.GONE : View.VISIBLE);
 
             mProgressCurrent = (int) current;
             mProgressMax = (int) total;
@@ -522,6 +539,16 @@ public class MainActivity extends Activity {
             buildNow.setVisibility(!enableBuild || enableFlash ? View.GONE : View.VISIBLE);
             rebootNow.setVisibility(enableReboot ? View.VISIBLE : View.GONE);
             mFileFlashButton.setVisibility(disableCheckNow ? View.GONE : View.VISIBLE);
+
+            // handle changelog
+            if (enableChangelog) {
+                final String cl = mPrefs.getString(UpdateService.PREF_LATEST_CHANGELOG, null);
+                if (cl != null) changelog.setText(cl);
+                else enableChangelog = false;
+            }
+            changelog.setVisibility(enableChangelog ? View.VISIBLE : View.GONE);
+            changelogHeader.setVisibility(enableChangelog ? View.VISIBLE : View.GONE);
+            changelogPlaceholder.setVisibility(enableChangelog ? View.GONE : View.VISIBLE);
 
             // download buttons
             final int vis = enableDownload ? View.VISIBLE : View.GONE;
@@ -696,8 +723,8 @@ public class MainActivity extends Activity {
     private void updateInfoVisibility() {
         boolean showInfo = config.getShowInfo();
         if (mInfoImage != null && mInfoText != null) {
-            mInfoImage.setVisibility(showInfo ? View.VISIBLE : View.INVISIBLE);
-            mInfoText.setVisibility(showInfo ? View.VISIBLE : View.INVISIBLE);
+            mInfoImage.setVisibility(showInfo ? View.VISIBLE : View.GONE);
+            mInfoText.setVisibility(showInfo ? View.VISIBLE : View.GONE);
         }
     }
 

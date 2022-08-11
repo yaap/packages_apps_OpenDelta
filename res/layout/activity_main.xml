@@ -157,6 +157,28 @@
         android:textAppearance="@style/ValueText" />
 
     <Space
+        android:id="@+id/download_size_spacer"
+        android:layout_width="match_parent"
+        android:layout_height="10dp" />
+
+    <TextView
+        android:id="@+id/text_changelog_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/text_changelog_header_title"
+        android:textAppearance="@style/HeaderText" />
+
+    <TextView
+        android:id="@+id/text_changelog"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="vertical"
+        android:visibility="gone"
+        android:textAppearance="@style/ValueText" />
+
+    <Space
+        android:id="@+id/changelog_placeholder"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />

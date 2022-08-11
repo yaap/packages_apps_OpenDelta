@@ -186,6 +186,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     public static final int NOTIFICATION_ERROR = 3;
 
     public static final String PREF_READY_FILENAME_NAME = "ready_filename";
+    public static final String PREF_LATEST_CHANGELOG = "latest_changelog";
 
     public static final String PREF_LAST_CHECK_TIME_NAME = "last_check_time";
     public static final long PREF_LAST_CHECK_TIME_DEFAULT = 0L;
@@ -2188,6 +2189,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         editor.putString(PREF_LATEST_FULL_NAME, null);
         editor.putString(PREF_LATEST_DELTA_NAME, null);
         editor.putString(PREF_READY_FILENAME_NAME, null);
+        editor.putString(PREF_LATEST_CHANGELOG, null);
         editor.putLong(PREF_DOWNLOAD_SIZE, -1);
         editor.putBoolean(PREF_DELTA_SIGNATURE, false);
         editor.putString(PREF_INITIAL_FILE, null);
@@ -2256,6 +2258,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 }
                 Logger.d("latest full build for device " + config.getDevice() + " is " + latestFullFetch);
                 prefs.edit().putString(PREF_LATEST_FULL_NAME, latestFullBuild).commit();
+
+                // also update the changelog
+                final String changelog = downloadUrlMemoryAsString(
+                        config.getUrlBaseJson().replace(
+                        config.getDevice() + ".json", "Changelog.txt"));
+                prefs.edit().putString(PREF_LATEST_CHANGELOG, changelog).commit();
 
                 if (!Config.isABDevice()) {
                     // Create a list of deltas to apply to get from our current
