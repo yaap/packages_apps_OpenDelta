@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2013-2014 Jorrit "Chainfire" Jongma
  * Copyright (C) 2013-2015 The OmniROM Project
- * Copyright (C) 2020-2021 Yet Another AOSP Project
+ * Copyright (C) 2020-2022 Yet Another AOSP Project
  */
 /*
  * This file is part of OpenDelta.
@@ -60,6 +60,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -88,31 +89,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         start(context, null);
     }
 
-    public static void startCheck(Context context) {
-        start(context, ACTION_CHECK);
-    }
-
-    public static void startFlash(Context context) {
-        start(context, ACTION_FLASH);
-    }
-
-    public static void startBuild(Context context) {
-        start(context, ACTION_BUILD);
-    }
-
-    public static void startUpdate(Context context) {
-        start(context, ACTION_UPDATE);
-    }
-
     public static void startClearRunningInstall(Context context) {
         start(context, ACTION_CLEAR_INSTALL_RUNNING);
-    }
-
-    public static void startFlashFile(Context context, String flashFilename) {
-        Intent i = new Intent(context, UpdateService.class);
-        i.setAction(ACTION_FLASH_FILE);
-        i.putExtra(EXTRA_FILENAME, flashFilename);
-        context.startService(i);
     }
 
     private static void start(Context context, String action) {
@@ -134,12 +112,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
     public static final String BROADCAST_INTENT = "eu.chainfire.opendelta.intent.BROADCAST_STATE";
     public static final String EXTRA_STATE = "eu.chainfire.opendelta.extra.ACTION_STATE";
-    public static final String EXTRA_PROGRESS = "eu.chainfire.opendelta.extra.PROGRESS";
-    public static final String EXTRA_CURRENT = "eu.chainfire.opendelta.extra.CURRENT";
-    public static final String EXTRA_TOTAL = "eu.chainfire.opendelta.extra.TOTAL";
     public static final String EXTRA_FILENAME = "eu.chainfire.opendelta.extra.FILENAME";
-    public static final String EXTRA_MS = "eu.chainfire.opendelta.extra.MS";
-    public static final String EXTRA_ERROR_CODE = "eu.chainfire.opendelta.extra.ERROR_CODE";
 
     public static final String STATE_ACTION_NONE = "action_none";
     public static final String STATE_ACTION_CHECKING = "action_checking";
@@ -167,18 +140,18 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     public static final String STATE_ERROR_FLASH_FILE = "error_flash_file";
     public static final String STATE_ACTION_FLASH_FILE_READY = "action_flash_file_ready";
 
-    private static final String ACTION_CHECK = "eu.chainfire.opendelta.action.CHECK";
-    private static final String ACTION_FLASH = "eu.chainfire.opendelta.action.FLASH";
-    private static final String ACTION_ALARM = "eu.chainfire.opendelta.action.ALARM";
+    public static final String ACTION_CHECK = "eu.chainfire.opendelta.action.CHECK";
+    public static final String ACTION_FLASH = "eu.chainfire.opendelta.action.FLASH";
+    public static final String ACTION_ALARM = "eu.chainfire.opendelta.action.ALARM";
     private static final String EXTRA_ALARM_ID = "eu.chainfire.opendelta.extra.ALARM_ID";
     private static final String ACTION_NOTIFICATION_DELETED = "eu.chainfire.opendelta.action.NOTIFICATION_DELETED";
-    private static final String ACTION_BUILD = "eu.chainfire.opendelta.action.BUILD";
+    public static final String ACTION_BUILD = "eu.chainfire.opendelta.action.BUILD";
     private static final String ACTION_UPDATE = "eu.chainfire.opendelta.action.UPDATE";
     static final String ACTION_CLEAR_INSTALL_RUNNING =
             "eu.chainfire.opendelta.action.ACTION_CLEAR_INSTALL_RUNNING";
-    private static final String ACTION_FLASH_FILE = "eu.chainfire.opendelta.action.FLASH_FILE";
-    private static final String ACTION_DOWNLOAD_STOP = "eu.chainfire.opendelta.action.DOWNLOAD_STOP";
-    private static final String ACTION_DOWNLOAD_PAUSE = "eu.chainfire.opendelta.action.DOWNLOAD_PAUSE";
+    public static final String ACTION_FLASH_FILE = "eu.chainfire.opendelta.action.FLASH_FILE";
+    public static final String ACTION_DOWNLOAD_STOP = "eu.chainfire.opendelta.action.DOWNLOAD_STOP";
+    public static final String ACTION_DOWNLOAD_PAUSE = "eu.chainfire.opendelta.action.DOWNLOAD_PAUSE";
 
     private static final String NOTIFICATION_CHANNEL_ID = "eu.chainfire.opendelta.notification";
     public static final int NOTIFICATION_BUSY = 1;
@@ -275,6 +248,31 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         }
     };
 
+    private final IBinder mBinder = new LocalBinder();
+
+    public class LocalBinder extends Binder {
+        UpdateService getService() {
+            return UpdateService.this;
+        }
+    }
+
+    private StateCallback mStateCallback;
+
+    public interface StateCallback {
+        void updateState(String state, Float progress,
+                Long current, Long total, String filename,
+                Long ms, int errorCode);
+    }
+
+    public void registerStateCallback(StateCallback callback) {
+        mStateCallback = callback;
+        updateState(mState);
+    }
+
+    public void unregisterStateCallback() {
+        mStateCallback = null;
+    }
+
     /*
      * Using reflection voodoo instead calling the hidden class directly, to
      * dev/test outside of AOSP tree
@@ -299,7 +297,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
     }
 
     @SuppressWarnings("deprecation")
@@ -343,16 +341,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         mScreenState = new ScreenState();
         mScreenState.start(this, this);
 
-        try {
-            mStopDownload = mPrefs.getInt(PREF_STOP_DOWNLOAD, -1);
-        } catch (Exception e) {
-            // we probably failed converting the old bool to int
-            // done for migration purposes
-            mPrefs.edit().remove(PREF_STOP_DOWNLOAD).commit();
-            mPrefs.edit().putInt(PREF_STOP_DOWNLOAD, -1).apply();
-            mStopDownload = -1;
-        }
-
         mPrefs.registerOnSharedPreferenceChangeListener(this);
     }
 
@@ -370,17 +358,29 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
-            if (ACTION_CHECK.equals(intent.getAction())) {
+            performAction(intent);
+        }
+        return START_STICKY;
+    }
+
+    public synchronized void performAction(Intent intent) {
+        String action = intent.getAction();
+        if (action == null) action = "";
+        switch (action) {
+            case ACTION_CHECK:
                 if (checkPermissions())
                     checkForUpdates(true, PREF_AUTO_DOWNLOAD_CHECK);
-            } else if (ACTION_FLASH.equals(intent.getAction())) {
+                break;
+            case ACTION_FLASH:
                 if (checkPermissions()) {
                     if (Config.isABDevice()) flashABUpdate();
                     else flashUpdate();
                 }
-            } else if (ACTION_ALARM.equals(intent.getAction())) {
+                break;
+            case ACTION_ALARM:
                 mScheduler.alarm(intent.getIntExtra(EXTRA_ALARM_ID, -1));
-            } else if (ACTION_NOTIFICATION_DELETED.equals(intent.getAction())) {
+                break;
+            case ACTION_NOTIFICATION_DELETED:
                 mPrefs.edit().putLong(PREF_LAST_SNOOZE_TIME_NAME,
                         System.currentTimeMillis()).apply();
                 String lastBuild = mPrefs.getString(PREF_LATEST_FULL_NAME, null);
@@ -389,31 +389,56 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     Logger.i("Snoozing notification for " + lastBuild);
                     mPrefs.edit().putString(PREF_SNOOZE_UPDATE_NAME, lastBuild).apply();
                 }
-            } else if (ACTION_BUILD.equals(intent.getAction())) {
+                break;
+            case ACTION_BUILD:
                 if (checkPermissions())
                     checkForUpdates(true, PREF_AUTO_DOWNLOAD_FULL);
-            } else if (ACTION_UPDATE.equals(intent.getAction())) {
+                break;
+            case ACTION_UPDATE:
                 autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
-            } else if (ACTION_CLEAR_INSTALL_RUNNING.equals(intent.getAction())) {
+                break;
+            case ACTION_CLEAR_INSTALL_RUNNING:
                 ABUpdate.setInstallingUpdate(false, this);
                 mIsUpdateRunning = false;
-            } else if (ACTION_FLASH_FILE.equals(intent.getAction())) {
+                break;
+            case ACTION_FLASH_FILE:
                 if (intent.hasExtra(EXTRA_FILENAME)) {
                     String flashFilename = intent.getStringExtra(EXTRA_FILENAME);
                     setFlashFilename(flashFilename);
                 }
-            } else if (ACTION_DOWNLOAD_STOP.equals(intent.getAction())) {
-                mPrefs.edit().putInt(PREF_STOP_DOWNLOAD, PREF_STOP_DOWNLOAD_STOP).commit();
-            } else if (ACTION_DOWNLOAD_PAUSE.equals(intent.getAction())) {
+                break;
+            case ACTION_DOWNLOAD_STOP:
+                mStopDownload = PREF_STOP_DOWNLOAD_STOP;
+                if (mNotificationManager != null)
+                    mNotificationManager.cancel(NOTIFICATION_BUSY);
+                // if we have a paused download in progress we need to manually stop it
+                if (mState.equals(STATE_ERROR_DOWNLOAD_RESUME) ||
+                        mState.equals(STATE_ACTION_DOWNLOADING_PAUSED)) {
+                    // to do so we just need to remove the file and update state
+                    File[] files = new File(mConfig.getPathBase()).listFiles();
+                    for (File file : files)
+                        if (file.isFile() && file.getName().endsWith(".part"))
+                            file.delete();
+                    autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
+                }
+                break;
+            case ACTION_DOWNLOAD_PAUSE:
                 final boolean isPaused = mState.equals(STATE_ACTION_DOWNLOADING_PAUSED) ||
-                                         mState.equals(STATE_ERROR_DOWNLOAD_RESUME);
-                mPrefs.edit().putInt(PREF_STOP_DOWNLOAD,
-                        isPaused ? PREF_STOP_DOWNLOAD_RESUME : PREF_STOP_DOWNLOAD_PAUSE).commit();
-            } else {
+                        mState.equals(STATE_ERROR_DOWNLOAD_RESUME);
+                if (isPaused) {
+                    // resume
+                    mStopDownload = -1;
+                    checkForUpdates(true, PREF_AUTO_DOWNLOAD_FULL);
+                } else {
+                    // pause
+                    mStopDownload = PREF_STOP_DOWNLOAD_PAUSE;
+                    autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
+                }
+                break;
+            default:
                 autoState(false, PREF_AUTO_DOWNLOAD_CHECK, false);
-            }
+                break;
         }
-        return START_STICKY;
     }
 
     private void updateState(String state) {
@@ -428,22 +453,13 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     private synchronized void updateState(String state, Float progress,
             Long current, Long total, String filename, Long ms, int errorCode) {
         mState = state;
+        if (mStateCallback != null)
+            mStateCallback.updateState(state, progress, current,
+                    total, filename, ms, errorCode);
+    }
 
-        Intent i = new Intent(BROADCAST_INTENT);
-        i.putExtra(EXTRA_STATE, state);
-        if (progress != null)
-            i.putExtra(EXTRA_PROGRESS, progress);
-        if (current != null)
-            i.putExtra(EXTRA_CURRENT, current);
-        if (total != null)
-            i.putExtra(EXTRA_TOTAL, total);
-        if (filename != null)
-            i.putExtra(EXTRA_FILENAME, filename);
-        if (ms != null)
-            i.putExtra(EXTRA_MS, ms);
-        if (errorCode != -1)
-            i.putExtra(EXTRA_ERROR_CODE, errorCode);
-        sendBroadcast(i);
+    public synchronized String getState() {
+        return mState;
     }
 
     @Override
@@ -483,28 +499,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             case PREF_AUTO_UPDATE_METERED_NETWORKS:
                 mNetworkState.setMeteredAllowed(sharedPreferences.getBoolean(
                         PREF_AUTO_UPDATE_METERED_NETWORKS, false));
-                break;
-            case PREF_STOP_DOWNLOAD:
-                mStopDownload = sharedPreferences.getInt(PREF_STOP_DOWNLOAD, -1);
-                if (mNotificationManager != null)
-                        mNotificationManager.cancel(NOTIFICATION_BUSY);
-                if (mStopDownload == PREF_STOP_DOWNLOAD_STOP) {
-                    // if we have a paused download in progress we need to manually stop it
-                    if (mState.equals(STATE_ERROR_DOWNLOAD_RESUME) ||
-                        mState.equals(STATE_ACTION_DOWNLOADING_PAUSED)) {
-                        // to do so we just need to resume remove the file and update state
-                        File[] files = new File(mConfig.getPathBase()).listFiles();
-                        for (File file : files)
-                            if (file.isFile() && file.getName().endsWith(".part"))
-                                file.delete();
-                        autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
-                    }
-                } else if (mStopDownload == PREF_STOP_DOWNLOAD_PAUSE) {
-                    autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
-                } else {
-                    // resume
-                    startBuild(this);
-                }
                 break;
             case SettingsActivity.PREF_AUTO_DOWNLOAD:
                 int autoDownload = getAutoDownloadValue();
@@ -568,12 +562,9 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             }
         }
 
-        // let's check if we have a .part file that is still latest
-        List<String> latestFullBuildWithUrl = getNewestFullBuild();
-        String latestFullBuild;
-        // if we don't even find a build on dl no sense to continue
-        if (latestFullBuildWithUrl != null && latestFullBuildWithUrl.size() != 0) {
-            latestFullBuild = latestFullBuildWithUrl.get(0);
+        // check if we have a .part file that was saved as latest
+        String latestFullBuild = mPrefs.getString(PREF_LATEST_FULL_NAME, null);
+        if (latestFullBuild != null) {
             File found = null;
             File[] files = new File(mConfig.getPathBase()).listFiles();
             for (File file : files) {
@@ -586,22 +577,9 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 }
             }
             if (found != null) {
-                // prefer the preference, if it's reset - get from server
-                Long total = mPrefs.getLong(PREF_DOWNLOAD_SIZE, -1);
-                if (total == -1) {
-                    String latestFullFetch;
-                    if (latestFullBuildWithUrl.size() < 3) {
-                        latestFullFetch = mConfig.getUrlBaseFull() +
-                                latestFullBuild + mConfig.getUrlSuffix();
-                    } else {
-                        latestFullFetch = latestFullBuildWithUrl.get(1);
-                    }
-                    final HttpsURLConnection conn = setupHttpsRequest(latestFullFetch);
-                    if (conn != null) total = conn.getContentLengthLong();
-                    else total = 1500000000L; // default to 1.5 GB
-                }
-                final Long current = found.length();
-                final Long lastTime = mPrefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
+                long total = mPrefs.getLong(PREF_DOWNLOAD_SIZE, 1500000000L /* 1.5 GB */);
+                final long current = found.length();
+                final long lastTime = mPrefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
                 final float progress = ((float) current / (float) total) * 100f;
                 updateState(STATE_ACTION_DOWNLOADING_PAUSED, progress, current, total, latestFullBuild, lastTime);
                 // display paused notification with the proper title
@@ -808,6 +786,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             return urlConnection;
         } catch (Exception e) {
             Logger.i("Failed to connect to server");
+            Logger.ex(e);
             return null;
         }
     }
@@ -1086,10 +1065,10 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             if (urlConnection != null) urlConnection.disconnect();
             try { if (is != null) is.close(); } catch (IOException ignored) {}
             try { if (os != null) os.close(); } catch (IOException ignored) {}
+            mNotificationManager.cancel(NOTIFICATION_BUSY);
             return false;
         } finally {
             mIsUpdateRunning = false;
-            mNotificationManager.cancel(NOTIFICATION_BUSY);
             if (urlConnection != null) urlConnection.disconnect();
             try { if (is != null) is.close(); } catch (IOException ignored) {}
             try { if (os != null) os.close(); } catch (IOException ignored) {}
@@ -1639,16 +1618,18 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 && f.renameTo(new File(fn))) {
             Logger.d("success");
             mPrefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
+            mNotificationManager.cancel(NOTIFICATION_BUSY);
         } else {
             if (mStopDownload == PREF_STOP_DOWNLOAD_STOP) {
                 f.delete();
                 Logger.d("download stopped");
                 autoState(false, PREF_AUTO_DOWNLOAD_DISABLED, false);
+                mNotificationManager.cancel(NOTIFICATION_BUSY);
             } else if (mStopDownload != PREF_STOP_DOWNLOAD_RESUME &&
                        !mState.equals(STATE_ERROR_DOWNLOAD)) {
                 // either pause or error
                 final Long current = f.length();
-                final Long total = mPrefs.getLong(PREF_DOWNLOAD_SIZE, 1500000000L /* 1.5GB */);;
+                final Long total = mPrefs.getLong(PREF_DOWNLOAD_SIZE, 1500000000L /* 1.5GB */);
                 final Long lastTime = mPrefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
                 final float progress = ((float) current / (float) total) * 100f;
                 final boolean isPause = mStopDownload == PREF_STOP_DOWNLOAD_PAUSE;
@@ -1657,8 +1638,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 Logger.d("download " + (isPause ? "paused" : "error"));
                 updateState(newState, progress, current, total, imageName, lastTime);
                 // display paused notification with the proper title
-                if (mNotificationManager != null)
-                    mNotificationManager.cancel(NOTIFICATION_BUSY);
                 String title = getString(isPause
                         ? R.string.state_action_downloading_paused
                         : R.string.state_error_download_resume);
@@ -2611,7 +2590,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         return mConfig;
     }
 
-    private void setFlashFilename(String flashFilename) {
+    public void setFlashFilename(String flashFilename) {
         Logger.d("Flash file set: %s", flashFilename);
         File fn = new File(flashFilename);
         if (!fn.exists()) {

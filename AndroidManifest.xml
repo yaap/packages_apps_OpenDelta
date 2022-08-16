@@ -36,7 +36,7 @@
 
         <activity
             android:name="eu.chainfire.opendelta.MainActivity"
-            android:configChanges="orientation"
+            android:screenOrientation="portrait"
             android:label="@string/title"
             android:launchMode="singleInstance"
             android:theme="@style/Theme.SubSettingsBase"

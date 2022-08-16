@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2013-2014 Jorrit "Chainfire" Jongma
  * Copyright (C) 2013-2015 The OmniROM Project
+ * Copyright (C) 2020-2022 Yet Another AOSP Project
  */
 /*
  * This file is part of OpenDelta.
@@ -29,18 +30,18 @@ import java.util.Locale;
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.UpdateEngine;
 import android.provider.DocumentsContract;
@@ -53,7 +54,6 @@ import android.view.MenuItem;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Space;
@@ -66,7 +66,9 @@ public class MainActivity extends Activity {
     private static final int PERMISSIONS_REQUEST_MANAGE_EXTERNAL_STORAGE = 0;
     private static final int ACTIVITY_SELECT_FLASH_FILE = 1;
 
+    private UpdateService mUpdateService;
     private Config mConfig;
+    private Handler mHandler;
     private String mState;
     private TextView mTitle;
     private TextView mSub;
@@ -94,13 +96,10 @@ public class MainActivity extends Activity {
     private TextView mInfoText;
     private ImageView mInfoImage;
     private TextView mProgressPercent;
-    private View mProgressEndSpace;
-    private long mLastProgressUpdate;
     private int mProgressCurrent = 0;
     private int mProgressMax = 1;
     private boolean mProgressEnabled;
     private boolean mPermOk;
-    private boolean mFileSelection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,10 +111,13 @@ public class MainActivity extends Activity {
 
         // Enable title and home button by default
         final ActionBar actionBar = getActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeButtonEnabled(true);
-        actionBar.setDisplayShowTitleEnabled(false);
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            actionBar.setDisplayShowTitleEnabled(false);
+        }
 
+        mHandler = new Handler(getMainLooper());
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         mTitle = findViewById(R.id.text_title);
@@ -150,6 +152,10 @@ public class MainActivity extends Activity {
         mPermOk = false;
         requestPermissions();
         updateInfoVisibility();
+
+        if (mUpdateService == null) {
+            startUpdateService(UpdateService.STATE_ACTION_NONE);
+        }
     }
 
     @Override
@@ -206,435 +212,427 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private final IntentFilter updateFilter = new IntentFilter(
-            UpdateService.BROADCAST_INTENT);
-    private final BroadcastReceiver updateReceiver = new BroadcastReceiver() {
+    private final ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            UpdateService.LocalBinder binder = (UpdateService.LocalBinder) iBinder;
+            mUpdateService = binder.getService();
+            mUpdateService.registerStateCallback(updateReceiver);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mUpdateService.unregisterStateCallback();
+            mUpdateService = null;
+        }
+    };
+
+    private void startUpdateService(String action) {
+        Intent i = new Intent(this, UpdateService.class);
+        i.setAction(action);
+        if (mUpdateService == null) {
+            startService(i);
+            bindService(i, mConnection, Context.BIND_AUTO_CREATE);
+            return;
+        }
+        mUpdateService.performAction(i);
+    }
+
+    private void startUpdateServiceFile(String flashFilename) {
+        if (mUpdateService == null) {
+            Intent i = new Intent(this, UpdateService.class);
+            i.setAction(UpdateService.ACTION_FLASH_FILE);
+            i.putExtra(UpdateService.EXTRA_FILENAME, flashFilename);
+            startService(i);
+            bindService(i, mConnection, Context.BIND_AUTO_CREATE);
+            return;
+        }
+        if (flashFilename == null) return;
+        mUpdateService.setFlashFilename(flashFilename);
+    }
+
+    private final UpdateService.StateCallback updateReceiver = new UpdateService.StateCallback() {
         private String formatLastChecked(long ms) {
-            //Date date = new Date(ms);
             if (ms == 0) {
                 return "";
             } else {
                 SimpleDateFormat format = new SimpleDateFormat("EEEE, MMMM d, yyyy - HH:mm");
                 return format.format(ms);
-                /*return getString(
-                        R.string.last_checked,
-                        DateFormat.getDateFormat(MainActivity.this).format(
-                                date),
-                        DateFormat.getTimeFormat(MainActivity.this).format(
-                                date));*/
             }
         }
 
         @Override
-        public void onReceive(Context context, Intent intent) {
-            String title = "";
-            String sub = "";
-            String sub2 = "";
-            String progressPercent = "";
-            String updateVersion = "";
-            String extraText = "";
-            String downloadSizeText = "";
-            long current = 0L;
-            long total = 1L;
-            boolean enableCheck = false;
-            boolean enableFlash = false;
-            boolean enableBuild = false;
-            boolean enableDownload = false;
-            boolean enableResume = false;
-            boolean enableReboot = false;
-            boolean deltaUpdatePossible;
-            boolean fullUpdatePossible;
-            boolean enableProgress = false;
-            boolean disableCheckNow = false;
-            boolean disableDataSpeed = false;
-            boolean enableChangelog = false;
-            long lastCheckedSaved = mPrefs.getLong(UpdateService.PREF_LAST_CHECK_TIME_NAME,
-                    UpdateService.PREF_LAST_CHECK_TIME_DEFAULT);
-            String lastCheckedText = lastCheckedSaved != UpdateService.PREF_LAST_CHECK_TIME_DEFAULT ?
-                    formatLastChecked(lastCheckedSaved) : getString(R.string.last_checked_never_title_new);
-            String fullVersion = mConfig.getVersion();
-            String[] versionParts = fullVersion.split("-");
-            String versionType = "";
-            try {
-                versionType = versionParts[3];
-            } catch (Exception ignored) {
-            }
-
-            String state = intent.getStringExtra(UpdateService.EXTRA_STATE);
-            // don't try this at home
-            if (state != null) {
+        public void updateState(String state, Float progress,
+                                Long current, Long total, String filename,
+                                Long ms, int errorCode) {
+            mHandler.post(() -> {
+                String title = "";
+                String sub = "";
+                String sub2 = "";
+                String progressPercent = "";
+                String updateVersion = "";
+                String extraText = "";
+                String downloadSizeText = "";
+                long localTotal = total != null ? total : 0L;
+                long localCurrent = current != null ? current : 1L;
+                long localMS = ms != null ? ms : 0L;
+                boolean enableCheck = false;
+                boolean enableFlash = false;
+                boolean enableBuild = false;
+                boolean enableDownload = false;
+                boolean enableResume = false;
+                boolean enableReboot = false;
+                boolean deltaUpdatePossible;
+                boolean fullUpdatePossible;
+                boolean enableProgress = false;
+                boolean disableCheckNow = false;
+                boolean disableDataSpeed = false;
+                boolean enableChangelog = false;
+                long lastCheckedSaved = mPrefs.getLong(UpdateService.PREF_LAST_CHECK_TIME_NAME,
+                        UpdateService.PREF_LAST_CHECK_TIME_DEFAULT);
+                String lastCheckedText = lastCheckedSaved != UpdateService.PREF_LAST_CHECK_TIME_DEFAULT ?
+                        formatLastChecked(lastCheckedSaved) : getString(R.string.last_checked_never_title_new);
+                String fullVersion = mConfig.getVersion();
+                String[] versionParts = fullVersion.split("-");
+                String versionType = "";
                 try {
-                    title = getString(getResources().getIdentifier(
-                            "state_" + state, "string", getPackageName()));
-                } catch (Exception e) {
-                    // String for this state could not be found (displays empty
-                    // string)
-                    //Logger.ex(e);
+                    versionType = versionParts[3];
+                } catch (Exception ignored) {
                 }
-                // check for first start until check button has been pressed
-                // use a special title then - but only once
-                if (UpdateService.STATE_ACTION_NONE.equals(state)
-                        && !mPrefs.getBoolean(SettingsActivity.PREF_START_HINT_SHOWN, false)) {
-                    title = getString(R.string.last_checked_never_title_new);
+
+                // don't try this at home
+                if (state != null) {
+                    try {
+                        title = getString(getResources().getIdentifier(
+                                "state_" + state, "string", getPackageName()));
+                    } catch (Exception e) {
+                        // String for this state could not be found (displays empty
+                        // string)
+                        //Logger.ex(e);
+                    }
+                    // check for first start until check button has been pressed
+                    // use a special title then - but only once
+                    if (UpdateService.STATE_ACTION_NONE.equals(state)
+                            && !mPrefs.getBoolean(SettingsActivity.PREF_START_HINT_SHOWN, false)) {
+                        title = getString(R.string.last_checked_never_title_new);
+                    }
+                    // don't spill for progress
+                    if (!UpdateService.isProgressState(state)) {
+                        Logger.d("onReceive state = " + state);
+                    } else if (state.equals(mState)) {
+                        // same progress state as before.
+                        // save a lot of time by only updating progress
+                        disableDataSpeed = UpdateService.STATE_ACTION_AB_FLASH.equals(state);
+                        // long --> int overflows FTL (progress.setXXX)
+                        boolean progressInK = false;
+                        if (localTotal > 1024L * 1024L * 1024L) {
+                            progressInK = true;
+                            localCurrent /= 1024L;
+                            localTotal /= 1024L;
+                        }
+                        progressPercent = String.format(Locale.ENGLISH, "%.0f %%", progress);
+                        if ((localMS > 500) && (localCurrent > 0) && (localTotal > 0)) {
+                            float kibps = ((float) localCurrent / 1024f) / ((float) localMS / 1000f);
+                            if (progressInK) kibps *= 1024f;
+                            int sec = (int) (((((float) localTotal / (float) localCurrent) *
+                                    (float) localMS) - localMS) / 1000f);
+                            if (disableDataSpeed) {
+                                sub2 = String.format(Locale.ENGLISH,
+                                        "%02d:%02d",
+                                        sec / 60, sec % 60);
+                            } else {
+                                if (kibps < 1024) {
+                                    sub2 = String.format(Locale.ENGLISH,
+                                            "%.0f KiB/s, %02d:%02d",
+                                            kibps, sec / 60, sec % 60);
+                                } else {
+                                    sub2 = String.format(Locale.ENGLISH,
+                                            "%.0f MiB/s, %02d:%02d",
+                                            kibps / 1024f, sec / 60, sec % 60);
+                                }
+                            }
+                        }
+                        mSub2.setText(sub2);
+                        mProgressPercent.setText(progressPercent);
+                        mProgressCurrent = Math.round(localCurrent);
+                        mProgressMax = Math.round(localTotal);
+                        mProgressEnabled = true;
+                        handleProgressBar();
+                        return;
+                    }
+                    mState = state;
                 }
-                // don't spill for progress
-                if (!UpdateService.isProgressState(state)) {
-                    Logger.d("onReceive state = " + state);
-                } else if (state.equals(mState)) {
-                    // same progress state as before.
-                    // save a lot of time by only updating progress
-                    final long ms = intent.getLongExtra(UpdateService.EXTRA_MS, 0);
-                    mLastProgressUpdate = ms;
-                    disableDataSpeed = UpdateService.STATE_ACTION_AB_FLASH.equals(state);
-                    current = intent.getLongExtra(UpdateService.EXTRA_CURRENT, current);
-                    total = intent.getLongExtra(UpdateService.EXTRA_TOTAL, total);
+
+                if (UpdateService.STATE_ERROR_DISK_SPACE.equals(state)) {
+                    enableCheck = true;
+                    mProgress.setIndeterminate(false);
+                    localCurrent /= 1024L * 1024L;
+                    localTotal /= 1024L * 1024L;
+
+                    extraText = getString(R.string.error_disk_space_sub,
+                            localCurrent, localTotal);
+                } else if (UpdateService.STATE_ERROR_UNKNOWN.equals(state)) {
+                    enableCheck = true;
+                    mProgress.setIndeterminate(false);
+                } else if (UpdateService.STATE_ERROR_UNOFFICIAL.equals(state)) {
+                    enableCheck = true;
+                    mProgress.setIndeterminate(false);
+                    extraText = getString(R.string.state_error_not_official_extra, versionType);
+                } else if (UpdateService.STATE_ERROR_DOWNLOAD.equals(state)) {
+                    enableCheck = true;
+                    mProgress.setIndeterminate(false);
+                } else if (UpdateService.STATE_ERROR_CONNECTION.equals(state)) {
+                    enableCheck = true;
+                    mProgress.setIndeterminate(false);
+                } else if (UpdateService.STATE_ERROR_PERMISSIONS.equals(state)) {
+                    enableCheck = true;
+                    mProgress.setIndeterminate(false);
+                } else if (UpdateService.STATE_ERROR_FLASH.equals(state)) {
+                    enableCheck = true;
+                    enableFlash = true;
+                    mProgress.setIndeterminate(false);
+                    title = getString(R.string.state_error_flash_title);
+                } else if (UpdateService.STATE_ERROR_AB_FLASH.equals(state)) {
+                    enableCheck = true;
+                    mProgress.setIndeterminate(false);
+                    title = getString(R.string.state_error_ab_flash_title);
+                    if (errorCode == UpdateEngine.ErrorCodeConstants.PAYLOAD_TIMESTAMP_ERROR) {
+                        extraText = getString(R.string.error_ab_timestamp);
+                    } else if (errorCode == UpdateEngine.ErrorCodeConstants.UPDATED_BUT_NOT_ACTIVE) {
+                        extraText = getString(R.string.error_ab_inactive);
+                    }
+                } else if (UpdateService.STATE_ERROR_FLASH_FILE.equals(state)) {
+                    enableCheck = true;
+                    mProgress.setIndeterminate(false);
+                    title = getString(R.string.state_error_flash_file_title);
+                } else if (UpdateService.STATE_ACTION_NONE.equals(state)) {
+                    enableCheck = true;
+                    mProgress.setIndeterminate(false);
+                } else if (UpdateService.STATE_ACTION_READY.equals(state)) {
+                    enableCheck = true;
+                    enableFlash = true;
+                    enableChangelog = true;
+                    mProgress.setIndeterminate(false);
+
+                    final String flashImage = mPrefs.getString(
+                            UpdateService.PREF_READY_FILENAME_NAME, null);
+                    String flashImageBase = flashImage != null ? new File(
+                            flashImage).getName() : null;
+                    if (flashImageBase != null) {
+                        updateVersion = flashImageBase.substring(0,
+                                flashImageBase.lastIndexOf('.'));
+                    }
+                    mUpdateVersionTitle.setText(R.string.text_update_version_title);
+                } else if (UpdateService.STATE_ACTION_FLASH_FILE_READY.equals(state)) {
+                    enableCheck = true;
+                    enableFlash = true;
+                    mProgress.setIndeterminate(false);
+                    final String flashImage = mPrefs.getString(
+                            UpdateService.PREF_READY_FILENAME_NAME, null);
+                    mPrefs.edit().putBoolean(UpdateService.PREF_FILE_FLASH, true).commit();
+                    String flashImageBase = flashImage != null ? new File(
+                            flashImage).getName() : null;
+                    if (flashImageBase != null) {
+                        updateVersion = flashImageBase;
+                    }
+                    mUpdateVersionTitle.setText(R.string.text_update_file_flash_title);
+                } else if (UpdateService.STATE_ACTION_AB_FINISHED.equals(state)) {
+                    enableReboot = true;
+                    disableCheckNow = true;
+                    enableChangelog = true;
+                    mProgress.setIndeterminate(false);
+
+                    final String flashImage = mPrefs.getString(
+                            UpdateService.PREF_READY_FILENAME_NAME, null);
+                    String flashImageBase = flashImage != null ? new File(
+                            flashImage).getName() : null;
+                    if (flashImageBase != null) {
+                        updateVersion = flashImageBase.substring(0,
+                                flashImageBase.lastIndexOf('.'));
+                    }
+
+                    mPrefs.edit().putString(UpdateService.PREF_READY_FILENAME_NAME, null).commit();
+                    mPrefs.edit().putBoolean(UpdateService.PREF_FILE_FLASH, false).commit();
+                    mPrefs.edit().putString(UpdateService.PREF_LATEST_FULL_NAME, null).commit();
+
+                } else if (UpdateService.STATE_ACTION_BUILD.equals(state)) {
+                    enableCheck = true;
+                    mProgress.setIndeterminate(false);
+
+                    final String latestFull = mPrefs.getString(
+                            UpdateService.PREF_LATEST_FULL_NAME, null);
+                    final String latestDelta = mPrefs.getString(
+                            UpdateService.PREF_LATEST_DELTA_NAME, null);
+
+                    String latestDeltaZip = latestDelta != null ? new File(
+                            latestDelta).getName() : null;
+
+                    deltaUpdatePossible = latestDeltaZip != null;
+                    fullUpdatePossible = latestFull != null;
+
+                    if (deltaUpdatePossible) {
+                        String latestDeltaBase = latestDelta.substring(0,
+                                latestDelta.lastIndexOf('.'));
+                        enableBuild = true;
+                        enableChangelog = true;
+                        updateVersion = latestDeltaBase;
+                        title = getString(R.string.state_action_build_delta);
+                    } else if (fullUpdatePossible) {
+                        String latestFullBase = latestFull.substring(0,
+                                latestFull.lastIndexOf('.'));
+                        enableBuild = true;
+                        enableChangelog = true;
+                        updateVersion = latestFullBase;
+                        title = getString(R.string.state_action_build_full);
+                    }
+                    long downloadSize = mPrefs.getLong(
+                            UpdateService.PREF_DOWNLOAD_SIZE, -1);
+                    if (downloadSize == -1) {
+                        downloadSizeText = "";
+                    } else if (downloadSize == 0) {
+                        downloadSizeText = getString(R.string.text_download_size_unknown);
+                    } else {
+                        downloadSizeText = Formatter.formatFileSize(getApplicationContext(), downloadSize);
+                    }
+                } else if (UpdateService.STATE_ACTION_SEARCHING.equals(state)
+                        || UpdateService.STATE_ACTION_CHECKING.equals(state)) {
+                    enableProgress = true;
+                    mProgress.setIndeterminate(true);
+                    localCurrent = 1L;
+                } else {
+                    enableChangelog = true;
+                    enableProgress = true;
+                    if (UpdateService.STATE_ACTION_AB_FLASH.equals(state)) {
+                        disableDataSpeed = true;
+                    } else if (UpdateService.STATE_ACTION_DOWNLOADING.equals(state)) {
+                        disableCheckNow = true;
+                        enableDownload = true;
+                    } else if (UpdateService.STATE_ERROR_DOWNLOAD_RESUME.equals(state) ||
+                            UpdateService.STATE_ACTION_DOWNLOADING_PAUSED.equals(state)) {
+                        disableCheckNow = true;
+                        enableDownload = true;
+                        enableResume = true;
+                    }
+                    mProgress.setIndeterminate(false);
+
+                    long downloadSize = mPrefs.getLong(
+                            UpdateService.PREF_DOWNLOAD_SIZE, -1);
+                    if (downloadSize == -1) {
+                        downloadSizeText = "";
+                    } else if (downloadSize == 0) {
+                        downloadSizeText = getString(R.string.text_download_size_unknown);
+                    } else {
+                        downloadSizeText = Formatter.formatFileSize(getApplicationContext(), downloadSize);
+                    }
+
+                    updateVersion = getUpdateVersionString();
+
+                    final String flashImage = mPrefs.getString(
+                            UpdateService.PREF_READY_FILENAME_NAME, null);
+                    String flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
+                    if (flashImageBase != null) {
+                        updateVersion = flashImageBase.substring(0,
+                                flashImageBase.lastIndexOf('.'));
+                    }
+
                     // long --> int overflows FTL (progress.setXXX)
                     boolean progressInK = false;
-                    if (total > 1024L * 1024L * 1024L) {
+                    if (localTotal > 1024L * 1024L * 1024L) {
                         progressInK = true;
-                        current /= 1024L;
-                        total /= 1024L;
+                        localCurrent /= 1024L;
+                        localTotal /= 1024L;
                     }
-                    progressPercent = String.format(Locale.ENGLISH, "%.0f %%",
-                                intent.getFloatExtra(UpdateService.EXTRA_PROGRESS, 0));
-                    if ((ms > 500) && (current > 0) && (total > 0)) {
-                        float kibps = ((float) current / 1024f) / ((float) ms / 1000f);
-                        if (progressInK) kibps *= 1024f;
-                        int sec = (int) (((((float) total / (float) current) * (float) ms) - ms) / 1000f);
-                        if (disableDataSpeed) {
-                            sub2 = String.format(Locale.ENGLISH,
-                                    "%02d:%02d",
-                                    sec / 60, sec % 60);
-                        } else {
-                            if (kibps < 1024) {
+
+                    if (filename != null) {
+                        sub = filename;
+                        progressPercent = String.format(Locale.ENGLISH, "%.0f %%", progress);
+                        if ((localMS > 500) && (localCurrent > 0) && (localTotal > 0)) {
+                            float kibps = ((float) localCurrent / 1024f) / ((float) localMS / 1000f);
+                            if (progressInK) kibps *= 1024f;
+                            int sec = (int) (((((float) localTotal / (float) localCurrent)
+                                    * (float) localMS) - localMS) / 1000f);
+                            if (disableDataSpeed) {
                                 sub2 = String.format(Locale.ENGLISH,
-                                        "%.0f KiB/s, %02d:%02d",
-                                        kibps, sec / 60, sec % 60);
+                                        "%02d:%02d",
+                                        sec / 60, sec % 60);
                             } else {
-                                sub2 = String.format(Locale.ENGLISH,
-                                        "%.0f MiB/s, %02d:%02d",
-                                        kibps / 1024f, sec / 60, sec % 60);
-                            }
-                        }
-                    }
-                    mSub2.setText(sub2);
-                    mProgressPercent.setText(progressPercent);
-                    mProgressCurrent = (int) current;
-                    mProgressMax = (int) total;
-                    mProgressEnabled = true;
-                    handleProgressBar();
-                    return;
-                }
-                mState = state;
-            }
-
-            if (UpdateService.STATE_ERROR_DISK_SPACE.equals(state)) {
-                enableCheck = true;
-                mProgress.setIndeterminate(false);
-                current = intent.getLongExtra(UpdateService.EXTRA_CURRENT,
-                        current);
-                total = intent.getLongExtra(UpdateService.EXTRA_TOTAL, total);
-
-                current /= 1024L * 1024L;
-                total /= 1024L * 1024L;
-
-                extraText = getString(R.string.error_disk_space_sub, current,
-                        total);
-            } else if (UpdateService.STATE_ERROR_UNKNOWN.equals(state)) {
-                enableCheck = true;
-                mProgress.setIndeterminate(false);
-            } else if (UpdateService.STATE_ERROR_UNOFFICIAL.equals(state)) {
-                enableCheck = true;
-                mProgress.setIndeterminate(false);
-                extraText = getString(R.string.state_error_not_official_extra, versionType);
-            } else if (UpdateService.STATE_ERROR_DOWNLOAD.equals(state)) {
-                enableCheck = true;
-                mProgress.setIndeterminate(false);
-            } else if (UpdateService.STATE_ERROR_CONNECTION.equals(state)) {
-                enableCheck = true;
-                mProgress.setIndeterminate(false);
-            } else if (UpdateService.STATE_ERROR_PERMISSIONS.equals(state)) {
-                enableCheck = true;
-                mProgress.setIndeterminate(false);
-            } else if (UpdateService.STATE_ERROR_FLASH.equals(state)) {
-                enableCheck = true;
-                enableFlash = true;
-                mProgress.setIndeterminate(false);
-                title = getString(R.string.state_error_flash_title);
-            } else if (UpdateService.STATE_ERROR_AB_FLASH.equals(state)) {
-                enableCheck = true;
-                mProgress.setIndeterminate(false);
-                title = getString(R.string.state_error_ab_flash_title);
-                int errorCode = intent.getIntExtra(UpdateService.EXTRA_ERROR_CODE, -1);
-                if (errorCode == UpdateEngine.ErrorCodeConstants.PAYLOAD_TIMESTAMP_ERROR) {
-                    extraText = getString(R.string.error_ab_timestamp);
-                } else if (errorCode == UpdateEngine.ErrorCodeConstants.UPDATED_BUT_NOT_ACTIVE) {
-                    extraText = getString(R.string.error_ab_inactive);
-                }
-            } else if (UpdateService.STATE_ERROR_FLASH_FILE.equals(state)) {
-                enableCheck = true;
-                mProgress.setIndeterminate(false);
-                title = getString(R.string.state_error_flash_file_title);
-            } else if (UpdateService.STATE_ACTION_NONE.equals(state)) {
-                enableCheck = true;
-                mProgress.setIndeterminate(false);
-            } else if (UpdateService.STATE_ACTION_READY.equals(state)) {
-                enableCheck = true;
-                enableFlash = true;
-                enableChangelog = true;
-                mProgress.setIndeterminate(false);
-
-                final String flashImage = mPrefs.getString(
-                        UpdateService.PREF_READY_FILENAME_NAME, null);
-                String flashImageBase = flashImage != null ? new File(
-                        flashImage).getName() : null;
-                if (flashImageBase != null) {
-                    updateVersion = flashImageBase.substring(0,
-                            flashImageBase.lastIndexOf('.'));
-                }
-                mUpdateVersionTitle.setText(R.string.text_update_version_title);
-            } else if (UpdateService.STATE_ACTION_FLASH_FILE_READY.equals(state)) {
-                enableCheck = true;
-                enableFlash = true;
-                mProgress.setIndeterminate(false);
-                final String flashImage = mPrefs.getString(
-                        UpdateService.PREF_READY_FILENAME_NAME, null);
-                mPrefs.edit().putBoolean(UpdateService.PREF_FILE_FLASH, true).commit();
-                String flashImageBase = flashImage != null ? new File(
-                        flashImage).getName() : null;
-                if (flashImageBase != null) {
-                    updateVersion = flashImageBase;
-                }
-                mUpdateVersionTitle.setText(R.string.text_update_file_flash_title);
-            } else if (UpdateService.STATE_ACTION_AB_FINISHED.equals(state)) {
-                enableReboot = true;
-                disableCheckNow = true;
-                enableChangelog = true;
-                mProgress.setIndeterminate(false);
-
-                final String flashImage = mPrefs.getString(
-                        UpdateService.PREF_READY_FILENAME_NAME, null);
-                String flashImageBase = flashImage != null ? new File(
-                        flashImage).getName() : null;
-                if (flashImageBase != null) {
-                    updateVersion = flashImageBase.substring(0,
-                            flashImageBase.lastIndexOf('.'));
-                }
-
-                mPrefs.edit().putString(UpdateService.PREF_READY_FILENAME_NAME, null).commit();
-                mPrefs.edit().putBoolean(UpdateService.PREF_FILE_FLASH, false).commit();
-                mPrefs.edit().putString(UpdateService.PREF_LATEST_FULL_NAME, null).commit();
-
-            } else if (UpdateService.STATE_ACTION_BUILD.equals(state)) {
-                enableCheck = true;
-                mProgress.setIndeterminate(false);
-
-                final String latestFull = mPrefs.getString(
-                        UpdateService.PREF_LATEST_FULL_NAME, null);
-                final String latestDelta = mPrefs.getString(
-                        UpdateService.PREF_LATEST_DELTA_NAME, null);
-
-                String latestDeltaZip = latestDelta != null ? new File(
-                        latestDelta).getName() : null;
-
-                deltaUpdatePossible = latestDeltaZip != null;
-                fullUpdatePossible = latestFull != null;
-
-                if (deltaUpdatePossible) {
-                    String latestDeltaBase = latestDelta.substring(0,
-                            latestDelta.lastIndexOf('.'));
-                    enableBuild = true;
-                    enableChangelog = true;
-                    updateVersion = latestDeltaBase;
-                    title = getString(R.string.state_action_build_delta);
-                } else if (fullUpdatePossible) {
-                    String latestFullBase = latestFull.substring(0,
-                            latestFull.lastIndexOf('.'));
-                    enableBuild = true;
-                    enableChangelog = true;
-                    updateVersion = latestFullBase;
-                    title = getString(R.string.state_action_build_full);
-                }
-                long downloadSize = mPrefs.getLong(
-                        UpdateService.PREF_DOWNLOAD_SIZE, -1);
-                if (downloadSize == -1) {
-                    downloadSizeText = "";
-                } else if (downloadSize == 0) {
-                    downloadSizeText = getString(R.string.text_download_size_unknown);
-                } else {
-                    downloadSizeText = Formatter.formatFileSize(context, downloadSize);
-                }
-            } else if (UpdateService.STATE_ACTION_SEARCHING.equals(state)
-                    || UpdateService.STATE_ACTION_CHECKING.equals(state)) {
-                enableProgress = true;
-                mProgress.setIndeterminate(true);
-                current = 1;
-            } else {
-                enableChangelog = true;
-                enableProgress = true;
-                if (UpdateService.STATE_ACTION_AB_FLASH.equals(state)) {
-                    disableDataSpeed = true;
-                } else if (UpdateService.STATE_ACTION_DOWNLOADING.equals(state)) {
-                    mPrefs.edit().putInt(UpdateService.PREF_STOP_DOWNLOAD, -1).commit();
-                    disableCheckNow = true;
-                    enableDownload = true;
-                } else if (UpdateService.STATE_ERROR_DOWNLOAD_RESUME.equals(state) ||
-                           UpdateService.STATE_ACTION_DOWNLOADING_PAUSED.equals(state)) {
-                    disableCheckNow = true;
-                    enableDownload = true;
-                    enableResume = true;
-                }
-
-                current = intent.getLongExtra(UpdateService.EXTRA_CURRENT, current);
-                total = intent.getLongExtra(UpdateService.EXTRA_TOTAL, total);
-                mProgress.setIndeterminate(false);
-
-                long downloadSize = mPrefs.getLong(
-                        UpdateService.PREF_DOWNLOAD_SIZE, -1);
-                if (downloadSize == -1) {
-                    downloadSizeText = "";
-                } else if (downloadSize == 0) {
-                    downloadSizeText = getString(R.string.text_download_size_unknown);
-                } else {
-                    downloadSizeText = Formatter.formatFileSize(context, downloadSize);
-                }
-
-                updateVersion = getUpdateVersionString();
-
-                final String flashImage = mPrefs.getString(
-                        UpdateService.PREF_READY_FILENAME_NAME, null);
-                String flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
-                if (flashImageBase != null) {
-                    updateVersion = flashImageBase.substring(0,
-                            flashImageBase.lastIndexOf('.'));
-                }
-
-                // long --> int overflows FTL (progress.setXXX)
-                boolean progressInK = false;
-                if (total > 1024L * 1024L * 1024L) {
-                    progressInK = true;
-                    current /= 1024L;
-                    total /= 1024L;
-                }
-
-                String filename = intent
-                        .getStringExtra(UpdateService.EXTRA_FILENAME);
-                if (filename != null) {
-                    sub = filename;
-                    long ms = intent.getLongExtra(UpdateService.EXTRA_MS, 0);
-                    progressPercent = String.format(Locale.ENGLISH, "%.0f %%",
-                                intent.getFloatExtra(UpdateService.EXTRA_PROGRESS, 0));
-
-                    if ((ms > 500) && (current > 0) && (total > 0)) {
-                        float kibps = ((float) current / 1024f) / ((float) ms / 1000f);
-                        if (progressInK) kibps *= 1024f;
-                        int sec = (int) (((((float) total / (float) current) * (float) ms) - ms) / 1000f);
-                        if (disableDataSpeed) {
-                            sub2 = String.format(Locale.ENGLISH,
-                                    "%02d:%02d",
-                                    sec / 60, sec % 60);
-                        } else {
-                            if (kibps < 1024) {
-                                sub2 = String.format(Locale.ENGLISH,
-                                        "%.0f KiB/s, %02d:%02d",
-                                        kibps, sec / 60, sec % 60);
-                            } else {
-                                sub2 = String.format(Locale.ENGLISH,
-                                        "%.0f MiB/s, %02d:%02d",
-                                        kibps / 1024f, sec / 60, sec % 60);
+                                if (kibps < 1024) {
+                                    sub2 = String.format(Locale.ENGLISH,
+                                            "%.0f KiB/s, %02d:%02d",
+                                            kibps, sec / 60, sec % 60);
+                                } else {
+                                    sub2 = String.format(Locale.ENGLISH,
+                                            "%.0f MiB/s, %02d:%02d",
+                                            kibps / 1024f, sec / 60, sec % 60);
+                                }
                             }
                         }
                     }
                 }
-            }
-            mTitle.setText(title);
-            mSub.setText(sub);
-            mSub2.setText(sub2);
-            mProgressPercent.setText(progressPercent);
-            final boolean hideVersion = TextUtils.isEmpty(updateVersion);
-            if (!hideVersion) mUpdateVersion.setText(updateVersion);
-            mUpdateVersion.setVisibility(hideVersion ? View.GONE : View.VISIBLE);
-            mUpdateVersionTitle.setVisibility(hideVersion ? View.GONE : View.VISIBLE);
-            mCurrentVersion.setText(mConfig.getFilenameBase());
-            mLastChecked.setText(lastCheckedText);
-            mExtraText.setText(extraText);
-            final boolean hideSize = TextUtils.isEmpty(downloadSizeText);
-            if (!hideSize) mDownloadSize.setText(downloadSizeText);
-            mDownloadSize.setVisibility(hideSize ? View.GONE : View.VISIBLE);
-            mDownloadSizeHeader.setVisibility(hideSize ? View.GONE : View.VISIBLE);
-            mDownloadSizeSpacer.setVisibility(hideSize ? View.GONE : View.VISIBLE);
+                mTitle.setText(title);
+                mSub.setText(sub);
+                mSub2.setText(sub2);
+                mProgressPercent.setText(progressPercent);
+                final boolean hideVersion = TextUtils.isEmpty(updateVersion);
+                if (!hideVersion) mUpdateVersion.setText(updateVersion);
+                mUpdateVersion.setVisibility(hideVersion ? View.GONE : View.VISIBLE);
+                mUpdateVersionTitle.setVisibility(hideVersion ? View.GONE : View.VISIBLE);
+                mCurrentVersion.setText(mConfig.getFilenameBase());
+                mLastChecked.setText(lastCheckedText);
+                mExtraText.setText(extraText);
+                final boolean hideSize = TextUtils.isEmpty(downloadSizeText);
+                if (!hideSize) mDownloadSize.setText(downloadSizeText);
+                mDownloadSize.setVisibility(hideSize ? View.GONE : View.VISIBLE);
+                mDownloadSizeHeader.setVisibility(hideSize ? View.GONE : View.VISIBLE);
+                mDownloadSizeSpacer.setVisibility(hideSize ? View.GONE : View.VISIBLE);
 
-            mProgressCurrent = (int) current;
-            mProgressMax = (int) total;
-            mProgressEnabled = enableProgress;
+                mProgressCurrent = Math.round(localCurrent);
+                mProgressMax = Math.round(localTotal);
+                mProgressEnabled = enableProgress;
 
-            handleProgressBar();
+                handleProgressBar();
 
-            mCheckBtn.setEnabled(mPermOk && enableCheck);
-            mBuildBtn.setEnabled(mPermOk && enableBuild);
-            mFlashBtn.setEnabled(mPermOk && enableFlash);
-            mRebootBtn.setEnabled(enableReboot);
-            mFileFlashButton.setEnabled(mPermOk && enableCheck);
-            mCheckBtn.setVisibility(disableCheckNow ? View.GONE : View.VISIBLE);
-            mFlashBtn.setVisibility(enableFlash ? View.VISIBLE : View.GONE);
-            mBuildBtn.setVisibility(!enableBuild || enableFlash ? View.GONE : View.VISIBLE);
-            mRebootBtn.setVisibility(enableReboot ? View.VISIBLE : View.GONE);
-            mFileFlashButton.setVisibility(disableCheckNow ? View.GONE : View.VISIBLE);
+                mCheckBtn.setEnabled(mPermOk && enableCheck);
+                mBuildBtn.setEnabled(mPermOk && enableBuild);
+                mFlashBtn.setEnabled(mPermOk && enableFlash);
+                mRebootBtn.setEnabled(enableReboot);
+                mFileFlashButton.setEnabled(mPermOk && enableCheck);
+                mCheckBtn.setVisibility(disableCheckNow ? View.GONE : View.VISIBLE);
+                mFlashBtn.setVisibility(enableFlash ? View.VISIBLE : View.GONE);
+                mBuildBtn.setVisibility(!enableBuild || enableFlash ? View.GONE : View.VISIBLE);
+                mRebootBtn.setVisibility(enableReboot ? View.VISIBLE : View.GONE);
+                mFileFlashButton.setVisibility(disableCheckNow ? View.GONE : View.VISIBLE);
 
-            // handle changelog
-            if (enableChangelog) {
-                final String cl = mPrefs.getString(UpdateService.PREF_LATEST_CHANGELOG, null);
-                if (cl != null) mChangelog.setText(cl);
-                else enableChangelog = false;
-            }
-            mChangelog.setVisibility(enableChangelog ? View.VISIBLE : View.GONE);
-            mChangelogHeader.setVisibility(enableChangelog ? View.VISIBLE : View.GONE);
-            mChangelogPlaceholder.setVisibility(enableChangelog ? View.GONE : View.VISIBLE);
+                // handle changelog
+                if (enableChangelog) {
+                    final String cl = mPrefs.getString(UpdateService.PREF_LATEST_CHANGELOG, null);
+                    if (cl != null) mChangelog.setText(cl);
+                    else enableChangelog = false;
+                }
+                mChangelog.setVisibility(enableChangelog ? View.VISIBLE : View.GONE);
+                mChangelogHeader.setVisibility(enableChangelog ? View.VISIBLE : View.GONE);
+                mChangelogPlaceholder.setVisibility(enableChangelog ? View.GONE : View.VISIBLE);
 
-            // download buttons
-            final int vis = enableDownload ? View.VISIBLE : View.GONE;
-            mStopBtn.setVisibility(vis);
-            mPauseBtn.setVisibility(vis);
-            mPauseBtn.setText(getString(enableResume ? R.string.button_resume_text 
-                                                    : R.string.button_pause_text));
+                // download buttons
+                final int vis = enableDownload ? View.VISIBLE : View.GONE;
+                mStopBtn.setVisibility(vis);
+                mPauseBtn.setVisibility(vis);
+                mPauseBtn.setText(getString(enableResume ? R.string.button_resume_text
+                        : R.string.button_pause_text));
+            });
         }
     };
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        registerReceiver(updateReceiver, updateFilter);
-    }
-
-    @Override
-    protected void onStop() {
-        unregisterReceiver(updateReceiver);
-        super.onStop();
-    }
 
     @Override
     protected void onResume() {
         super.onResume();
         handleProgressBar();
         updateInfoVisibility();
-        if (!mFileSelection) UpdateService.startCheck(this);
-        else mFileSelection = false;
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-        // Called for a new screen orientation
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ||
-            newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            handleProgressBar();
-        }
     }
 
     public void onButtonCheckNowClick(View v) {
         mPrefs.edit().putBoolean(SettingsActivity.PREF_START_HINT_SHOWN, true).commit();
-        UpdateService.startCheck(this);
+        startUpdateService(UpdateService.ACTION_CHECK);
     }
 
     public void onButtonRebootNowClick(View v) {
@@ -647,7 +645,7 @@ public class MainActivity extends Activity {
     }
 
     public void onButtonBuildNowClick(View v) {
-        UpdateService.startBuild(this);
+        startUpdateService(UpdateService.ACTION_BUILD);
     }
 
     public void onButtonFlashNowClick(View v) {
@@ -659,16 +657,11 @@ public class MainActivity extends Activity {
     }
 
     public void onButtonStopClick(View v) {
-        mPrefs.edit().putInt(UpdateService.PREF_STOP_DOWNLOAD,
-                UpdateService.PREF_STOP_DOWNLOAD_STOP).commit();
+        startUpdateService(UpdateService.ACTION_DOWNLOAD_STOP);
     }
 
     public void onButtonPauseClick(View v) {
-        final boolean isResume = ((Button) v).getText().toString()
-                .equals(getString(R.string.button_resume_text));
-        mPrefs.edit().putInt(UpdateService.PREF_STOP_DOWNLOAD,
-        isResume ? UpdateService.PREF_STOP_DOWNLOAD_RESUME
-                 : UpdateService.PREF_STOP_DOWNLOAD_PAUSE).commit();
+        startUpdateService(UpdateService.ACTION_DOWNLOAD_PAUSE);
     }
 
     private final Runnable flashRecoveryWarning = new Runnable() {
@@ -736,7 +729,7 @@ public class MainActivity extends Activity {
         mCheckBtn.setEnabled(false);
         mFlashBtn.setEnabled(false);
         mBuildBtn.setEnabled(false);
-        UpdateService.startFlash(MainActivity.this);
+        startUpdateService(UpdateService.ACTION_FLASH);
     };
 
     private void requestPermissions() {
@@ -750,7 +743,7 @@ public class MainActivity extends Activity {
             startActivityForResult(intent, PERMISSIONS_REQUEST_MANAGE_EXTERNAL_STORAGE);
         } else {
             mPermOk = true;
-            UpdateService.start(this);
+            startUpdateService(null);
         }
     }
 
@@ -776,7 +769,7 @@ public class MainActivity extends Activity {
             Logger.d("Try flash file: %s", uri.getPath());
             String flashFilename = getPath(uri);
             if (flashFilename != null) {
-                UpdateService.startFlashFile(this, flashFilename);
+                startUpdateServiceFile(flashFilename);
             } else {
                 Intent i = new Intent(UpdateService.BROADCAST_INTENT);
                 i.putExtra(UpdateService.EXTRA_STATE, UpdateService.STATE_ERROR_FLASH_FILE);
@@ -785,7 +778,7 @@ public class MainActivity extends Activity {
         } else if (requestCode == PERMISSIONS_REQUEST_MANAGE_EXTERNAL_STORAGE
                 && resultCode == Activity.RESULT_OK) {
             mPermOk = Environment.isExternalStorageManager();
-            UpdateService.start(this);
+            startUpdateService(null);
         }
     }
 
@@ -838,7 +831,6 @@ public class MainActivity extends Activity {
     }
 
     public void onButtonSelectFileClick(View v) {
-        mFileSelection = true;
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.setType("application/zip");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
