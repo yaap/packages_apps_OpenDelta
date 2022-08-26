@@ -439,7 +439,7 @@ public class MainActivity extends Activity {
                 } else if (UpdateService.STATE_ACTION_AB_FINISHED.equals(state)) {
                     enableReboot = true;
                     disableCheckNow = true;
-                    enableChangelog = true;
+                    enableChangelog = !mPrefs.getBoolean(UpdateService.PREF_FILE_FLASH, false);
                     mProgress.setIndeterminate(false);
 
                     final String flashImage = mPrefs.getString(
@@ -452,9 +452,7 @@ public class MainActivity extends Activity {
                     }
 
                     mPrefs.edit().putString(UpdateService.PREF_READY_FILENAME_NAME, null).commit();
-                    mPrefs.edit().putBoolean(UpdateService.PREF_FILE_FLASH, false).commit();
                     mPrefs.edit().putString(UpdateService.PREF_LATEST_FULL_NAME, null).commit();
-
                 } else if (UpdateService.STATE_ACTION_BUILD.equals(state)) {
                     enableCheck = true;
                     mProgress.setIndeterminate(false);
@@ -500,7 +498,7 @@ public class MainActivity extends Activity {
                     mProgress.setIndeterminate(true);
                     localCurrent = 1L;
                 } else {
-                    enableChangelog = true;
+                    enableChangelog = !mPrefs.getBoolean(UpdateService.PREF_FILE_FLASH, false);
                     enableProgress = true;
                     if (UpdateService.STATE_ACTION_AB_FLASH.equals(state)) {
                         disableDataSpeed = true;

@@ -524,16 +524,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         }
 
         // Check if a previous update was done already
-        if (mPrefs.getBoolean(PREF_PENDING_REBOOT, false) ||
-            mState.equals(STATE_ACTION_AB_FINISHED)) {
-            updateState(STATE_ACTION_AB_FINISHED);
-            return;
-        }
-        if (ABUpdate.isInstallingUpdate(this)) {
-            final String lastFilename = mPrefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
-            ABUpdate.pokeStatus(lastFilename, this);
-            return;
-        }
+        if (checkForFinishedUpdate()) return;
 
         // Check if we're currently installing an A/B update
         if (Config.isABDevice() && ABUpdate.isInstallingUpdate(this)) {
@@ -1355,16 +1346,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             return false;
 
         // Check if a previous update was done already
-        if (mState.equals(STATE_ACTION_AB_FINISHED)) return false;
-        if (mPrefs.getBoolean(PREF_PENDING_REBOOT, false)) {
-            updateState(STATE_ACTION_AB_FINISHED);
-            return false;
-        }
-        if (ABUpdate.isInstallingUpdate(this)) {
-            final String lastFilename = mPrefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
-            ABUpdate.pokeStatus(lastFilename, this);
-            return false;
-        }
+        if (checkForFinishedUpdate()) return false;
 
         Logger.d("checkForUpdates checkOnly = " + checkOnly + " mIsUpdateRunning = " + mIsUpdateRunning + " userInitiated = " + userInitiated +
                 " mNetworkState.getState() = " + mNetworkState.getState() + " mBatteryState.getState() = " + mBatteryState.getState() +
@@ -1375,6 +1357,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             return false;
         }
 
+        clearState();
         stopNotification();
         stopErrorNotification();
 
@@ -1795,7 +1778,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     private String handleUpdateCleanup() throws FileNotFoundException {
         String flashFilename = mPrefs.getString(PREF_READY_FILENAME_NAME, null);
         String initialFile = mPrefs.getString(PREF_INITIAL_FILE, null);
-        boolean fileFlash =  mPrefs.getBoolean(PREF_FILE_FLASH, true);
+        boolean fileFlash = mPrefs.getBoolean(PREF_FILE_FLASH, false);
 
         if (flashFilename == null
                 || (!fileFlash && !flashFilename.startsWith(mConfig.getPathBase()))
@@ -2171,6 +2154,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         editor.putString(PREF_LATEST_CHANGELOG, null);
         editor.putLong(PREF_DOWNLOAD_SIZE, -1);
         editor.putBoolean(PREF_DELTA_SIGNATURE, false);
+        editor.putBoolean(PREF_FILE_FLASH, false);
         editor.putString(PREF_INITIAL_FILE, null);
         editor.commit();
     }
@@ -2211,8 +2195,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 String flashFilename = null;
                 (new File(mConfig.getPathBase())).mkdir();
                 (new File(mConfig.getPathFlashAfterUpdate())).mkdir();
-
-                clearState();
 
                 List<String> latestFullBuildWithUrl = getNewestFullBuild();
                 String latestFullBuild;
@@ -2557,6 +2539,19 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             file.delete();
         }
         return false;
+    }
+
+    private boolean checkForFinishedUpdate() {
+        final boolean finished = 
+                mPrefs.getBoolean(PREF_PENDING_REBOOT, false) ||
+                mState.equals(STATE_ACTION_AB_FINISHED) ||
+                ABUpdate.isInstallingUpdate(this);
+        if (finished) {
+            final String lastFilename = mPrefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
+            mPrefs.edit().putBoolean(PREF_PENDING_REBOOT, false).commit();
+            ABUpdate.pokeStatus(lastFilename, this);
+        }
+        return finished;
     }
 
     private boolean checkPermissions() {
