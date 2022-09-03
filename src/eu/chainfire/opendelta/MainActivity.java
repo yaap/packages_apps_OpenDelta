@@ -330,6 +330,7 @@ public class MainActivity extends Activity {
                             localCurrent /= 1024L;
                             localTotal /= 1024L;
                         }
+                        sub = filename;
                         progressPercent = String.format(Locale.ENGLISH, "%.0f %%", progress);
                         if ((localMS > 500) && (localCurrent > 0) && (localTotal > 0)) {
                             float kibps = ((float) localCurrent / 1024f) / ((float) localMS / 1000f);
@@ -352,6 +353,7 @@ public class MainActivity extends Activity {
                                 }
                             }
                         }
+                        mSub.setText(sub);
                         mSub2.setText(sub2);
                         mProgressPercent.setText(progressPercent);
                         mProgressCurrent = Math.round(localCurrent);

@@ -537,7 +537,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             updateState(STATE_ACTION_AB_FLASH, 0f, 0L, 100L, _filename, null);
             mIsUpdateRunning = ABUpdate.resume(flashFilename, mProgressListener, this);
             if (!mIsUpdateRunning) {
-                stopNotification();
+                mNotificationManager.cancel(NOTIFICATION_UPDATE);
                 updateState(STATE_ERROR_AB_FLASH);
             } else {
                 newFlashNotification(_filename);
@@ -722,10 +722,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 .setContentText(flashFilename).build());
     }
 
-    private void stopNotification() {
-        mNotificationManager.cancel(NOTIFICATION_UPDATE);
-    }
-
     private void startErrorNotification() {
         String errorStateString = null;
         try {
@@ -745,10 +741,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     .setShowWhen(true)
                     .setContentIntent(getNotificationIntent(false)).build());
         }
-    }
-
-    private void stopErrorNotification() {
-        mNotificationManager.cancel(NOTIFICATION_ERROR);
     }
 
     private HttpsURLConnection setupHttpsRequest(String urlStr) {
@@ -1358,8 +1350,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         }
 
         clearState();
-        stopNotification();
-        stopErrorNotification();
+        mNotificationManager.cancel(NOTIFICATION_UPDATE);
+        mNotificationManager.cancel(NOTIFICATION_ERROR);
 
         // so we have a time even in the error case
         mPrefs.edit().putLong(PREF_LAST_CHECK_TIME_NAME, System.currentTimeMillis()).apply();
@@ -1799,7 +1791,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
     protected void onUpdateCompleted(int status, int errorCode) {
         Logger.d("onUpdateCompleted status = " + status);
-        stopNotification();
+        mNotificationManager.cancel(NOTIFICATION_UPDATE);
         mIsUpdateRunning = false;
         if (status == UpdateEngine.ErrorCodeConstants.SUCCESS) {
             mPrefs.edit().putBoolean(PREF_PENDING_REBOOT, true).commit();
@@ -1896,12 +1888,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 mProgressListener.setStatus(_filename);
                 mIsUpdateRunning = true;
                 if (!ABUpdate.start(flashFilename, mProgressListener, this)) {
-                    stopNotification();
+                    mNotificationManager.cancel(NOTIFICATION_UPDATE);
                     updateState(STATE_ERROR_AB_FLASH);
                     mIsUpdateRunning = false;
                 }
             } else {
-                stopNotification();
+                mNotificationManager.cancel(NOTIFICATION_UPDATE);
                 updateState(STATE_ERROR_AB_FLASH);
                 mIsUpdateRunning = false;
             }
