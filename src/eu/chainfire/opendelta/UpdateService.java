@@ -114,32 +114,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     public static final String EXTRA_STATE = "eu.chainfire.opendelta.extra.ACTION_STATE";
     public static final String EXTRA_FILENAME = "eu.chainfire.opendelta.extra.FILENAME";
 
-    public static final String STATE_ACTION_NONE = "action_none";
-    public static final String STATE_ACTION_CHECKING = "action_checking";
-    public static final String STATE_ACTION_CHECKING_SUM = "action_checking_sum";
-    public static final String STATE_ACTION_SEARCHING = "action_searching";
-    public static final String STATE_ACTION_SEARCHING_SUM = "action_searching_sum";
-    public static final String STATE_ACTION_DOWNLOADING = "action_downloading";
-    public static final String STATE_ACTION_DOWNLOADING_PAUSED = "action_downloading_paused";
-    public static final String STATE_ACTION_APPLYING = "action_applying";
-    public static final String STATE_ACTION_APPLYING_PATCH = "action_applying_patch";
-    public static final String STATE_ACTION_APPLYING_SUM = "action_applying_sum";
-    public static final String STATE_ACTION_READY = "action_ready";
-    public static final String STATE_ACTION_AB_FLASH = "action_ab_flash";
-    public static final String STATE_ACTION_AB_FINISHED = "action_ab_finished";
-    public static final String STATE_ERROR_DISK_SPACE = "error_disk_space";
-    public static final String STATE_ERROR_UNKNOWN = "error_unknown";
-    public static final String STATE_ERROR_UNOFFICIAL = "error_unofficial";
-    public static final String STATE_ACTION_BUILD = "action_build";
-    public static final String STATE_ERROR_DOWNLOAD = "error_download";
-    public static final String STATE_ERROR_DOWNLOAD_RESUME = "error_download_resume";
-    public static final String STATE_ERROR_CONNECTION = "error_connection";
-    public static final String STATE_ERROR_PERMISSIONS = "error_permissions";
-    public static final String STATE_ERROR_FLASH = "error_flash";
-    public static final String STATE_ERROR_AB_FLASH = "error_ab_flash";
-    public static final String STATE_ERROR_FLASH_FILE = "error_flash_file";
-    public static final String STATE_ACTION_FLASH_FILE_READY = "action_flash_file_ready";
-
     public static final String ACTION_CHECK = "eu.chainfire.opendelta.action.CHECK";
     public static final String ACTION_FLASH = "eu.chainfire.opendelta.action.FLASH";
     public static final String ACTION_ALARM = "eu.chainfire.opendelta.action.ALARM";
@@ -204,7 +178,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     private HandlerThread mHandlerThread;
     private Handler mHandler;
 
-    private String mState = STATE_ACTION_NONE;
+    private State mState = State.getInstance();
 
     private NetworkState mNetworkState;
     private BatteryState mBatteryState;
@@ -237,7 +211,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             if (now >= mLastProgressTime[0] + 250L) {
                 long ms = SystemClock.elapsedRealtime() - mLastProgressTime[1];
                 int sec = (int) (((((float) total / (float) current) * (float) ms) - ms) / 1000f);
-                updateState(STATE_ACTION_AB_FLASH, progress, current, total, this.status, ms);
+                mState.update(State.ACTION_AB_FLASH, progress, current, total, this.status, ms);
                 setFlashNotificationProgress((int) progress, sec);
                 mLastProgressTime[0] = now;
             }
@@ -254,23 +228,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         UpdateService getService() {
             return UpdateService.this;
         }
-    }
-
-    private StateCallback mStateCallback;
-
-    public interface StateCallback {
-        void updateState(String state, Float progress,
-                Long current, Long total, String filename,
-                Long ms, int errorCode);
-    }
-
-    public void registerStateCallback(StateCallback callback) {
-        mStateCallback = callback;
-        updateState(mState);
-    }
-
-    public void unregisterStateCallback() {
-        mStateCallback = null;
     }
 
     /*
@@ -412,8 +369,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 if (mNotificationManager != null)
                     mNotificationManager.cancel(NOTIFICATION_BUSY);
                 // if we have a paused download in progress we need to manually stop it
-                if (mState.equals(STATE_ERROR_DOWNLOAD_RESUME) ||
-                        mState.equals(STATE_ACTION_DOWNLOADING_PAUSED)) {
+                if (mState.equals(State.ERROR_DOWNLOAD_RESUME) ||
+                        mState.equals(State.ACTION_DOWNLOADING_PAUSED)) {
                     // to do so we just need to remove the file and update state
                     File[] files = new File(mConfig.getPathBase()).listFiles();
                     for (File file : files)
@@ -423,8 +380,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 }
                 break;
             case ACTION_DOWNLOAD_PAUSE:
-                final boolean isPaused = mState.equals(STATE_ACTION_DOWNLOADING_PAUSED) ||
-                        mState.equals(STATE_ERROR_DOWNLOAD_RESUME);
+                final boolean isPaused = mState.equals(State.ACTION_DOWNLOADING_PAUSED) ||
+                        mState.equals(State.ERROR_DOWNLOAD_RESUME);
                 if (isPaused) {
                     // resume
                     mStopDownload = -1;
@@ -441,24 +398,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         }
     }
 
-    private void updateState(String state) {
-        updateState(state, null, null, null, null, null);
-    }
-
-    private void updateState(String state, Float progress,
-            Long current, Long total, String filename, Long ms) {
-        updateState(state, progress, current,  total,  filename,  ms, -1);
-    }
-
-    private synchronized void updateState(String state, Float progress,
-            Long current, Long total, String filename, Long ms, int errorCode) {
-        mState = state;
-        if (mStateCallback != null)
-            mStateCallback.updateState(state, progress, current,
-                    total, filename, ms, errorCode);
-    }
-
-    public synchronized String getState() {
+    public State getState() {
         return mState;
     }
 
@@ -480,7 +420,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
     @Override
     public boolean onWantUpdateCheck() {
-        if (isProgressState(mState)) {
+        if (mState.isProgressState()) {
             Logger.i("Blocked scheduler requests while running in state " + mState);
             return false;
         }
@@ -519,7 +459,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     private void autoState(boolean userInitiated, int checkOnly, boolean notify) {
         Logger.d("autoState state = " + mState + " userInitiated = " + userInitiated + " checkOnly = " + checkOnly);
 
-        if (isErrorState(mState)) {
+        if (mState.isErrorState()) {
             return;
         }
 
@@ -534,11 +474,11 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             if (mLastProgressTime == null)
                 mLastProgressTime = new long[] { 0, SystemClock.elapsedRealtime() };
             mProgressListener.setStatus(_filename);
-            updateState(STATE_ACTION_AB_FLASH, 0f, 0L, 100L, _filename, null);
+            mState.update(State.ACTION_AB_FLASH, 0f, 0L, 100L, _filename, null);
             mIsUpdateRunning = ABUpdate.resume(flashFilename, mProgressListener, this);
             if (!mIsUpdateRunning) {
                 mNotificationManager.cancel(NOTIFICATION_UPDATE);
-                updateState(STATE_ERROR_AB_FLASH);
+                mState.update(State.ERROR_AB_FLASH);
             } else {
                 newFlashNotification(_filename);
             }
@@ -572,7 +512,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 final long current = found.length();
                 final long lastTime = mPrefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
                 final float progress = ((float) current / (float) total) * 100f;
-                updateState(STATE_ACTION_DOWNLOADING_PAUSED, progress, current, total, latestFullBuild, lastTime);
+                mState.update(State.ACTION_DOWNLOADING_PAUSED, progress, current, total, latestFullBuild, lastTime);
                 // display paused notification with the proper title
                 newDownloadNotification(true, getString(R.string.state_action_downloading_paused));
                 mDownloadNotificationBuilder.setProgress(100, Math.round(progress), false);
@@ -587,12 +527,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             Logger.d("Checking step done");
             if (!updateAvailable()) {
                 Logger.d("System up to date");
-                updateState(STATE_ACTION_NONE, null, null, null, null,
+                mState.update(State.ACTION_NONE, null, null, null, null,
                         mPrefs.getLong(PREF_LAST_CHECK_TIME_NAME,
                                 PREF_LAST_CHECK_TIME_DEFAULT));
             } else {
                 Logger.d("Update available");
-                updateState(STATE_ACTION_BUILD, null, null, null, null,
+                mState.update(State.ACTION_BUILD, null, null, null, null,
                         mPrefs.getLong(PREF_LAST_CHECK_TIME_NAME,
                                 PREF_LAST_CHECK_TIME_DEFAULT));
                 if (!userInitiated && notify) {
@@ -608,12 +548,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
         if (filename == null) {
             Logger.d("System up to date");
-            updateState(STATE_ACTION_NONE, null, null, null, null,
+            mState.update(State.ACTION_NONE, null, null, null, null,
                     mPrefs.getLong(PREF_LAST_CHECK_TIME_NAME,
                             PREF_LAST_CHECK_TIME_DEFAULT));
         } else {
             Logger.d("Update found: %s", filename);
-            updateState(STATE_ACTION_READY, null, null, null, (new File(
+            mState.update(State.ACTION_READY, null, null, null, (new File(
                     filename)).getName(), mPrefs.getLong(
                             PREF_LAST_CHECK_TIME_NAME, PREF_LAST_CHECK_TIME_DEFAULT));
 
@@ -944,7 +884,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
         try {
             final String userFN = f.getName().substring(0, f.getName().length() - 5);
-            updateState(STATE_ACTION_DOWNLOADING, 0f, 0L, 0L, userFN, null);
+            mState.update(State.ACTION_DOWNLOADING, 0f, 0L, 0L, userFN, null);
             urlConnection = setupHttpsRequest(url);
             if (urlConnection == null) return false;
 
@@ -957,12 +897,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 Logger.d("Resuming download at: " + offset);
             }
 
-            updateState(STATE_ACTION_DOWNLOADING, 0f, 0L, len, userFN, null);
+            mState.update(State.ACTION_DOWNLOADING, 0f, 0L, len, userFN, null);
 
             long freeSpace = (new StatFs(mConfig.getPathBase()))
                     .getAvailableBytes();
             if (freeSpace < len - offset) {
-                updateState(STATE_ERROR_DISK_SPACE, null, freeSpace, len, null,
+                mState.update(State.ERROR_DISK_SPACE, null, freeSpace, len, null,
                         null);
                 Logger.d("not enough space!");
                 return false;
@@ -979,7 +919,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     progress = ((float) current / (float) total) * 100f;
                     long now = SystemClock.elapsedRealtime();
                     if (now >= last[2] + 250L) {
-                        updateState(STATE_ACTION_DOWNLOADING, progress,
+                        mState.update(State.ACTION_DOWNLOADING, progress,
                                 current, total, userFN, now - last[3]);
                         setDownloadNotificationProgress(progress, current,
                                 total,now - last[3]);
@@ -1016,7 +956,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
                 StringBuilder SUM;
                 if (offset > 0) {
-                    SUM = new StringBuilder(getFileSHA256(f, getSUMProgress(STATE_ACTION_CHECKING_SUM, f.getName())));
+                    SUM = new StringBuilder(getFileSHA256(f, getSUMProgress(State.ACTION_CHECKING_SUM, f.getName())));
                 } else {
                     if (digest == null) return false;
                     SUM = new StringBuilder(new BigInteger(1, digest.digest())
@@ -1033,7 +973,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     Logger.i("SUM check failed for " + url);
                     // if sum does not match when done, get rid
                     f.delete();
-                    updateState(STATE_ERROR_DOWNLOAD);
+                    mState.update(State.ERROR_DOWNLOAD);
                 }
                 return sumCheck;
             }
@@ -1110,7 +1050,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
         String buildData = downloadUrlMemoryAsString(url);
         if (buildData == null || buildData.length() == 0) {
-            updateState(STATE_ERROR_DOWNLOAD, null, null, null, url, null);
+            mState.update(State.ERROR_DOWNLOAD, null, null, null, url, null);
             mNotificationManager.cancel(NOTIFICATION_BUSY);
             return null;
         }
@@ -1168,7 +1108,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         } catch (Exception e) {
             Logger.ex(e);
         }
-        updateState(STATE_ERROR_UNOFFICIAL, null, null, null, mConfig.getVersion(), null);
+        mState.update(State.ERROR_UNOFFICIAL, null, null, null, mConfig.getVersion(), null);
         return null;
     }
 
@@ -1183,7 +1123,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             public void onProgress(float progress, long current, long total) {
                 long now = SystemClock.elapsedRealtime();
                 if (now >= last[0] + 16L) {
-                    updateState(_state, progress, current, total, _filename,
+                    mState.update(_state, progress, current, total, _filename,
                             SystemClock.elapsedRealtime() - last[1]);
                     last[0] = now;
                 }
@@ -1220,7 +1160,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     if (mStopDownload >= 0) {
                         Logger.d("download stopped");
                     } else {
-                        updateState(STATE_ERROR_DOWNLOAD, null, null, null,
+                        mState.update(State.ERROR_DOWNLOAD, null, null, null,
                                 fn, null);
                         Logger.d("download error");
                         mNotificationManager.cancel(NOTIFICATION_BUSY);
@@ -1249,7 +1189,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             while (true) {
                 try {
                     long current = _currentOut + _file.length();
-                    updateState(STATE_ACTION_APPLYING_PATCH,
+                    mState.update(State.ACTION_APPLYING_PATCH,
                             ((float) current / (float) _totalOut) * 100f,
                             current, _totalOut, _display,
                             SystemClock.elapsedRealtime() - _start);
@@ -1358,12 +1298,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
         if (!isSupportedVersion()) {
             // TODO - to be more generic this should maybe use the info from getNewestFullBuild
-            updateState(STATE_ERROR_UNOFFICIAL, null, null, null, mConfig.getVersion(), null);
+            mState.update(State.ERROR_UNOFFICIAL, null, null, null, mConfig.getVersion(), null);
             Logger.i("Ignoring request to check for updates - not compatible for update! " + mConfig.getVersion());
             return false;
         }
         if (!mNetworkState.isConnected()) {
-            updateState(STATE_ERROR_CONNECTION);
+            mState.update(State.ERROR_CONNECTION);
             Logger.i("Ignoring request to check for updates - no data connection");
             return false;
         }
@@ -1394,7 +1334,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     }
 
     private long getDeltaDownloadSize(List<DeltaInfo> deltas) {
-        updateState(STATE_ACTION_CHECKING);
+        mState.update(State.ACTION_CHECKING);
 
         long deltaDownloadSize = 0L;
         for (DeltaInfo di : deltas) {
@@ -1402,7 +1342,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             if (di.getUpdate().match(
                     new File(fn),
                     true,
-                    getSUMProgress(STATE_ACTION_CHECKING_SUM, di.getUpdate()
+                    getSUMProgress(State.ACTION_CHECKING_SUM, di.getUpdate()
                             .getName())) == di.getUpdate().getUpdate()) {
                 di.getUpdate().setTag(fn);
             } else {
@@ -1418,7 +1358,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 if (lastDelta.getSignature().match(
                         new File(fn),
                         true,
-                        getSUMProgress(STATE_ACTION_CHECKING_SUM, lastDelta
+                        getSUMProgress(State.ACTION_CHECKING_SUM, lastDelta
                                 .getSignature().getName())) == lastDelta
                                 .getSignature().getUpdate()) {
                     lastDelta.getSignature().setTag(fn);
@@ -1429,7 +1369,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             }
         }
 
-        updateState(STATE_ACTION_CHECKING);
+        mState.update(State.ACTION_CHECKING);
 
         return deltaDownloadSize;
     }
@@ -1478,7 +1418,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
         DeltaInfo firstDelta = deltas.get(0);
 
-        updateState(STATE_ACTION_SEARCHING);
+        mState.update(State.ACTION_SEARCHING);
 
         String initialFile = null;
 
@@ -1499,7 +1439,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             match = firstDelta.getIn().match(
                     new File(expectedLocation),
                     true,
-                    getSUMProgress(STATE_ACTION_SEARCHING_SUM, firstDelta
+                    getSUMProgress(State.ACTION_SEARCHING_SUM, firstDelta
                             .getIn().getName()));
             if (match != null) {
                 initialFile = expectedLocation;
@@ -1521,7 +1461,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         DeltaInfo lastDelta = deltas.get(deltas.size() - 1);
 
         final String[] filename = new String[] { null };
-        updateState(STATE_ACTION_DOWNLOADING, 0f, 0L, totalDownloadSize, null,
+        mState.update(State.ACTION_DOWNLOADING, 0f, 0L, totalDownloadSize, null,
                 null);
 
         final long[] last = new long[] { 0, totalDownloadSize, 0,
@@ -1534,7 +1474,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 progress = ((float) current / (float) total) * 100f;
                 long now = SystemClock.elapsedRealtime();
                 if (now >= last[2] + 250L) {
-                    updateState(STATE_ACTION_DOWNLOADING, progress, current,
+                    mState.update(State.ACTION_DOWNLOADING, progress, current,
                             total, filename[0], SystemClock.elapsedRealtime()
                             - last[3]);
                     setDownloadNotificationProgress(progress, current, total,
@@ -1565,7 +1505,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 return false;
             }
         }
-        updateState(STATE_ACTION_DOWNLOADING, 100f, totalDownloadSize,
+        mState.update(State.ACTION_DOWNLOADING, 100f, totalDownloadSize,
                 totalDownloadSize, null, null);
 
         return true;
@@ -1601,17 +1541,17 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 autoState(false, PREF_AUTO_DOWNLOAD_DISABLED, false);
                 mNotificationManager.cancel(NOTIFICATION_BUSY);
             } else if (mStopDownload != PREF_STOP_DOWNLOAD_RESUME &&
-                       !mState.equals(STATE_ERROR_DOWNLOAD)) {
+                       !mState.equals(State.ERROR_DOWNLOAD)) {
                 // either pause or error
                 final Long current = f.length();
                 final Long total = mPrefs.getLong(PREF_DOWNLOAD_SIZE, 1500000000L /* 1.5GB */);
                 final Long lastTime = mPrefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
                 final float progress = ((float) current / (float) total) * 100f;
                 final boolean isPause = mStopDownload == PREF_STOP_DOWNLOAD_PAUSE;
-                final String newState = isPause ? STATE_ACTION_DOWNLOADING_PAUSED
-                                                : STATE_ERROR_DOWNLOAD_RESUME;
+                final String newState = isPause ? State.ACTION_DOWNLOADING_PAUSED
+                                                : State.ERROR_DOWNLOAD_RESUME;
                 Logger.d("download " + (isPause ? "paused" : "error"));
-                updateState(newState, progress, current, total, imageName, lastTime);
+                mState.update(newState, progress, current, total, imageName, lastTime);
                 // display paused notification with the proper title
                 String title = getString(isPause
                         ? R.string.state_action_downloading_paused
@@ -1635,7 +1575,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             try {
                 String fileSUM = getFileSHA256(
                         file,
-                        getSUMProgress(STATE_ACTION_CHECKING_SUM,
+                        getSUMProgress(State.ACTION_CHECKING_SUM,
                         file.getName()));
                 boolean sumCheck = fileSUM.equals(latestFullSUM);
                 Logger.d("fileSUM=" + fileSUM + " latestFullSUM=" + latestFullSUM);
@@ -1712,7 +1652,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             if (initialFileNeedsProcessing) {
                 if (!zipadjust(initialFile, tempFiles[tempFile], start,
                         current, total)) {
-                    updateState(STATE_ERROR_UNKNOWN, null, null, null, null,
+                    mState.update(State.ERROR_UNKNOWN, null, null, null, null,
                             null);
                     Logger.d("zipadjust error");
                     return false;
@@ -1733,7 +1673,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 if (!dedelta(inFile, mConfig.getPathBase()
                         + di.getUpdate().getName(), outFile, start, current,
                         total)) {
-                    updateState(STATE_ERROR_UNKNOWN, null, null, null, null,
+                    mState.update(State.ERROR_UNKNOWN, null, null, null, null,
                             null);
                     Logger.d("dedelta error");
                     return false;
@@ -1748,7 +1688,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                         + lastDelta.getSignature().getName(),
                         mConfig.getPathBase() + lastDelta.getOut().getName(),
                         start, current, total)) {
-                    updateState(STATE_ERROR_UNKNOWN, null, null, null, null,
+                    mState.update(State.ERROR_UNKNOWN, null, null, null, null,
                             null);
                     Logger.d("dedelta error");
                     return false;
@@ -1801,9 +1741,9 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 mPrefs.edit().putString(PREF_CURRENT_FILENAME_NAME, flashFilename).commit();
             }
             startABRebootNotification(flashFilename);
-            updateState(STATE_ACTION_AB_FINISHED);
+            mState.update(State.ACTION_AB_FINISHED);
         } else {
-            updateState(STATE_ERROR_AB_FLASH, null, null, null, null, null, errorCode);
+            mState.update(State.ERROR_AB_FLASH, null, null, null, null, null, errorCode);
         }
     }
 
@@ -1862,7 +1802,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         try {
             flashFilename = handleUpdateCleanup();
         } catch (Exception ex) {
-            updateState(STATE_ERROR_AB_FLASH);
+            mState.update(State.ERROR_AB_FLASH);
             mIsUpdateRunning = false;
             Logger.ex(ex);
             return;
@@ -1875,7 +1815,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         mPrefs.edit().putLong(PREF_DOWNLOAD_SIZE, -1).commit();
 
         final String _filename = new File(flashFilename).getName();
-        updateState(STATE_ACTION_AB_FLASH, 0f, 0L, 100L, _filename, null);
+        mState.update(State.ACTION_AB_FLASH, 0f, 0L, 100L, _filename, null);
 
         newFlashNotification(_filename);
 
@@ -1889,12 +1829,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 mIsUpdateRunning = true;
                 if (!ABUpdate.start(flashFilename, mProgressListener, this)) {
                     mNotificationManager.cancel(NOTIFICATION_UPDATE);
-                    updateState(STATE_ERROR_AB_FLASH);
+                    mState.update(State.ERROR_AB_FLASH);
                     mIsUpdateRunning = false;
                 }
             } else {
                 mNotificationManager.cancel(NOTIFICATION_UPDATE);
-                updateState(STATE_ERROR_AB_FLASH);
+                mState.update(State.ERROR_AB_FLASH);
                 mIsUpdateRunning = false;
             }
         } catch (Exception ex) {
@@ -1924,7 +1864,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         try {
             flashFilename = handleUpdateCleanup();
         } catch (Exception ex) {
-            updateState(STATE_ERROR_FLASH);
+            mState.update(State.ERROR_FLASH);
             Logger.ex(ex);
             return;
         }
@@ -2028,14 +1968,14 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     dst.delete();
                     Logger.d("flashUpdate - Could not install OTA package:");
                     Logger.ex(e);
-                    updateState(STATE_ERROR_FLASH);
+                    mState.update(State.ERROR_FLASH);
                 }
             }
         } catch (Exception e) {
             // We have failed to write something. There's not really anything
             // else to do at this stage than give up. No reason to crash though.
             Logger.ex(e);
-            updateState(STATE_ERROR_FLASH);
+            mState.update(State.ERROR_FLASH);
         }
     }
 
@@ -2096,30 +2036,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         return true;
     }
 
-    public static boolean isProgressState(String state) {
-        return state.equals(UpdateService.STATE_ACTION_DOWNLOADING) ||
-                state.equals(UpdateService.STATE_ACTION_SEARCHING) ||
-                state.equals(UpdateService.STATE_ACTION_SEARCHING_SUM) ||
-                state.equals(UpdateService.STATE_ACTION_CHECKING) ||
-                state.equals(UpdateService.STATE_ACTION_CHECKING_SUM) ||
-                state.equals(UpdateService.STATE_ACTION_APPLYING) ||
-                state.equals(UpdateService.STATE_ACTION_APPLYING_SUM) ||
-                state.equals(UpdateService.STATE_ACTION_APPLYING_PATCH) ||
-                state.equals(UpdateService.STATE_ACTION_AB_FLASH);
-    }
-
-    public static boolean isErrorState(String state) {
-        return state.equals(UpdateService.STATE_ERROR_DOWNLOAD) ||
-                state.equals(UpdateService.STATE_ERROR_DOWNLOAD_RESUME) ||
-                state.equals(UpdateService.STATE_ERROR_DISK_SPACE) ||
-                state.equals(UpdateService.STATE_ERROR_UNKNOWN) ||
-                state.equals(UpdateService.STATE_ERROR_UNOFFICIAL) ||
-                state.equals(UpdateService.STATE_ERROR_CONNECTION) ||
-                state.equals(UpdateService.STATE_ERROR_AB_FLASH) ||
-                state.equals(UpdateService.STATE_ERROR_FLASH_FILE) ||
-                state.equals(UpdateService.STATE_ERROR_FLASH);
-    }
-
     private boolean isSnoozeNotification() {
         // check if we're snoozed, using abs for clock changes
         boolean timeSnooze = Math.abs(System.currentTimeMillis()
@@ -2168,7 +2084,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     private void checkForUpdatesAsync(final boolean userInitiated, final int checkOnly) {
         Logger.d("checkForUpdatesAsync " + getPrefs().getAll());
 
-        updateState(STATE_ACTION_CHECKING);
+        mState.update(State.ACTION_CHECKING);
         mWakeLock.acquire();
         mWifiLock.acquire();
 
@@ -2283,7 +2199,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                         if (di.getOut()
                                 .match(new File(fn),
                                         true,
-                                        getSUMProgress(STATE_ACTION_CHECKING_SUM, di.getOut()
+                                        getSUMProgress(State.ACTION_CHECKING_SUM, di.getOut()
                                                 .getName())) != null) {
                             if (latestFullBuild.equals(di.getOut().getName())) {
                                 boolean signedFile = di.getOut().isSignedFile(new File(fn));
@@ -2429,7 +2345,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     Logger.d("requiredSpace = " + requiredSpace + " freeSpace = " + freeSpace);
 
                     if (freeSpace < requiredSpace) {
-                        updateState(STATE_ERROR_DISK_SPACE, null, freeSpace, requiredSpace,
+                        mState.update(State.ERROR_DISK_SPACE, null, freeSpace, requiredSpace,
                                 null, null);
                         Logger.d("not enough space!");
                         return;
@@ -2454,9 +2370,9 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                         if (lastDelta.getOut().match(
                                 new File(mConfig.getPathBase() + lastDelta.getOut().getName()),
                                 true,
-                                getSUMProgress(STATE_ACTION_APPLYING_SUM, lastDelta.getOut()
+                                getSUMProgress(State.ACTION_APPLYING_SUM, lastDelta.getOut()
                                         .getName())) == null) {
-                            updateState(STATE_ERROR_UNKNOWN);
+                            mState.update(State.ERROR_UNKNOWN);
                             Logger.d("final verification error");
                             return;
                         }
@@ -2487,11 +2403,11 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                         if (latestFullSUM != null) {
                             downloadFullBuild(latestFullFetch, latestFullSUM, latestFullBuild); // download full
                         } else {
-                            updateState(STATE_ERROR_DOWNLOAD);
+                            mState.update(State.ERROR_DOWNLOAD);
                             Logger.d("aborting download due to sha256sum not found");
                         }
                     } else {
-                        updateState(STATE_ERROR_DOWNLOAD);
+                        mState.update(State.ERROR_DOWNLOAD);
                         Logger.d("aborting download due to network state");
                     }
                 }
@@ -2501,7 +2417,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 if (mWifiLock.isHeld()) mWifiLock.release();
                 if (mWakeLock.isHeld()) mWakeLock.release();
 
-                if (isErrorState(mState)) {
+                if (mState.isErrorState()) {
                     mFailedUpdateCount++;
                     clearState();
                     if (!userInitiated) {
@@ -2536,7 +2452,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     private boolean checkForFinishedUpdate() {
         final boolean finished = 
                 mPrefs.getBoolean(PREF_PENDING_REBOOT, false) ||
-                mState.equals(STATE_ACTION_AB_FINISHED) ||
+                mState.equals(State.ACTION_AB_FINISHED) ||
                 ABUpdate.isInstallingUpdate(this);
         if (finished) {
             final String lastFilename = mPrefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
@@ -2549,7 +2465,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     private boolean checkPermissions() {
         if (!Environment.isExternalStorageManager()) {
             Logger.d("checkPermissions failed");
-            updateState(STATE_ERROR_PERMISSIONS);
+            mState.update(State.ERROR_PERMISSIONS);
             return false;
         }
         return true;
@@ -2581,16 +2497,16 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         Logger.d("Flash file set: %s", flashFilename);
         File fn = new File(flashFilename);
         if (!fn.exists()) {
-            updateState(STATE_ERROR_FLASH_FILE);
+            mState.update(State.ERROR_FLASH_FILE);
             return;
         }
         if (!fn.getName().endsWith(".zip")) {
-            updateState(STATE_ERROR_FLASH_FILE);
+            mState.update(State.ERROR_FLASH_FILE);
             return;
         }
         Logger.d("Set flash possible: %s", flashFilename);
         mPrefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
-        updateState(STATE_ACTION_FLASH_FILE_READY, null, null, null, (new File(flashFilename)).getName(), null);
+        mState.update(State.ACTION_FLASH_FILE_READY, null, null, null, (new File(flashFilename)).getName(), null);
     }
 
     private void createNotificationChannel() {
