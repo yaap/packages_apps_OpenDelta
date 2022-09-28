@@ -13,7 +13,7 @@ cc_library_shared {
         "delta_jni.c",
     ],
     host_ldlibs: ["-lz"],
-    include_dirs: ["external/zlib"],
+    include_dirs: ["external/zlib-ng"],
     shared_libs: ["libz"],
     header_libs: ["jni_headers"],
 }
@@ -33,7 +33,7 @@ cc_binary {
     ],
     host_ldlibs: ["-lz"],
 
-    include_dirs: ["external/zlib"],
+    include_dirs: ["external/zlib-ng"],
     shared_libs: ["libz"],
 }
 
@@ -50,6 +50,6 @@ cc_binary {
         "zipadjust_run.c",
     ],
     host_ldlibs: ["-lz"],
-    include_dirs: ["external/zlib"],
+    include_dirs: ["external/zlib-ng"],
     shared_libs: ["libz"],
 }
