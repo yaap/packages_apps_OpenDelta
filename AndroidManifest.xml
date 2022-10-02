@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="eu.chainfire.opendelta"
     coreApp="true"
-    android:versionCode="12"
+    android:versionCode="13"
     android:versionName="1.0" >
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -20,6 +20,7 @@
     <uses-permission android:name="android.permission.MANAGE_USERS" />
     <uses-permission android:name="android.permission.MANAGE_DOCUMENTS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <protected-broadcast android:name="eu.chainfire.opendelta.intent.BROADCAST_STATE" />
 
