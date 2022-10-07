@@ -22,6 +22,8 @@
 
 package eu.chainfire.opendelta;
 
+import static android.Manifest.permission.POST_NOTIFICATIONS;
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -60,11 +62,13 @@ import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toolbar;
 
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission;
 import androidx.preference.PreferenceManager;
 
 public class MainActivity extends Activity {
     private static final int PERMISSIONS_REQUEST_MANAGE_EXTERNAL_STORAGE = 0;
-    private static final int ACTIVITY_SELECT_FLASH_FILE = 1;
+    private static final int PERMISSIONS_REQUEST_NOTIFICATION = 1;
+    private static final int ACTIVITY_SELECT_FLASH_FILE = 2;
 
     private UpdateService mUpdateService;
     private Config mConfig;
@@ -733,7 +737,9 @@ public class MainActivity extends Activity {
     };
 
     private void requestPermissions() {
+        mPermOk = true;
         if (!Environment.isExternalStorageManager()) {
+            mPermOk = false;
             // should never reach here if it's a system priv-app
             // this permission is granted by default
             // this block exists in case the user manually revoked that perm
@@ -741,10 +747,19 @@ public class MainActivity extends Activity {
             Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
             intent.setData(uri);
             startActivityForResult(intent, PERMISSIONS_REQUEST_MANAGE_EXTERNAL_STORAGE);
-        } else {
-            mPermOk = true;
-            startUpdateService(null);
         }
+        
+        // check for notification perm, but don't fail for it
+        if (getApplicationContext().checkSelfPermission(POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            // whatever you decide is cool.
+            // I will, however, nudge you about it 
+            // every time you re-create the activity.
+            this.requestPermissions(new String[]{POST_NOTIFICATIONS},
+                    PERMISSIONS_REQUEST_NOTIFICATION);
+        }
+
+        if (mPermOk) startUpdateService(null);
     }
 
     private void handleProgressBar() {
