@@ -30,10 +30,8 @@
     <string name="secure_mode_disabled_title">Modo seguro: deshabilitado</string>
     <string name="secure_mode_disabled_description"><![CDATA[Las actualizaciones son aplicadas si están presentes. Tenga en cuenta que cualquier paquete de software (malicioso) puede obtener acceso completo al sistema. Se recomienda precaución.]]></string>
     <string name="recovery_notice_title">Aviso</string>
-    <string name="recovery_notice_description_secure"><![CDATA[Aplicar actualizaciones en el modo actual es sólo soportado con el recovery <b>TWRP</b>. Por favor, asegurese que está usando el recovery compatible antes de continuar.]]></string>
     <string name="recovery_notice_description_not_secure"><![CDATA[Aplicar actualizaciones en el modo actual es sólo soportado con el recovery <b>TWRP</b>. <i>El recovery oficial</i> de <b>CWM</b> <i>no</i> es soportado, aunque algunas <i>versiones construidas por la comunidad</i> de <b>CWM</b> <i>pueden</i> funcionar. Por favor, asegúrese que está usando el recovery compatible antes de continuar.]]></string>
     <string name="flash_after_update_notice_title">Aviso</string>
-    <string name="flash_after_update_notice_description"><![CDATA[Las actualizaciones estarán en la carpeta <b>FlashAfterUpdate</b>. Si usted continua, estas actualizaciones <b>no</b> serán aplicadas.]]></string>
     <string name="button_build_delta">Descarga</string>
     <string name="button_stop">Parar</string>
     <string name="state_action_build">Actualización disponible.</string>
@@ -70,7 +68,6 @@
     <string name="scheduler_daily_time">Hora</string>
     <string name="scheduler_week_day">Día</string>
     <string name="category_flashing">Intermitente</string>
-    <string name="secure_mode_title">Modo seguro</string>
     <string name="state_error_connection">No hay conexión de datos.</string>
     <string name="category_admin">Mantenimiento</string>
     <string name="clear_files_title">Limpiar archivos de actualización</string>

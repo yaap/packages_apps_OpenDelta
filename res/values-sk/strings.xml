@@ -30,10 +30,8 @@
     <string name="secure_mode_disabled_title">Zabezpečený režim: zakázaný</string>
     <string name="secure_mode_disabled_description"><![CDATA[Všetky ďalšie prítomné aktualizácie budú nainštalované. Majte na mysli, že akákoľvek (škodlivá) aplikácia sem môže umiestniť vlastnú aktualizáciu a prevziať kontrolu nad zariadením. Preto buďte opatrní.]]></string>
     <string name="recovery_notice_title">Oznam</string>
-    <string name="recovery_notice_description_secure"><![CDATA[Inštalácia aktualizácií v aktuálnom režime je podporovaná iba cez <b>TWRP</b> recovery. Pred tým, ako budete pokračovať, sa uistite, že používate kompatibilnú verziu recovery.]]></string>
     <string name="recovery_notice_description_not_secure"><![CDATA[Inštalácia aktualizácií v aktuálnom režime je oficiálne podporovaná len cez <b>TWRP</b> recovery. <i>Oficiálnel</i> <b>CWM</b> recovery <i>nie sú</i> podporované, aj keď niektoré <i>komunitné</i> verzie <b>CWM</b> <i>môžu</i> stále fungovať. Pred tým, než budete pokračovať, sa prosím uistite, že používate kompatibilnú recovery.]]></string>
     <string name="flash_after_update_notice_title">Oznam</string>
-    <string name="flash_after_update_notice_description"><![CDATA[V adresári <b>FlashAfterUpdate</b> sú prítomné ďalšie aktualizácie, ale zároveň je zapnutý zabezpečený režim. Ak sa rozhodnete pokračovať, tieto ďalšie aktualizácie <b>nebudú</b> nainštalované.]]></string>
     <string name="button_build_delta">Prevziať</string>
     <string name="button_stop">Zastaviť</string>
     <string name="state_action_build">Aktualizácia je dostupná.</string>
@@ -70,7 +68,6 @@
     <string name="scheduler_daily_time">Čas</string>
     <string name="scheduler_week_day">Deň</string>
     <string name="category_flashing">Inštaluje sa</string>
-    <string name="secure_mode_title">Zabezpečený režim</string>
     <string name="state_error_connection">Žiadne dátové pripojenie.</string>
     <string name="category_admin">Údržba</string>
     <string name="clear_files_title">Vyčistiť súbory aktualizácií</string>

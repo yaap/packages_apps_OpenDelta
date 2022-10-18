@@ -31,10 +31,8 @@
     <string name="secure_mode_disabled_title">安全模式 : 已關閉</string>
     <string name="secure_mode_disabled_description"><![CDATA[會自動刷寫附加更新(如果有的話)。 注意 : 任何附加軟體(甚至是惡意的)都可能會被刷寫進系統並獲得完整系統權限，請小心操作。]]></string>
     <string name="recovery_notice_title">通知</string>
-    <string name="recovery_notice_description_secure"><![CDATA[更新刷寫功能目前只能在 <b>TWRP</b> 系列的 Recovery 中執行，在繼續前，請確認您正在使用適用的 Recovery。]]></string>
     <string name="recovery_notice_description_not_secure"><![CDATA[在目前的模式中，更新刷寫功能只在 <b>TWRP</b> 的 Recovery 中獲得 <i>正式</i> 支援。而 <b>CWM</b> 並沒有被 <i>正式</i> 支援。但是有些 <i>修改版</i> 的<b>CWM</b> <i>可能</i> 能夠支援。在繼續前，請確認您正在使用的 Recovery 能夠支援。]]></string>
     <string name="flash_after_update_notice_title">通知</string>
-    <string name="flash_after_update_notice_description"><![CDATA[附加更新目前是放在 <b>FlashAfterUpdate</b> 資料夾中，但是由於安全模式已開啟，如果選擇繼續，這些附加的功能將 <b>不會</b> 被刷寫。]]></string>
     <string name="button_build_delta">下載</string>
     <string name="button_stop">停止</string>
     <string name="state_action_build">有可用更新</string>
@@ -71,7 +69,6 @@
     <string name="scheduler_daily_time">時間</string>
     <string name="scheduler_week_day">星期</string>
     <string name="category_flashing">刷寫中</string>
-    <string name="secure_mode_title">安全模式</string>
     <string name="state_error_connection">沒有資料連接</string>
     <string name="category_admin">維護</string>
     <string name="clear_files_title">清理更新檔案</string>

@@ -380,13 +380,13 @@ public class MainActivity extends Activity {
                 } else if (State.ERROR_UNKNOWN.equals(state)) {
                     enableCheck = true;
                     mProgress.setIndeterminate(false);
+                } else if (State.ERROR_DOWNLOAD.equals(state)) {
+                    enableCheck = true;
+                    mProgress.setIndeterminate(false);
                 } else if (State.ERROR_UNOFFICIAL.equals(state)) {
                     enableCheck = true;
                     mProgress.setIndeterminate(false);
                     extraText = getString(R.string.state_error_not_official_extra, versionType);
-                } else if (State.ERROR_DOWNLOAD.equals(state)) {
-                    enableCheck = true;
-                    mProgress.setIndeterminate(false);
                 } else if (State.ERROR_CONNECTION.equals(state)) {
                     enableCheck = true;
                     mProgress.setIndeterminate(false);
@@ -463,30 +463,14 @@ public class MainActivity extends Activity {
                     enableCheck = true;
                     mProgress.setIndeterminate(false);
 
-                    final String latestFull = mPrefs.getString(
+                    final String latest = mPrefs.getString(
                             UpdateService.PREF_LATEST_FULL_NAME, null);
-                    final String latestDelta = mPrefs.getString(
-                            UpdateService.PREF_LATEST_DELTA_NAME, null);
-
-                    String latestDeltaZip = latestDelta != null ? new File(
-                            latestDelta).getName() : null;
-
-                    deltaUpdatePossible = latestDeltaZip != null;
-                    fullUpdatePossible = latestFull != null;
-
-                    if (deltaUpdatePossible) {
-                        String latestDeltaBase = latestDelta.substring(0,
-                                latestDelta.lastIndexOf('.'));
+                    if (latest != null) {
+                        String latestBase = latest.substring(0,
+                                latest.lastIndexOf('.'));
                         enableBuild = true;
                         enableChangelog = true;
-                        updateVersion = latestDeltaBase;
-                        title = getString(R.string.state_action_build_delta);
-                    } else if (fullUpdatePossible) {
-                        String latestFullBase = latestFull.substring(0,
-                                latestFull.lastIndexOf('.'));
-                        enableBuild = true;
-                        enableChangelog = true;
-                        updateVersion = latestFullBase;
+                        updateVersion = latestBase;
                         title = getString(R.string.state_action_build_full);
                     }
                     long downloadSize = mPrefs.getLong(
@@ -674,21 +658,17 @@ public class MainActivity extends Activity {
             // Show a warning message about recoveries we support, depending
             // on the state of secure mode and if we've shown the message before
 
-            final Runnable next = flashWarningFlashAfterUpdateZIPs;
+            final Runnable next = flashStart;
 
             CharSequence message = null;
-            if (!mConfig.getSecureModeCurrent()
-                    && !mConfig.getShownRecoveryWarningNotSecure()) {
-                message = Html
-                        .fromHtml(getString(R.string.recovery_notice_description_not_secure),
-                                Html.FROM_HTML_MODE_LEGACY);
-                mConfig.setShownRecoveryWarningNotSecure();
-            } else if (mConfig.getSecureModeCurrent()
-                    && !mConfig.getShownRecoveryWarningSecure()) {
-                message = Html
-                        .fromHtml(getString(R.string.recovery_notice_description_secure),
-                                Html.FROM_HTML_MODE_LEGACY);
-                mConfig.setShownRecoveryWarningSecure();
+            if (mConfig.getUseTWRP()) {
+                message = Html.fromHtml(
+                        getString(R.string.recovery_notice_description_not_secure),
+                        Html.FROM_HTML_MODE_LEGACY);
+            } else {
+                message = Html.fromHtml(
+                        getString(R.string.recovery_notice_description_reboot),
+                        Html.FROM_HTML_MODE_LEGACY);
             }
 
             if (message != null) {
@@ -699,30 +679,6 @@ public class MainActivity extends Activity {
                         .setNegativeButton(android.R.string.cancel, null)
                         .setPositiveButton(android.R.string.ok,
                                 (dialog, which) -> next.run()).show();
-            } else {
-                next.run();
-            }
-        }
-    };
-
-    private final Runnable flashWarningFlashAfterUpdateZIPs = new Runnable() {
-        @Override
-        public void run() {
-            // If we're in secure mode, but additional ZIPs to flash have been
-            // detected, warn the user that these will not be flashed
-
-            final Runnable next = flashStart;
-
-            if (mConfig.getSecureModeCurrent()
-                    && (mConfig.getFlashAfterUpdateZIPs().size() > 0)) {
-                (new AlertDialog.Builder(MainActivity.this))
-                        .setTitle(R.string.flash_after_update_notice_title)
-                        .setMessage(
-                                Html.fromHtml(getString(R.string.flash_after_update_notice_description),
-                                        Html.FROM_HTML_MODE_LEGACY))
-                        .setCancelable(true)
-                        .setNegativeButton(android.R.string.cancel, null)
-                        .setPositiveButton(android.R.string.ok, (dialog, which) -> next.run()).show();
             } else {
                 next.run();
             }
@@ -863,20 +819,11 @@ public class MainActivity extends Activity {
     }
 
     private String getUpdateVersionString() {
-        final String latestFull = mPrefs.getString(
+        final String latest = mPrefs.getString(
                 UpdateService.PREF_LATEST_FULL_NAME, null);
-        final String latestDelta = mPrefs.getString(
-                UpdateService.PREF_LATEST_DELTA_NAME, null);
-
-        String latestDeltaZip = latestDelta != null ? new File(
-                latestDelta).getName() : null;
-
-        if (latestDeltaZip != null) {
-            return latestDelta.substring(0,
-                    latestDelta.lastIndexOf('.'));
-        } else if (latestFull != null) {
-            return latestFull.substring(0,
-                    latestFull.lastIndexOf('.'));
+        if (latest != null) {
+            return latest.substring(0,
+                    latest.lastIndexOf('.'));
         }
         return "";
     }

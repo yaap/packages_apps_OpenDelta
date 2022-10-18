@@ -30,10 +30,8 @@
     <string name="secure_mode_disabled_title">Biztonságos üzemmód: letiltva</string>
     <string name="secure_mode_disabled_description"><![CDATA[További frissítések is telepítésre kerülnek, ha elérhetőek. Ne feledje, hogy minden (rosszindulatú) szoftvercsomag elhelyezheti ezeket a frissítéseket, és átveheti a teljes rendszer hozzáférést. Óvatosság javasolt.]]></string>
     <string name="recovery_notice_title">Figyelmeztetés</string>
-    <string name="recovery_notice_description_secure"><![CDATA[Frissítések telepítése az aktuális módban csak a <b>TWRP</b> recovery által támogatott. Kérjük, a folytatás előtt győződjön meg róla, hogy egy kompatibilis recovery-t használ.]]></string>
     <string name="recovery_notice_description_not_secure"><![CDATA[Frissítések telepítése az aktuális módban csak a <b>TWRP</b> recovery által támogatott. <i>Hivatalos</i> <b>CWM</b> kiadások <i>nem</i> támogatottak, bár néhány <i>közösségi kiadású</i> verziója a <b>CWM</b>-nak <i>talán</i> mégis működhet. Kérjük, a folytatás előtt győződjön meg róla, hogy egy kompatibilis recovery-t használ.]]></string>
     <string name="flash_after_update_notice_title">Figyelmeztetés</string>
-    <string name="flash_after_update_notice_description"><![CDATA[További frissítések találhatóak a <b>FlashAfterUpdate</b> mappában, de a biztonságos mód engedélyezve van. Ha folytatja, ezek a további frissítések <b>nem</b> fognak települni.]]></string>
     <string name="button_build_delta">Letöltés</string>
     <string name="button_stop">Leállítás</string>
     <string name="state_action_build">Frissítés érhető el.</string>
@@ -70,7 +68,6 @@
     <string name="scheduler_daily_time">Idő</string>
     <string name="scheduler_week_day">Nap</string>
     <string name="category_flashing">Flashelés</string>
-    <string name="secure_mode_title">Biztonságos üzemmód</string>
     <string name="state_error_connection">Nincs adatkapcsolat.</string>
     <string name="category_admin">Karbantartás</string>
     <string name="clear_files_title">Frissítési fájlok törlése</string>

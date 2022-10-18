@@ -34,10 +34,8 @@
     <string name="secure_mode_disabled_title">Безопасный режим: деактивирован</string>
     <string name="secure_mode_disabled_description"><![CDATA[Дополнительные файлы будут установлены, если они есть. Заметим, что любой (зловредный) пакет программного обеспечения можно разместить  в эти обновления и получить полный доступ к системе. Используйте этот режим на свое усмотрение.]]></string>
     <string name="recovery_notice_title">Внимание!</string>
-    <string name="recovery_notice_description_secure"><![CDATA[Установка обновлений в текущем режиме поддерживается только с <b>TWRP</b> рекавери. Пожалуйста, убедитесь, что вы используете совместимое рекавери, прежде чем продолжить.]]></string>
     <string name="recovery_notice_description_not_secure"><![CDATA[Установка обновлений в данном режиме официально поддерживается только с помощью  <b>TWRP</b> рекавери. <i>Официально</i> <b>CWM</b>  <i>не</i> поддерживается, но некоторые <i>пользовательские сборки</i> <b>CWM</b> <i>возможно</i> совместимы. Пожалуйста, убедитесь, что у вас совместимое рекавери, прежде чем продолжить.]]></string>
     <string name="flash_after_update_notice_title">Внимание!</string>
-    <string name="flash_after_update_notice_description"><![CDATA[Дополнительные обновления располагаются в папке <b>FlashAfterUpdate</b>, но Безопасный режим активирован. Если вы продолжите, все дополнительные файлы <b>не будут</b> установлены.]]></string>
     <string name="button_build_delta">Загрузить</string>
     <string name="button_stop">Остановить</string>
     <string name="state_action_build">Доступно обновление.</string>
@@ -75,7 +73,6 @@
     <string name="scheduler_daily_time">Время</string>
     <string name="scheduler_week_day">День</string>
     <string name="category_flashing">Установка</string>
-    <string name="secure_mode_title">Защищенный режим</string>
     <string name="state_error_connection">Нет подключения к интернету.</string>
     <string name="category_admin">Поддержка</string>
     <string name="clear_files_title">Очистить файлы обновления</string>

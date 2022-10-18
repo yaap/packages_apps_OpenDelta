@@ -47,7 +47,6 @@ import androidx.preference.PreferenceManager;
 public class SettingsFragment extends PreferenceFragment implements
         OnPreferenceChangeListener, OnTimeSetListener {
     private static final String KEY_NETWORKS = "metered_networks_config";
-    private static final String KEY_SECURE_MODE = "secure_mode";
     private static final String KEY_AB_PERF_MODE = "ab_perf_mode";
     private static final String KEY_CATEGORY_DOWNLOAD = "category_download";
     private static final String KEY_CATEGORY_FLASHING = "category_flashing";
@@ -58,7 +57,6 @@ public class SettingsFragment extends PreferenceFragment implements
     private ListPreference mAutoDownload;
     private ListPreference mBatteryLevel;
     private SwitchPreference mChargeOnly;
-    private SwitchPreference mSecureMode;
     private SwitchPreference mABPerfMode;
     private Config mConfig;
     private PreferenceCategory mAutoDownloadCategory;
@@ -78,7 +76,8 @@ public class SettingsFragment extends PreferenceFragment implements
         mNetworksConfig = findPreference(KEY_NETWORKS);
         mNetworksConfig.setChecked(prefs.getBoolean(UpdateService.PREF_AUTO_UPDATE_METERED_NETWORKS, false));
 
-        String autoDownload = prefs.getString(SettingsActivity.PREF_AUTO_DOWNLOAD, getDefaultAutoDownloadValue());
+        String autoDownload = prefs.getString(SettingsActivity.PREF_AUTO_DOWNLOAD,
+                UpdateService.PREF_AUTO_DOWNLOAD_DISABLED_STRING);
         int autoDownloadValue = Integer.parseInt(autoDownload);
         mAutoDownload = findPreference(SettingsActivity.PREF_AUTO_DOWNLOAD);
         mAutoDownload.setOnPreferenceChangeListener(this);
@@ -90,9 +89,6 @@ public class SettingsFragment extends PreferenceFragment implements
         mBatteryLevel.setSummary(mBatteryLevel.getEntry());
         mChargeOnly = findPreference(SettingsActivity.PREF_CHARGE_ONLY);
         mBatteryLevel.setEnabled(!prefs.getBoolean(SettingsActivity.PREF_CHARGE_ONLY, true));
-        mSecureMode = findPreference(KEY_SECURE_MODE);
-        mSecureMode.setEnabled(mConfig.getSecureModeEnable());
-        mSecureMode.setChecked(mConfig.getSecureModeCurrent());
         mABPerfMode = findPreference(KEY_AB_PERF_MODE);
         mABPerfMode.setChecked(mConfig.getABPerfModeCurrent());
         mABPerfMode.setOnPreferenceChangeListener(this);
@@ -115,7 +111,8 @@ public class SettingsFragment extends PreferenceFragment implements
         mSchedulerMode
                 .setEnabled(autoDownloadValue > UpdateService.PREF_AUTO_DOWNLOAD_DISABLED);
 
-        String schedulerMode = prefs.getString(SettingsActivity.PREF_SCHEDULER_MODE, SettingsActivity.PREF_SCHEDULER_MODE_SMART);
+        String schedulerMode = prefs.getString(SettingsActivity.PREF_SCHEDULER_MODE,
+                SettingsActivity.PREF_SCHEDULER_MODE_SMART);
         mSchedulerDailyTime = findPreference(SettingsActivity.PREF_SCHEDULER_DAILY_TIME);
         mSchedulerDailyTime.setEnabled(!schedulerMode.equals(SettingsActivity.PREF_SCHEDULER_MODE_SMART));
         mSchedulerDailyTime.setSummary(prefs.getString(
@@ -140,19 +137,6 @@ public class SettingsFragment extends PreferenceFragment implements
         } else if (preference == mChargeOnly) {
             boolean value = ((SwitchPreference) preference).isChecked();
             mBatteryLevel.setEnabled(!value);
-            return true;
-        } else if (preference == mSecureMode) {
-            boolean value = ((SwitchPreference) preference).isChecked();
-            mConfig.setSecureModeCurrent(value);
-            (new AlertDialog.Builder(getContext()))
-                    .setTitle(
-                            value ? R.string.secure_mode_enabled_title
-                                    : R.string.secure_mode_disabled_title)
-                    .setMessage(
-                            Html.fromHtml(getString(value ? R.string.secure_mode_enabled_description
-                                    : R.string.secure_mode_disabled_description), Html.FROM_HTML_MODE_LEGACY))
-                    .setCancelable(true)
-                    .setPositiveButton(android.R.string.ok, null).show();
             return true;
         } else if (preference == mSchedulerDailyTime) {
             showTimePicker();
@@ -239,14 +223,6 @@ public class SettingsFragment extends PreferenceFragment implements
                 DateFormat.is24HourFormat(getContext())).show();
     }
 
-    private String getDefaultAutoDownloadValue() {
-        return isSupportedVersion() ? UpdateService.PREF_AUTO_DOWNLOAD_CHECK_STRING : UpdateService.PREF_AUTO_DOWNLOAD_DISABLED_STRING;
-    }
-
-    private boolean isSupportedVersion() {
-        return mConfig.isOfficialVersion();
-    }
-
     private int cleanFiles() {
         int deletedFiles = 0;
         String dataFolder = mConfig.getPathBase();
@@ -271,10 +247,8 @@ public class SettingsFragment extends PreferenceFragment implements
 
     private void clearState(SharedPreferences prefs) {
         prefs.edit().putString(UpdateService.PREF_LATEST_FULL_NAME, null).commit();
-        prefs.edit().putString(UpdateService.PREF_LATEST_DELTA_NAME, null).commit();
         prefs.edit().putString(UpdateService.PREF_READY_FILENAME_NAME, null).commit();
         prefs.edit().putLong(UpdateService.PREF_DOWNLOAD_SIZE, -1).commit();
-        prefs.edit().putBoolean(UpdateService.PREF_DELTA_SIGNATURE, false).commit();
         prefs.edit().putString(UpdateService.PREF_INITIAL_FILE, null).commit();
     }
 }

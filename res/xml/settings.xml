@@ -22,11 +22,6 @@
 		android:title="@string/category_flashing" >
 		<SwitchPreference
 			android:defaultValue="true"
-			android:key="secure_mode"
-			android:persistent="false"
-			android:title="@string/secure_mode_title" />
-		<SwitchPreference
-			android:defaultValue="true"
 			android:key="ab_perf_mode"
 			android:persistent="false"
 			android:title="@string/ab_perf_mode_title"

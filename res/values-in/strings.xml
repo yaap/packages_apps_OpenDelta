@@ -30,10 +30,8 @@
     <string name="secure_mode_disabled_title">Modus aman: dinonaktifkan</string>
     <string name="secure_mode_disabled_description"><![CDATA[Tambahan pembaruan dimuat jika ada. Perhatikan bahwa paket perangkat lunak (berbahaya) apapun dapat menempatkan pembaruan ini dan memperoleh akses sistem secara penuh. Disarankan hati-hati.]]></string>
     <string name="recovery_notice_title">Pemberitahuan</string>
-    <string name="recovery_notice_description_secure"><![CDATA[Memuat pembaruan di modus saat ini hanya didukung pada <b>TWRP</b> recovery. Silakan pastikan Anda sedang menjalankan recovery yang kompatibel sebelum lanjut.]]></string>
     <string name="recovery_notice_description_not_secure"><![CDATA[Memuat pembaruan di modus saat ini hanya didukung pada <b>TWRP</b> recovery. Buatan <i>Official</i> <b>CWM</b> <i>tidak</i> didukung, meskipun beberapa versi <i>komunitas</i> dari <b>CWM</b> <i>mungkin</i> masih bekerja. Silakan pastikan Anda sedang menjalankan recovery yang kompatibel sebelum lanjut.]]></string>
     <string name="flash_after_update_notice_title">Pemberitahuan</string>
-    <string name="flash_after_update_notice_description"><![CDATA[Tambahan pembaruan ada di folder <b>FlashAfterUpdate</b>, tetapi modus aman diaktifkan, jika Anda melanjutkan, tambahan pembaruan ini <b>tidak</b> akan dimuat.]]></string>
     <string name="button_build_delta">Unduh</string>
     <string name="button_stop">Berhenti</string>
     <string name="state_action_build">Pembaruan tersedia</string>
@@ -70,7 +68,6 @@
     <string name="scheduler_daily_time">Waktu</string>
     <string name="scheduler_week_day">Hari</string>
     <string name="category_flashing">Berkedip</string>
-    <string name="secure_mode_title">Mode aman</string>
     <string name="state_error_connection">Tidak ada koneksi data.</string>
     <string name="category_admin">Perbaikan</string>
     <string name="clear_files_title">Bersihkan file pembaruan</string>

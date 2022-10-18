@@ -30,10 +30,8 @@
     <string name="secure_mode_disabled_title">Modo de segurança: desativado</string>
     <string name="secure_mode_disabled_description"><![CDATA[Atualizações adicionais serão instaladas caso existam. Note que qualquer pacote (malicioso) de software pode obter acesso completo ao sistema. Recomenda-se precaução.]]></string>
     <string name="recovery_notice_title">Aviso</string>
-    <string name="recovery_notice_description_secure"><![CDATA[Instalar atualizações no modo atual só é suportado com a <b>TWRP</b>. Por favor, assegure-se de que tem instalada uma recuperação compatível antes de avançar.]]></string>
     <string name="recovery_notice_description_not_secure"><![CDATA[Instalar atualizações no modo atual só é suportado com a <b>TWRP</b>. Compilações <i>Oficiais</i> <b>CWM</b> <i>não são</i> suportadas, apesar de algumas <i>compilações feitas pela comunidade</i> <b>CWM</b> <i>poderem</i> ainda funcionar. Por favor, assegure-se de que tem uma recuperação compatível antes de avançar.]]></string>
     <string name="flash_after_update_notice_title">Aviso</string>
-    <string name="flash_after_update_notice_description"><![CDATA[Existem atualizações adicionais na pasta <b>FlashAfterUpdate</b>, mas o modo de segurança está ativado. Se avançar, estas atualizações adicionais <b>não</b> serão instaladas.]]></string>
     <string name="button_build_delta">Download</string>
     <string name="button_stop">Parar</string>
     <string name="state_action_build">Actualização disponível.</string>
@@ -70,7 +68,6 @@
     <string name="scheduler_daily_time">Hora</string>
     <string name="scheduler_week_day">Dia da semana</string>
     <string name="category_flashing">A instalar</string>
-    <string name="secure_mode_title">Modo de segurança</string>
     <string name="state_error_connection">Sem ligação de dados.</string>
     <string name="category_admin">Manutenção</string>
     <string name="clear_files_title">Limpar ficheiros de atualizações</string>

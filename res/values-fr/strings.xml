@@ -33,10 +33,8 @@
     <string name="secure_mode_disabled_title">Mode de sécurité : désactivé</string>
     <string name="secure_mode_disabled_description"><![CDATA[Les mises à jour additionnelles présentes seront installées. Notez qu\'un logiciel (malveillant) peut placer des mises à jour additionnelles et obtenir un accès complet à votre système. Soyez prudent.]]></string>
     <string name="recovery_notice_title">Avertissement</string>
-    <string name="recovery_notice_description_secure"><![CDATA[Le mode d\'installation actuellement sélectionné est uniquement compatible avec le mode de récupération <b>TWRP</b>. Assurez-vous d\'avoir un mode de récupération compatible avant de continuer.]]></string>
     <string name="recovery_notice_description_not_secure"><![CDATA[Le mode d\'installation actuellement sélectionné est uniquement compatible avec le mode de récupération <b>TWRP</b>. <i>Officiellement</i>, le mode de récupération <b>CWM</b> <i>n\'est pas</i> supporté même si certaines versions de <b>CWM</b> compilées par la communauté <i>peuvent</i> fonctionner. Assurez-vous d\'avoir un mode de récupération compatible avant de continuer.]]></string>
     <string name="flash_after_update_notice_title">Avertissement</string>
-    <string name="flash_after_update_notice_description"><![CDATA[Des mises à jour additionnelles sont présentes dans le dossier <b>FlashAfterUpdate</b>. Le mode de sécurité est activé, si vous continuez, les mises à jours additionnelles ne seront <b>pas</b> installées.]]></string>
     <string name="button_build_delta">Télécharger</string>
     <string name="button_stop">Arrêter</string>
     <string name="state_action_build">Mise à jour disponible.</string>
@@ -74,7 +72,6 @@
     <string name="scheduler_daily_time">Heure</string>
     <string name="scheduler_week_day">Jour</string>
     <string name="category_flashing">Installation en cours</string>
-    <string name="secure_mode_title">Mode sécurisé</string>
     <string name="state_error_connection">Aucune connexion réseau.</string>
     <string name="category_admin">Maintenance</string>
     <string name="clear_files_title">Supprimer les fichiers de mise à jour</string>

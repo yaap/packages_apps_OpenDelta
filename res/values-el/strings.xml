@@ -30,10 +30,8 @@
     <string name="secure_mode_disabled_title">Ασφαλής τρόπος: απενεργοποιημένος</string>
     <string name="secure_mode_disabled_description"><![CDATA[Πρόσθετες ενημερώσεις θα εφαρμοστούν, εφόσον υπάρχουν. Λάβετε υπόψη οτι οποιοδήποτε (κακόβουλο) λογισμικό μπορεί να προσθέσει ενημερώσεις και να επιτύχει πλήρη πρόσβαση στο σύστημα. Απαιτείται προσοχή.]]></string>
     <string name="recovery_notice_title">Σημείωση</string>
-    <string name="recovery_notice_description_secure"><![CDATA[Η ενημέρωση με τον τρέχοντα τρόπο υποστηρίζεται μόνο από την ανάκτηση <b>TWRP</b>. Παρακαλώ βεβαιωθείτε οτι εκτελείτε συμβατό λογισμικό ανάκτησης πριν συνεχίστετε.]]></string>
     <string name="recovery_notice_description_not_secure"><![CDATA[Η ενημέρωση με τον τρέχοντα τρόπο υποστηρίζεται επίσημα μόνο με ανάκτηση <b>TWRP</b>. <i>Επίσημες</i> <b>CWM</b> εκδόσεις <i>δεν</i> υποστηρίζονται, παρόλο που μερικές εκδόσεις <i>απο τις κοινότητες</i> του <b>CWM</b> <i>μπορεί</i> να λειτουργούν. Παρακαλώ βεβαιωθείτε οτι εκτελείτε συμβατό λογισμικό ανάκτησης πριν συνεχίστετε.]]></string>
     <string name="flash_after_update_notice_title">Σημείωση</string>
-    <string name="flash_after_update_notice_description"><![CDATA[Υπάρχουν πρόσθετες ενημερώσεις στο φάκλεο <b>FlashAfterUpdate</b>, αλλά είναι ενεργοποιημένος ο ασφαλής τρόπος. Εάν συνεχίσετε, οι πρόσθετες αυτές ενημερώσεις <b>δεν</b> θα εφαρμοστούν.]]></string>
     <string name="button_build_delta">Λήψη</string>
     <string name="button_stop">Διακοπή</string>
     <string name="state_action_build">Διαθέσιμη Ενημέρωση.</string>
@@ -69,7 +67,6 @@
     <string name="scheduler_daily_time">Ώρα</string>
     <string name="scheduler_week_day">Ημέρα</string>
     <string name="category_flashing">Εγκατάσταση</string>
-    <string name="secure_mode_title">Λειτουργία ασφαλείας</string>
     <string name="state_error_connection">Δεν υπάρχει σύνδεση δεδομένων.</string>
     <string name="category_admin">Συντήρηση</string>
     <string name="clear_files_title">Εκκαθάριση αρχείων ενημέρωσης</string>

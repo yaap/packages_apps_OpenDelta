@@ -28,10 +28,8 @@
     <string name="secure_mode_disabled_title">안전 모드: 사용하지 않음</string>
     <string name="secure_mode_disabled_description"><![CDATA[별도의 추가적인 업데이트가 있는 경우 이를 적용합니다. 악성 소프트웨어 패키지가 별도의 업데이트를 무단으로 배치시킬 수 있으며 이 경우 시스템 전반에 접근할 수 있게 됩니다. 주의가 필요합니다.]]></string>
     <string name="recovery_notice_title">주의 사항</string>
-    <string name="recovery_notice_description_secure"><![CDATA[현재 모드에서 업데이트를 적용하려면 반드시 <b>TWRP</b> 리커버리가 필요합니다. 계속하기 전에 호환되는 리커버리를 사용중인지를 확인하세요.]]></string>
     <string name="recovery_notice_description_not_secure"><![CDATA[현재 모드에서 업데이트를 적용하려면 반드시 <b>TWRP</b> 리커버리가 필요합니다. 일부 비공식 개조 CWM 리커버리는 호환이 될 수도 있지만 공식 CWM 리커버리는 호환되지 않습니다. 계속하기 전에 호환되는 리커버리를 사용중인지를 확인하세요.]]></string>
     <string name="flash_after_update_notice_title">주의 사항</string>
-    <string name="flash_after_update_notice_description"><![CDATA[<b>FlashAfterUpdate</b> 폴더에 별도의 추가적인 업데이트가 존재하지만, 현재 안전 모드를 사용중입니다. 계속 진행하게 되면 별도의 추가적인 업데이트는 <b>적용되지 않습니다.</b>]]></string>
     <string name="button_build_delta">다운로드</string>
     <string name="button_stop">중지</string>
     <string name="state_action_build">업데이트 사용 가능</string>
@@ -67,7 +65,6 @@
     <string name="scheduler_daily_time">시간</string>
     <string name="scheduler_week_day">일</string>
     <string name="category_flashing">플래싱</string>
-    <string name="secure_mode_title">보안 모드</string>
     <string name="state_error_connection">데이터 연결 없음.</string>
     <string name="category_admin">관리</string>
     <string name="clear_files_title">업데이트 파일 정리</string>

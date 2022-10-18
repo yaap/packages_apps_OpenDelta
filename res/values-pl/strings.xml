@@ -34,10 +34,8 @@
     <string name="secure_mode_disabled_title">Tryb bezpieczny: wyłączony</string>
     <string name="secure_mode_disabled_description"><![CDATA[Dodatkowe aktualizacje zostaną zainstalowane, jeśli będą dostępne. Należy pamiętać, że każdy program (złośliwy) może umieścić tam aktualizację i przejąć pełną kontrolę nad systemem. Zaleca się ostrożność.]]></string>
     <string name="recovery_notice_title">Uwaga</string>
-    <string name="recovery_notice_description_secure"><![CDATA[Instalowanie aktualizacji w obecnym trybie jest obsługiwane tylko przez recovery <b>TWRP</b>. Upewnij się, że używasz zgodnego recovery przed kontynuacją.]]></string>
     <string name="recovery_notice_description_not_secure"><![CDATA[Instalowanie aktualizacji w tym trybie jest oficjalnie obsługiwane tylko przez recovery <b>TWRP</b>. <i>Oficjalne</i> wersje <b>CWM</b> <i>nie</i> są wspierane, choć niektóre wersje <b>CWM</b> <i>tworzone przez społeczność</i> <i>mogą</i> wciąż działać. Upewnij się, że używasz kompatybilnego recovery przed kontynuowaniem.]]></string>
     <string name="flash_after_update_notice_title">Uwaga</string>
-    <string name="flash_after_update_notice_description"><![CDATA[Dodatkowe aktualizacje znajdują się w folderze <b>FlashAfterUpdate</b>, ale tryb bezpieczny jest włączony. Jeśli chcesz kontynuować, te dodatkowe aktualizacje <b>nie</b> zostaną zainstalowane.]]></string>
     <string name="button_build_delta">Pobierz</string>
     <string name="button_stop">Zatrzymaj</string>
     <string name="state_action_build">Aktualizacja jest dostępna.</string>
@@ -75,7 +73,6 @@
     <string name="scheduler_daily_time">Czas</string>
     <string name="scheduler_week_day">Dzień tygodnia</string>
     <string name="category_flashing">Wgrywanie</string>
-    <string name="secure_mode_title">Bezpieczny tryb</string>
     <string name="state_error_connection">Brak połączenia danych.</string>
     <string name="category_admin">Konserwacja</string>
     <string name="clear_files_title">Wyczyść pliki aktualizacji</string>

@@ -37,10 +37,8 @@
     <string name="secure_mode_disabled_title">安全模式：已禁用</string>
     <string name="secure_mode_disabled_description"><![CDATA[会自动刷入附加更新（如果有的话）。注意：任何软件包（甚至是恶意的）都可能会被刷入系统并获得完整访问权限，请谨慎行事。]]></string>
     <string name="recovery_notice_title">通知</string>
-    <string name="recovery_notice_description_secure"><![CDATA[更新刷入功能目前仅在 <b>TWRP</b> 系列的 Recovery 中工作，在继续前，请确保您正在使用兼容的 Recovery 。]]></string>
     <string name="recovery_notice_description_not_secure"><![CDATA[在当前的模式中的更新刷入功能仅在 <b>TWRP</b> 的 Recovery 中得到 <i>正式</i> 支持。而 <b>CWM</b> 并没有被 <i>正式</i> 支持。但是有一些 <i>社区构建</i> 的<b>CWM</b> <i>可能</i> 能够工作。在继续前，请确保您目前正在使用的 Recovery 能够兼容。]]></string>
     <string name="flash_after_update_notice_title">通知</string>
-    <string name="flash_after_update_notice_description"><![CDATA[附加更新目前是放在 <b>FlashAfterUpdate</b> 文件夹中，但是由于安全模式已开启，如果您选择继续，这些附加的功能将 <b>不会</b> 被刷入。]]></string>
     <string name="button_build_delta">下载</string>
     <string name="button_stop">停止</string>
     <string name="state_action_build">更新可用</string>
@@ -79,7 +77,6 @@
     <string name="scheduler_daily_time">时间</string>
     <string name="scheduler_week_day">天</string>
     <string name="category_flashing">刷入中</string>
-    <string name="secure_mode_title">安全模式</string>
     <string name="state_error_connection">没有数据连接</string>
     <string name="category_admin">维护</string>
     <string name="show_info_title">查看信息 </string>

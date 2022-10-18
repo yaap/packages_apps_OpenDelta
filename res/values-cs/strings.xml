@@ -35,10 +35,8 @@
     <string name="secure_mode_disabled_title">Zabezpečený režim: zakázáno</string>
     <string name="secure_mode_disabled_description"><![CDATA[Aktualizace budou nahrány do zařízení. Všimněte si, že jakákoliv škodlivá aplikace sem může umístit tyto aktualizace a získat plný přístup. Opatrnost je na místě.]]></string>
     <string name="recovery_notice_title">Upozornění</string>
-    <string name="recovery_notice_description_secure"><![CDATA[Flashování aktualizací je v současném režimu podporováno pouze na <b>TWRP</b> recovery. Zkontrolujte prosím před spuštěním kompatibilitu recovery.]]></string>
     <string name="recovery_notice_description_not_secure"><![CDATA[Flashování aktualizací je v současném režimu podporováno pouze na <b>TWRP</b> recovery.<i>Oficiální</i><b>CWM</b> vydání <i>není</i> podporováno, ale některé<i>neoficiální</i> verze <b>CWM</b><i>mohou</i> přesto pracovat správně. Zkontrolujte si prosím kompatibilitu recovery před spuštěním.]]></string>
     <string name="flash_after_update_notice_title">Upozornění</string>
-    <string name="flash_after_update_notice_description"><![CDATA[Další aktualizace jsou přítomny ve složce <b>FlashAfterUpdate</b>, ale je povolen zabezpečený režim. Budete-li pokračovat, tyto další aktualizace se <b>nebudou</b> instalovat.]]></string>
     <string name="state_error_not_official_extra" formatted="false">Aktualizace typu %s není možná</string>
     <string name="button_build_delta">Stáhnout</string>
     <string name="button_stop">Stop</string>
@@ -77,7 +75,6 @@
     <string name="scheduler_daily_time">Čas</string>
     <string name="scheduler_week_day">Den</string>
     <string name="category_flashing">Flashing</string>
-    <string name="secure_mode_title">Bezpečný režim</string>
     <string name="state_error_connection">Žádné datové připojení.</string>
     <string name="category_admin">Údržba</string>
     <string name="clear_files_title">Vyčistit aktualizační soubory</string>

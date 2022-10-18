@@ -33,10 +33,8 @@
     <string name="secure_mode_disabled_title">Turvaline režiim: keelatud</string>
     <string name="secure_mode_disabled_description"><![CDATA[Lisauuendused välgutatakse nende olemasolul. Pane tähele, et iga (pahatahtlik) tarkvara võib asetada neid uuendusi ja saada täieliku juurdepääsu süsteemile. Ettevaatlikkus on soovitatav.]]></string>
     <string name="recovery_notice_title">Teade</string>
-    <string name="recovery_notice_description_secure"><![CDATA[Uuenduste välgutamine praeguses režiimis on toetatud ainult <b>TWRP</b> taastustes. Palun tee kindlaks, et kasutad ühilduvat taastust enne jätkamist.]]></string>
     <string name="recovery_notice_description_not_secure"><![CDATA[Uuenduste välgutamine praeguses režiimis on ametlikult toetatud ainult <b>TWRP</b> taastuses. <i>Ametlikud</i> <b>CWM</b> järgud <i>ei ole</i> toetatud, ent mõned <i>kogukonna poolt</i> tehtud <b>CWM</b> versioonid <i>võivad</i> siiski töötada. Enne jätkamist palun tee kindlaks, et kasutad ühilduvat taastust.]]></string>
     <string name="flash_after_update_notice_title">Teade</string>
-    <string name="flash_after_update_notice_description"><![CDATA[Lisauuendused asuvad <b>FlashAfterUpdate</b> kaustas, ent turvaline režiim on lubatud. Jätkamisel neid lisauuendusi <b>ei</b> välgutata.]]></string>
     <string name="button_build_delta">Laadi alla</string>
     <string name="button_stop">Peata</string>
     <string name="state_action_build">Uuendus saadaval</string>
@@ -74,7 +72,6 @@
     <string name="scheduler_daily_time">Kellaaeg</string>
     <string name="scheduler_week_day">Päev</string>
     <string name="category_flashing">Välgutamine</string>
-    <string name="secure_mode_title">Turvaline režiim</string>
     <string name="state_error_connection">Andmeside puudub.</string>
     <string name="category_admin">Hooldus</string>
     <string name="clear_files_title">Puhasta uuendusfailid</string>

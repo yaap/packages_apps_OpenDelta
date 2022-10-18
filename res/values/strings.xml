@@ -55,10 +55,9 @@
     <string name="secure_mode_disabled_title">Secure mode: disabled</string>
     <string name="secure_mode_disabled_description"><![CDATA[Additional updates are flashed if present. Note that any (malicious) software package can place these updates and gain full system access. Caution is advised.]]></string>
     <string name="recovery_notice_title">Notice</string>
-    <string name="recovery_notice_description_secure"><![CDATA[Flashing updates in the current mode is only supported on <b>TWRP</b> recoveries. Please make sure you are running a compatible recovery before continuing.]]></string>
     <string name="recovery_notice_description_not_secure"><![CDATA[Flashing updates in the current mode is only officially supported on <b>TWRP</b> recoveries. <i>Official</i> <b>CWM</b> builds are <i>not</i> supported, though some <i>community-built</i> versions of <b>CWM</b> <i>may</i> still work. Please make sure you are running a compatible recovery before continuing.]]></string>
+    <string name="recovery_notice_description_reboot"><![CDATA[The device will now reboot to AOSP recovery to install the update]]></string>
     <string name="flash_after_update_notice_title">Notice</string>
-    <string name="flash_after_update_notice_description"><![CDATA[Additional updates are present in the <b>FlashAfterUpdate</b> folder, but secure mode is enabled. If you continue, these additional updates will <b>not</b> be flashed.]]></string>
     <string name="state_error_not_official_extra" formatted="false">Update of type %s is not possible</string>
     <string name="button_build_delta">Download</string>
     <string name="button_stop">Stop</string>
@@ -105,7 +104,6 @@
     <string name="metered_networks_title">Metered networks</string>
     <string name="metered_networks_message">Allow auto downloading on metered networks</string>
     <string name="category_flashing">Flashing</string>
-    <string name="secure_mode_title">Secure mode</string>
     <string name="state_error_connection">No data connection.</string>
     <string name="category_admin">Maintenance</string>
     <string name="show_info_title">Show info</string>

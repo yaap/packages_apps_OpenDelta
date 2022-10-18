@@ -11,8 +11,6 @@ android_app {
         "androidx.preference_preference",
     ],
     privileged: true,
-    jni_libs: ["libopendelta"],
-    required: ["libopendelta"],
     optimize: {
         enabled: false,
     },

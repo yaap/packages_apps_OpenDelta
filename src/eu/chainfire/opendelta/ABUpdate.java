@@ -31,7 +31,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.chainfire.opendelta.DeltaInfo.ProgressListener;
+import eu.chainfire.opendelta.UpdateService.ProgressListener;
 
 class ABUpdate {
 

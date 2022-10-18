@@ -34,10 +34,8 @@
     <string name="secure_mode_disabled_title">セキュアモード: 無効</string>
     <string name="secure_mode_disabled_description"><![CDATA[追加の更新が存在する場合はフラッシュさます。どんな (悪意のある) ソフトウェアパッケージでも、これらの更新を適用して完全なシステムアクセスを得ることができることに注意して下さい。]]></string>
     <string name="recovery_notice_title">注意</string>
-    <string name="recovery_notice_description_secure"><![CDATA[現在のモードでの更新の書き込みは、<b>TWRP</b> リカバリーのみサポートされています。続行する前に互換性のあるリカバリーを実行していることを確認して下さい。]]></string>
     <string name="recovery_notice_description_not_secure"><![CDATA[現在のモードでの更新の書き込みは、<b>TWRP</b> リカバリーのみ正式にサポートされています。<b>CWM</b> のいくつかの<i>コミュニティビルド</i>バージョンでは動作する<i>かもしれませんが</i>、<i>公式</i> <b>CWM</b> はサポート<i>されていません</i>。続行する前に互換性のあるリカバリーを実行していることを確認して下さい。]]></string>
     <string name="flash_after_update_notice_title">注意</string>
-    <string name="flash_after_update_notice_description"><![CDATA[追加の更新は <b>FlashAfterUpdate</b> フォルダにありますが、セキュアモードは有効です。続行すると、これらの追加の更新はフラッシュ<b>されません</b>。]]></string>
     <string name="button_build_delta">ダウンロード</string>
     <string name="button_stop">停止</string>
     <string name="state_action_build">利用可能な更新があります</string>
@@ -75,7 +73,6 @@
     <string name="scheduler_daily_time">時刻</string>
     <string name="scheduler_week_day">日付</string>
     <string name="category_flashing">書き込み</string>
-    <string name="secure_mode_title">セキュアモード</string>
     <string name="state_error_connection">データ接続がありません</string>
     <string name="category_admin">メンテナンス</string>
     <string name="clear_files_title">更新ファイルを削除する</string>
