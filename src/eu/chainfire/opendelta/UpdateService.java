@@ -22,17 +22,14 @@
 
 package eu.chainfire.opendelta;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
-import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -41,7 +38,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.zip.ZipFile;
-import javax.net.ssl.HttpsURLConnection;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -81,8 +77,6 @@ import eu.chainfire.opendelta.ScreenState.OnScreenStateListener;
 public class UpdateService extends Service implements OnNetworkStateListener,
         OnBatteryStateListener, OnScreenStateListener,
         OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
-    private static final int HTTP_READ_TIMEOUT = 30000;
-    private static final int HTTP_CONNECTION_TIMEOUT = 30000;
 
     public static void start(Context context) {
         start(context, null);
@@ -142,7 +136,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     public static final String PREF_LAST_CHECK_TIME_NAME = "last_check_time";
     public static final long PREF_LAST_CHECK_TIME_DEFAULT = 0L;
 
-    private static final String PREF_LAST_DOWNLOAD_TIME = "last_spent_download_time";
+    public static final String PREF_LAST_DOWNLOAD_TIME = "last_spent_download_time";
     private static final String PREF_LAST_SNOOZE_TIME_NAME = "last_snooze_time";
     private static final long PREF_LAST_SNOOZE_TIME_DEFAULT = 0L;
     // we only snooze until a new build
@@ -167,11 +161,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     public static final int PREF_AUTO_DOWNLOAD_CHECK = 1;
     public static final int PREF_AUTO_DOWNLOAD_FULL = 2;
 
-    public static final int PREF_STOP_DOWNLOAD_STOP = 0;
-    public static final int PREF_STOP_DOWNLOAD_PAUSE = 1;
-    public static final int PREF_STOP_DOWNLOAD_RESUME = 2;
-
-
     public static final String PREF_AUTO_DOWNLOAD_CHECK_STRING = String.valueOf(PREF_AUTO_DOWNLOAD_CHECK);
     public static final String PREF_AUTO_DOWNLOAD_DISABLED_STRING = String.valueOf(PREF_AUTO_DOWNLOAD_DISABLED);
 
@@ -181,6 +170,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     private Handler mHandler;
 
     private State mState = State.getInstance();
+    private Download mDownload;
 
     private NetworkState mNetworkState;
     private BatteryState mBatteryState;
@@ -193,7 +183,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
     private NotificationManager mNotificationManager;
     private boolean mIsUpdateRunning;
-    private int mStopDownload = -1;
     private int mFailedUpdateCount;
     private SharedPreferences mPrefs;
     private Notification.Builder mFlashNotificationBuilder;
@@ -362,7 +351,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 }
                 break;
             case ACTION_DOWNLOAD_STOP:
-                mStopDownload = PREF_STOP_DOWNLOAD_STOP;
+                if (mDownload != null) mDownload.stop();
                 if (mNotificationManager != null)
                     mNotificationManager.cancel(NOTIFICATION_BUSY);
                 // if we have a paused download in progress we need to manually stop it
@@ -381,11 +370,11 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                         mState.equals(State.ERROR_DOWNLOAD_RESUME);
                 if (isPaused) {
                     // resume
-                    mStopDownload = -1;
+                    if (mDownload != null) mDownload.resetState();
                     checkForUpdates(true, PREF_AUTO_DOWNLOAD_FULL);
                 } else {
                     // pause
-                    mStopDownload = PREF_STOP_DOWNLOAD_PAUSE;
+                    if (mDownload != null) mDownload.pause();
                     autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
                 }
                 break;
@@ -680,344 +669,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         }
     }
 
-    private HttpsURLConnection setupHttpsRequest(String urlStr) {
-        return setupHttpsRequest(urlStr, 0);
-    }
-
-    private HttpsURLConnection setupHttpsRequest(String urlStr, long offset) {
-        URL url;
-        HttpsURLConnection urlConnection;
-        try {
-            url = new URL(urlStr);
-            urlConnection = (HttpsURLConnection) url.openConnection();
-            urlConnection.setConnectTimeout(HTTP_CONNECTION_TIMEOUT);
-            urlConnection.setReadTimeout(HTTP_READ_TIMEOUT);
-            urlConnection.setRequestMethod("GET");
-            urlConnection.setDoInput(true);
-            if (offset > 0)
-                urlConnection.setRequestProperty("Range", "bytes=" + offset + "-");
-            urlConnection.connect();
-            int code = urlConnection.getResponseCode();
-            if (code != HttpsURLConnection.HTTP_OK
-                    && code != HttpsURLConnection.HTTP_PARTIAL) {
-                Logger.d("response: %d", code);
-                return null;
-            }
-            return urlConnection;
-        } catch (Exception e) {
-            Logger.i("Failed to connect to server");
-            Logger.ex(e);
-            return null;
-        }
-    }
-
-    private byte[] downloadUrlMemory(String url) {
-        Logger.d("download: %s", url);
-
-        HttpsURLConnection urlConnection = null;
-        try {
-            urlConnection = setupHttpsRequest(url);
-            if (urlConnection == null) {
-                return null;
-            }
-
-            int len = urlConnection.getContentLength();
-            if ((len >= 0) && (len < 1024 * 1024)) {
-                InputStream is = urlConnection.getInputStream();
-                int byteInt;
-                ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
-
-                while((byteInt = is.read()) >= 0){
-                    byteArray.write(byteInt);
-                }
-
-                return byteArray.toByteArray();
-            }
-            return null;
-        } catch (Exception e) {
-            // Download failed for any number of reasons, timeouts, connection
-            // drops, etc. Just log it in debugging mode.
-            Logger.ex(e);
-            return null;
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-        }
-    }
-
-    private String downloadUrlMemoryAsString(String url) {
-        Logger.d("download: %s", url);
-
-        HttpsURLConnection urlConnection = null;
-        try {
-            urlConnection = setupHttpsRequest(url);
-            if (urlConnection == null){
-                return null;
-            }
-
-            InputStream is = urlConnection.getInputStream();
-            ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
-            int byteInt;
-
-            while((byteInt = is.read()) >= 0){
-                byteArray.write(byteInt);
-            }
-
-            byte[] bytes = byteArray.toByteArray();
-            if (bytes == null){
-                return null;
-            }
-
-            return new String(bytes, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            // Download failed for any number of reasons, timeouts, connection
-            // drops, etc. Just log it in debugging mode.
-            Logger.ex(e);
-            return null;
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-        }
-    }
-
-    private boolean downloadUrlFile(String url, File f, String matchSUM,
-            ProgressListener progressListener) {
-        Logger.d("download: %s", url);
-
-        HttpsURLConnection urlConnection = null;
-        MessageDigest digest = null;
-        if (matchSUM != null) {
-            try {
-                digest = MessageDigest.getInstance("SHA-256");
-            } catch (NoSuchAlgorithmException e) {
-                // No SHA-256 algorithm support
-                Logger.ex(e);
-            }
-        }
-
-        if (f.exists()) f.delete();
-
-        try {
-            urlConnection = setupHttpsRequest(url);
-            if (urlConnection == null){
-                return false;
-            }
-            long len = urlConnection.getContentLength();
-            long recv = 0;
-            if ((len > 0) && (len < 4L * 1024L * 1024L * 1024L)) {
-                byte[] buffer = new byte[262144];
-
-                InputStream is = urlConnection.getInputStream();
-                try (FileOutputStream os = new FileOutputStream(f, false)) {
-                    int r;
-                    while ((r = is.read(buffer)) > 0) {
-                        if (mStopDownload >= 0) {
-                            return false;
-                        }
-                        os.write(buffer, 0, r);
-                        if (digest != null)
-                            digest.update(buffer, 0, r);
-
-                        recv += r;
-                        if (progressListener != null)
-                            progressListener.onProgress(
-                                    ((float) recv / (float) len) * 100f, recv,
-                                    len);
-                    }
-                }
-
-                if (digest != null) {
-                    StringBuilder SUM = new StringBuilder(new BigInteger(1, digest.digest())
-                            .toString(16).toLowerCase(Locale.ENGLISH));
-                    while (SUM.length() < 64)
-                        SUM.insert(0, "0");
-                    boolean sumCheck = SUM.toString().equals(matchSUM);
-                    Logger.d("SUM=" + SUM + " matchSUM=" + matchSUM);
-                    Logger.d("SUM.length=" + SUM.length() +
-                            " matchSUM.length=" + matchSUM.length());
-                    if (!sumCheck) {
-                        Logger.i("SUM check failed for " + url);
-                    }
-                    return sumCheck;
-                }
-                return true;
-            }
-            return false;
-        } catch (Exception e) {
-            // Download failed for any number of reasons, timeouts, connection
-            // drops, etc. Just log it in debugging mode.
-            Logger.ex(e);
-            return false;
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-        }
-    }
-
-    private boolean downloadUrlFileUnknownSize(String url, final File f,
-            String matchSUM) {
-        Logger.d("download: %s", url);
-
-        HttpsURLConnection urlConnection = null;
-        InputStream is = null;
-        FileOutputStream os = null;
-        MessageDigest digest = null;
-        long len = 0;
-        if (matchSUM != null) {
-            try {
-                digest = MessageDigest.getInstance("SHA-256");
-            } catch (NoSuchAlgorithmException e) {
-                // No SHA-256 algorithm support
-                Logger.ex(e);
-            }
-        }
-
-        long lastTime = SystemClock.elapsedRealtime();
-        long offset = 0;
-        if (f.exists()) offset = f.length();
-
-        try {
-            final String userFN = f.getName().substring(0, f.getName().length() - 5);
-            mState.update(State.ACTION_DOWNLOADING, 0f, 0L, 0L, userFN, null);
-            urlConnection = setupHttpsRequest(url);
-            if (urlConnection == null) return false;
-
-            len = urlConnection.getContentLength();
-            mPrefs.edit().putLong(PREF_DOWNLOAD_SIZE, len).apply();
-            if (offset > 0 && offset < len) {
-                urlConnection.disconnect();
-                urlConnection = setupHttpsRequest(url, offset);
-                if (urlConnection == null) return false;
-                Logger.d("Resuming download at: " + offset);
-            }
-
-            mState.update(State.ACTION_DOWNLOADING, 0f, 0L, len, userFN, null);
-
-            long freeSpace = (new StatFs(mConfig.getPathBase()))
-                    .getAvailableBytes();
-            if (freeSpace < len - offset) {
-                mState.update(State.ERROR_DISK_SPACE, null, freeSpace, len, null,
-                        null);
-                Logger.d("not enough space!");
-                return false;
-            }
-
-            if (offset > 0)
-                lastTime -= mPrefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
-            final long[] last = new long[] { 0, len, 0, lastTime };
-            ProgressListener progressListener = new ProgressListener() {
-                @Override
-                public void onProgress(float progress, long current, long total) {
-                    current += last[0];
-                    total = last[1];
-                    progress = ((float) current / (float) total) * 100f;
-                    long now = SystemClock.elapsedRealtime();
-                    if (now >= last[2] + 250L) {
-                        mState.update(State.ACTION_DOWNLOADING, progress,
-                                current, total, userFN, now - last[3]);
-                        setDownloadNotificationProgress(progress, current,
-                                total,now - last[3]);
-                        last[2] = now;
-                    }
-                }
-
-                public void setStatus(String s){
-                    // do nothing
-                }
-            };
-
-            long recv = offset;
-            if ((len > 0) && (len < 4L * 1024L * 1024L * 1024L)) {
-                mIsUpdateRunning = true;
-                byte[] buffer = new byte[262144];
-
-                is = urlConnection.getInputStream();
-                os = new FileOutputStream(f, offset > 0);
-                int r;
-                while ((r = is.read(buffer)) > 0) {
-                    if (mStopDownload >= 0) {
-                        return false;
-                    }
-                    os.write(buffer, 0, r);
-                    if (offset == 0 && digest != null)
-                        digest.update(buffer, 0, r);
-
-                    recv += r;
-                    progressListener.onProgress(
-                            ((float) recv / (float) len) * 100f,
-                            recv, len);
-                }
-
-                StringBuilder SUM;
-                if (offset > 0) {
-                    SUM = new StringBuilder(getFileSHA256(f, getSUMProgress(State.ACTION_CHECKING_SUM, f.getName())));
-                } else {
-                    if (digest == null) return false;
-                    SUM = new StringBuilder(new BigInteger(1, digest.digest())
-                            .toString(16).toLowerCase(Locale.ENGLISH));
-                }
-                while (SUM.length() < 64)
-                    SUM.insert(0, "0");
-                boolean sumCheck = SUM.toString().equals(matchSUM);
-                Logger.d("SUM=" + SUM + " matchSUM=" + matchSUM);
-                Logger.d("SUM.length=" + SUM.length() +
-                        " matchSUM.length=" + matchSUM.length());
-                if (!sumCheck) {
-                    mIsUpdateRunning = false;
-                    Logger.i("SUM check failed for " + url);
-                    // if sum does not match when done, get rid
-                    f.delete();
-                    mState.update(State.ERROR_DOWNLOAD);
-                }
-                return sumCheck;
-            }
-            return false;
-        } catch (Exception e) {
-            // Download failed for any number of reasons, timeouts, connection
-            // drops, etc. Just log it in debugging mode.
-            mIsUpdateRunning = false;
-            Logger.ex(e);
-            mPrefs.edit().putLong(PREF_LAST_DOWNLOAD_TIME,
-                    SystemClock.elapsedRealtime() - lastTime).apply();
-            if (urlConnection != null) urlConnection.disconnect();
-            try { if (is != null) is.close(); } catch (IOException ignored) {}
-            try { if (os != null) os.close(); } catch (IOException ignored) {}
-            mNotificationManager.cancel(NOTIFICATION_BUSY);
-            return false;
-        } finally {
-            mIsUpdateRunning = false;
-            if (urlConnection != null) urlConnection.disconnect();
-            try { if (is != null) is.close(); } catch (IOException ignored) {}
-            try { if (os != null) os.close(); } catch (IOException ignored) {}
-        }
-    }
-
-    private long getUrlDownloadSize(String url) {
-        Logger.d("getUrlDownloadSize: %s", url);
-
-        HttpsURLConnection urlConnection = null;
-        try {
-            urlConnection = setupHttpsRequest(url);
-            if (urlConnection == null){
-                return 0;
-            }
-
-            return urlConnection.getContentLength();
-        } catch (Exception e) {
-            // Download failed for any number of reasons, timeouts, connection
-            // drops, etc. Just log it in debugging mode.
-            Logger.ex(e);
-            return 0;
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-        }
-    }
-
     private boolean isMatchingImage(String fileName) {
         try {
             Logger.d("Image check for file name: " + fileName);
@@ -1045,7 +696,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
         String url = mConfig.getUrlBaseJson();
 
-        String buildData = downloadUrlMemoryAsString(url);
+        String buildData = Download.asString(url);
         if (buildData == null || buildData.length() == 0) {
             mState.update(State.ERROR_DOWNLOAD, null, null, null, url, null);
             mNotificationManager.cancel(NOTIFICATION_BUSY);
@@ -1109,8 +760,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         return null;
     }
 
-    private ProgressListener getSUMProgress(String state,
-                                            String filename) {
+    public ProgressListener getSUMProgress(String state, String filename) {
         final long[] last = new long[] { 0, SystemClock.elapsedRealtime() };
         final String _state = state;
         final String _filename = filename;
@@ -1240,25 +890,25 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             }
         }
 
-        if (downloadUrlFileUnknownSize(url, f, sha256Sum)
-                && f.renameTo(new File(fn))) {
+        mDownload = new Download(url, f, sha256Sum, this);
+        if (mDownload.start() && f.renameTo(new File(fn))) {
             Logger.d("success");
             mPrefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
             mNotificationManager.cancel(NOTIFICATION_BUSY);
         } else {
-            if (mStopDownload == PREF_STOP_DOWNLOAD_STOP) {
+            if (mDownload.getStatus() == Download.STATUS_DOWNLOAD_STOP) {
                 f.delete();
                 Logger.d("download stopped");
                 autoState(false, PREF_AUTO_DOWNLOAD_DISABLED, false);
                 mNotificationManager.cancel(NOTIFICATION_BUSY);
-            } else if (mStopDownload != PREF_STOP_DOWNLOAD_RESUME &&
+            } else if (mDownload.getStatus() != Download.STATUS_DOWNLOAD_RESUME &&
                        !mState.equals(State.ERROR_DOWNLOAD)) {
                 // either pause or error
                 final Long current = f.length();
                 final Long total = mPrefs.getLong(PREF_DOWNLOAD_SIZE, 1500000000L /* 1.5GB */);
                 final Long lastTime = mPrefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
                 final float progress = ((float) current / (float) total) * 100f;
-                final boolean isPause = mStopDownload == PREF_STOP_DOWNLOAD_PAUSE;
+                final boolean isPause = mDownload.getStatus() == Download.STATUS_DOWNLOAD_PAUSE;
                 final String newState = isPause ? State.ACTION_DOWNLOADING_PAUSED
                                                 : State.ERROR_DOWNLOAD_RESUME;
                 Logger.d("download " + (isPause ? "paused" : "error"));
@@ -1267,6 +917,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 String title = getString(isPause
                         ? R.string.state_action_downloading_paused
                         : R.string.state_error_download_resume);
+                mNotificationManager.cancel(NOTIFICATION_BUSY);
                 newDownloadNotification(true, title);
                 mDownloadNotificationBuilder.setProgress(100, Math.round(progress), false);
                 mNotificationManager.notify(NOTIFICATION_BUSY, mDownloadNotificationBuilder.build());
@@ -1301,7 +952,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         return false;
     }
 
-    private String getFileSHA256(File file, ProgressListener progressListener) {
+    public String getFileSHA256(File file, ProgressListener progressListener) {
         String ret = null;
         int count = 0;
 
@@ -1397,7 +1048,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     NOTIFICATION_UPDATE, mFlashNotificationBuilder.build());
     }
 
-    private synchronized void setDownloadNotificationProgress(float progress, long current, long total, long ms) {
+    public synchronized void setDownloadNotificationProgress(float progress, long current, long total, long ms) {
         // max progress is 100%
         int percent = Math.round(progress);
         mDownloadNotificationBuilder.setProgress(100, percent, false);
@@ -1602,7 +1253,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         } else if (urlSuffix.length() > 0) {
             sumUrl += mConfig.getUrlSuffix();
         }
-        String latestSum = downloadUrlMemoryAsString(sumUrl);
+        String latestSum = Download.asString(sumUrl);
         if (latestSum != null) {
             String sumPart = latestSum;
             while (sumPart.length() > 64)
@@ -1693,7 +1344,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 getString(R.string.state_action_downloading));
 
         mHandler.post(() -> {
-            mStopDownload = -1;
             mIsUpdateRunning = true;
 
             try {
@@ -1743,7 +1393,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     }
                 }
 
-                final String changelog = downloadUrlMemoryAsString(
+                final String changelog = Download.asString(
                         mConfig.getUrlBaseJson().replace(
                         mConfig.getDevice() + ".json", "Changelog.txt"));
                 mPrefs.edit().putString(PREF_LATEST_CHANGELOG, changelog).commit();
@@ -1754,7 +1404,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                         latestBuildWithUrl, latestFetchSUM);
                 if (!updateAvailable || isExisting) return;
                 
-                final long size = getUrlDownloadSize(latestFetch);
+                final long size = Download.getSize(latestFetch);
                 mPrefs.edit().putLong(PREF_DOWNLOAD_SIZE, size).commit();
 
                 Logger.d("check done: latest build available = " +
