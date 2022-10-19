@@ -577,13 +577,17 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             flashFilename.substring(0, flashFilename.lastIndexOf('.'));
         }
 
-        String notifyFileName = readyToFlash ? flashFilename : latest.substring(0, latest.lastIndexOf('.'));
+        String notifyFileName = readyToFlash
+                ? flashFilename
+                : latest.substring(0, latest.lastIndexOf('.'));
 
         mNotificationManager.notify(
                 NOTIFICATION_UPDATE,
                 (new Notification.Builder(this, NOTIFICATION_CHANNEL_ID))
                 .setSmallIcon(R.drawable.stat_notify_update)
-                .setContentTitle(readyToFlash ? getString(R.string.notify_title_flash) : getString(R.string.notify_title_download))
+                .setContentTitle(readyToFlash
+                        ? getString(R.string.notify_title_flash)
+                        : getString(R.string.notify_title_download))
                 .setShowWhen(true)
                 .setContentIntent(getNotificationIntent(false))
                 .setDeleteIntent(getNotificationIntent(true))
@@ -596,6 +600,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 .setContentTitle(getString(R.string.state_action_ab_flash))
                 .setShowWhen(true)
                 .setOngoing(true)
+                .setOnlyAlertOnce(true)
                 .setContentIntent(getNotificationIntent(false))
                 .setContentText(filename);
         setFlashNotificationProgress(0, 0);
@@ -627,6 +632,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 .setContentTitle(title)
                 .setShowWhen(false)
                 .setOngoing(true)
+                .setOnlyAlertOnce(true)
                 .setContentIntent(getNotificationIntent(false));
         for (Notification.Action action : actions)
             mDownloadNotificationBuilder.addAction(action);
@@ -825,9 +831,14 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         // Check if a previous update was done already
         if (checkForFinishedUpdate()) return false;
 
-        Logger.d("checkForUpdates checkOnly = " + checkOnly + " mIsUpdateRunning = " + mIsUpdateRunning + " userInitiated = " + userInitiated +
-                " mNetworkState.getState() = " + mNetworkState.getState() + " mBatteryState.getState() = " + mBatteryState.getState() +
-                " mScreenState.getState() = " + mScreenState.getState());
+        Logger.d(
+            "checkForUpdates checkOnly = " + checkOnly +
+            " mIsUpdateRunning = " + mIsUpdateRunning +
+            " userInitiated = " + userInitiated +
+            " mNetworkState.getState() = " + mNetworkState.getState() +
+            " mBatteryState.getState() = " + mBatteryState.getState() +
+            " mScreenState.getState() = " + mScreenState.getState()
+        );
 
         if (mIsUpdateRunning) {
             Logger.i("Ignoring request to check for updates - busy");
