@@ -51,7 +51,6 @@
     <string name="auto_download_title">Harmonogram działań</string>
     <string name="download_disabled">Nieaktywne</string>
     <string name="check_only">Sprawdź i powiadom</string>
-    <string name="download_delta">Automatyczne pobieranie delta</string>
     <string name="download_full">Automatyczne pobieranie wszystkiego</string>
     <string name="menu_settings">Ustawienia</string>
     <string name="category_download">Automatyczne pobieranie</string>

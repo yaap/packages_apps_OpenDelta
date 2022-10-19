@@ -51,7 +51,6 @@
     <string name="auto_download_title">Запланированное действие</string>
     <string name="download_disabled">Отключено</string>
     <string name="check_only">Проверять обновления и уведомлять о них</string>
-    <string name="download_delta">Автоматически загружать дельта-файлы обновлений</string>
     <string name="download_full">Автоматически загружать все обновления</string>
     <string name="menu_settings">Настройки</string>
     <string name="category_download">Автозагрузка</string>

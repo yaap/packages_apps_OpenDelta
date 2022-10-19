@@ -46,7 +46,6 @@
     <string name="auto_download">Χρονοδιάγραμμα</string>
     <string name="download_disabled">Ανενεργό</string>
     <string name="check_only">Έλεγχος και ειδοποίηση</string>
-    <string name="download_delta">Αυτόματη λήψη delta</string>
     <string name="download_full">Αυτόματη λήψη όλων</string>
     <string name="menu_settings">Ρυθμίσεις</string>
     <string name="category_download">Αυτόματη λήψη</string>

@@ -4,14 +4,12 @@
 	<string-array name="scheduler_actions_keys" translatable="false">
 		<item>@string/download_disabled</item>
 		<item>@string/check_only</item>
-		<item>@string/download_delta</item>
 		<item>@string/download_full</item>
 	</string-array>
 	<string-array name="scheduler_actions_values" translatable="false">
 		<item>0</item>
 		<item>1</item>
 		<item>2</item>
-		<item>3</item>
 	</string-array>
 	<string-array name="battery_level_keys" translatable="false">
 		<item>@string/twenty_five_percent</item>

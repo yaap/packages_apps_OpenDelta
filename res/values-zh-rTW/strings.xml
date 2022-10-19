@@ -48,7 +48,6 @@
     <string name="auto_download_title">排程計畫操作</string>
     <string name="download_disabled">停用</string>
     <string name="check_only">檢查和通知</string>
-    <string name="download_delta">自動下載節省流量更新</string>
     <string name="download_full">自動下載完整更新</string>
     <string name="menu_settings">設定</string>
     <string name="category_download">自動下載</string>

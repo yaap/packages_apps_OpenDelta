@@ -47,7 +47,6 @@
     <string name="auto_download_title">Azione pianificazione</string>
     <string name="download_disabled">Disabilitato</string>
     <string name="check_only">Controlla e notifica</string>
-    <string name="download_delta">Download automatico delta</string>
     <string name="download_full">Download automatico completo</string>
     <string name="menu_settings">Impostazioni</string>
     <string name="category_download">Download automatico</string>

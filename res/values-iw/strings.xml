@@ -44,7 +44,6 @@
     <string name="auto_download_title">מתזמן פעולה</string>
     <string name="download_disabled">לא פעיל</string>
     <string name="check_only">בדוק ודווח</string>
-    <string name="download_delta">דלתא הורדה אוטומטית</string>
     <string name="download_full">הורדה אוטומטית להכל</string>
     <string name="menu_settings">הגדרות</string>
     <string name="category_download">הורדה אוטומטית</string>

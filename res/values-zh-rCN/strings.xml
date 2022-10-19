@@ -54,7 +54,6 @@
     <string name="auto_download_title">计划任务操作</string>
     <string name="download_disabled">关闭</string>
     <string name="check_only">检查并提醒</string>
-    <string name="download_delta">自动下载增量包</string>
     <string name="download_full">自动下载完整包</string>
     <string name="menu_settings">设置</string>
     <string name="menu_changelog">更新日志</string>

@@ -47,7 +47,6 @@
     <string name="auto_download_title">Aksi penjadwal</string>
     <string name="download_disabled">Dinonaktifkan</string>
     <string name="check_only">Periksa dan beritahu</string>
-    <string name="download_delta">Otomatis unduh delta</string>
     <string name="download_full">Otomatis unduh semua</string>
     <string name="menu_settings">Pengaturan</string>
     <string name="category_download">Otomatis unduh</string>

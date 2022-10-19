@@ -41,7 +41,6 @@
     <string name="auto_download_title">Ajastuksen toiminto</string>
     <string name="download_disabled">Pois käytöstä</string>
     <string name="check_only">Tarkista ja ilmoita</string>
-    <string name="download_delta">Lataa delta automaattisesti</string>
     <string name="download_full">Lataa kaikki automaattisesti</string>
     <string name="menu_settings">Asetukset</string>
     <string name="category_download">Automaattinen lataus</string>

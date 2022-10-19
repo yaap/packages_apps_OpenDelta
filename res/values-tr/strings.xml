@@ -54,7 +54,6 @@
     <string name="auto_download_title">Programlayıcı eylemi</string>
     <string name="download_disabled">Devre dışı</string>
     <string name="check_only">Yokla ve beni haberdâr et</string>
-    <string name="download_delta">Kısmî güncellemeleri kendiliğinden indir</string>
     <string name="download_full">Hepsini kendiliğinden indir</string>
     <string name="menu_settings">Ayarlar</string>
     <string name="category_download">Kendiliğinden indirme</string>

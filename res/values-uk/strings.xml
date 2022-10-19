@@ -47,7 +47,6 @@
     <string name="auto_download_title">Запланована дія</string>
     <string name="download_disabled">Вимкнено</string>
     <string name="check_only">Перевіряти оновлення та повідомляти про них</string>
-    <string name="download_delta">Автоматично завантажувати дельта-файли оновлень</string>
     <string name="download_full">Автоматично завантажувати всі оновлення</string>
     <string name="menu_settings">Налаштування</string>
     <string name="category_download">Автозавантаження</string>

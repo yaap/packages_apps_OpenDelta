@@ -286,8 +286,6 @@ public class MainActivity extends Activity {
                 boolean enableDownload = false;
                 boolean enableResume = false;
                 boolean enableReboot = false;
-                boolean deltaUpdatePossible;
-                boolean fullUpdatePossible;
                 boolean enableProgress = false;
                 boolean disableCheckNow = false;
                 boolean disableDataSpeed = false;
@@ -660,7 +658,7 @@ public class MainActivity extends Activity {
 
             final Runnable next = flashStart;
 
-            CharSequence message = null;
+            CharSequence message;
             if (mConfig.getUseTWRP()) {
                 message = Html.fromHtml(
                         getString(R.string.recovery_notice_description_not_secure),

@@ -51,7 +51,6 @@
     <string name="auto_download_title">スケジュールアクション</string>
     <string name="download_disabled">無効</string>
     <string name="check_only">確認と通知</string>
-    <string name="download_delta">Delta の自動ダウンロード</string>
     <string name="download_full">全て自動ダウンロード</string>
     <string name="menu_settings">設定</string>
     <string name="category_download">自動ダウンロード</string>

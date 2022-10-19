@@ -50,7 +50,6 @@
     <string name="auto_download_title">Gestion de la planification</string>
     <string name="download_disabled">Désactivée</string>
     <string name="check_only">Vérifier et notifier</string>
-    <string name="download_delta">Télécharger automatiquement le delta</string>
     <string name="download_full">Télécharger Tout automatiquement</string>
     <string name="menu_settings">Paramètres</string>
     <string name="category_download">Téléchargement automatique</string>

@@ -47,7 +47,6 @@
     <string name="auto_download_title">Acción de programador</string>
     <string name="download_disabled">Deshabilitado</string>
     <string name="check_only">Comprobar y notificar</string>
-    <string name="download_delta">Auto descargar deltas</string>
     <string name="download_full">Auto descargar todos</string>
     <string name="menu_settings">Configuraciones</string>
     <string name="category_download">Descarga automática</string>

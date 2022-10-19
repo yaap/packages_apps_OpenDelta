@@ -45,7 +45,6 @@
     <string name="auto_download_title">예약 작업</string>
     <string name="download_disabled">비활성화</string>
     <string name="check_only">확인 및 통보</string>
-    <string name="download_delta">델타 자동 다운로드</string>
     <string name="download_full">전체 자동 다운로드</string>
     <string name="menu_settings">설정</string>
     <string name="category_download">자동 다운로드</string>

@@ -43,7 +43,6 @@
     <string name="auto_download_title">Tindakan berjadual</string>
     <string name="download_disabled">Tidak aktif</string>
     <string name="check_only">Semak dan maklumkan</string>
-    <string name="download_delta">Muat turun delta auto</string>
     <string name="download_full">Muat turun semua auto</string>
     <string name="menu_settings">Tetapan</string>
     <string name="category_download">Muat turun auto</string>

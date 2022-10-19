@@ -47,7 +47,6 @@
     <string name="auto_download_title">Planner actie</string>
     <string name="download_disabled">Uitgeschakeld</string>
     <string name="check_only">Controleer en meld</string>
-    <string name="download_delta">Download delta\'s automatisch</string>
     <string name="download_full">Download alles automatisch</string>
     <string name="menu_settings">Instellingen</string>
     <string name="category_download">Automatische download</string>

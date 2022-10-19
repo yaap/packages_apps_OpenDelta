@@ -153,7 +153,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     public static final String PREF_AUTO_UPDATE_METERED_NETWORKS = "auto_update_metered_networks";
 
     public static final String PREF_LATEST_FULL_NAME = "latest_full_name";
-    public static final String PREF_STOP_DOWNLOAD = "stop_download";
     public static final String PREF_DOWNLOAD_SIZE = "download_size_long";
     public static final String PREF_INITIAL_FILE = "initial_file";
 
@@ -161,7 +160,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     public static final int PREF_AUTO_DOWNLOAD_CHECK = 1;
     public static final int PREF_AUTO_DOWNLOAD_FULL = 2;
 
-    public static final String PREF_AUTO_DOWNLOAD_CHECK_STRING = String.valueOf(PREF_AUTO_DOWNLOAD_CHECK);
     public static final String PREF_AUTO_DOWNLOAD_DISABLED_STRING = String.valueOf(PREF_AUTO_DOWNLOAD_DISABLED);
 
     private Config mConfig;
@@ -1282,7 +1280,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     }
 
     private int getAutoDownloadValue() {
-        String autoDownload = mPrefs.getString(SettingsActivity.PREF_AUTO_DOWNLOAD,
+        String autoDownload = mPrefs.getString(
+                SettingsActivity.PREF_AUTO_DOWNLOAD,
                 PREF_AUTO_DOWNLOAD_DISABLED_STRING);
         return Integer.parseInt(autoDownload);
     }

@@ -47,7 +47,6 @@
     <string name="auto_download_title">Ação do agendamento</string>
     <string name="download_disabled">Desativado</string>
     <string name="check_only">Verificar e notificar</string>
-    <string name="download_delta">Transferir delta automaticamente</string>
     <string name="download_full">Transferir todos automaticamente</string>
     <string name="menu_settings">Definições</string>
     <string name="category_download">Transferir automaticamente</string>

@@ -47,7 +47,6 @@
     <string name="auto_download_title">Akcia plánovača</string>
     <string name="download_disabled">Zakázané</string>
     <string name="check_only">Skontrolovať a oznámiť</string>
-    <string name="download_delta">Automaticky preberať delty</string>
     <string name="download_full">Automaticky preberať všetko</string>
     <string name="menu_settings">Nastavenia</string>
     <string name="category_download">Automatické preberanie</string>

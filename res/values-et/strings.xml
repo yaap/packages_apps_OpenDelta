@@ -50,7 +50,6 @@
     <string name="auto_download_title">Ajastaja tegevus</string>
     <string name="download_disabled">Keelatud</string>
     <string name="check_only">Kontrolli ja teata</string>
-    <string name="download_delta">Tõmba delta automaatselt</string>
     <string name="download_full">Tõmba kõik automaatselt</string>
     <string name="menu_settings">Seaded</string>
     <string name="category_download">Automaatne allalaadimine</string>

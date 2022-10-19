@@ -47,7 +47,6 @@
     <string name="auto_download_title">Dejanje urnika</string>
     <string name="download_disabled">Onemogočeno</string>
     <string name="check_only">Preveri in obvesti</string>
-    <string name="download_delta">Samodejno prejmi Delto</string>
     <string name="download_full">Samodejno prejmi vse</string>
     <string name="menu_settings">Nastavitve</string>
     <string name="category_download">Samodejno prejmi</string>

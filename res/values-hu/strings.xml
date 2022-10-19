@@ -47,7 +47,6 @@
     <string name="auto_download_title">Tervezett művelet</string>
     <string name="download_disabled">Kikapcsolva</string>
     <string name="check_only">Ellenőriz és értesít</string>
-    <string name="download_delta">Delta automatikus letöltése</string>
     <string name="download_full">Teljes automatikus letöltése</string>
     <string name="menu_settings">Beállítások</string>
     <string name="category_download">Automatikus letöltés</string>

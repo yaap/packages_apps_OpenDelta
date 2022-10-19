@@ -47,7 +47,6 @@
     <string name="auto_download_title">Planleggingshandling</string>
     <string name="download_disabled">Deaktivert</string>
     <string name="check_only">Sjekk og varsle</string>
-    <string name="download_delta">Automatisk nedlasting delta</string>
     <string name="download_full">Automatisk nedlasting alle</string>
     <string name="menu_settings">Innstillinger</string>
     <string name="category_download">Automatisk nedlasting</string>

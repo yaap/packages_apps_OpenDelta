@@ -47,7 +47,6 @@
     <string name="auto_download_title">Proqramlama əməli</string>
     <string name="download_disabled">Qeyri-aktiv</string>
     <string name="check_only">Yoxla və xəbərdar et</string>
-    <string name="download_delta">Delta təzələməsini avtomatik yüklə</string>
     <string name="download_full">Hamısını avtomatik yüklə</string>
     <string name="menu_settings">Parametrlər</string>
     <string name="category_download">Avtomatik yüklə</string>
