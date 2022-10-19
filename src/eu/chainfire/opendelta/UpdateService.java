@@ -1392,17 +1392,16 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                         Logger.ex(exception);
                     }
                 }
+                mPrefs.edit().putString(PREF_LATEST_FULL_NAME,
+                        updateAvailable ? latestBuild : null).commit();
+                if (!updateAvailable) return;
 
                 final String changelog = Download.asString(
                         mConfig.getUrlBaseJson().replace(
                         mConfig.getDevice() + ".json", "Changelog.txt"));
                 mPrefs.edit().putString(PREF_LATEST_CHANGELOG, changelog).commit();
 
-                mPrefs.edit().putString(PREF_LATEST_FULL_NAME,
-                        updateAvailable ? latestBuild : null).commit();
-                final boolean isExisting = checkExistingBuild(
-                        latestBuildWithUrl, latestFetchSUM);
-                if (!updateAvailable || isExisting) return;
+                if (checkExistingBuild(latestBuildWithUrl, latestFetchSUM)) return;
                 
                 final long size = Download.getSize(latestFetch);
                 mPrefs.edit().putLong(PREF_DOWNLOAD_SIZE, size).commit();
@@ -1462,7 +1461,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     }
 
     private boolean checkExistingBuild(List<String> latestBuildWithUrl,
-                                           String latestFetchSUM) {
+            String latestFetchSUM) {
         String fn = mConfig.getPathBase() + latestBuildWithUrl.get(0);
         File file = new File(fn);
         if (file.exists()) {
