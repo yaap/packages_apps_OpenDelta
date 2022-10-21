@@ -243,7 +243,7 @@ public class Download {
                     Logger.i("SUM check failed for " + mURL);
                     // if sum does not match when done, get rid
                     mFile.delete();
-                    mState.update(State.ERROR_DOWNLOAD);
+                    mState.update(State.ERROR_DOWNLOAD_SHA);
                 }
                 return sumCheck;
             }

@@ -378,7 +378,8 @@ public class MainActivity extends Activity {
                 } else if (State.ERROR_UNKNOWN.equals(state)) {
                     enableCheck = true;
                     mProgress.setIndeterminate(false);
-                } else if (State.ERROR_DOWNLOAD.equals(state)) {
+                } else if (State.ERROR_DOWNLOAD.equals(state)
+                        || State.ERROR_DOWNLOAD_SHA.equals(state)) {
                     enableCheck = true;
                     mProgress.setIndeterminate(false);
                 } else if (State.ERROR_UNOFFICIAL.equals(state)) {

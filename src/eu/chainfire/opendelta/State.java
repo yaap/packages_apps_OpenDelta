@@ -41,6 +41,7 @@ public class State {
     public static final String ERROR_UNKNOWN = "error_unknown";
     public static final String ERROR_UNOFFICIAL = "error_unofficial";
     public static final String ERROR_DOWNLOAD = "error_download";
+    public static final String ERROR_DOWNLOAD_SHA = "error_download_sha";
     public static final String ERROR_DOWNLOAD_RESUME = "error_download_resume";
     public static final String ERROR_CONNECTION = "error_connection";
     public static final String ERROR_PERMISSIONS = "error_permissions";
@@ -62,6 +63,7 @@ public class State {
 
     private static final Set<String> mErrorStates = Set.of(
         ERROR_DOWNLOAD,
+        ERROR_DOWNLOAD_SHA,
         ERROR_DOWNLOAD_RESUME,
         ERROR_DISK_SPACE,
         ERROR_UNKNOWN,

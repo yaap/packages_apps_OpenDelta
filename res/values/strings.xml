@@ -65,6 +65,7 @@
     <string name="state_action_build_delta">Delta update is possible</string>
     <string name="state_action_build_full">Full update is possible</string>
     <string name="state_error_download">Download problem</string>
+    <string name="state_error_download_sha">Download problem (corrupted file)</string>
     <string name="state_error_download_resume">Download problem (resume-able)</string>
     <string name="text_current_version_header_title">Current version:</string>
     <string name="text_last_checked_header_title">Last checked:</string>

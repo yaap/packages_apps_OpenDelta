@@ -911,7 +911,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 autoState(false, PREF_AUTO_DOWNLOAD_DISABLED, false);
                 mNotificationManager.cancel(NOTIFICATION_BUSY);
             } else if (mDownload.getStatus() != Download.STATUS_DOWNLOAD_RESUME &&
-                       !mState.equals(State.ERROR_DOWNLOAD)) {
+                       !mState.equals(State.ERROR_DOWNLOAD) &&
+                       !mState.equals(State.ERROR_DOWNLOAD_SHA)) {
                 // either pause or error
                 final Long current = f.length();
                 final Long total = mPrefs.getLong(PREF_DOWNLOAD_SIZE, 1500000000L /* 1.5GB */);
