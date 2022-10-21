@@ -325,41 +325,19 @@ public class MainActivity extends Activity {
                         // same progress state as before.
                         // save a lot of time by only updating progress
                         disableDataSpeed = State.ACTION_AB_FLASH.equals(state);
-                        // long --> int overflows FTL (progress.setXXX)
-                        boolean progressInK = false;
-                        if (localTotal > 1024L * 1024L * 1024L) {
-                            progressInK = true;
-                            localCurrent /= 1024L;
-                            localTotal /= 1024L;
-                        }
-                        sub = filename;
-                        progressPercent = String.format(Locale.ENGLISH, "%.0f %%", progress);
-                        if ((localMS > 500) && (localCurrent > 0) && (localTotal > 0)) {
-                            float kibps = ((float) localCurrent / 1024f) / ((float) localMS / 1000f);
-                            if (progressInK) kibps *= 1024f;
-                            int sec = (int) (((((float) localTotal / (float) localCurrent) *
-                                    (float) localMS) - localMS) / 1000f);
-                            if (disableDataSpeed) {
-                                sub2 = String.format(Locale.ENGLISH,
-                                        "%02d:%02d",
-                                        sec / 60, sec % 60);
-                            } else {
-                                if (kibps < 1024) {
-                                    sub2 = String.format(Locale.ENGLISH,
-                                            "%.0f KiB/s, %02d:%02d",
-                                            kibps, sec / 60, sec % 60);
-                                } else {
-                                    sub2 = String.format(Locale.ENGLISH,
-                                            "%.0f MiB/s, %02d:%02d",
-                                            kibps / 1024f, sec / 60, sec % 60);
-                                }
-                            }
-                        }
-                        mSub.setText(sub);
-                        mSub2.setText(sub2);
-                        mProgressPercent.setText(progressPercent);
-                        mProgressCurrent = Math.round(localCurrent);
-                        mProgressMax = Math.round(localTotal);
+                        final ProgressGenerator pgen = new ProgressGenerator(
+                            localCurrent,
+                            localTotal,
+                            localMS,
+                            progress,
+                            disableDataSpeed,
+                            filename
+                        );
+                        mSub.setText(pgen.sub);
+                        mSub2.setText(pgen.sub2);
+                        mProgressPercent.setText(pgen.progressPercent);
+                        mProgressCurrent = Math.round(pgen.localCurrent);
+                        mProgressMax = Math.round(pgen.localTotal);
                         mProgressEnabled = true;
                         handleProgressBar();
                         return;
@@ -367,194 +345,179 @@ public class MainActivity extends Activity {
                     mState = state;
                 }
 
-                if (State.ERROR_DISK_SPACE.equals(state)) {
-                    enableCheck = true;
-                    mProgress.setIndeterminate(false);
-                    localCurrent /= 1024L * 1024L;
-                    localTotal /= 1024L * 1024L;
+                String flashImage = null;
+                String flashImageBase = null;
+                long downloadSize = 0L;
+                switch (state) {
+                    case State.ERROR_DISK_SPACE:
+                        enableCheck = true;
+                        mProgress.setIndeterminate(false);
+                        localCurrent /= 1024L * 1024L;
+                        localTotal /= 1024L * 1024L;
 
-                    extraText = getString(R.string.error_disk_space_sub,
-                            localCurrent, localTotal);
-                } else if (State.ERROR_UNKNOWN.equals(state)) {
-                    enableCheck = true;
-                    mProgress.setIndeterminate(false);
-                } else if (State.ERROR_DOWNLOAD.equals(state)
-                        || State.ERROR_DOWNLOAD_SHA.equals(state)) {
-                    enableCheck = true;
-                    mProgress.setIndeterminate(false);
-                } else if (State.ERROR_UNOFFICIAL.equals(state)) {
-                    enableCheck = true;
-                    mProgress.setIndeterminate(false);
-                    extraText = getString(R.string.state_error_not_official_extra, versionType);
-                } else if (State.ERROR_CONNECTION.equals(state)) {
-                    enableCheck = true;
-                    mProgress.setIndeterminate(false);
-                } else if (State.ERROR_PERMISSIONS.equals(state)) {
-                    enableCheck = true;
-                    mProgress.setIndeterminate(false);
-                } else if (State.ERROR_FLASH.equals(state)) {
-                    enableCheck = true;
-                    enableFlash = true;
-                    mProgress.setIndeterminate(false);
-                    title = getString(R.string.state_error_flash_title);
-                } else if (State.ERROR_AB_FLASH.equals(state)) {
-                    enableCheck = true;
-                    mProgress.setIndeterminate(false);
-                    title = getString(R.string.state_error_ab_flash_title);
-                    if (errorCode == UpdateEngine.ErrorCodeConstants.PAYLOAD_TIMESTAMP_ERROR) {
-                        extraText = getString(R.string.error_ab_timestamp);
-                    } else if (errorCode == UpdateEngine.ErrorCodeConstants.UPDATED_BUT_NOT_ACTIVE) {
-                        extraText = getString(R.string.error_ab_inactive);
-                    }
-                } else if (State.ERROR_FLASH_FILE.equals(state)) {
-                    enableCheck = true;
-                    mProgress.setIndeterminate(false);
-                    title = getString(R.string.state_error_flash_file_title);
-                } else if (State.ACTION_NONE.equals(state)) {
-                    enableCheck = true;
-                    mProgress.setIndeterminate(false);
-                } else if (State.ACTION_READY.equals(state)) {
-                    enableCheck = true;
-                    enableFlash = true;
-                    enableChangelog = true;
-                    mProgress.setIndeterminate(false);
-
-                    final String flashImage = mPrefs.getString(
-                            UpdateService.PREF_READY_FILENAME_NAME, null);
-                    String flashImageBase = flashImage != null ? new File(
-                            flashImage).getName() : null;
-                    if (flashImageBase != null) {
-                        updateVersion = flashImageBase.substring(0,
-                                flashImageBase.lastIndexOf('.'));
-                    }
-                    mUpdateVersionTitle.setText(R.string.text_update_version_title);
-                } else if (State.ACTION_FLASH_FILE_READY.equals(state)) {
-                    enableCheck = true;
-                    enableFlash = true;
-                    mProgress.setIndeterminate(false);
-                    final String flashImage = mPrefs.getString(
-                            UpdateService.PREF_READY_FILENAME_NAME, null);
-                    mPrefs.edit().putBoolean(UpdateService.PREF_FILE_FLASH, true).commit();
-                    String flashImageBase = flashImage != null ? new File(
-                            flashImage).getName() : null;
-                    if (flashImageBase != null) {
-                        updateVersion = flashImageBase;
-                    }
-                    mUpdateVersionTitle.setText(R.string.text_update_file_flash_title);
-                } else if (State.ACTION_AB_FINISHED.equals(state)) {
-                    enableReboot = true;
-                    disableCheckNow = true;
-                    enableChangelog = !mPrefs.getBoolean(UpdateService.PREF_FILE_FLASH, false);
-                    mProgress.setIndeterminate(false);
-
-                    final String flashImage = mPrefs.getString(
-                            UpdateService.PREF_READY_FILENAME_NAME, null);
-                    String flashImageBase = flashImage != null ? new File(
-                            flashImage).getName() : null;
-                    if (flashImageBase != null) {
-                        updateVersion = flashImageBase.substring(0,
-                                flashImageBase.lastIndexOf('.'));
-                    }
-
-                    mPrefs.edit().putString(UpdateService.PREF_READY_FILENAME_NAME, null).commit();
-                    mPrefs.edit().putString(UpdateService.PREF_LATEST_FULL_NAME, null).commit();
-                } else if (State.ACTION_BUILD.equals(state)) {
-                    enableCheck = true;
-                    mProgress.setIndeterminate(false);
-
-                    final String latest = mPrefs.getString(
-                            UpdateService.PREF_LATEST_FULL_NAME, null);
-                    if (latest != null) {
-                        String latestBase = latest.substring(0,
-                                latest.lastIndexOf('.'));
-                        enableBuild = true;
-                        enableChangelog = true;
-                        updateVersion = latestBase;
-                        title = getString(R.string.state_action_build_full);
-                    }
-                    long downloadSize = mPrefs.getLong(
-                            UpdateService.PREF_DOWNLOAD_SIZE, -1);
-                    if (downloadSize == -1) {
-                        downloadSizeText = "";
-                    } else if (downloadSize == 0) {
-                        downloadSizeText = getString(R.string.text_download_size_unknown);
-                    } else {
-                        downloadSizeText = Formatter.formatFileSize(getApplicationContext(), downloadSize);
-                    }
-                } else if (State.ACTION_SEARCHING.equals(state)
-                        || State.ACTION_CHECKING.equals(state)) {
-                    enableProgress = true;
-                    mProgress.setIndeterminate(true);
-                    localCurrent = 1L;
-                } else {
-                    enableChangelog = !mPrefs.getBoolean(UpdateService.PREF_FILE_FLASH, false);
-                    enableProgress = true;
-                    if (State.ACTION_AB_FLASH.equals(state)) {
-                        disableDataSpeed = true;
-                    } else if (State.ACTION_DOWNLOADING.equals(state)) {
-                        disableCheckNow = true;
-                        enableDownload = true;
-                    } else if (State.ERROR_DOWNLOAD_RESUME.equals(state) ||
-                            State.ACTION_DOWNLOADING_PAUSED.equals(state)) {
-                        disableCheckNow = true;
-                        enableDownload = true;
-                        enableResume = true;
-                    }
-                    mProgress.setIndeterminate(false);
-
-                    long downloadSize = mPrefs.getLong(
-                            UpdateService.PREF_DOWNLOAD_SIZE, -1);
-                    if (downloadSize == -1) {
-                        downloadSizeText = "";
-                    } else if (downloadSize == 0) {
-                        downloadSizeText = getString(R.string.text_download_size_unknown);
-                    } else {
-                        downloadSizeText = Formatter.formatFileSize(getApplicationContext(), downloadSize);
-                    }
-
-                    updateVersion = getUpdateVersionString();
-
-                    final String flashImage = mPrefs.getString(
-                            UpdateService.PREF_READY_FILENAME_NAME, null);
-                    String flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
-                    if (flashImageBase != null) {
-                        updateVersion = flashImageBase.substring(0,
-                                flashImageBase.lastIndexOf('.'));
-                    }
-
-                    // long --> int overflows FTL (progress.setXXX)
-                    boolean progressInK = false;
-                    if (localTotal > 1024L * 1024L * 1024L) {
-                        progressInK = true;
-                        localCurrent /= 1024L;
-                        localTotal /= 1024L;
-                    }
-
-                    if (filename != null) {
-                        sub = filename;
-                        progressPercent = String.format(Locale.ENGLISH, "%.0f %%", progress);
-                        if ((localMS > 500) && (localCurrent > 0) && (localTotal > 0)) {
-                            float kibps = ((float) localCurrent / 1024f) / ((float) localMS / 1000f);
-                            if (progressInK) kibps *= 1024f;
-                            int sec = (int) (((((float) localTotal / (float) localCurrent)
-                                    * (float) localMS) - localMS) / 1000f);
-                            if (disableDataSpeed) {
-                                sub2 = String.format(Locale.ENGLISH,
-                                        "%02d:%02d",
-                                        sec / 60, sec % 60);
-                            } else {
-                                if (kibps < 1024) {
-                                    sub2 = String.format(Locale.ENGLISH,
-                                            "%.0f KiB/s, %02d:%02d",
-                                            kibps, sec / 60, sec % 60);
-                                } else {
-                                    sub2 = String.format(Locale.ENGLISH,
-                                            "%.0f MiB/s, %02d:%02d",
-                                            kibps / 1024f, sec / 60, sec % 60);
-                                }
-                            }
+                        extraText = getString(R.string.error_disk_space_sub,
+                                localCurrent, localTotal);
+                        break;
+                    case State.ERROR_UNOFFICIAL:
+                        enableCheck = true;
+                        mProgress.setIndeterminate(false);
+                        extraText = getString(R.string.state_error_not_official_extra, versionType);
+                        break;
+                    case State.ERROR_UNKNOWN:
+                    case State.ERROR_DOWNLOAD:
+                    case State.ERROR_DOWNLOAD_SHA:
+                    case State.ERROR_CONNECTION:
+                    case State.ERROR_PERMISSIONS:
+                    case State.ACTION_NONE:
+                        enableCheck = true;
+                        mProgress.setIndeterminate(false);
+                        break;
+                    case State.ERROR_FLASH:
+                        enableCheck = true;
+                        enableFlash = true;
+                        mProgress.setIndeterminate(false);
+                        title = getString(R.string.state_error_flash_title);
+                        break;
+                    case State.ERROR_AB_FLASH:
+                        enableCheck = true;
+                        mProgress.setIndeterminate(false);
+                        title = getString(R.string.state_error_ab_flash_title);
+                        if (errorCode == UpdateEngine.ErrorCodeConstants.PAYLOAD_TIMESTAMP_ERROR) {
+                            extraText = getString(R.string.error_ab_timestamp);
+                        } else if (errorCode == UpdateEngine.ErrorCodeConstants.UPDATED_BUT_NOT_ACTIVE) {
+                            extraText = getString(R.string.error_ab_inactive);
                         }
-                    }
+                        break;
+                    case State.ERROR_FLASH_FILE:
+                        enableCheck = true;
+                        enableFlash = true;
+                        mProgress.setIndeterminate(false);
+                        title = getString(R.string.state_error_flash_title);
+                        break;
+                    case State.ACTION_READY:
+                        enableCheck = true;
+                        enableFlash = true;
+                        enableChangelog = true;
+                        mProgress.setIndeterminate(false);
+
+                        flashImage = mPrefs.getString(UpdateService.PREF_READY_FILENAME_NAME, null);
+                        flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
+                        if (flashImageBase != null) {
+                            updateVersion = flashImageBase.substring(0,
+                                    flashImageBase.lastIndexOf('.'));
+                        }
+                        mUpdateVersionTitle.setText(R.string.text_update_version_title);
+                        break;
+                    case State.ACTION_FLASH_FILE_READY:
+                        enableCheck = true;
+                        enableFlash = true;
+                        mProgress.setIndeterminate(false);
+                        flashImage = mPrefs.getString(UpdateService.PREF_READY_FILENAME_NAME, null);
+                        mPrefs.edit().putBoolean(UpdateService.PREF_FILE_FLASH, true).commit();
+                        flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
+                        if (flashImageBase != null) {
+                            updateVersion = flashImageBase;
+                        }
+                        mUpdateVersionTitle.setText(R.string.text_update_file_flash_title);
+                        break;
+                    case State.ACTION_AB_FINISHED:
+                        enableReboot = true;
+                        disableCheckNow = true;
+                        enableChangelog = !mPrefs.getBoolean(UpdateService.PREF_FILE_FLASH, false);
+                        mProgress.setIndeterminate(false);
+
+                        flashImage = mPrefs.getString(UpdateService.PREF_READY_FILENAME_NAME, null);
+                        flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
+                        if (flashImageBase != null) {
+                            updateVersion = flashImageBase.substring(0,
+                                    flashImageBase.lastIndexOf('.'));
+                        }
+
+                        mPrefs.edit().putString(UpdateService.PREF_READY_FILENAME_NAME, null).commit();
+                        mPrefs.edit().putString(UpdateService.PREF_LATEST_FULL_NAME, null).commit();
+                        break;
+                    case State.ACTION_BUILD:
+                        enableCheck = true;
+                        mProgress.setIndeterminate(false);
+
+                        final String latest = mPrefs.getString(
+                                UpdateService.PREF_LATEST_FULL_NAME, null);
+                        if (latest != null) {
+                            String latestBase = latest.substring(0,
+                                    latest.lastIndexOf('.'));
+                            enableBuild = true;
+                            enableChangelog = true;
+                            updateVersion = latestBase;
+                            title = getString(R.string.state_action_build_full);
+                        }
+                        downloadSize = mPrefs.getLong(
+                                UpdateService.PREF_DOWNLOAD_SIZE, -1);
+                        if (downloadSize == -1) {
+                            downloadSizeText = "";
+                        } else if (downloadSize == 0) {
+                            downloadSizeText = getString(R.string.text_download_size_unknown);
+                        } else {
+                            downloadSizeText = Formatter.formatFileSize(getApplicationContext(), downloadSize);
+                        }
+                        break;
+                    case State.ACTION_SEARCHING:
+                    case State.ACTION_CHECKING:
+                        enableProgress = true;
+                        mProgress.setIndeterminate(true);
+                        localCurrent = 1L;
+                        break;
+                    default:
+                        enableChangelog = !mPrefs.getBoolean(UpdateService.PREF_FILE_FLASH, false);
+                        enableProgress = true;
+                        switch (state) {
+                            case State.ACTION_AB_FLASH:
+                                disableDataSpeed = true;
+                                break;
+                            case State.ACTION_DOWNLOADING:
+                                disableCheckNow = true;
+                                enableDownload = true;
+                                break;
+                            case State.ERROR_DOWNLOAD_RESUME:
+                            case State.ACTION_DOWNLOADING_PAUSED:
+                                disableCheckNow = true;
+                                enableDownload = true;
+                                enableResume = true;
+                                break;
+                        }
+                        mProgress.setIndeterminate(false);
+
+                        downloadSize = mPrefs.getLong(
+                                UpdateService.PREF_DOWNLOAD_SIZE, -1);
+                        if (downloadSize == -1) {
+                            downloadSizeText = "";
+                        } else if (downloadSize == 0) {
+                            downloadSizeText = getString(R.string.text_download_size_unknown);
+                        } else {
+                            downloadSizeText = Formatter.formatFileSize(getApplicationContext(), downloadSize);
+                        }
+
+                        updateVersion = getUpdateVersionString();
+
+                        flashImage = mPrefs.getString(UpdateService.PREF_READY_FILENAME_NAME, null);
+                        flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
+                        if (flashImageBase != null) {
+                            updateVersion = flashImageBase.substring(0, flashImageBase.lastIndexOf('.'));
+                        }
+
+                        final ProgressGenerator pgen = new ProgressGenerator(
+                            localCurrent,
+                            localTotal,
+                            localMS,
+                            progress,
+                            disableDataSpeed,
+                            filename
+                        );
+                        sub = pgen.sub;
+                        sub2 = pgen.sub2;
+                        progressPercent = pgen.progressPercent;
+                        localCurrent = pgen.localCurrent;
+                        localTotal = pgen.localTotal;
+                        break;
                 }
                 mTitle.setText(title);
                 mSub.setText(sub);
@@ -831,5 +794,62 @@ public class MainActivity extends Activity {
                     latest.lastIndexOf('.'));
         }
         return "";
+    }
+
+    private class ProgressGenerator {
+        public String sub;
+        public String sub2;
+        public String progressPercent;
+        public long localCurrent;
+        public long localTotal;
+
+        public ProgressGenerator(
+                long localCurrent,
+                long localTotal,
+                long localMS,
+                Float progress,
+                boolean disableDataSpeed,
+                String filename
+                ) {
+            this.localCurrent = localCurrent;
+            this.localTotal = localTotal;
+            generate(localMS, progress, disableDataSpeed, filename);
+        }
+
+        private void generate(long localMS, Float progress,
+                boolean disableDataSpeed, String filename) {
+            // long --> int overflows FTL (progress.setXXX)
+            boolean progressInK = false;
+            if (localTotal > 1024L * 1024L * 1024L) {
+                progressInK = true;
+                localCurrent /= 1024L;
+                localTotal /= 1024L;
+            }
+
+            if (filename != null) {
+                sub = filename;
+                progressPercent = String.format(Locale.ENGLISH, "%.0f %%", progress);
+                if (localMS < 500 || localCurrent < 0 || localTotal < 0) return;
+                float kibps = ((float) localCurrent / 1024f) / ((float) localMS / 1000f);
+                if (progressInK) kibps *= 1024f;
+                int sec = (int) (((((float) localTotal / (float) localCurrent) *
+                        (float) localMS) - localMS) / 1000f);
+                if (disableDataSpeed) {
+                    sub2 = String.format(Locale.ENGLISH,
+                            "%02d:%02d",
+                            sec / 60, sec % 60);
+                    return;
+                }
+                if (kibps < 1024) {
+                    sub2 = String.format(Locale.ENGLISH,
+                            "%.0f KiB/s, %02d:%02d",
+                            kibps, sec / 60, sec % 60);
+                    return;
+                }
+                sub2 = String.format(Locale.ENGLISH,
+                        "%.0f MiB/s, %02d:%02d",
+                        kibps / 1024f, sec / 60, sec % 60);
+            }
+        }
     }
 }
