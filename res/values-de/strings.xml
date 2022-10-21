@@ -104,6 +104,6 @@
     <string name="channel_name">Aktualisierungsfortschritt</string>
     <string name="text_update_file_flash_title">Aktualisierungsdatei</string>
     <string name="text_info_section">Drücken Sie die auf prüfen, um zu sehen, ob ein Update verfügbar ist. Nach einem Update werden Sie zum Neustart aufgefordert. Geräte mit einem traditionellen Recovery-basierten Update werden beim Neustart in die Recovery gewechselt, um den Flash-Prozess auszuführen. Wenn Ihr Gerät nahtlose Updates (A/B) unterstützt, wird das Update durch den Neustart aktiviert.</string>
-    <string name="error_ab_timestamp">Die aktuelle Version ist neuer als das Update</string>
-    <string name="error_ab_inactive">Update bereits installiert und muss neu gestartet werden</string>
+    <string name="error_ab_51">Die aktuelle Version ist neuer als das Update</string>
+    <string name="error_ab_52">Update bereits installiert und muss neu gestartet werden</string>
 </resources>

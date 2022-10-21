@@ -105,6 +105,6 @@
     <string name="channel_name">Güncelleme ilerlemesi</string>
     <string name="text_update_file_flash_title">Güncelleme dosyası</string>
     <string name="text_info_section">Bir güncellemenin mevcut olup olmadığına bakmak için yokla düğmesine dokununuz. Bir güncelleme kurulduktan sonra sizden yeniden başlatmanız rica edilir. Geleneksel recovery yazılımı temeline sahip cihazlar kurulum işleminin yerine getirilmesi için yeniden başlatılma esnasında recovery moduna girer. Cihazınız A/B tipi güncellemeleri destekliyorsa yeniden başlatma güncellemeyi devreye sokar.</string>
-    <string name="error_ab_timestamp">Mevcut versiyon güncellemeden daha yeni</string>
-    <string name="error_ab_inactive">Güncelleme zâten kurulmuş ve yeniden başlatmaya ihtiyacı var</string>
+    <string name="error_ab_51">Mevcut versiyon güncellemeden daha yeni</string>
+    <string name="error_ab_52">Güncelleme zâten kurulmuş ve yeniden başlatmaya ihtiyacı var</string>
 </resources>

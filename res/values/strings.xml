@@ -137,6 +137,19 @@
     <string name="channel_description"></string>
     <string name="text_update_file_flash_title">Update file:</string>
     <string name="text_info_section">Press check to see if an update is available. After an update has been flashed you will be asked to reboot. Devices with a traditional recovery based update will enter recovery on reboot to execute the flash process. If your device supports seamless updates (A/B) the reboot will activate the update.</string>
-    <string name="error_ab_timestamp">Current version is newer than the update</string>
-    <string name="error_ab_inactive">Update is already installed and a reboot is needed</string>
+    <string name="error_ab_1">Generic error</string>
+    <string name="error_ab_4">FS copy error</string>
+    <string name="error_ab_5">Failure in post-install</string>
+    <string name="error_ab_6">Payload mismatched\nThis file probably belongs to a different device</string>
+    <string name="error_ab_7">Failed opening device</string>
+    <string name="error_ab_8">Failed opening kernel</string>
+    <string name="error_ab_9">Payload download failure\nCheck your internet connection</string>
+    <string name="error_ab_10">Payload corrupted (hash mismatch)\nDownload the file again</string>
+    <string name="error_ab_11">Payload corrupted (size mismatch)\nDownload the file again</string>
+    <string name="error_ab_12">Payload signature mismatch</string>
+    <string name="error_ab_51">Current version is newer than the update</string>
+    <string name="error_ab_52">Update is already installed and a reboot is needed</string>
+    <!-- Above string is WRONG. Keeping for historical reasons. This error cannot be reached unless we call applyPayload with SWITCH_SLOT_ON_REBOOT=0 -->
+    <string name="error_ab_60">Not enough free space</string>
+    <string name="error_ab_61">Device corruption\nA clean install through recovery is adviced</string>
 </resources>

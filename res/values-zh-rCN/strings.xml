@@ -109,6 +109,6 @@
     <string name="channel_description"></string>
     <string name="text_update_file_flash_title">更新文件</string>
     <string name="text_info_section">点击以查看是否有新的更新可用. 在一个更新刷入过后你需要重启你的设备. 具有基于传统recovery的更新的设备将在重新引导时进入恢复以执行刷入. 如果你的设备支持无缝更新 (A/B) 重新启动将激活更新.</string>
-    <string name="error_ab_timestamp">目前版本高于服务器上的最新版本</string>
-    <string name="error_ab_inactive">更新已安装，需要重新启动</string>
+    <string name="error_ab_51">目前版本高于服务器上的最新版本</string>
+    <string name="error_ab_52">更新已安装，需要重新启动</string>
 </resources>

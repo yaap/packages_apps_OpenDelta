@@ -308,9 +308,8 @@ public class MainActivity extends Activity {
                         title = getString(getResources().getIdentifier(
                                 "state_" + state, "string", getPackageName()));
                     } catch (Exception e) {
-                        // String for this state could not be found (displays empty
-                        // string)
-                        //Logger.ex(e);
+                        // String for this state could not be found (displays an empty string)
+                        // Logger.ex(e);
                     }
                     // check for first start until check button has been pressed
                     // use a special title then - but only once
@@ -382,10 +381,12 @@ public class MainActivity extends Activity {
                         enableCheck = true;
                         mProgress.setIndeterminate(false);
                         title = getString(R.string.state_error_ab_flash_title);
-                        if (errorCode == UpdateEngine.ErrorCodeConstants.PAYLOAD_TIMESTAMP_ERROR) {
-                            extraText = getString(R.string.error_ab_timestamp);
-                        } else if (errorCode == UpdateEngine.ErrorCodeConstants.UPDATED_BUT_NOT_ACTIVE) {
-                            extraText = getString(R.string.error_ab_inactive);
+                        try {
+                            extraText = getString(getResources().getIdentifier(
+                                    "error_ab_" + errorCode, "string", getPackageName()));
+                        } catch (Exception e) {
+                            // String for this state could not be found (displays an empty string)
+                            // Logger.ex(e);
                         }
                         break;
                     case State.ERROR_FLASH_FILE:
