@@ -31,8 +31,8 @@
 	<!-- URL base to fetch all builds. %s is replaced by (expanded) property_device -->
 	<string name="url_base_json" formatted="false">https://raw.githubusercontent.com/yaap/ota-info/thirteen/%s/%s.json</string>
 
-	<!-- Applies whole-file signature delta. Adds one extra delta step. Required if recovery verifies signatures -->
-	<item name="apply_signature" type="bool">false</item>
+	<!-- Whether device supports A/B performance flashing -->
+	<item name="support_ab_perf_mode" type="bool">false</item>
 
 	<!-- Applies to A-only devices only, should be overlayed from DT -->
 	<item name="use_twrp" type="bool">false</item>

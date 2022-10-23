@@ -63,6 +63,7 @@ public class Config {
     private final String url_base;
     private final String url_base_sum;
     private final String url_base_suffix;
+    private final boolean support_ab_perf_mode;
     private final boolean use_twrp;
     private final String filename_base_prefix;
     private final String url_base_json;
@@ -111,6 +112,7 @@ public class Config {
         url_base_sum = String.format(
                 res.getString(R.string.url_base_full_sum), property_device);
         url_base_suffix = res.getString(R.string.url_base_suffix);
+        support_ab_perf_mode = res.getBoolean(R.bool.support_ab_perf_mode);
         use_twrp = res.getBoolean(R.bool.use_twrp);
         url_base_json = String.format(
                 res.getString(R.string.url_base_json),
@@ -165,8 +167,13 @@ public class Config {
         return use_twrp;
     }
 
+    public boolean getABPerfModeSupport() {
+        return support_ab_perf_mode;
+    }
+
     public boolean getABPerfModeCurrent() {
-        return prefs.getBoolean(PREF_AB_PERF_MODE_NAME, PREF_AB_PERF_MODE_DEFAULT);
+        return getABPerfModeSupport() && prefs.getBoolean(
+                PREF_AB_PERF_MODE_NAME, PREF_AB_PERF_MODE_DEFAULT);
     }
 
     public void setABPerfModeCurrent(boolean enable) {

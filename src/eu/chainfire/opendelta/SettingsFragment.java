@@ -89,19 +89,18 @@ public class SettingsFragment extends PreferenceFragment implements
         mBatteryLevel.setSummary(mBatteryLevel.getEntry());
         mChargeOnly = findPreference(SettingsActivity.PREF_CHARGE_ONLY);
         mBatteryLevel.setEnabled(!prefs.getBoolean(SettingsActivity.PREF_CHARGE_ONLY, true));
-        mABPerfMode = findPreference(KEY_AB_PERF_MODE);
-        mABPerfMode.setChecked(mConfig.getABPerfModeCurrent());
-        mABPerfMode.setOnPreferenceChangeListener(this);
         mShowInfo = findPreference(KEY_SHOW_INFO);
         mShowInfo.setChecked(mConfig.getShowInfo());
 
-        mAutoDownloadCategory = findPreference(KEY_CATEGORY_DOWNLOAD);
-        PreferenceCategory flashingCategory = findPreference(KEY_CATEGORY_FLASHING);
-
-        if (!Config.isABDevice()) {
-            flashingCategory.removePreference(mABPerfMode);
+        if (!Config.isABDevice() || !mConfig.getABPerfModeSupport()) {
+            getPreferenceScreen().removePreference(findPreference(KEY_CATEGORY_FLASHING));
+        } else {
+            mABPerfMode = findPreference(KEY_AB_PERF_MODE);
+            mABPerfMode.setChecked(mConfig.getABPerfModeCurrent());
+            mABPerfMode.setOnPreferenceChangeListener(this);
         }
 
+        mAutoDownloadCategory = findPreference(KEY_CATEGORY_DOWNLOAD);
         mAutoDownloadCategory
                 .setEnabled(autoDownloadValue > UpdateService.PREF_AUTO_DOWNLOAD_CHECK);
 
