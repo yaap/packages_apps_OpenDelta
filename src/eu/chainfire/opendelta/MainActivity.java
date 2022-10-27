@@ -743,7 +743,7 @@ public class MainActivity extends Activity {
                     return Environment.getExternalStorageDirectory() + "/" + split[1];
                 }
                 if ("home".equalsIgnoreCase(type)) {
-                    return this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS) + "/" + split[1];
+                    return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/" + split[1];
                 }
             }
             // DownloadsProvider
@@ -751,7 +751,7 @@ public class MainActivity extends Activity {
                 Logger.d("isDownloadsDocument: %s", uri.getPath());
                 String fileName = getFileNameColumn(uri);
                 if (fileName != null) {
-                    return this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) + "/" + fileName;
+                    return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + fileName;
                 }
             }
         }
@@ -760,7 +760,7 @@ public class MainActivity extends Activity {
 
     private String getFileNameColumn(Uri uri) {
         try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
-            while (cursor.moveToNext()) {
+            if (cursor.moveToNext()) {
                 int index = cursor.getColumnIndexOrThrow("_display_name");
                 return cursor.getString(index);
             }
