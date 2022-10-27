@@ -29,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.lang.StringBuilder;
 import java.math.BigInteger;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
@@ -1407,9 +1408,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                         updateAvailable ? latestBuild : null).commit();
                 if (!updateAvailable) return;
 
-                final String changelog = Download.asString(
-                        mConfig.getUrlBaseJson().replace(
-                        mConfig.getDevice() + ".json", "Changelog.txt"));
+                final String changelog = getChangelogString();
                 mPrefs.edit().putString(PREF_LATEST_CHANGELOG, changelog).commit();
 
                 if (checkExistingBuild(latestBuildWithUrl, latestFetchSUM)) return;
@@ -1555,5 +1554,43 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance);
         channel.setDescription(description);
         mNotificationManager.createNotificationChannel(channel);
+    }
+
+    private String getChangelogString() {
+        final String jsURL = mConfig.getUrlBaseJson();
+        StringBuilder changelog = new StringBuilder(
+                Download.asString(jsURL.replace(
+                mConfig.getDevice() + ".json",
+                "Changelog.txt")));
+        // currently changelog only contains the latest info
+        // let us check if we have any builds the user skipped and add em
+        try {
+            final JSONArray jArr = new JSONArray(Download.asString(mConfig.getUrlAPIHistory()));
+            for (int i = 1; i < jArr.length() && i < 10; i++) {
+                try {
+                    final String otaJsonURL = jsURL.replace(
+                            mConfig.getUrlBranchName(),
+                            jArr.getJSONObject(i).getString("sha"));
+                    final JSONObject otaJson = new JSONObject(Download.asString(otaJsonURL));
+                    final String filename = otaJson.getJSONArray("response")
+                            .getJSONObject(0).getString("filename");
+                    final Long fileDate = Long.parseLong(
+                            filename.split("-")[4].substring(0, 8));
+                    final Long currDate = Long.parseLong(
+                            mConfig.getFilenameBase().split("-")[4].substring(0, 8));
+                    if (fileDate <= currDate) break; // reached an older/same build
+
+                    // fetch and add the changelog of that commit sha, titled by the date
+                    final String currChangelog = Download.asString(
+                            otaJsonURL.replace(mConfig.getDevice() + ".json", "Changelog.txt"));
+                    changelog.append("\n" + fileDate + ":\n\n" + currChangelog);
+                } catch (JSONException e) {
+                    Logger.ex(e);
+                }
+            }
+        } catch (Exception e) {
+            Logger.ex(e);
+        }
+        return changelog.toString();
     }
 }

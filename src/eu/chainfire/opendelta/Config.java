@@ -66,7 +66,9 @@ public class Config {
     private final boolean support_ab_perf_mode;
     private final boolean use_twrp;
     private final String filename_base_prefix;
+    private final String url_branch_name;
     private final String url_base_json;
+    private final String url_api_history;
     private final String android_version;
 
     /*
@@ -114,9 +116,13 @@ public class Config {
         url_base_suffix = res.getString(R.string.url_base_suffix);
         support_ab_perf_mode = res.getBoolean(R.bool.support_ab_perf_mode);
         use_twrp = res.getBoolean(R.bool.use_twrp);
+        url_branch_name = res.getString(R.string.url_branch_name);
         url_base_json = String.format(
                 res.getString(R.string.url_base_json),
-                property_device, property_device);
+                url_branch_name, property_device, property_device);
+        url_api_history = String.format(
+                res.getString(R.string.url_api_history),
+                url_branch_name, property_device, property_device);
         android_version = getProperty(context,
                 res.getString(R.string.android_version));
         filename_base_prefix = String.format(Locale.ENGLISH,
@@ -131,7 +137,9 @@ public class Config {
         Logger.d("url_base_update: %s", url_base_update);
         Logger.d("url_base: %s", url_base);
         Logger.d("url_base_sum: %s", url_base_sum);
+        Logger.d("url_branch_name: %s", url_branch_name);
         Logger.d("url_base_json: %s", url_base_json);
+        Logger.d("url_api_history: %s", url_api_history);
         Logger.d("use_twrp: %d", use_twrp ? 1 : 0);
     }
 
@@ -219,8 +227,16 @@ public class Config {
         return filename_base_prefix;
     }
 
+    public String getUrlBranchName() {
+        return url_branch_name;
+    }
+
     public String getUrlBaseJson() {
         return url_base_json;
+    }
+
+    public String getUrlAPIHistory() {
+        return url_api_history;
     }
 
     public String getAndroidVersion() {
