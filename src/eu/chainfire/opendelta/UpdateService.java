@@ -483,13 +483,15 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         if (latestBuild != null) {
             File found = null;
             File[] files = new File(mConfig.getPathBase()).listFiles();
-            for (File file : files) {
-                String currName = file.getName();
-                if (file.isFile() && currName.endsWith(".part")) {
-                    if (currName.equals(latestBuild + ".part"))
-                        found = file;
-                    else
-                        file.delete(); // remove old .part files
+            if (files != null && files.length > 0) {
+                for (File file : files) {
+                    String currName = file.getName();
+                    if (file.isFile() && currName.endsWith(".part")) {
+                        if (currName.equals(latestBuild + ".part"))
+                            found = file;
+                        else
+                            file.delete(); // remove old .part files
+                    }
                 }
             }
             if (found != null) {
