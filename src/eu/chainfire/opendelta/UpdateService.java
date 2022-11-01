@@ -59,6 +59,7 @@ import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -217,28 +218,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     public class LocalBinder extends Binder {
         UpdateService getService() {
             return UpdateService.this;
-        }
-    }
-
-    /*
-     * Using reflection voodoo instead calling the hidden class directly, to
-     * dev/test outside of AOSP tree
-     */
-    private void setPermissions(String path, int uid) {
-        try {
-            Class<?> FileUtils = getClassLoader().loadClass(
-                    "android.os.FileUtils");
-            Method setPermissions = FileUtils.getDeclaredMethod(
-                    "setPermissions", String.class, int.class,
-                    int.class, int.class);
-            setPermissions.invoke(
-                    null,
-                    path, 420,
-                    uid, 2001);
-        } catch (Exception e) {
-            // A lot of voodoo could go wrong here, return failure instead of
-            // crashing
-            Logger.ex(e);
         }
     }
 
@@ -1215,8 +1194,14 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     writeString(os, "wipe cache");
                 }
 
-                setPermissions("/cache/recovery/openrecoveryscript",
-                        Process.myUid()  /* AID_CACHE */);
+                final int res = FileUtils.setPermissions(
+                        "/cache/recovery/openrecoveryscript",
+                        420, Process.myUid(), 2001);
+                if (res != 0) {
+                    Logger.i("Failed setting /cache/recovery/openrecoveryscript permissions with code " + res);
+                    Logger.i("Earlier FileUtils logs will point out the reason");
+                    return;
+                };
 
                 Logger.d("flashUpdate - reboot to recovery");
                 ((PowerManager) getSystemService(Context.POWER_SERVICE))
