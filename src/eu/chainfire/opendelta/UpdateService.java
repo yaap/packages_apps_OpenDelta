@@ -886,6 +886,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             Logger.d("success");
             mPrefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
             mNotificationManager.cancel(NOTIFICATION_BUSY);
+            startNotification();
         } else {
             if (mDownload.getStatus() == Download.STATUS_DOWNLOAD_STOP) {
                 f.delete();
