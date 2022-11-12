@@ -414,7 +414,6 @@ public class MainActivity extends Activity {
                         enableFlash = true;
                         mProgress.setIndeterminate(false);
                         flashImage = mPrefs.getString(UpdateService.PREF_READY_FILENAME_NAME, null);
-                        mPrefs.edit().putBoolean(UpdateService.PREF_FILE_FLASH, true).commit();
                         flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
                         if (flashImageBase != null) {
                             updateVersion = flashImageBase;

@@ -248,6 +248,5 @@ public class SettingsFragment extends PreferenceFragment implements
         prefs.edit().putString(UpdateService.PREF_LATEST_FULL_NAME, null).commit();
         prefs.edit().putString(UpdateService.PREF_READY_FILENAME_NAME, null).commit();
         prefs.edit().putLong(UpdateService.PREF_DOWNLOAD_SIZE, -1).commit();
-        prefs.edit().putString(UpdateService.PREF_INITIAL_FILE, null).commit();
     }
 }

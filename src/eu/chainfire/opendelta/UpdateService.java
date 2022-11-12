@@ -156,7 +156,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
     public static final String PREF_LATEST_FULL_NAME = "latest_full_name";
     public static final String PREF_DOWNLOAD_SIZE = "download_size_long";
-    public static final String PREF_INITIAL_FILE = "initial_file";
 
     public static final int PREF_AUTO_DOWNLOAD_DISABLED = 0;
     public static final int PREF_AUTO_DOWNLOAD_CHECK = 1;
@@ -337,9 +336,10 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                         mState.equals(State.ACTION_DOWNLOADING_PAUSED)) {
                     // to do so we just need to remove the file and update state
                     File[] files = new File(mConfig.getPathBase()).listFiles();
-                    for (File file : files)
-                        if (file.isFile() && file.getName().endsWith(".part"))
-                            file.delete();
+                    if (files != null && files.length > 0)
+                        for (File file : files)
+                            if (file.isFile() && file.getName().endsWith(".part"))
+                                file.delete();
                     autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
                 }
                 break;
@@ -434,19 +434,21 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         if (Config.isABDevice() && ABUpdate.isInstallingUpdate(this)) {
             // resume listening to progress
             final String flashFilename = mPrefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
-            final String _filename = new File(flashFilename).getName();
-            if (mLastProgressTime == null)
-                mLastProgressTime = new long[] { 0, SystemClock.elapsedRealtime() };
-            mProgressListener.setStatus(_filename);
-            mState.update(State.ACTION_AB_FLASH, 0f, 0L, 100L, _filename, null);
-            mIsUpdateRunning = ABUpdate.resume(flashFilename, mProgressListener, this);
-            if (!mIsUpdateRunning) {
-                mNotificationManager.cancel(NOTIFICATION_UPDATE);
-                mState.update(State.ERROR_AB_FLASH);
-            } else {
-                newFlashNotification(_filename);
+            if (flashFilename != null && !flashFilename.isEmpty()) {
+                final String _filename = new File(flashFilename).getName();
+                if (mLastProgressTime == null)
+                    mLastProgressTime = new long[] { 0, SystemClock.elapsedRealtime() };
+                mProgressListener.setStatus(_filename);
+                mState.update(State.ACTION_AB_FLASH, 0f, 0L, 100L, _filename, null);
+                mIsUpdateRunning = ABUpdate.resume(flashFilename, mProgressListener, this);
+                if (!mIsUpdateRunning) {
+                    mNotificationManager.cancel(NOTIFICATION_UPDATE);
+                    mState.update(State.ERROR_AB_FLASH);
+                } else {
+                    newFlashNotification(_filename);
+                }
+                return;
             }
-            return;
         }
 
         String filename = mPrefs.getString(PREF_READY_FILENAME_NAME, null);
@@ -620,18 +622,22 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
     private void startABRebootNotification(String filename) {
         String flashFilename = filename;
-        flashFilename = new File(flashFilename).getName();
-        flashFilename.substring(0, flashFilename.lastIndexOf('.'));
+        final boolean hasName = flashFilename != null && !flashFilename.isEmpty();
+        if (hasName) {
+            flashFilename = new File(flashFilename).getName();
+            flashFilename.substring(0, flashFilename.lastIndexOf('.'));
+        }
 
-        mNotificationManager.notify(
-                NOTIFICATION_UPDATE,
+        Notification.Builder builder =
                 (new Notification.Builder(this, NOTIFICATION_CHANNEL_ID))
                 .setSmallIcon(R.drawable.stat_notify_update)
                 .setContentTitle(getString(R.string.state_action_ab_finished))
                 .setShowWhen(true)
                 .setContentIntent(getNotificationIntent(false))
-                .setDeleteIntent(getNotificationIntent(true))
-                .setContentText(flashFilename).build());
+                .setDeleteIntent(getNotificationIntent(true));
+        if (hasName) builder.setContentText(flashFilename);
+
+        mNotificationManager.notify(NOTIFICATION_UPDATE, builder.build());
     }
 
     private void startErrorNotification() {
@@ -767,32 +773,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         };
     }
 
-    private Thread getThreadedProgress(String filename, String display,
-            long start, long currentOut, long totalOut) {
-        final File _file = new File(filename);
-        final String _display = display;
-        final long _currentOut = currentOut;
-        final long _totalOut = totalOut;
-        final long _start = start;
-
-        return new Thread(() -> {
-            while (true) {
-                try {
-                    long current = _currentOut + _file.length();
-                    mState.update(State.ACTION_APPLYING_PATCH,
-                            ((float) current / (float) _totalOut) * 100f,
-                            current, _totalOut, _display,
-                            SystemClock.elapsedRealtime() - _start);
-
-                    Thread.sleep(16);
-                } catch (InterruptedException e) {
-                    // We're being told to quit
-                    break;
-                }
-            }
-        });
-    }
-
     private boolean checkForUpdates(boolean userInitiated, int checkOnly) {
         /*
          * Unless the user is specifically asking to check for updates, we only
@@ -863,15 +843,14 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         return false;
     }
 
-    private void downloadBuild(String url, String sha256Sum,
-                                   String imageName) {
+    private void downloadBuild(String url, String sha256Sum, String imageName) {
         String fn = mConfig.getPathBase() + imageName;
         File f = new File(fn + ".part");
         Logger.d("download: %s --> %s", url, fn);
 
         // get rid of old .part files if any
         File[] files = new File(mConfig.getPathBase()).listFiles();
-        if (files != null) {
+        if (files != null && files.length > 0) {
             for (File file : files) {
                 String currName = file.getName();
                 if (file.isFile() && currName.endsWith(".part")
@@ -989,7 +968,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
     private String handleUpdateCleanup() throws FileNotFoundException {
         String flashFilename = mPrefs.getString(PREF_READY_FILENAME_NAME, null);
-        String initialFile = mPrefs.getString(PREF_INITIAL_FILE, null);
         boolean fileFlash = mPrefs.getBoolean(PREF_FILE_FLASH, false);
 
         if (flashFilename == null
@@ -997,13 +975,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 || !new File(flashFilename).exists()) {
             clearState();
             throw new FileNotFoundException("flashUpdate - no valid file to flash found " + flashFilename);
-        }
-        // now delete the initial file
-        if (initialFile != null
-                && new File(initialFile).exists()
-                && initialFile.startsWith(mConfig.getPathBase())){
-            new File(initialFile).delete();
-            Logger.d("flashUpdate - delete initial file");
         }
 
         return flashFilename;
@@ -1315,7 +1286,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         editor.putString(PREF_LATEST_CHANGELOG, null);
         editor.putLong(PREF_DOWNLOAD_SIZE, -1);
         editor.putBoolean(PREF_FILE_FLASH, false);
-        editor.putString(PREF_INITIAL_FILE, null);
         editor.commit();
     }
 
@@ -1458,8 +1428,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         });
     }
 
-    private boolean checkExistingBuild(List<String> latestBuildWithUrl,
-            String latestFetchSUM) {
+    private boolean checkExistingBuild(List<String> latestBuildWithUrl, String latestFetchSUM) {
         String fn = mConfig.getPathBase() + latestBuildWithUrl.get(0);
         File file = new File(fn);
         if (file.exists()) {
@@ -1521,6 +1490,10 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
     public void setFlashFilename(String flashFilename) {
         Logger.d("Flash file set: %s", flashFilename);
+        if (flashFilename == null) {
+            mState.update(State.ERROR_FLASH_FILE);
+            return; 
+        }
         File fn = new File(flashFilename);
         if (!fn.exists()) {
             mState.update(State.ERROR_FLASH_FILE);
@@ -1531,6 +1504,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             return;
         }
         Logger.d("Set flash possible: %s", flashFilename);
+        mPrefs.edit().putBoolean(PREF_FILE_FLASH, true).commit();
         mPrefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
         mState.update(State.ACTION_FLASH_FILE_READY, null, null, null, (new File(flashFilename)).getName(), null);
     }
