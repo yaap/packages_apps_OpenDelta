@@ -36,6 +36,8 @@ public class State {
     public static final String ACTION_AB_FLASH = "action_ab_flash";
     public static final String ACTION_AB_FINISHED = "action_ab_finished";
     public static final String ACTION_BUILD = "action_build";
+    public static final String ACTION_FLASH_FILE_NO_SUM = "action_flash_file_no_sum";
+    public static final String ACTION_FLASH_FILE_INVALID_SUM = "action_flash_file_invalid_sum";
     public static final String ACTION_FLASH_FILE_READY = "action_flash_file_ready";
     public static final String ERROR_DISK_SPACE = "error_disk_space";
     public static final String ERROR_UNKNOWN = "error_unknown";

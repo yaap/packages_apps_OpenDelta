@@ -103,8 +103,6 @@
     <string name="button_select_file">文件</string>
     <string name="state_error_ab_flash_title">无法刷入AB更新</string>
     <string name="state_error_flash_title">无法刷入更新</string>
-    <string name="flash_file_notice_title">本地文件刷入</string>
-    <string name="flash_file_notice_message"><b>注意:</b> 不会检查所选的ZIP文件是否适合您的设备！\n\n<b>刷入错误的ZIP可能会导致设备无法开机！</b></string>
     <string name="channel_name">更新进度</string>
     <string name="channel_description"></string>
     <string name="text_update_file_flash_title">更新文件</string>

@@ -99,8 +99,6 @@
     <string name="select_file_activity_title">Επιλογή αρχείου ZIP</string>
     <string name="state_error_ab_flash_title">Δεν μπορεί να γίνει εγκατάσταση AB ενημέρωσης</string>
     <string name="state_error_flash_title">Δεν μπορεί να γίνει εγκατάσταση της ενημέρωσης</string>
-    <string name="flash_file_notice_title">Θα γίνει εγκατάσταση τοπικού αρχείου</string>
-    <string name="flash_file_notice_message"><b>Προσοχή:</b> Δεν μπορεί να γίνει έλεγχος για το εάν το αρχείο είναι συμβατό με τη συσκευή σας!\n\n<b>Εγκαθιστώντας λανθασμένο αρχείο ZIP μπορεί να οδηγήσει σε μή λειτουργία της συσκευής!</b></string>
     <string name="channel_name">Διαδικασία ενημέρωσης</string>
     <string name="channel_description"></string>
     <string name="text_update_file_flash_title">Αρχείο ενημέρωσης</string>

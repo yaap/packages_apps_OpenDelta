@@ -97,8 +97,6 @@
     <string name="button_select_file">ファイル</string>
     <string name="state_error_ab_flash_title">AB アップデートをフラッシュできません</string>
     <string name="state_error_flash_title">更新をフラッシュができません</string>
-    <string name="flash_file_notice_title">ローカルファイルのフラッシュ</string>
-    <string name="flash_file_notice_message"><b>注意:</b>選択された ZIp ファイルがお使いの端末に適応した場合は確認が行われません!\n\n<b>間違った ZIP ファイルのフラッシュは端末を破損する恐れがあります!</b></string>
     <string name="channel_name">更新の進捗状況</string>
     <string name="text_update_file_flash_title">更新ファイル</string>
 </resources>

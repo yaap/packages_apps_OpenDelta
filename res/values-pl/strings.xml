@@ -97,8 +97,6 @@
     <string name="button_select_file">Plik</string>
     <string name="state_error_ab_flash_title">Nie można wgrać aktualizacji AB</string>
     <string name="state_error_flash_title">Nie można wgrać aktualizacji</string>
-    <string name="flash_file_notice_title">Wgranie lokalnego pliku</string>
-    <string name="flash_file_notice_message"><b>Uwaga:</b> Nie będzie sprawdzania, czy wybrany plik ZIP jest odpowiedni dla Twojego urządzenia!\n\n<b>Wgrywanie złego ZIP może prowadzić do zepsucia urządzenia!</b></string>
     <string name="channel_name">Postęp aktualizacji</string>
     <string name="text_update_file_flash_title">Plik aktualizacji</string>
 </resources>

@@ -99,8 +99,6 @@
     <string name="button_select_file">Datei</string>
     <string name="state_error_ab_flash_title">Kann AB Update nicht flashen</string>
     <string name="state_error_flash_title">Kann Update nicht flashen</string>
-    <string name="flash_file_notice_title">Lokale ZIP-Datei flash</string>
-    <string name="flash_file_notice_message"><b>Achtung:</b> Es wird keine Überprüfung durchgeführt, ob die gewählte ZIP-Datei für Ihr Gerät geeignet ist!\n\n<b>Das Flashen der falschen ZIP-Datei kann zu einem nicht funktionalen Gerät führen!</b></string>
     <string name="channel_name">Aktualisierungsfortschritt</string>
     <string name="text_update_file_flash_title">Aktualisierungsdatei</string>
     <string name="text_info_section">Drücken Sie die auf prüfen, um zu sehen, ob ein Update verfügbar ist. Nach einem Update werden Sie zum Neustart aufgefordert. Geräte mit einem traditionellen Recovery-basierten Update werden beim Neustart in die Recovery gewechselt, um den Flash-Prozess auszuführen. Wenn Ihr Gerät nahtlose Updates (A/B) unterstützt, wird das Update durch den Neustart aktiviert.</string>

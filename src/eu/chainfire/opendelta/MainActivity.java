@@ -34,6 +34,7 @@ import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -409,11 +410,24 @@ public class MainActivity extends Activity {
                         }
                         mUpdateVersionTitle.setText(R.string.text_update_version_title);
                         break;
+                    case State.ACTION_FLASH_FILE_NO_SUM:
+                    case State.ACTION_FLASH_FILE_INVALID_SUM:
+                        // warn the user once
+                        showLocalSumWarnDialog(state);
+                        enableCheck = true;
+                        mProgress.setIndeterminate(false);
+                        flashImage = filename;
+                        flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
+                        if (flashImageBase != null) {
+                            updateVersion = flashImageBase;
+                        }
+                        mUpdateVersionTitle.setText(R.string.text_update_file_flash_title);
+                        break;
                     case State.ACTION_FLASH_FILE_READY:
                         enableCheck = true;
                         enableFlash = true;
                         mProgress.setIndeterminate(false);
-                        flashImage = mPrefs.getString(UpdateService.PREF_READY_FILENAME_NAME, null);
+                        flashImage = filename;
                         flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
                         if (flashImageBase != null) {
                             updateVersion = flashImageBase;
@@ -612,6 +626,41 @@ public class MainActivity extends Activity {
 
     public void onButtonPauseClick(View v) {
         startUpdateService(UpdateService.ACTION_DOWNLOAD_PAUSE);
+    }
+
+    private void showLocalSumWarnDialog(String state) {
+        final String msg = state.equals(State.ACTION_FLASH_FILE_NO_SUM)
+                ? getString(R.string.no_sum_dialog_msg)
+                : getString(R.string.invalid_sum_dialog_msg);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(msg)
+            .setPositiveButton(getString(R.string.button_flash_now),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        final String flashFilename = mPrefs.getString(
+                                UpdateService.PREF_READY_FILENAME_NAME, null);
+                        mUpdateService.setFlashFilename(flashFilename, true);
+                    }
+                }
+            )
+            .setNegativeButton(getString(R.string.button_stop_text),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        mPrefs.edit().putString(
+                                UpdateService.PREF_READY_FILENAME_NAME, null).commit();
+                    }
+                }
+            )
+            .setOnCancelListener(
+                new DialogInterface.OnCancelListener() {
+                    public void onCancel(DialogInterface dialog) {
+                        mPrefs.edit().putString(
+                                UpdateService.PREF_READY_FILENAME_NAME, null).commit();
+                    }
+                }
+            );
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     private final Runnable flashRecoveryWarning = new Runnable() {

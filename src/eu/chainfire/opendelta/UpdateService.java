@@ -22,10 +22,12 @@
 
 package eu.chainfire.opendelta;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
@@ -1489,6 +1491,10 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     }
 
     public void setFlashFilename(String flashFilename) {
+        setFlashFilename(flashFilename, false);
+    }
+
+    public void setFlashFilename(String flashFilename, boolean forceFlash) {
         Logger.d("Flash file set: %s", flashFilename);
         if (flashFilename == null) {
             mState.update(State.ERROR_FLASH_FILE);
@@ -1503,10 +1509,45 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             mState.update(State.ERROR_FLASH_FILE);
             return;
         }
+        mHandler.post(() -> {
+            maybeFlashFile(flashFilename, forceFlash);
+        });
+    }
+
+    private void maybeFlashFile(String flashFilename, boolean forceFlash) {
+        mPrefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
+        File fn = new File(flashFilename);
+        if (!forceFlash) {
+            File shaFile = new File(flashFilename + ".sha256sum");
+            if (!shaFile.exists()) {
+                mState.update(State.ACTION_FLASH_FILE_NO_SUM, null, null, null,
+                        fn.getName(), null);
+                return;
+            }
+            // verify sha with local file
+            String sha;
+            try (BufferedReader br = new BufferedReader(new FileReader(shaFile))) {
+                sha = br.readLine();
+                while (sha.length() > 64)
+                    sha = sha.substring(0, sha.length() - 1);
+            } catch (Exception e) {
+                Logger.ex(e);
+                mState.update(State.ACTION_FLASH_FILE_INVALID_SUM, null, null, null,
+                        fn.getName(), null);
+                return;
+            }
+            final String fileSha = getFileSHA256(fn,
+                    getSUMProgress(State.ACTION_CHECKING_SUM, flashFilename));
+            if (fileSha == null || sha == null || !fileSha.equals(sha)) {
+                mState.update(State.ACTION_FLASH_FILE_INVALID_SUM, null, null, null,
+                        fn.getName(), null);
+                return;
+            }
+        }
         Logger.d("Set flash possible: %s", flashFilename);
         mPrefs.edit().putBoolean(PREF_FILE_FLASH, true).commit();
-        mPrefs.edit().putString(PREF_READY_FILENAME_NAME, flashFilename).commit();
-        mState.update(State.ACTION_FLASH_FILE_READY, null, null, null, (new File(flashFilename)).getName(), null);
+        mState.update(State.ACTION_FLASH_FILE_READY, null, null, null,
+                fn.getName(), null);
     }
 
     private void createNotificationChannel() {
