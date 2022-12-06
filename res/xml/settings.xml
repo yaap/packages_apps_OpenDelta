@@ -26,6 +26,12 @@
 			android:persistent="false"
 			android:title="@string/ab_perf_mode_title"
 			android:summary="@string/ab_perf_mode_summary_new" />
+		<SwitchPreference
+			android:defaultValue="true"
+			android:key="ab_wake_lock"
+			android:persistent="false"
+			android:title="@string/ab_wake_lock_title"
+			android:summary="@string/ab_wake_lock_summary" />
 	</PreferenceCategory>
 	<PreferenceCategory
 		android:key="category_scheduler"

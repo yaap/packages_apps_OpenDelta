@@ -15,6 +15,7 @@
  */
 package eu.chainfire.opendelta;
 
+import android.os.PowerManager.WakeLock;
 import android.os.UpdateEngine;
 import android.os.UpdateEngineCallback;
 import android.util.Log;
@@ -125,6 +126,11 @@ class ABUpdate {
     }
 
     static synchronized void setInstallingUpdate(boolean installing, UpdateService us) {
+        final boolean enabled = us.getConfig().getABWakeLockCurrent();
+        final WakeLock wakeLock = us.getWakeLock();
+        if (installing && enabled) wakeLock.acquire();
+        else if (wakeLock.isHeld()) wakeLock.release();
+
         us.getPrefs().edit()
                 .putBoolean(PREFS_IS_INSTALLING_UPDATE, installing).commit();
     }

@@ -1490,6 +1490,10 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         return mConfig;
     }
 
+    public PowerManager.WakeLock getWakeLock() {
+        return mWakeLock;
+    }
+
     public void setFlashFilename(String flashFilename) {
         setFlashFilename(flashFilename, false);
     }

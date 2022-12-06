@@ -48,6 +48,7 @@ public class SettingsFragment extends PreferenceFragment implements
         OnPreferenceChangeListener, OnTimeSetListener {
     private static final String KEY_NETWORKS = "metered_networks_config";
     private static final String KEY_AB_PERF_MODE = "ab_perf_mode";
+    private static final String KEY_AB_WAKE_LOCK = "ab_wake_lock";
     private static final String KEY_CATEGORY_DOWNLOAD = "category_download";
     private static final String KEY_CATEGORY_FLASHING = "category_flashing";
     private static final String KEY_SHOW_INFO = "show_info";
@@ -58,6 +59,7 @@ public class SettingsFragment extends PreferenceFragment implements
     private ListPreference mBatteryLevel;
     private SwitchPreference mChargeOnly;
     private SwitchPreference mABPerfMode;
+    private SwitchPreference mABWakeLock;
     private Config mConfig;
     private PreferenceCategory mAutoDownloadCategory;
     private ListPreference mSchedulerMode;
@@ -93,11 +95,19 @@ public class SettingsFragment extends PreferenceFragment implements
         mShowInfo.setChecked(mConfig.getShowInfo());
 
         if (!Config.isABDevice() || !mConfig.getABPerfModeSupport()) {
-            getPreferenceScreen().removePreference(findPreference(KEY_CATEGORY_FLASHING));
+            getPreferenceScreen().removePreference(findPreference(KEY_AB_PERF_MODE));
         } else {
             mABPerfMode = findPreference(KEY_AB_PERF_MODE);
             mABPerfMode.setChecked(mConfig.getABPerfModeCurrent());
             mABPerfMode.setOnPreferenceChangeListener(this);
+        }
+
+        if (!Config.isABDevice()) {
+            getPreferenceScreen().removePreference(findPreference(KEY_CATEGORY_FLASHING));
+        } else {
+            mABWakeLock = findPreference(KEY_AB_WAKE_LOCK);
+            mABWakeLock.setChecked(mConfig.getABWakeLockCurrent());
+            mABWakeLock.setOnPreferenceChangeListener(this);
         }
 
         mAutoDownloadCategory = findPreference(KEY_CATEGORY_DOWNLOAD);
@@ -185,6 +195,9 @@ public class SettingsFragment extends PreferenceFragment implements
             return true;
         } else if (preference.equals(mABPerfMode)) {
             mConfig.setABPerfModeCurrent((boolean) newValue);
+            return true;
+        } else if (preference.equals(mABWakeLock)) {
+            mConfig.setABWakeLockCurrent((boolean) newValue);
             return true;
         } else if (preference.equals(mShowInfo)) {
             mConfig.setShowInfo((boolean) newValue);
