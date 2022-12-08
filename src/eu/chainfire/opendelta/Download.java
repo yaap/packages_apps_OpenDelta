@@ -308,9 +308,14 @@ public class Download {
                 urlConnection.setRequestProperty("Range", "bytes=" + offset + "-");
             urlConnection.connect();
             int code = urlConnection.getResponseCode();
-            if (code != HttpsURLConnection.HTTP_OK
-                    && code != HttpsURLConnection.HTTP_PARTIAL) {
-                Logger.d("response: %d", code);
+            if (offset > 0 && code != HttpsURLConnection.HTTP_PARTIAL) {
+                Logger.d("response: %d expected: %d", code,
+                        HttpsURLConnection.HTTP_PARTIAL);
+                return null;
+            }
+            if (offset == 0 && code != HttpsURLConnection.HTTP_OK) {
+                Logger.d("response: %d expected: %d", code,
+                        HttpsURLConnection.HTTP_OK);
                 return null;
             }
             return urlConnection;
