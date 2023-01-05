@@ -42,6 +42,7 @@
     <string name="button_pause_text">Pause</string>
     <string name="button_resume_text">Resume</string>
     <string name="button_stop_text">Cancel</string>
+    <string name="button_ignore_text">Ignore</string>
     <string name="state_action_ab_flash">Installing AB Update &#8230;</string>
     <string name="state_action_ab_finished">Done Installing. Reboot Now &#8230;</string>
     <string name="button_reboot_short">Reboot</string>
@@ -69,6 +70,9 @@
     <string name="state_error_download">Download problem</string>
     <string name="state_error_download_sha">Download problem (corrupted file)</string>
     <string name="state_error_download_resume">Download problem (resume-able)</string>
+    <string name="state_error_download_extra_1">Can\'t fetch the newest build\nCheck your network connection and DNS settings</string>
+    <string name="state_error_download_extra_2">No sum file was found on the server\nTalk with your maintainer</string>
+    <string name="state_error_download_extra_3">@string/state_error_connection</string>
     <string name="text_current_version_header_title">Current version:</string>
     <string name="text_last_checked_header_title">Last checked:</string>
     <string name="text_update_version_title">Update version:</string>
@@ -106,14 +110,14 @@
     <string name="metered_networks_title">Metered networks</string>
     <string name="metered_networks_message">Allow auto downloading on metered networks</string>
     <string name="category_flashing">Flashing</string>
-    <string name="state_error_connection">No data connection.</string>
+    <string name="state_error_connection">No network connection available</string>
     <string name="category_admin">Maintenance</string>
     <string name="show_info_title">Show info</string>
     <string name="show_info_summary">Show explanation / info text in main page</string>
     <string name="clear_files_title">Clean update files</string>
     <string name="clear_files_summary">Delete existing update files to force downloading full update</string>
     <string name="clean_files_feedback" formatted="false">Deleted %d files. Now press \'Check for updates\'</string>
-    <string name="state_error_permissions">No storage permissions.</string>
+    <string name="state_error_permissions">No storage permissions</string>
     <string name="state_error_flash">Failed to setup flash. Clean /cache and try again.</string>
     <string name="state_error_ab_flash">Failed to setup flash. Please reboot and try again.</string>
     <string name="progress_status_0">Idle &#8230;</string>
@@ -135,8 +139,8 @@
     <string name="button_select_file">File</string>
     <string name="state_error_ab_flash_title">Couldn\'t flash AB update</string>
     <string name="state_error_flash_title">Couldn\'t flash update</string>
-    <string name="no_sum_dialog_msg">No local sum file (.sha256sum) was found.\nPlease place the file at the same path of the file to flash.\nPress flash to proceed without sum check (dangerous!)</string>
-    <string name="invalid_sum_dialog_msg">File sum mismatched with local sum file.\nThis file is probably corrupted, please download it again.\nPress flash to ignore and proceed.\nDo note this will probably fail later on anyways</string>
+    <string name="no_sum_dialog_msg">No local sum file (.sha256sum) was found.\nPlease place the file at the same path of the file to flash.\nPress ignore to proceed without sum check (dangerous!)</string>
+    <string name="invalid_sum_dialog_msg">File sum mismatched with local sum file.\nThis file is probably corrupted, please download it again.\nPress ignore to proceed.\nDo note this will probably fail later on anyways</string>
     <string name="channel_name">Update progress</string>
     <string name="channel_description"></string>
     <string name="text_update_file_flash_title">Update file:</string>
@@ -155,5 +159,5 @@
     <string name="error_ab_52">Update is already installed and a reboot is needed</string>
     <!-- Above string is WRONG. Keeping for historical reasons. This error cannot be reached unless we call applyPayload with SWITCH_SLOT_ON_REBOOT=0 -->
     <string name="error_ab_60">Not enough free space</string>
-    <string name="error_ab_61">Device corruption\nA clean install through recovery is adviced</string>
+    <string name="error_ab_61">Device corruption\nA clean install through recovery is advised</string>
 </resources>

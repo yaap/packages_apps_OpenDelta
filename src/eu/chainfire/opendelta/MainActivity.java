@@ -281,14 +281,14 @@ public class MainActivity extends Activity {
                 long localTotal = total != null ? total : 0L;
                 long localCurrent = current != null ? current : 1L;
                 long localMS = ms != null ? ms : 0L;
-                boolean enableCheck = false;
                 boolean enableFlash = false;
                 boolean enableBuild = false;
                 boolean enableDownload = false;
                 boolean enableResume = false;
                 boolean enableReboot = false;
                 boolean enableProgress = false;
-                boolean disableCheckNow = false;
+                boolean disableCheck = false;
+                boolean hideCheck = false;
                 boolean disableDataSpeed = false;
                 boolean enableChangelog = false;
                 long lastCheckedSaved = mPrefs.getLong(UpdateService.PREF_LAST_CHECK_TIME_NAME,
@@ -305,6 +305,7 @@ public class MainActivity extends Activity {
 
                 // don't try this at home
                 if (state != null) {
+                    title = tryGetResourceString("state_" + state);
                     try {
                         title = getString(getResources().getIdentifier(
                                 "state_" + state, "string", getPackageName()));
@@ -345,13 +346,18 @@ public class MainActivity extends Activity {
                     mState = state;
                 }
 
+                mProgress.setIndeterminate(false);
                 String flashImage = null;
                 String flashImageBase = null;
                 long downloadSize = 0L;
                 switch (state) {
+                    case State.ERROR_UNKNOWN:
+                    case State.ERROR_DOWNLOAD_SHA:
+                    case State.ERROR_CONNECTION:
+                    case State.ERROR_PERMISSIONS:
+                    case State.ACTION_NONE:
+                        break;
                     case State.ERROR_DISK_SPACE:
-                        enableCheck = true;
-                        mProgress.setIndeterminate(false);
                         localCurrent /= 1024L * 1024L;
                         localTotal /= 1024L * 1024L;
 
@@ -359,48 +365,26 @@ public class MainActivity extends Activity {
                                 localCurrent, localTotal);
                         break;
                     case State.ERROR_UNOFFICIAL:
-                        enableCheck = true;
-                        mProgress.setIndeterminate(false);
                         extraText = getString(R.string.state_error_not_official_extra, versionType);
                         break;
-                    case State.ERROR_UNKNOWN:
                     case State.ERROR_DOWNLOAD:
-                    case State.ERROR_DOWNLOAD_SHA:
-                    case State.ERROR_CONNECTION:
-                    case State.ERROR_PERMISSIONS:
-                    case State.ACTION_NONE:
-                        enableCheck = true;
-                        mProgress.setIndeterminate(false);
+                        extraText = tryGetResourceString("state_error_download_extra_" + errorCode);
                         break;
                     case State.ERROR_FLASH:
-                        enableCheck = true;
                         enableFlash = true;
-                        mProgress.setIndeterminate(false);
                         title = getString(R.string.state_error_flash_title);
                         break;
                     case State.ERROR_AB_FLASH:
-                        enableCheck = true;
-                        mProgress.setIndeterminate(false);
                         title = getString(R.string.state_error_ab_flash_title);
-                        try {
-                            extraText = getString(getResources().getIdentifier(
-                                    "error_ab_" + errorCode, "string", getPackageName()));
-                        } catch (Exception e) {
-                            // String for this state could not be found (displays an empty string)
-                            // Logger.ex(e);
-                        }
+                        extraText = tryGetResourceString("error_ab_" + errorCode);
                         break;
                     case State.ERROR_FLASH_FILE:
-                        enableCheck = true;
                         enableFlash = true;
-                        mProgress.setIndeterminate(false);
                         title = getString(R.string.state_error_flash_title);
                         break;
                     case State.ACTION_READY:
-                        enableCheck = true;
                         enableFlash = true;
                         enableChangelog = true;
-                        mProgress.setIndeterminate(false);
 
                         flashImage = mPrefs.getString(UpdateService.PREF_READY_FILENAME_NAME, null);
                         flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
@@ -414,8 +398,6 @@ public class MainActivity extends Activity {
                     case State.ACTION_FLASH_FILE_INVALID_SUM:
                         // warn the user once
                         showLocalSumWarnDialog(state);
-                        enableCheck = true;
-                        mProgress.setIndeterminate(false);
                         flashImage = filename;
                         flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
                         if (flashImageBase != null) {
@@ -424,9 +406,7 @@ public class MainActivity extends Activity {
                         mUpdateVersionTitle.setText(R.string.text_update_file_flash_title);
                         break;
                     case State.ACTION_FLASH_FILE_READY:
-                        enableCheck = true;
                         enableFlash = true;
-                        mProgress.setIndeterminate(false);
                         flashImage = filename;
                         flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
                         if (flashImageBase != null) {
@@ -436,9 +416,8 @@ public class MainActivity extends Activity {
                         break;
                     case State.ACTION_AB_FINISHED:
                         enableReboot = true;
-                        disableCheckNow = true;
+                        hideCheck = true;
                         enableChangelog = !mPrefs.getBoolean(UpdateService.PREF_FILE_FLASH, false);
-                        mProgress.setIndeterminate(false);
 
                         flashImage = mPrefs.getString(UpdateService.PREF_READY_FILENAME_NAME, null);
                         flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
@@ -451,8 +430,6 @@ public class MainActivity extends Activity {
                         mPrefs.edit().putString(UpdateService.PREF_LATEST_FULL_NAME, null).commit();
                         break;
                     case State.ACTION_BUILD:
-                        enableCheck = true;
-                        mProgress.setIndeterminate(false);
 
                         final String latest = mPrefs.getString(
                                 UpdateService.PREF_LATEST_FULL_NAME, null);
@@ -476,11 +453,13 @@ public class MainActivity extends Activity {
                         break;
                     case State.ACTION_SEARCHING:
                     case State.ACTION_CHECKING:
+                        disableCheck = true;
                         enableProgress = true;
                         mProgress.setIndeterminate(true);
                         localCurrent = 1L;
                         break;
                     default:
+                        disableCheck = true;
                         enableChangelog = !mPrefs.getBoolean(UpdateService.PREF_FILE_FLASH, false);
                         enableProgress = true;
                         switch (state) {
@@ -488,17 +467,16 @@ public class MainActivity extends Activity {
                                 disableDataSpeed = true;
                                 break;
                             case State.ACTION_DOWNLOADING:
-                                disableCheckNow = true;
+                                hideCheck = true;
                                 enableDownload = true;
                                 break;
                             case State.ERROR_DOWNLOAD_RESUME:
                             case State.ACTION_DOWNLOADING_PAUSED:
-                                disableCheckNow = true;
+                                hideCheck = true;
                                 enableDownload = true;
                                 enableResume = true;
                                 break;
                         }
-                        mProgress.setIndeterminate(false);
 
                         downloadSize = mPrefs.getLong(
                                 UpdateService.PREF_DOWNLOAD_SIZE, -1);
@@ -556,16 +534,16 @@ public class MainActivity extends Activity {
 
                 handleProgressBar();
 
-                mCheckBtn.setEnabled(mPermOk && enableCheck);
+                mCheckBtn.setEnabled(mPermOk && !disableCheck);
                 mBuildBtn.setEnabled(mPermOk && enableBuild);
                 mFlashBtn.setEnabled(mPermOk && enableFlash);
                 mRebootBtn.setEnabled(enableReboot);
-                mFileFlashButton.setEnabled(mPermOk && enableCheck);
-                mCheckBtn.setVisibility(disableCheckNow ? View.GONE : View.VISIBLE);
+                mFileFlashButton.setEnabled(mPermOk && !disableCheck);
+                mCheckBtn.setVisibility(hideCheck ? View.GONE : View.VISIBLE);
                 mFlashBtn.setVisibility(enableFlash ? View.VISIBLE : View.GONE);
                 mBuildBtn.setVisibility(!enableBuild || enableFlash ? View.GONE : View.VISIBLE);
                 mRebootBtn.setVisibility(enableReboot ? View.VISIBLE : View.GONE);
-                mFileFlashButton.setVisibility(disableCheckNow ? View.GONE : View.VISIBLE);
+                mFileFlashButton.setVisibility(hideCheck ? View.GONE : View.VISIBLE);
 
                 // handle changelog
                 if (enableChangelog) {
@@ -634,7 +612,7 @@ public class MainActivity extends Activity {
                 : getString(R.string.invalid_sum_dialog_msg);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(msg)
-            .setPositiveButton(getString(R.string.button_flash_now),
+            .setPositiveButton(getString(R.string.button_ignore_text),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         final String flashFilename = mPrefs.getString(
@@ -816,6 +794,17 @@ public class MainActivity extends Activity {
             Logger.d("Failed to resolve file name", e);
         }
         return null;
+    }
+
+    private String tryGetResourceString(String str) {
+        try {
+            return getString(getResources().getIdentifier(
+                    str, "string", getPackageName()));
+        } catch (Exception e) {
+            // String for this state could not be found (returns an empty string)
+            // Logger.ex(e);
+        }
+        return "";
     }
 
     public void onButtonSelectFileClick(View v) {

@@ -103,7 +103,11 @@ public class State {
     }
 
     public void update(String state) {
-        update(state, null, null, null, null, null);
+        update(state, -1);
+    }
+
+    public void update(String state, int errorCode) {
+        update(state, null, null, null, null, null, errorCode);
     }
 
     public void update(String state, Float progress,

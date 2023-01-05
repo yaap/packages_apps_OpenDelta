@@ -692,7 +692,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
         String buildData = Download.asString(url);
         if (buildData == null || buildData.length() == 0) {
-            mState.update(State.ERROR_DOWNLOAD, null, null, null, url, null);
+            mState.update(State.ERROR_DOWNLOAD, null, null, null, url, null,
+                    Download.ERROR_CODE_NEWEST_BUILD);
             mNotificationManager.cancel(NOTIFICATION_BUSY);
             return null;
         }
@@ -1400,11 +1401,11 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                         if (latestSUM != null) {
                             downloadBuild(latestFetch, latestSUM, latestBuild);
                         } else {
-                            mState.update(State.ERROR_DOWNLOAD);
+                            mState.update(State.ERROR_DOWNLOAD, Download.ERROR_CODE_NO_SUM_FILE);
                             Logger.d("aborting download due to sha256sum not found");
                         }
                     } else {
-                        mState.update(State.ERROR_DOWNLOAD);
+                        mState.update(State.ERROR_DOWNLOAD, Download.ERROR_CODE_NO_CONNECTION);
                         Logger.d("aborting download due to network state");
                     }
                 }
