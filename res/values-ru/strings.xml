@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">OpenDelta</string>
     <string name="title">Обновление телефона</string>
     <string name="action_about">О программе</string>
@@ -9,6 +10,7 @@
     <string name="state_action_searching">Поиск файлов &#8230;</string>
     <string name="state_action_searching_sum">Проверка файла &#8230;</string>
     <string name="state_action_downloading">Загрузка &#8230;</string>
+    <string name="state_action_downloading_paused">Загрузка приостановлена</string>
     <string name="state_action_applying">Внесение изменений &#8230;</string>
     <string name="state_action_applying_patch">Внесение изменений &#8230;</string>
     <string name="state_action_applying_sum">Проверка файла &#8230;</string>
@@ -24,10 +26,19 @@
     <string name="button_check_short">Проверить</string>
     <string name="button_check_now">Поиск обновлений &#8230;</string>
     <string name="button_flash_now">Установить</string>
+    <string name="button_pause_text">Пауза</string>
+    <string name="button_resume_text">Продолжить</string>
+    <string name="button_stop_text">Отменить</string>
+    <string name="button_ignore_text">Игнорировать</string>
     <string name="state_action_ab_flash">Установка A/B обновления &#8230;</string>
     <string name="state_action_ab_finished">Установка завершена. Перезагрузитесь сейчас &#8230;</string>
     <string name="button_reboot_short">Перезагрузка</string>
+    <string name="state_action_flash_file_ready">Обновление готово к установке</string>
+    <string name="state_action_flash_file_no_sum">Не обнаружен файл контрольной суммы</string>
+    <string name="state_action_flash_file_invalid_sum">Несоответствие с файлом контрольной суммы</string>
+
     <!-- updates from 2013/12/18 -->
+
     <string name="action_secure_mode">Безопасный режим</string>
     <string name="secure_mode_enabled_title">Безопасный режим: активирован</string>
     <string name="secure_mode_enabled_description"><![CDATA[Криптографическая подпись обновления будет проверена перед установкой, чтобы подтвердить происхождение обновления, и никакие дополнительные файлы не будут установлены. Этот режим совместим только с <b>TWRP</b>.]]></string>
@@ -35,24 +46,33 @@
     <string name="secure_mode_disabled_description"><![CDATA[Дополнительные файлы будут установлены, если они есть. Заметим, что любой (зловредный) пакет программного обеспечения можно разместить  в эти обновления и получить полный доступ к системе. Используйте этот режим на свое усмотрение.]]></string>
     <string name="recovery_notice_title">Внимание!</string>
     <string name="recovery_notice_description_not_secure"><![CDATA[Установка обновлений в данном режиме официально поддерживается только с помощью  <b>TWRP</b> рекавери. <i>Официально</i> <b>CWM</b>  <i>не</i> поддерживается, но некоторые <i>пользовательские сборки</i> <b>CWM</b> <i>возможно</i> совместимы. Пожалуйста, убедитесь, что у вас совместимое рекавери, прежде чем продолжить.]]></string>
+    <string name="recovery_notice_description_reboot"><![CDATA[Устройство будет перезагруженно в AOSP рекавери для установки обновления]]></string>
     <string name="flash_after_update_notice_title">Внимание!</string>
+
     <string name="button_build_delta">Загрузить</string>
     <string name="button_stop">Остановить</string>
     <string name="state_action_build">Доступно обновление.</string>
     <string name="state_action_build_delta">Возможно обновление дельта-файлом.</string>
     <string name="state_action_build_full">Возможно обновление полным файлом ПО.</string>
     <string name="state_error_download">Проблема при загрузке.</string>
-    <string name="text_current_version_header_title">Текущая версия</string>
-    <string name="text_last_checked_header_title">Последний поиск</string>
-    <string name="text_update_version_title">Версия обновления</string>
-    <string name="text_download_size_header_title">Размер загрузки</string>
+    <string name="state_error_download_sha">Проблема при загрузке (файл повреждён)</string>
+    <string name="state_error_download_resume">Проблема при загрузке (можно возобновить)</string>
+    <string name="state_error_download_extra_1">Невозможно найти последнее обновление\nПроверьте настройки сети и DNS</string>
+    <string name="state_error_download_extra_2">Не найдена файл контрольной суммы на сервере\nСообщите своему мейнтейнеру</string>
+    <string name="state_error_download_extra_3">@string/state_error_connection</string>
+    <string name="text_current_version_header_title">Текущая версия:</string>
+    <string name="text_last_checked_header_title">Последний поиск:</string>
+    <string name="text_update_version_title">Версия обновления:</string>
+    <string name="text_download_size_header_title">Размер загрузки:</string>
     <string name="text_download_size_unknown">Неизвестно</string>
     <string name="auto_download">Расписание</string>
     <string name="auto_download_title">Запланированное действие</string>
     <string name="download_disabled">Отключено</string>
+    <string name="text_changelog_header_title">Изменения:</string>
     <string name="check_only">Проверять обновления и уведомлять о них</string>
     <string name="download_full">Автоматически загружать все обновления</string>
     <string name="menu_settings">Настройки</string>
+    <string name="menu_changelog">Изменения</string>
     <string name="category_download">Автозагрузка</string>
     <string name="charge_only_title">Только при зарядке</string>
     <string name="charge_only_message">Обновления будут загружаться только при подключённом зарядном устройстве</string>
@@ -71,9 +91,13 @@
     <string name="scheduler_weekly">Еженедельно</string>
     <string name="scheduler_daily_time">Время</string>
     <string name="scheduler_week_day">День</string>
+    <string name="metered_networks_title">Роуминг</string>
+    <string name="metered_networks_message">Разрешить автозагрузку в роуминге</string>
     <string name="category_flashing">Установка</string>
     <string name="state_error_connection">Нет подключения к интернету.</string>
     <string name="category_admin">Поддержка</string>
+    <string name="show_info_title">Показывать информацию</string>
+    <string name="show_info_summary">Показывать вспомогательную информацию на главном экране</string>
     <string name="clear_files_title">Очистить файлы обновления</string>
     <string name="clear_files_summary">Удалить существующие файлы обновлений для принудительного скачивания обновления</string>
     <string name="clean_files_feedback" formatted="false">Удалено %d файлов. Теперь нажмите «Проверить»</string>
@@ -92,17 +116,32 @@
     <string name="progress_status_9">Отключено.</string>
     <string name="ab_perf_mode_title">Режим производительности A/B</string>
     <string name="ab_perf_mode_summary_new">Приоритет процесса обновления. Может повлиять на обычное использование во время обновления.</string>
+    <string name="ab_wake_lock_title">AB wake lock</string>
+    <string name="ab_wake_lock_summary">Не давать спать процессору во время установки обновления. Ускоряет обновление при выключенном экране</string>
     <string name="state_error_flash_file_title">Не могу установить этот файл</string>
     <string name="select_file_activity_title">Выберите ZIP файл</string>
     <string name="button_select_file">Файл</string>
     <string name="state_error_ab_flash_title">Не удается установить A/B обновление</string>
     <string name="state_error_flash_title">Не удается установить обновление</string>
+    <string name="no_sum_dialog_msg">Не найден файл контрольной суммы (.sha256sum).\nПоместите файл контрольной суммы вместе с файлом прошивки\nНажимте "игнорировать" чтобы продолжить без проверки (опасно!)</string>
+    <string name="invalid_sum_dialog_msg">Контрольная сумма не совпадает.\nСкорее всего файл обновления поврежден, перекачайте заново.\nНажмите "игнорировать" чтобы продолжить.\nИмейте ввиду что это вам аукнется</string>
     <string name="channel_name">Процесс обновления</string>
-    <string name="text_update_file_flash_title">Обновить файл</string>
+    <string name="channel_description"></string>
+    <string name="text_update_file_flash_title">Файл обновления:</string>
     <string name="text_info_section">Нажмите "Проверить" чтобы проверить наличие обновлений ОС. После загрузки Вам будет предложено перезагрузить устройство. Если устройство поддерживает бесшовный (seamless) тип обновлений, то файл обновления будет применён сразу после перезагрузки. В ином случае будет произведена перезагрузка в режим рекавери для автоматической установки файла обновления.</string>
+    <string name="error_ab_1">Общая ошибка</string>
+    <string name="error_ab_4">Ошибка копирования</string>
+    <string name="error_ab_5">Ошибка после установки</string>
+    <string name="error_ab_6">Пейлоад не совпадает\nСкорее всего обновление предназначено для другого устройства</string>
+    <string name="error_ab_7">Ошибка открытия устройсвта</string>
+    <string name="error_ab_8">Ошибка открытия ядра</string>
+    <string name="error_ab_9">Ошибка загрузки пейлоада\nПроверьте доступ к интернету</string>
+    <string name="error_ab_10">Пейлоад поврежден (несоответствие хеша)\nСкачайте файл заново</string>
+    <string name="error_ab_11">Пейлоад поврежден (несоответствие размера)\nСкачайте файл заново</string>
+    <string name="error_ab_12">Несоответствие подписи пейлоада</string>
     <string name="error_ab_51">Версия файла обновления ниже версии уже установленной ОС.</string>
     <string name="error_ab_52">Файл обновления уже установлен. Перезагрузите телефон.</string>
-    <string name="menu_changelog">Список изменений</string>
-    <string name="show_info_title">Показывать информацию</string>
-    <string name="show_info_summary">Показывать вспомогательную информацию на главном экране</string>
+    <!-- Above string is WRONG. Keeping for historical reasons. This error cannot be reached unless we call applyPayload with SWITCH_SLOT_ON_REBOOT=0 -->
+    <string name="error_ab_60">Not enough free space</string>
+    <string name="error_ab_61">Device corruption\nA clean install through recovery is advised</string>
 </resources>
