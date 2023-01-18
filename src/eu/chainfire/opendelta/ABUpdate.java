@@ -37,11 +37,10 @@ import eu.chainfire.opendelta.UpdateService.ProgressListener;
 class ABUpdate {
 
     private static final String TAG = "ABUpdateInstaller";
-
     private static final String PAYLOAD_BIN_PATH = "payload.bin";
     private static final String PAYLOAD_PROPERTIES_PATH = "payload_properties.txt";
-
     private static final String PREFS_IS_INSTALLING_UPDATE = "prefs_is_installing_update";
+    private static final long WAKELOCK_TIMEOUT = 60 * 60 * 1000; /* 1 hour */
 
     private final String zipPath;
     private final boolean enableABPerfMode;
@@ -128,8 +127,10 @@ class ABUpdate {
     static synchronized void setInstallingUpdate(boolean installing, UpdateService us) {
         final boolean enabled = us.getConfig().getABWakeLockCurrent();
         final WakeLock wakeLock = us.getWakeLock();
-        if (installing && enabled) wakeLock.acquire();
-        else if (wakeLock.isHeld()) wakeLock.release();
+        if (installing && enabled && !wakeLock.isHeld())
+            wakeLock.acquire(WAKELOCK_TIMEOUT);
+        else if (wakeLock.isHeld())
+            wakeLock.release();
 
         us.getPrefs().edit()
                 .putBoolean(PREFS_IS_INSTALLING_UPDATE, installing).commit();
