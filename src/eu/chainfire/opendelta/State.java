@@ -19,6 +19,8 @@
  */
 package eu.chainfire.opendelta;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class State {
@@ -78,7 +80,13 @@ public class State {
 
     private static State mState;
     private String mStateStr = ACTION_NONE;
-    private StateCallback mStateCallback;
+    private Float mProgress = null;
+    private Long mCurrent = null;
+    private Long mTotal = null;
+    private String mFilename = null;
+    private Long mMs = null;
+    private int mErrorCode = -1;
+    private List<StateCallback> mStateCallbacks = new CopyOnWriteArrayList<>();
 
     private State() {}
 
@@ -88,13 +96,22 @@ public class State {
                 Long ms, int errorCode);
     }
 
-    public void registerStateCallback(StateCallback callback) {
-        mStateCallback = callback;
-        update(mStateStr);
+    public void addStateCallback(StateCallback callback) {
+        mStateCallbacks.add(callback);
+        callback.update(mStateStr, mProgress, mCurrent, mTotal, mFilename, mMs, mErrorCode);
     }
 
-    public void unregisterStateCallback() {
-        mStateCallback = null;
+    public void removeStateCallback(StateCallback callback) {
+        if (!mStateCallbacks.contains(callback)) return;
+        mStateCallbacks.remove(callback);
+    }
+
+    public synchronized void notifyCallbacks() {
+        if (mStateCallbacks.size() == 0) return;
+        for (StateCallback callback : mStateCallbacks) {
+            callback.update(mStateStr, mProgress, mCurrent,
+                    mTotal, mFilename, mMs, mErrorCode);
+        }
     }
 
     public static State getInstance() {
@@ -110,6 +127,22 @@ public class State {
         update(state, null, null, null, null, null, errorCode);
     }
 
+    public void update(String state, Long ms) {
+        update(state, null, ms);
+    }
+
+    public void update(String state, String filename) {
+        update(state, filename, null);
+    }
+
+    public void update(String state, String filename, Long ms) {
+        update(state, null, null, null, filename, ms);
+    }
+
+    public void update(String state, String filename, int errorCode) {
+        update(state, null, null, null, filename, null, errorCode);
+    }
+
     public void update(String state, Float progress,
             Long current, Long total, String filename, Long ms) {
         update(state, progress, current,  total,  filename,  ms, -1);
@@ -118,20 +151,24 @@ public class State {
     public synchronized void update(String state, Float progress,
             Long current, Long total, String filename, Long ms, int errorCode) {
         mStateStr = state;
-        if (mStateCallback != null)
-            mStateCallback.update(state, progress, current,
-                    total, filename, ms, errorCode);
+        mProgress = progress;
+        mCurrent = current;
+        mTotal = total;
+        mFilename = filename;
+        mMs = ms;
+        mErrorCode = errorCode;
+        notifyCallbacks();
     }
 
     public synchronized String getState() {
         return mStateStr;
     }
 
-    public boolean isProgressState() {
+    public synchronized boolean isProgressState() {
         return isProgressState(mStateStr);
     }
 
-    public boolean isErrorState() {
+    public synchronized boolean isErrorState() {
         return isErrorState(mStateStr);
     }
 

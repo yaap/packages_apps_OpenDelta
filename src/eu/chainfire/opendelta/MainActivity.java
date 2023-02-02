@@ -220,14 +220,16 @@ public class MainActivity extends Activity {
     private final ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            Logger.d("Service connected");
             UpdateService.LocalBinder binder = (UpdateService.LocalBinder) iBinder;
             mUpdateService = binder.getService();
-            mUpdateService.getState().registerStateCallback(updateReceiver);
+            mUpdateService.getState().addStateCallback(updateReceiver);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            mUpdateService.getState().unregisterStateCallback();
+            Logger.d("Service disconnected");
+            mUpdateService.getState().removeStateCallback(updateReceiver);
             mUpdateService = null;
         }
     };
@@ -306,13 +308,6 @@ public class MainActivity extends Activity {
                 // don't try this at home
                 if (state != null) {
                     title = tryGetResourceString("state_" + state);
-                    try {
-                        title = getString(getResources().getIdentifier(
-                                "state_" + state, "string", getPackageName()));
-                    } catch (Exception e) {
-                        // String for this state could not be found (displays an empty string)
-                        // Logger.ex(e);
-                    }
                     // check for first start until check button has been pressed
                     // use a special title then - but only once
                     if (State.ACTION_NONE.equals(state)

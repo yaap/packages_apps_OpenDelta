@@ -193,7 +193,7 @@ public class Download {
                         mState.update(State.ACTION_DOWNLOADING, progress,
                                 current, total, userFN, now - last[3]);
                         mUpdateService.setDownloadNotificationProgress(progress, current,
-                                total,now - last[3]);
+                                total, now - last[3]);
                         last[2] = now;
                     }
                 }

@@ -157,6 +157,7 @@ public class SettingsFragment extends PreferenceFragment implements
             prefs.edit().putBoolean(SettingsActivity.PREF_START_HINT_SHOWN, false).apply();
             Toast.makeText(getContext(), String.format(getString(R.string.clean_files_feedback),
                     numDeletedFiles), Toast.LENGTH_LONG).show();
+            State.getInstance().update(State.ACTION_NONE);
             return true;
         }
         return false;
