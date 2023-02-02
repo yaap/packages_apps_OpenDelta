@@ -79,7 +79,6 @@
     <string name="clean_files_feedback" formatted="false">%d個のファイルを削除しました。「更新を確認」をチェックして下さい。</string>
     <string name="state_error_permissions">ストレージの許可がありません</string>
     <string name="state_error_flash">書き込みの開始に失敗しました。キャッシュを削除して再試行して下さい。</string>
-    <string name="state_error_ab_flash">書き込みの開始に失敗しました。再起動して再試行して下さい。</string>
     <string name="progress_status_0">一時停止中&#8230;</string>
     <string name="progress_status_1">更新の確認中&#8230;</string>
     <string name="progress_status_2">更新が利用可能です&#8230;</string>
@@ -95,8 +94,8 @@
     <string name="state_error_flash_file_title">そのファイルをフラッシュできません</string>
     <string name="select_file_activity_title">ZIP ファイルの選択</string>
     <string name="button_select_file">ファイル</string>
-    <string name="state_error_ab_flash_title">AB アップデートをフラッシュできません</string>
-    <string name="state_error_flash_title">更新をフラッシュができません</string>
+    <string name="state_error_ab_flash">AB アップデートをフラッシュできません</string>
+    <string name="state_error_flash_file">更新をフラッシュができません</string>
     <string name="channel_name">更新の進捗状況</string>
     <string name="text_update_file_flash_title">更新ファイル</string>
 </resources>

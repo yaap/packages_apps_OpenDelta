@@ -79,7 +79,6 @@
     <string name="show_info_summary">Εμφάνιση επεξήγησης/κειμένου στην κεντρική σελίδα</string>
     <string name="state_error_permissions">Δεν έχουν δωθεί τα δικαιώματα εγγραφής/ανάγνωσης αποθηκευτ. χώρου.</string>
     <string name="state_error_flash">Αποτυχία ρύθμισης εγκατάστασης. Καθαρίστε /την cache και προσπαθήστε ξανά.</string>
-    <string name="state_error_ab_flash">Αποτυχία ρύθμισης εγκατάστασης. Επανεκκινήστε και προσπαθήστε ξανά.</string>
     <string name="progress_status_0">Ύπνος &#8230;</string>
     <string name="progress_status_1">Έλεγχος ενημερώσεων &#8230;</string>
     <string name="progress_status_2">Διαθέσιμη ενημέρωση &#8230;</string>
@@ -97,8 +96,8 @@
     <string name="ab_perf_mode_summary_new">Αύξηση προταιρεότητας διαδικασίας ενημερώσεων. Μπορεί να επηρεάσει τη χρήση της συσκευής κατά την ενεημέρωση.</string>
     <string name="state_error_flash_file_title">Δεν μπορεί να γίνει εγκατάσταση αυτού του αρχείου</string>
     <string name="select_file_activity_title">Επιλογή αρχείου ZIP</string>
-    <string name="state_error_ab_flash_title">Δεν μπορεί να γίνει εγκατάσταση AB ενημέρωσης</string>
-    <string name="state_error_flash_title">Δεν μπορεί να γίνει εγκατάσταση της ενημέρωσης</string>
+    <string name="state_error_ab_flash">Δεν μπορεί να γίνει εγκατάσταση AB ενημέρωσης</string>
+    <string name="state_error_flash_file">Δεν μπορεί να γίνει εγκατάσταση της ενημέρωσης</string>
     <string name="channel_name">Διαδικασία ενημέρωσης</string>
     <string name="channel_description"></string>
     <string name="text_update_file_flash_title">Αρχείο ενημέρωσης</string>

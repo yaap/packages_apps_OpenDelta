@@ -889,9 +889,11 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 Logger.d("download " + (isPause ? "paused" : "error"));
                 mState.update(newState, progress, current, total, imageName, lastTime);
                 // display paused notification with the proper title
-                String title = getString(isPause
-                        ? R.string.state_action_downloading_paused
-                        : R.string.state_error_download_resume);
+                String title = getString(R.string.state_action_downloading_paused);
+                if (!isPause) {
+                    title = getString(R.string.state_error_download) + "(" +
+                            getString(R.string.state_error_download_extra_resume) + ")";
+                }
                 mNotificationManager.cancel(NOTIFICATION_BUSY);
                 newDownloadNotification(true, title);
                 mDownloadNotificationBuilder.setProgress(100, Math.round(progress), false);

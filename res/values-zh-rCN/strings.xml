@@ -52,8 +52,8 @@
     <string name="state_action_build_delta">可以进行增量更新</string>
     <string name="state_action_build_full">可以进行完整更新</string>
     <string name="state_error_download">下载错误</string>
-    <string name="state_error_download_sha">下载错误 (文件损坏)</string>
-    <string name="state_error_download_resume">下载错误 (可恢复)</string>
+    <string name="state_error_download_extra_sha">文件损坏</string>
+    <string name="state_error_download_extra_resume">可恢复</string>
     <string name="state_error_download_extra_1">无法检测版本更新\n检查你的网络和 DNS 设置</string>
     <string name="state_error_download_extra_2">在服务器上未找到校验文件\n请询问您的设备维护者</string>
     <string name="text_current_version_header_title">当前版本</string>
@@ -99,7 +99,6 @@
     <string name="clean_files_feedback" formatted="false">删除了 %d 文件. 现在点击 “检查”</string>
     <string name="state_error_permissions">没有储存权限</string>
     <string name="state_error_flash">刷入失败. 清理 /cache 后重试.</string>
-    <string name="state_error_ab_flash">刷入失败. 请重启后再次尝试.</string>
     <string name="progress_status_0">空闲 &#8230;</string>
     <string name="progress_status_1">正在检查更新 &#8230;</string>
     <string name="progress_status_2">更新可用 &#8230;</string>
@@ -115,8 +114,8 @@
     <string name="state_error_flash_file_title">无法刷入该文件</string>
     <string name="select_file_activity_title">选择 ZIP 文件</string>
     <string name="button_select_file">文件</string>
-    <string name="state_error_ab_flash_title">无法刷入 AB 更新</string>
-    <string name="state_error_flash_title">无法刷入更新</string>
+    <string name="state_error_ab_flash">无法刷入 AB 更新</string>
+    <string name="state_error_flash_file">无法刷入更新</string>
     <string name="no_sum_dialog_msg">未找到本地校验文件 (.sha256sum)\n请将文件放在与要刷入的文件相同路径中\n按下忽略继续安装而不校验文件（危险！）</string>
     <string name="invalid_sum_dialog_msg">校验文件与本地文件不匹配\n此文件可能已损坏，请重新下载\n按下忽略继续安装\n请注意，可能会安装失败</string>
     <string name="channel_name">更新进度</string>

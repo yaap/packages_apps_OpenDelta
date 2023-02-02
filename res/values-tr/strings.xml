@@ -82,7 +82,6 @@
     <string name="clean_files_feedback" formatted="false">%d adet dosya silindi. Şimdi \'Güncellemeleri yokla\' düğmesine dokunun</string>
     <string name="state_error_permissions">Depolama izinleri yok.</string>
     <string name="state_error_flash">Kurulamadı. Ön belleği temizleyin ve tekrar deneyin.</string>
-    <string name="state_error_ab_flash">Kurulum tamamlanamadı. Lütfen cihazı tekrar başlatın ve tekrar deneyin.</string>
     <string name="progress_status_0">Boşta &#8230;</string>
     <string name="progress_status_1">Güncellemeler yoklanıyor &#8230;</string>
     <string name="progress_status_2">Güncelleme mevcut &#8230;</string>
@@ -98,8 +97,8 @@
     <string name="state_error_flash_file_title">Bu dosya kurulamıyor</string>
     <string name="select_file_activity_title">ZIP dosyasını seçin</string>
     <string name="button_select_file">Dosya</string>
-    <string name="state_error_ab_flash_title">AB güncellemesi kurulamıyor</string>
-    <string name="state_error_flash_title">Güncelleme kurulamıyor</string>
+    <string name="state_error_ab_flash">AB güncellemesi kurulamıyor</string>
+    <string name="state_error_flash_file">Güncelleme kurulamıyor</string>
     <string name="channel_name">Güncelleme ilerlemesi</string>
     <string name="text_update_file_flash_title">Güncelleme dosyası</string>
     <string name="text_info_section">Bir güncellemenin mevcut olup olmadığına bakmak için yokla düğmesine dokununuz. Bir güncelleme kurulduktan sonra sizden yeniden başlatmanız rica edilir. Geleneksel recovery yazılımı temeline sahip cihazlar kurulum işleminin yerine getirilmesi için yeniden başlatılma esnasında recovery moduna girer. Cihazınız A/B tipi güncellemeleri destekliyorsa yeniden başlatma güncellemeyi devreye sokar.</string>

@@ -335,6 +335,7 @@ public class MainActivity extends Activity {
                             filename
                         );
                         mSub.setText(pgen.sub);
+                        mSub.setSelected(true); // allow scrolling
                         mSub2.setText(pgen.sub2);
                         mProgressPercent.setText(pgen.progressPercent);
                         mProgressCurrent = Math.round(pgen.localCurrent);
@@ -352,10 +353,13 @@ public class MainActivity extends Activity {
                 long downloadSize = 0L;
                 switch (state) {
                     case State.ERROR_UNKNOWN:
-                    case State.ERROR_DOWNLOAD_SHA:
                     case State.ERROR_CONNECTION:
                     case State.ERROR_PERMISSIONS:
                     case State.ACTION_NONE:
+                        break;
+                    case State.ERROR_FLASH:
+                    case State.ERROR_FLASH_FILE:
+                        enableFlash = true;
                         break;
                     case State.ERROR_DISK_SPACE:
                         localCurrent /= 1024L * 1024L;
@@ -370,17 +374,12 @@ public class MainActivity extends Activity {
                     case State.ERROR_DOWNLOAD:
                         extraText = tryGetResourceString("state_error_download_extra_" + errorCode);
                         break;
-                    case State.ERROR_FLASH:
-                        enableFlash = true;
-                        title = getString(R.string.state_error_flash_title);
+                    case State.ERROR_DOWNLOAD_SHA:
+                        title = getString(R.string.state_error_download);
+                        extraText = getString(R.string.state_error_download_extra_sha);
                         break;
                     case State.ERROR_AB_FLASH:
-                        title = getString(R.string.state_error_ab_flash_title);
                         extraText = tryGetResourceString("error_ab_" + errorCode);
-                        break;
-                    case State.ERROR_FLASH_FILE:
-                        enableFlash = true;
-                        title = getString(R.string.state_error_flash_title);
                         break;
                     case State.ACTION_READY:
                         enableFlash = true;
@@ -471,6 +470,8 @@ public class MainActivity extends Activity {
                                 enableDownload = true;
                                 break;
                             case State.ERROR_DOWNLOAD_RESUME:
+                                title = getString(R.string.state_error_download);
+                                extraText = getString(R.string.state_error_download_extra_resume);
                             case State.ACTION_DOWNLOADING_PAUSED:
                                 hideCheck = true;
                                 enableDownload = true;
@@ -513,6 +514,7 @@ public class MainActivity extends Activity {
                 }
                 mTitle.setText(title);
                 mSub.setText(sub);
+                mSub.setSelected(true); // allow scrolling
                 mSub2.setText(sub2);
                 mProgressPercent.setText(progressPercent);
                 final boolean hideVersion = TextUtils.isEmpty(updateVersion);

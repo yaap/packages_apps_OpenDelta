@@ -81,7 +81,6 @@
     <string name="clean_files_feedback" formatted="false">%d Dateien gelöscht. Jetzt \"Nach Aktualisierungen suchen\" drücken</string>
     <string name="state_error_permissions">Keine Berechtigung zum speichern.</string>
     <string name="state_error_flash">Fehler beim Vorbereiten zum Einspielen. Bitte \"/cache \" bereinigen und wiederholen.</string>
-    <string name="state_error_ab_flash">Fehler beim Flashen. Bitte nach Neustart erneut versuchen.</string>
     <string name="progress_status_0">Idle &#8230;</string>
     <string name="progress_status_1">Suche nach Aktualisierungen &#8230;</string>
     <string name="progress_status_2">Update verfügbar &#8230;</string>
@@ -97,8 +96,8 @@
     <string name="state_error_flash_file_title">Kann diese Datei nicht flashen</string>
     <string name="select_file_activity_title">ZIP-Datei auswählen</string>
     <string name="button_select_file">Datei</string>
-    <string name="state_error_ab_flash_title">Kann AB Update nicht flashen</string>
-    <string name="state_error_flash_title">Kann Update nicht flashen</string>
+    <string name="state_error_ab_flash">Kann AB Update nicht flashen</string>
+    <string name="state_error_flash_file">Kann Update nicht flashen</string>
     <string name="channel_name">Aktualisierungsfortschritt</string>
     <string name="text_update_file_flash_title">Aktualisierungsdatei</string>
     <string name="text_info_section">Drücken Sie die auf prüfen, um zu sehen, ob ein Update verfügbar ist. Nach einem Update werden Sie zum Neustart aufgefordert. Geräte mit einem traditionellen Recovery-basierten Update werden beim Neustart in die Recovery gewechselt, um den Flash-Prozess auszuführen. Wenn Ihr Gerät nahtlose Updates (A/B) unterstützt, wird das Update durch den Neustart aktiviert.</string>

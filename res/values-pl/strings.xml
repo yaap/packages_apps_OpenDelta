@@ -79,7 +79,6 @@
     <string name="clean_files_feedback" formatted="false">Usunięto %d plików. Naciśnij teraz \"Sprawdź dostępność aktualizacji\"</string>
     <string name="state_error_permissions">Brak uprawnień pamięci.</string>
     <string name="state_error_flash">Nie udało się przygotować instalacji. Wyczyść /cache i ponów próbę.</string>
-    <string name="state_error_ab_flash">Błąd podczas instalacji. Uruchom ponownie i ponów próbę.</string>
     <string name="progress_status_0">Bezczynny &#8230;</string>
     <string name="progress_status_1">Sprawdzanie aktualizacji &#8230;</string>
     <string name="progress_status_2">Dostępna aktualizacja &#8230;</string>
@@ -95,8 +94,8 @@
     <string name="state_error_flash_file_title">Nie można wgrać tego pliku</string>
     <string name="select_file_activity_title">Wybierz plik ZIP</string>
     <string name="button_select_file">Plik</string>
-    <string name="state_error_ab_flash_title">Nie można wgrać aktualizacji AB</string>
-    <string name="state_error_flash_title">Nie można wgrać aktualizacji</string>
+    <string name="state_error_ab_flash">Nie można wgrać aktualizacji AB</string>
+    <string name="state_error_flash_file">Nie można wgrać aktualizacji</string>
     <string name="channel_name">Postęp aktualizacji</string>
     <string name="text_update_file_flash_title">Plik aktualizacji</string>
 </resources>

@@ -18,7 +18,7 @@
     <TextView
         android:id="@+id/text_title"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="30sp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="30dp"
         android:ellipsize="end"
@@ -29,24 +29,27 @@
     <TextView
         android:id="@+id/extra_text"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="40sp"
+        android:layout_marginTop="2dp"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="9sp"
+        android:autoSizeMaxTextSize="14sp"
         android:ellipsize="marquee"
-        android:singleLine="true"
         android:layout_gravity="center_horizontal"
         android:gravity="center_horizontal"
         android:textAppearance="@style/ValueText" />
 
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="20dp" />
-
     <TextView
         android:id="@+id/progress_text"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ellipsize="marquee"
+        android:layout_height="20sp"
+        android:ellipsize="start"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:singleLine="true"
-        android:textAppearance="@style/ValueText" />
+        android:textAppearance="@style/OtherText" />
 
     <LinearLayout
         android:id="@+id/progress_container"
@@ -76,20 +79,20 @@
         <TextView
             android:id="@+id/progress_percent"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="15sp"
             android:gravity="start"
             android:singleLine="true"
             android:textAppearance="@style/OtherText" />
 
         <Space
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="15sp"
             android:layout_weight="1" />
 
         <TextView
             android:id="@+id/progress_text2"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="15sp"
             android:ellipsize="marquee"
             android:gravity="end"
             android:singleLine="true"
@@ -97,6 +100,8 @@
 
     </LinearLayout>
 
+    <!-- Everything ABOVE this space should have a constant sp height
+         and never be set to GONE (only INVISIBLE) -->
     <Space
         android:layout_width="match_parent"
         android:layout_height="10dp" />

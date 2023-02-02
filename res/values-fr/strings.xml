@@ -78,7 +78,6 @@
     <string name="clean_files_feedback" formatted="false">%d fichiers supprimés. Appuyer maintenant sur \'Vérifier les mises à jour disponibles\'</string>
     <string name="state_error_permissions">Aucune autorisation de stockage.</string>
     <string name="state_error_flash">Échec de la préparation de mise à jour. Supprimer le contenu du /cache et réessayer.</string>
-    <string name="state_error_ab_flash">Échec de la préparation de la mise à jour. Veuillez redémarrer et réessayer.</string>
     <string name="progress_status_0">Au repos &#8230;</string>
     <string name="progress_status_1">Vérification des mises à jour disponibles &#8230;</string>
     <string name="progress_status_2">Mise à jour disponible &#8230;</string>

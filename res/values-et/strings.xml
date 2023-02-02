@@ -78,7 +78,6 @@
     <string name="clean_files_feedback" formatted="false">%d faili kustutatud. Nüüd vajuta \"Kontrolli uuendusi\"</string>
     <string name="state_error_permissions">Mäluruumi luba puudub.</string>
     <string name="state_error_flash">Välgutamise seadistamine ebaõnnestus. Tühjenda /cache ja proovi uuesti.</string>
-    <string name="state_error_ab_flash">Välgutamise seadistamine ebaõnnestus. Palun taaskäivita ja proovi uuesti.</string>
     <string name="progress_status_0">Ootel&#8230;</string>
     <string name="progress_status_1">Uuenduste kontrollimine&#8230;</string>
     <string name="progress_status_2">Uuendus saadaval&#8230;</string>

@@ -55,8 +55,8 @@
     <string name="state_action_build_delta">Возможно обновление дельта-файлом.</string>
     <string name="state_action_build_full">Возможно обновление полным файлом ПО.</string>
     <string name="state_error_download">Проблема при загрузке.</string>
-    <string name="state_error_download_sha">Проблема при загрузке (файл повреждён)</string>
-    <string name="state_error_download_resume">Проблема при загрузке (можно возобновить)</string>
+    <string name="state_error_download_extra_sha">файл повреждён</string>
+    <string name="state_error_download_extra_resume">можно возобновить</string>
     <string name="state_error_download_extra_1">Невозможно найти последнее обновление\nПроверьте настройки сети и DNS</string>
     <string name="state_error_download_extra_2">Не найдена файл контрольной суммы на сервере\nСообщите своему мейнтейнеру</string>
     <string name="state_error_download_extra_3">@string/state_error_connection</string>
@@ -103,7 +103,6 @@
     <string name="clean_files_feedback" formatted="false">Удалено %d файлов. Теперь нажмите «Проверить»</string>
     <string name="state_error_permissions">Нет разрешения для хранения.</string>
     <string name="state_error_flash">Ошибка установки. Сделайте очистку /cache и попробуйте еще раз.</string>
-    <string name="state_error_ab_flash">Ошибка установки. Перезагрузите устройство и попробуйте еще раз.</string>
     <string name="progress_status_0">Бездействую &#8230;</string>
     <string name="progress_status_1">Поиск обновлений &#8230;</string>
     <string name="progress_status_2">Доступно обновление &#8230;</string>
@@ -121,8 +120,8 @@
     <string name="state_error_flash_file_title">Не могу установить этот файл</string>
     <string name="select_file_activity_title">Выберите ZIP файл</string>
     <string name="button_select_file">Файл</string>
-    <string name="state_error_ab_flash_title">Не удается установить A/B обновление</string>
-    <string name="state_error_flash_title">Не удается установить обновление</string>
+    <string name="state_error_ab_flash">Не удается установить A/B обновление</string>
+    <string name="state_error_flash_file">Не удается установить обновление</string>
     <string name="no_sum_dialog_msg">Не найден файл контрольной суммы (.sha256sum).\nПоместите файл контрольной суммы вместе с файлом прошивки\nНажимте "игнорировать" чтобы продолжить без проверки (опасно!)</string>
     <string name="invalid_sum_dialog_msg">Контрольная сумма не совпадает.\nСкорее всего файл обновления поврежден, перекачайте заново.\nНажмите "игнорировать" чтобы продолжить.\nИмейте ввиду что это вам аукнется</string>
     <string name="channel_name">Процесс обновления</string>

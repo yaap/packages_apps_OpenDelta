@@ -81,7 +81,6 @@
     <string name="clean_files_feedback" formatted="false">Odstraněno %d souborů. Nyní stiskněte tlačítko \"Vyhledat aktualizace\"</string>
     <string name="state_error_permissions">Není oprávnění k přístupu na úložiště.</string>
     <string name="state_error_flash">Nepodařilo se nastavení flash. Vymažte /cache a akci opakujte.</string>
-    <string name="state_error_ab_flash">Nepodařilo se nastavení instalace. Restartujte a zkuste to znovu.</string>
     <string name="progress_status_0">Čekání &#8230;</string>
     <string name="progress_status_1">Kontroluji aktualizace &#8230;</string>
     <string name="progress_status_2">Aktualizace k dispozici &#8230;</string>
@@ -97,8 +96,8 @@
     <string name="state_error_flash_file_title">Tento soubor nelze nainstalovat</string>
     <string name="select_file_activity_title">Vyberte soubor ZIP</string>
     <string name="button_select_file">Soubor</string>
-    <string name="state_error_ab_flash_title">Nelze nainstalovat aktualizaci AB</string>
-    <string name="state_error_flash_title">Nelze nainstalovat aktualizaci</string>
+    <string name="state_error_ab_flash">Nelze nainstalovat aktualizaci AB</string>
+    <string name="state_error_flash_file">Nelze nainstalovat aktualizaci</string>
     <string name="channel_name">Postup aktualizace</string>
     <string name="text_update_file_flash_title">Aktualizovat soubor</string>
     <string name="text_info_section">Zkontrolujte, zda je k dispozici aktualizace. Po instalaci budete požádáni o restartování zařízení. Zařízení s tradiční aktualizací založenou na recovery vstoupí do recovery při restartu a spustí se instalační proces. Pokud vaše zařízení podporuje bezproblémové aktualizace (A/B), restartováním se aktualizace aktivuje.</string>
