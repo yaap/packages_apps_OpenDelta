@@ -159,4 +159,6 @@
     <!-- Above string is WRONG. Keeping for historical reasons. This error cannot be reached unless we call applyPayload with SWITCH_SLOT_ON_REBOOT=0 -->
     <string name="error_ab_60">Not enough free space</string>
     <string name="error_ab_61">Device corruption\nA clean install through recovery is advised</string>
+    <string name="long_press_info_toast">Long press to hide</string>
+    <string name="hide_info_toast">Info hidden. Undo in settings</string>
 </resources>

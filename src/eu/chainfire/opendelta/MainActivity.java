@@ -61,6 +61,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Space;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.Toolbar;
 
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission;
@@ -157,6 +158,23 @@ public class MainActivity extends Activity {
         mPermOk = false;
         requestPermissions();
         updateInfoVisibility();
+
+        final View.OnLongClickListener infoLongClickListener =
+                new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                mConfig.setShowInfo(false);
+                updateInfoVisibility(false);
+                Toast.makeText(
+                    getApplicationContext(),
+                    getString(R.string.hide_info_toast),
+                    Toast.LENGTH_LONG
+                ).show();
+                return true;
+            }
+        };
+        mInfoImage.setOnLongClickListener(infoLongClickListener);
+        mInfoText.setOnLongClickListener(infoLongClickListener);
 
         if (mUpdateService == null) {
             startUpdateService(State.ACTION_NONE);
@@ -712,10 +730,13 @@ public class MainActivity extends Activity {
     }
 
     private void updateInfoVisibility() {
-        boolean showInfo = mConfig.getShowInfo();
+        updateInfoVisibility(mConfig.getShowInfo());
+    }
+
+    private void updateInfoVisibility(boolean show) {
         if (mInfoImage != null && mInfoText != null) {
-            mInfoImage.setVisibility(showInfo ? View.VISIBLE : View.GONE);
-            mInfoText.setVisibility(showInfo ? View.VISIBLE : View.GONE);
+            mInfoImage.setVisibility(show ? View.VISIBLE : View.GONE);
+            mInfoText.setVisibility(show ? View.VISIBLE : View.GONE);
         }
     }
 
@@ -819,6 +840,14 @@ public class MainActivity extends Activity {
             i.putExtra(UpdateService.EXTRA_STATE, State.ERROR_FLASH_FILE);
             sendBroadcast(i);
         }
+    }
+
+    public void onInfoClick(View v) {
+        Toast.makeText(
+            getApplicationContext(),
+            getString(R.string.long_press_info_toast),
+            Toast.LENGTH_LONG
+        ).show();
     }
 
     private String getUpdateVersionString() {

@@ -210,6 +210,9 @@
             android:id="@+id/info_image"
             android:layout_width="32dp"
             android:layout_height="32dp"
+            android:onClick="onInfoClick"
+            android:clickable="true"
+            android:longClickable="true"
             android:src="@drawable/ic_info_outline_24dp" />
 
         <TextView
@@ -218,6 +221,9 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_gravity="top"
+            android:onClick="onInfoClick"
+            android:clickable="true"
+            android:longClickable="true"
             android:textAppearance="@style/OtherText"
             android:text="@string/text_info_section" />
     </LinearLayout>
