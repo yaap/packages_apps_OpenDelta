@@ -472,7 +472,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     mLastProgressTime = new long[] { 0, SystemClock.elapsedRealtime() };
                 mProgressListener.setStatus(_filename);
                 mState.update(State.ACTION_AB_FLASH, 0f, 0L, 100L, _filename, null);
-                mIsUpdateRunning = ABUpdate.resume(flashFilename, mProgressListener, this);
+                mIsUpdateRunning = ABUpdate.getInstance(this).resume();
                 if (!mIsUpdateRunning) {
                     mNotificationManager.cancel(NOTIFICATION_UPDATE);
                     mState.update(State.ERROR_AB_FLASH);
@@ -1108,7 +1108,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 mLastProgressTime = new long[] { 0, SystemClock.elapsedRealtime() };
                 mProgressListener.setStatus(_filename);
                 mIsUpdateRunning = true;
-                if (!ABUpdate.start(flashFilename, mProgressListener, this)) {
+                if (!ABUpdate.getInstance(this).start(flashFilename, mProgressListener)) {
                     mNotificationManager.cancel(NOTIFICATION_UPDATE);
                     mIsUpdateRunning = false;
                     mState.update(State.ERROR_AB_FLASH);
@@ -1483,7 +1483,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         if (finished) {
             final String lastFilename = mPrefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
             mPrefs.edit().putBoolean(PREF_PENDING_REBOOT, false).commit();
-            ABUpdate.pokeStatus(lastFilename, this);
+            ABUpdate.getInstance(this).pokeStatus();
         }
         return finished;
     }

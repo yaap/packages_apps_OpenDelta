@@ -42,19 +42,20 @@ class ABUpdate {
     private static final String PREFS_IS_INSTALLING_UPDATE = "prefs_is_installing_update";
     private static final long WAKELOCK_TIMEOUT = 60 * 60 * 1000; /* 1 hour */
 
-    private final String zipPath;
-    private final boolean enableABPerfMode;
-
-    private final ProgressListener mProgressListener;
+    private static ABUpdate mInstance;
 
     private final UpdateService mUpdateService;
     private final UpdateEngine mUpdateEngine;
+    private final boolean mEnableABPerfMode;
+
+    private String mZipPath;
+    private ProgressListener mProgressListener;
     private boolean mBound;
 
     private final UpdateEngineCallback mUpdateEngineCallback = new UpdateEngineCallback() {
         @Override
         public void onStatusUpdate(int status, float percent) {
-            Logger.d("onStatusUpdate = " + status);
+            Logger.d("onStatusUpdate = " + status + " " + percent + "%%");
             // downloading stage: 0% - 30%
             int offset = 0;
             int weight = 30;
@@ -102,21 +103,25 @@ class ABUpdate {
         }
     };
 
-    static synchronized boolean start(String zipPath, ProgressListener listener,
-            UpdateService us) {
-        if (isInstallingUpdate(us)) {
-            return false;
+    public boolean start(String zipPath, ProgressListener listener) {
+        mZipPath = zipPath;
+        mProgressListener = listener;
+        if (isInstallingUpdate(mUpdateService)) {
+            return true;
         }
-        ABUpdate installer = new ABUpdate(zipPath, listener, us);
-        setInstallingUpdate(installer.startUpdate(), us);
-        return isInstallingUpdate(us);
+        final boolean installing = startUpdate();
+        setInstallingUpdate(installing, mUpdateService);
+        return installing;
     }
 
-    static synchronized boolean resume(String zipPath, ProgressListener listener,
-            UpdateService us) {
-        ABUpdate installer = new ABUpdate(zipPath, listener, us);
-        setInstallingUpdate(installer.bindCallbacks(), us);
-        return isInstallingUpdate(us);
+    public boolean resume() {
+        final boolean installing = bindCallbacks();
+        setInstallingUpdate(installing, mUpdateService);
+        return installing;
+    }
+
+    public void pokeStatus() {
+        bindCallbacks();
     }
 
     static synchronized boolean isInstallingUpdate(UpdateService us) {
@@ -136,18 +141,18 @@ class ABUpdate {
                 .putBoolean(PREFS_IS_INSTALLING_UPDATE, installing).commit();
     }
 
-    static synchronized void pokeStatus(String zipPath, UpdateService us) {
-        ABUpdate installer = new ABUpdate(zipPath, null, us);
-        installer.bindCallbacks();
+    private ABUpdate(UpdateService service) {
+        mUpdateService = service;
+        mEnableABPerfMode = mUpdateService.getConfig().getABPerfModeCurrent();
+        mUpdateEngine = new UpdateEngine();
     }
 
-    private ABUpdate(String zipPath, ProgressListener listener,
-            UpdateService us) {
-        this.zipPath = zipPath;
-        this.mProgressListener = listener;
-        this.mUpdateService = us;
-        this.enableABPerfMode = mUpdateService.getConfig().getABPerfModeCurrent();
-        this.mUpdateEngine = new UpdateEngine();
+    public static ABUpdate getInstance(UpdateService service) {
+        if (mInstance != null) {
+            return mInstance;
+        }
+        mInstance = new ABUpdate(service);
+        return mInstance;
     }
 
     private boolean bindCallbacks() {
@@ -161,7 +166,7 @@ class ABUpdate {
     }
 
     private boolean startUpdate() {
-        File file = new File(zipPath);
+        File file = new File(mZipPath);
         if (!file.exists()) {
             Log.e(TAG, "The given update doesn't exist");
             return false;
@@ -174,8 +179,8 @@ class ABUpdate {
             offset = getZipEntryOffset(zipFile, PAYLOAD_BIN_PATH);
             ZipEntry payloadPropEntry = zipFile.getEntry(PAYLOAD_PROPERTIES_PATH);
             try (InputStream is = zipFile.getInputStream(payloadPropEntry);
-                 InputStreamReader isr = new InputStreamReader(is);
-                 BufferedReader br = new BufferedReader(isr)) {
+                InputStreamReader isr = new InputStreamReader(is);
+                BufferedReader br = new BufferedReader(isr)) {
                 List<String> lines = new ArrayList<>();
                 for (String line; (line = br.readLine()) != null;) {
                     lines.add(line);
@@ -189,7 +194,7 @@ class ABUpdate {
             return false;
         }
 
-        mUpdateEngine.setPerformanceMode(enableABPerfMode);
+        mUpdateEngine.setPerformanceMode(mEnableABPerfMode);
         if (!bindCallbacks()) return false;
         String zipFileUri = "file://" + file.getAbsolutePath();
         mUpdateEngine.applyPayload(zipFileUri, offset, 0, headerKeyValuePairs);
