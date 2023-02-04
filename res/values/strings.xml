@@ -107,6 +107,8 @@
     <string name="scheduler_weekly">Weekly</string>
     <string name="scheduler_daily_time">Time</string>
     <string name="scheduler_week_day">Day</string>
+    <string name="scheduler_sleep_enabled_title">Sleep detection</string>
+    <string name="scheduler_sleep_enabled_summary">Attempt to check for updates when the screen is off for 5 hours straight</string>
     <string name="metered_networks_title">Metered networks</string>
     <string name="metered_networks_message">Allow auto downloading on metered networks</string>
     <string name="category_flashing">Flashing</string>

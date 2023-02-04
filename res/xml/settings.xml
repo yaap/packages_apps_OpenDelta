@@ -47,6 +47,11 @@
 			android:entryValues="@array/scheduler_mode_values"
 			android:key="scheduler_mode"
 			android:title="@string/scheduler_mode_title" />
+		<SwitchPreference
+			android:defaultValue="true"
+			android:key="scheduler_sleep_enabled"
+			android:summary="@string/scheduler_sleep_enabled_summary"
+			android:title="@string/scheduler_sleep_enabled_title" />
 
 		<Preference
 			android:key="scheduler_daily_time"

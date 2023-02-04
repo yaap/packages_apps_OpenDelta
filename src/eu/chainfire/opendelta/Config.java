@@ -206,6 +206,14 @@ public class Config {
         prefs.edit().putBoolean(PREF_SHOW_INFO_NAME, enable).commit();
     }
 
+    public boolean getSchedulerSleepEnabled() {
+        return prefs.getBoolean(SettingsActivity.PREF_SCHEDULER_SLEEP, true);
+    }
+
+    public void setSchedulerSleepEnabled(boolean enable) {
+        prefs.edit().putBoolean(SettingsActivity.PREF_SCHEDULER_SLEEP, enable).commit();
+    }
+
     public List<String> getFlashAfterUpdateZIPs() {
         List<String> extras = new ArrayList<>();
 

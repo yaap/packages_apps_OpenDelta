@@ -156,12 +156,16 @@ public class Scheduler extends Service implements OnScreenStateListener {
         }
 
         // smart mode
-        mScreenState.start(this, this);
         final long time = getMaxTime(ALARM_INTERVAL);
         Logger.i("Setting a repeating alarm (inexact) for %s", mSdf.format(new Date(time)));
         mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,
                 time, ALARM_INTERVAL, mAlarmInterval);
         setSecondaryWakeAlarm();
+        if (!Config.getInstance(this).getSchedulerSleepEnabled()) {
+            mScreenState.stop();
+            return START_NOT_STICKY;
+        }
+        mScreenState.start(this, this);
         return START_REDELIVER_INTENT;
     }
 
@@ -304,7 +308,11 @@ public class Scheduler extends Service implements OnScreenStateListener {
 
     @Override
     public void onScreenState(boolean state) {
-        if (mIsStopped || mIsCustomAlarm) return;
+        final boolean enabled = Config.getInstance(this).getSchedulerSleepEnabled();
+        if (!enabled)
+            mScreenState.stop();
+        if (mIsStopped || mIsCustomAlarm || !enabled)
+            return;
         Logger.d("onScreenState = " + state);
         if (!state) {
             setDetectSleepAlarm();
