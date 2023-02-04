@@ -118,8 +118,7 @@
     <string name="state_error_flash_file">无法刷入更新</string>
     <string name="no_sum_dialog_msg">未找到本地校验文件 (.sha256sum)\n请将文件放在与要刷入的文件相同路径中\n按下忽略继续安装而不校验文件（危险！）</string>
     <string name="invalid_sum_dialog_msg">校验文件与本地文件不匹配\n此文件可能已损坏，请重新下载\n按下忽略继续安装\n请注意，可能会安装失败</string>
-    <string name="channel_name">更新进度</string>
-    <string name="channel_description"></string>
+    <string name="install_channel_name">更新进度</string>
     <string name="text_update_file_flash_title">更新文件</string>
     <string name="text_info_section">点击以检查是否有更新可用。在更新刷入过后你需要重启你的设备。具有基于传统 Recovery 的更新的设备将在重新引导时进入恢复以执行刷入。如果你的设备支持无缝更新 (A/B) 重新启动将自动应用更新。</string>
     <string name="error_ab_51">当前版本高于将更新的版本</string>

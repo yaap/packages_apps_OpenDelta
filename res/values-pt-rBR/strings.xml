@@ -98,7 +98,7 @@
     <string name="button_select_file">Arquivo</string>
     <string name="state_error_ab_flash">Não foi possível instalar a atualização AB</string>
     <string name="state_error_flash_file">Não foi possível instalar a atualização</string>
-    <string name="channel_name">Atualização em andamento</string>
+    <string name="install_channel_name">Atualização em andamento</string>
     <string name="text_update_file_flash_title">Atualizar arquivo</string>
     <string name="text_info_section">Pressione verificar para ver se uma atualização está disponível. Após a atualização de uma atualização, você será solicitado a reiniciar. Os dispositivos com uma atualização tradicional baseada em recuperação entrarão em recuperação na reinicialização para executar o processo flash. Se o seu dispositivo suportar atualizações contínuas (A / B), a reinicialização ativará a atualização.</string>
     <string name="error_ab_51">Versão mais recente do que a atualização</string>

@@ -3,7 +3,8 @@
     package="eu.chainfire.opendelta"
     coreApp="true"
     android:versionCode="13"
-    android:versionName="2.0" >
+    android:versionName="2.1"
+    android:sharedUserId="android.uid.system" >
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
@@ -70,6 +71,9 @@
         </receiver>
         <service
             android:name="eu.chainfire.opendelta.UpdateService"
+            android:exported="false" />
+        <service
+            android:name="eu.chainfire.opendelta.Scheduler"
             android:exported="false" />
     </application>
 </manifest>

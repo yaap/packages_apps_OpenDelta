@@ -73,14 +73,7 @@ import android.os.SystemClock;
 import android.os.UpdateEngine;
 import android.preference.PreferenceManager;
 
-import eu.chainfire.opendelta.BatteryState.OnBatteryStateListener;
-import eu.chainfire.opendelta.NetworkState.OnNetworkStateListener;
-import eu.chainfire.opendelta.Scheduler.OnWantUpdateCheckListener;
-import eu.chainfire.opendelta.ScreenState.OnScreenStateListener;
-
-public class UpdateService extends Service implements OnNetworkStateListener,
-        OnBatteryStateListener, OnScreenStateListener,
-        OnWantUpdateCheckListener, OnSharedPreferenceChangeListener {
+public class UpdateService extends Service implements OnSharedPreferenceChangeListener {
 
     public static void start(Context context) {
         start(context, null);
@@ -90,17 +83,10 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         start(context, ACTION_CLEAR_INSTALL_RUNNING);
     }
 
-    private static void start(Context context, String action) {
+    public static void start(Context context, String action) {
         Intent i = new Intent(context, UpdateService.class);
         i.setAction(action);
         context.startService(i);
-    }
-
-    public static PendingIntent alarmPending(Context context, int id) {
-        Intent intent = new Intent(context, UpdateService.class);
-        intent.setAction(ACTION_ALARM);
-        intent.putExtra(EXTRA_ALARM_ID, id);
-        return PendingIntent.getService(context, id, intent, PendingIntent.FLAG_MUTABLE);
     }
 
     public interface ProgressListener {
@@ -119,7 +105,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     public static final String ACTION_CHECK = "eu.chainfire.opendelta.action.CHECK";
     public static final String ACTION_FLASH = "eu.chainfire.opendelta.action.FLASH";
     public static final String ACTION_ALARM = "eu.chainfire.opendelta.action.ALARM";
-    private static final String EXTRA_ALARM_ID = "eu.chainfire.opendelta.extra.ALARM_ID";
+    public static final String ACTION_SCHEDULER = "eu.chainfire.opendelta.action.SCHEDULER";
+    public static final String EXTRA_ALARM_ID = "eu.chainfire.opendelta.extra.ALARM_ID";
     private static final String ACTION_NOTIFICATION_DELETED = "eu.chainfire.opendelta.action.NOTIFICATION_DELETED";
     public static final String ACTION_BUILD = "eu.chainfire.opendelta.action.BUILD";
     private static final String ACTION_UPDATE = "eu.chainfire.opendelta.action.UPDATE";
@@ -129,7 +116,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     public static final String ACTION_DOWNLOAD_STOP = "eu.chainfire.opendelta.action.DOWNLOAD_STOP";
     public static final String ACTION_DOWNLOAD_PAUSE = "eu.chainfire.opendelta.action.DOWNLOAD_PAUSE";
 
-    private static final String NOTIFICATION_CHANNEL_ID = "eu.chainfire.opendelta.notification";
+    private static final String INSTALL_NOTIFICATION_CHANNEL_ID = "eu.chainfire.opendelta.notification.install";
+    private static final String UPDATE_NOTIFICATION_CHANNEL_ID = "eu.chainfire.opendelta.notification.update";
     public static final int NOTIFICATION_BUSY = 1;
     public static final int NOTIFICATION_UPDATE = 2;
     public static final int NOTIFICATION_ERROR = 3;
@@ -152,7 +140,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     public static final String PREF_CURRENT_FILENAME_NAME = "current_filename";
     public static final String PREF_FILE_FLASH = "file_flash";
 
-    private static final long SNOOZE_MS = 24 * AlarmManager.INTERVAL_HOUR;
+    private static final long SNOOZE_MS = AlarmManager.INTERVAL_HALF_DAY;
 
     public static final String PREF_AUTO_UPDATE_METERED_NETWORKS = "auto_update_metered_networks";
 
@@ -162,8 +150,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     public static final int PREF_AUTO_DOWNLOAD_DISABLED = 0;
     public static final int PREF_AUTO_DOWNLOAD_CHECK = 1;
     public static final int PREF_AUTO_DOWNLOAD_FULL = 2;
-
-    public static final String PREF_AUTO_DOWNLOAD_DISABLED_STRING = String.valueOf(PREF_AUTO_DOWNLOAD_DISABLED);
 
     private Config mConfig;
 
@@ -176,8 +162,6 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     private NetworkState mNetworkState;
     private BatteryState mBatteryState;
     private ScreenState mScreenState;
-
-    private Scheduler mScheduler;
 
     private PowerManager.WakeLock mWakeLock;
     private WifiManager.WifiLock mWifiLock;
@@ -268,23 +252,23 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        createNotificationChannel();
+        createInstallNotificationChannel();
+        createUpdateNotificationChannel();
 
-        mScheduler = new Scheduler(this, this);
         int autoDownload = getAutoDownloadValue();
         if (autoDownload != PREF_AUTO_DOWNLOAD_DISABLED) {
-            mScheduler.start();
+            Scheduler.start(this, Scheduler.ACTION_SCHEDULER_START);
         }
         mNetworkState = new NetworkState();
-        mNetworkState.start(this, this);
+        mNetworkState.start(this, null);
 
         mBatteryState = new BatteryState();
-        mBatteryState.start(this, this,
+        mBatteryState.start(this, null,
                 Integer.parseInt(mPrefs.getString(SettingsActivity.PREF_BATTERY_LEVEL, "50")),
                 mPrefs.getBoolean(SettingsActivity.PREF_CHARGE_ONLY, true));
 
         mScreenState = new ScreenState();
-        mScreenState.start(this, this);
+        mScreenState.start(this, null);
 
         mPrefs.registerOnSharedPreferenceChangeListener(this);
     }
@@ -324,7 +308,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                 }
                 break;
             case ACTION_ALARM:
-                mScheduler.alarm(intent.getIntExtra(EXTRA_ALARM_ID, -1));
+                Scheduler.start(this, Scheduler.ACTION_SCHEDULER_ALARM,
+                        intent.getIntExtra(EXTRA_ALARM_ID, -1));
+                break;
+            case ACTION_SCHEDULER:
+                // see comment in ACTION_CLEAR_INSTALL_RUNNING
+                if (!onWantUpdateCheck()) stopSelf();
                 break;
             case ACTION_NOTIFICATION_DELETED:
                 mPrefs.edit().putLong(PREF_LAST_SNOOZE_TIME_NAME,
@@ -346,6 +335,13 @@ public class UpdateService extends Service implements OnNetworkStateListener,
             case ACTION_CLEAR_INSTALL_RUNNING:
                 mIsUpdateRunning = false;
                 ABUpdate.setInstallingUpdate(false, this);
+                if (getAutoDownloadValue() != PREF_AUTO_DOWNLOAD_DISABLED &&
+                        Scheduler.isTimePassed(mPrefs) && !Scheduler.isCustomAlarm(mPrefs)
+                        && onWantUpdateCheck()) {
+                    // scheduler check interval time passed after boot
+                    // checkForUpdatesAsync will stopSelf for us
+                    break;
+                }
                 // always stop after boot receiver has done its thing
                 stopSelf();
                 break;
@@ -394,24 +390,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         return mState;
     }
 
-    @Override
-    public void onNetworkState(boolean state) {
-        Logger.d("network state --> %d", state ? 1 : 0);
-    }
-
-    @Override
-    public void onBatteryState(boolean state) {
-        Logger.d("battery state --> %d", state ? 1 : 0);
-    }
-
-    @Override
-    public void onScreenState(boolean state) {
-        Logger.d("screen state --> %d", state ? 1 : 0);
-        mScheduler.onScreenState(state);
-    }
-
-    @Override
-    public boolean onWantUpdateCheck() {
+    private boolean onWantUpdateCheck() {
         if (mState.isProgressState()) {
             Logger.i("Blocked scheduler requests while running in state " + mState);
             return false;
@@ -419,11 +398,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         Logger.i("Scheduler requests check for updates");
         int autoDownload = getAutoDownloadValue();
         if (autoDownload != PREF_AUTO_DOWNLOAD_DISABLED) {
-            final boolean res = checkForUpdates(false, autoDownload);
-            // scheduler triggered a check
-            // stop when it's done
-            mState.addStateCallback(mStopWhenDoneCallback);
-            return res;
+            return checkForUpdates(false, autoDownload);
         }
         return false;
     }
@@ -437,19 +412,22 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                         PREF_AUTO_UPDATE_METERED_NETWORKS, false));
                 break;
             case SettingsActivity.PREF_AUTO_DOWNLOAD:
+            case SettingsActivity.PREF_SCHEDULER_MODE:
+            case SettingsActivity.PREF_SCHEDULER_DAILY_TIME:
+            case SettingsActivity.PREF_SCHEDULER_WEEK_DAY:
                 int autoDownload = getAutoDownloadValue();
-                if (autoDownload == PREF_AUTO_DOWNLOAD_DISABLED)
-                    mScheduler.stop();
-                else
-                    mScheduler.start();
+                if (autoDownload == PREF_AUTO_DOWNLOAD_DISABLED) {
+                    Scheduler.stop(this);
+                    break;
+                }
+                Scheduler.stop(this);
+                Scheduler.start(this, Scheduler.ACTION_SCHEDULER_START);
                 break;
             default:
                 break;
         }
         if (mBatteryState != null)
             mBatteryState.onSharedPreferenceChanged(sharedPreferences, key);
-        if (mScheduler != null)
-            mScheduler.onSharedPreferenceChanged(sharedPreferences, key);
     }
 
     private void autoState(boolean userInitiated, int checkOnly, boolean notify) {
@@ -593,7 +571,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
 
         mNotificationManager.notify(
                 NOTIFICATION_UPDATE,
-                (new Notification.Builder(this, NOTIFICATION_CHANNEL_ID))
+                (new Notification.Builder(this, UPDATE_NOTIFICATION_CHANNEL_ID))
                 .setSmallIcon(R.drawable.stat_notify_update)
                 .setContentTitle(readyToFlash
                         ? getString(R.string.notify_title_flash)
@@ -605,7 +583,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     }
 
     private void newFlashNotification(String filename) {
-        mFlashNotificationBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
+        mFlashNotificationBuilder = new Notification.Builder(this, INSTALL_NOTIFICATION_CHANNEL_ID);
         mFlashNotificationBuilder.setSmallIcon(R.drawable.stat_notify_update)
                 .setContentTitle(getString(R.string.state_action_ab_flash))
                 .setShowWhen(true)
@@ -637,7 +615,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     : R.string.button_pause_text),
             cPI
         ).build());
-        mDownloadNotificationBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
+        mDownloadNotificationBuilder = new Notification.Builder(this, INSTALL_NOTIFICATION_CHANNEL_ID);
         mDownloadNotificationBuilder.setSmallIcon(R.drawable.stat_notify_update)
                 .setContentTitle(title)
                 .setShowWhen(false)
@@ -657,7 +635,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         }
 
         Notification.Builder builder =
-                (new Notification.Builder(this, NOTIFICATION_CHANNEL_ID))
+                (new Notification.Builder(this, INSTALL_NOTIFICATION_CHANNEL_ID))
                 .setSmallIcon(R.drawable.stat_notify_update)
                 .setContentTitle(getString(R.string.state_action_ab_finished))
                 .setShowWhen(true)
@@ -680,7 +658,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         if (errorStateString != null) {
             mNotificationManager.notify(
                     NOTIFICATION_ERROR,
-                    (new Notification.Builder(this, NOTIFICATION_CHANNEL_ID))
+                    (new Notification.Builder(this, INSTALL_NOTIFICATION_CHANNEL_ID))
                     .setSmallIcon(R.drawable.stat_notify_error)
                     .setContentTitle(getString(R.string.notify_title_error))
                     .setContentText(errorStateString)
@@ -858,6 +836,8 @@ public class UpdateService extends Service implements OnNetworkStateListener,
                     updateAllowed = true;
                     Logger.i("Auto-download not possible - fallback to check only");
                 }
+                mPrefs.edit().putLong(Scheduler.PREF_LAST_CHECK_ATTEMPT_TIME_NAME,
+                        System.currentTimeMillis()).commit();
             }
         }
 
@@ -1274,7 +1254,7 @@ public class UpdateService extends Service implements OnNetworkStateListener,
     private int getAutoDownloadValue() {
         String autoDownload = mPrefs.getString(
                 SettingsActivity.PREF_AUTO_DOWNLOAD,
-                PREF_AUTO_DOWNLOAD_DISABLED_STRING);
+                Integer.toString(PREF_AUTO_DOWNLOAD_CHECK));
         return Integer.parseInt(autoDownload);
     }
 
@@ -1340,6 +1320,12 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         mState.update(State.ACTION_CHECKING);
         mWakeLock.acquire();
         mWifiLock.acquire();
+
+        if (!userInitiated) {
+            // scheduler triggered a check
+            // stop when it's done
+            mState.addStateCallback(mStopWhenDoneCallback);
+        }
 
         newDownloadNotification(false,
                 getString(R.string.state_action_downloading));
@@ -1579,12 +1565,24 @@ public class UpdateService extends Service implements OnNetworkStateListener,
         mState.update(State.ACTION_FLASH_FILE_READY, fn.getName());
     }
 
-    private void createNotificationChannel() {
-        CharSequence name = getString(R.string.channel_name);
-        String description = getString(R.string.channel_description);
-        int importance = NotificationManager.IMPORTANCE_LOW;
-        NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance);
+    private void createInstallNotificationChannel() {
+        final CharSequence name = getString(R.string.install_channel_name);
+        final String description = getString(R.string.install_channel_description);
+        final int importance = NotificationManager.IMPORTANCE_LOW;
+        final NotificationChannel channel = new NotificationChannel(
+                INSTALL_NOTIFICATION_CHANNEL_ID, name, importance);
         channel.setDescription(description);
+        mNotificationManager.createNotificationChannel(channel);
+    }
+
+    private void createUpdateNotificationChannel() {
+        final CharSequence name = getString(R.string.update_channel_name);
+        final String description = getString(R.string.update_channel_description);
+        final int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        final NotificationChannel channel = new NotificationChannel(
+                UPDATE_NOTIFICATION_CHANNEL_ID, name, importance);
+        channel.setDescription(description);
+        channel.setBlockable(true);
         mNotificationManager.createNotificationChannel(channel);
     }
 

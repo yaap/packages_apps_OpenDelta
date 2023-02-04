@@ -32,7 +32,7 @@ public class NetworkState {
 
     private Context context = null;
     private OnNetworkStateListener onNetworkStateListener = null;
-    private volatile Boolean stateLast = null;
+    private Boolean stateLast = null;
     private boolean mIsConnected;
     private boolean mIsMetered;
     private boolean mIsMeteredAllowed;
@@ -53,15 +53,14 @@ public class NetworkState {
     };
 
     private void updateState() {
-        if (onNetworkStateListener != null) {
-            mIsMetered = mConnectivityManager.isActiveNetworkMetered();
-            boolean state = (!mIsMetered || mIsMeteredAllowed) && mIsConnected;
+        mIsMetered = mConnectivityManager.isActiveNetworkMetered();
+        boolean state = (!mIsMetered || mIsMeteredAllowed) && mIsConnected;
 
-            if ((stateLast == null) || (stateLast != state)) {
-                stateLast = state;
-                onNetworkStateListener.onNetworkState(state);
-            }
-        }
+        if (stateLast != null && stateLast == state) return;
+        stateLast = state;
+
+        if (onNetworkStateListener == null) return;
+        onNetworkStateListener.onNetworkState(state);
     }
 
     public boolean start(Context context, OnNetworkStateListener onNetworkStateListener) {

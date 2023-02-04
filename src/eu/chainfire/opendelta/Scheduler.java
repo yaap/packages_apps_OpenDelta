@@ -1,6 +1,7 @@
 /* 
  * Copyright (C) 2013-2014 Jorrit "Chainfire" Jongma
  * Copyright (C) 2013-2015 The OmniROM Project
+ * Copyright (C) 2020-2023 Yet Another AOSP Project
  */
 /* 
  * This file is part of OpenDelta.
@@ -46,9 +47,11 @@ package eu.chainfire.opendelta;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.os.IBinder;
 import android.os.SystemClock;
 
 import androidx.preference.PreferenceManager;
@@ -60,258 +63,305 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-public class Scheduler implements OnScreenStateListener,
-        OnSharedPreferenceChangeListener {
-    public interface OnWantUpdateCheckListener {
-        boolean onWantUpdateCheck();
-    }
+public class Scheduler extends Service implements OnScreenStateListener {
 
-    private static final String PREF_LAST_CHECK_ATTEMPT_TIME_NAME = "last_check_attempt_time";
+    public static final String ACTION_SCHEDULER_START = "eu.chainfire.opendelta.action.Scheduler.START";
+    public static final String ACTION_SCHEDULER_ALARM = "eu.chainfire.opendelta.action.Scheduler.ALARM";
+    public static final String PREF_LAST_CHECK_ATTEMPT_TIME_NAME = "last_check_attempt_time";
     private static final long PREF_LAST_CHECK_ATTEMPT_TIME_DEFAULT = 0L;
 
-    private static final long CHECK_THRESHOLD_MS = 6 * AlarmManager.INTERVAL_HOUR;
-    private static final long ALARM_INTERVAL_START = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
-    private static final long ALARM_INTERVAL_INTERVAL = AlarmManager.INTERVAL_HALF_HOUR;
-    private static final long ALARM_SECONDARY_WAKEUP_TIME = 3 * AlarmManager.INTERVAL_HOUR;
-    private static final long ALARM_DETECT_SLEEP_TIME = (5 * AlarmManager.INTERVAL_HOUR)
-            + AlarmManager.INTERVAL_HALF_HOUR;
+    private static final long CHECK_THRESHOLD = 6 * AlarmManager.INTERVAL_HOUR;
+    private static final long ALARM_INTERVAL = 3 * AlarmManager.INTERVAL_HOUR;
+    private static final long ALARM_SECONDARY = AlarmManager.INTERVAL_HALF_DAY;
+    private static final long ALARM_DETECT_SLEEP_TIME = 5 * AlarmManager.INTERVAL_HOUR;
 
-    private final OnWantUpdateCheckListener onWantUpdateCheckListener;
-    private final AlarmManager alarmManager;
-    private final SharedPreferences prefs;
+    private AlarmManager mAlarmManager;
+    private SharedPreferences mPrefs;
+    private PendingIntent mAlarmInterval;
+    private PendingIntent mAlarmSecondaryWake;
+    private PendingIntent mAlarmDetectSleep;
+    private PendingIntent mAlarmCustom;
 
-    private final PendingIntent alarmInterval;
-    private final PendingIntent alarmSecondaryWake;
-    private final PendingIntent alarmDetectSleep;
-    private final PendingIntent alarmCustom;
+    private ScreenState mScreenState;
+    private boolean mIsStopped;
+    private boolean mIsCustomAlarm;
 
-    private boolean stopped;
-    private boolean customAlarm;
+    private final SimpleDateFormat mSdf = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
 
-    private final SimpleDateFormat sdfLog = (new SimpleDateFormat("HH:mm",
-            Locale.ENGLISH));
+    public static void start(Context context, String action) {
+        start(context, action, -1);
+    }
 
-    public Scheduler(Context context,
-            OnWantUpdateCheckListener onWantUpdateCheckListener) {
-        this.onWantUpdateCheckListener = onWantUpdateCheckListener;
-        alarmManager = (AlarmManager) context
-                .getSystemService(Context.ALARM_SERVICE);
-        prefs = PreferenceManager.getDefaultSharedPreferences(context);
+    public static void start(Context context, String action, int extra) {
+        Intent i = new Intent(context, Scheduler.class);
+        i.setAction(action);
+        i.putExtra(UpdateService.EXTRA_ALARM_ID, extra);
+        context.startService(i);
+    }
 
-        alarmInterval = UpdateService.alarmPending(context, 1);
-        alarmSecondaryWake = UpdateService.alarmPending(context, 2);
-        alarmDetectSleep = UpdateService.alarmPending(context, 3);
-        alarmCustom = UpdateService.alarmPending(context, 4);
+    public static void stop(Context context) {
+        context.stopService(new Intent(context, Scheduler.class));
+    }
 
-        stopped = true;
+    @Override
+    public void onCreate() {
+        mAlarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mAlarmInterval = alarmPending(this, 1);
+        mAlarmSecondaryWake = alarmPending(this, 2);
+        mAlarmDetectSleep = alarmPending(this, 3);
+        mAlarmCustom = alarmPending(this, 4);
+        mScreenState = new ScreenState();
+        mIsStopped = true;
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent == null || intent.getAction() == null) {
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
+        Logger.i("Scheduler onStartCommand=" + intent.getAction());
+        switch (intent.getAction()) {
+            case ACTION_SCHEDULER_START:
+                return startScheduler();
+            case ACTION_SCHEDULER_ALARM:
+                return alarm(intent.getIntExtra(UpdateService.EXTRA_ALARM_ID, -1));
+        }
+        return START_REDELIVER_INTENT;
+    }
+
+    private int startScheduler() {
+        cancelSecondaryWakeAlarm();
+        cancelDetectSleepAlarm();
+        mAlarmManager.cancel(mAlarmInterval);
+        mAlarmManager.cancel(mAlarmCustom);
+
+        final String alarmType = mPrefs.getString(SettingsActivity.PREF_SCHEDULER_MODE,
+                SettingsActivity.PREF_SCHEDULER_MODE_SMART);
+        mIsCustomAlarm = alarmType.equals(SettingsActivity.PREF_SCHEDULER_MODE_DAILY) ||
+                alarmType.equals(SettingsActivity.PREF_SCHEDULER_MODE_WEEKLY);
+
+        mIsStopped = false;
+        if (mIsCustomAlarm) {
+            setCustomAlarmFromPrefs(alarmType);
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
+        // smart mode
+        mScreenState.start(this, this);
+        final long time = getMaxTime(ALARM_INTERVAL);
+        Logger.i("Setting a repeating alarm (inexact) for %s", mSdf.format(new Date(time)));
+        mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,
+                time, ALARM_INTERVAL, mAlarmInterval);
+        setSecondaryWakeAlarm();
+        return START_REDELIVER_INTENT;
+    }
+
+    private int alarm(int id) {
+        switch (id) {
+            case 1:
+                // This is the interval alarm, called only if the device is
+                // already awake for some reason. Might as well see if
+                // conditions match to check for updates, right ?
+                Logger.i("Interval alarm fired");
+                checkForUpdates(false);
+                break;
+            case 2:
+                // Fallback alarm. Our interval alarm has not been called for
+                // 12 hours. The device might have been woken up just
+                // for us. Let's see if conditions are good to check for
+                // updates.
+                Logger.i("Secondary alarm fired");
+                checkForUpdates(false);
+                break;
+            case 3:
+                // The screen has been off for 5:00 hours, with luck we've
+                // caught the user asleep and we'll have a fresh build waiting
+                // when (s)he wakes!
+                Logger.i("Sleep detection alarm fired");
+                checkForUpdates(true);
+                break;
+            case 4:
+                // fixed daily alarm triggers
+                Logger.i("Daily alarm fired");
+                checkForUpdates(true);
+                break;
+        }
+
+        if (mIsCustomAlarm) {
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+        // Reset fallback wakeup command, we don't need to be called for another
+        // few hours
+        cancelSecondaryWakeAlarm();
+        setSecondaryWakeAlarm();
+        return START_REDELIVER_INTENT;
+    }
+
+    @Override
+    public void onDestroy() {
+        Logger.i("Stopping scheduler");
+        cancelSecondaryWakeAlarm();
+        cancelDetectSleepAlarm();
+        if (!mIsCustomAlarm) {
+            mAlarmManager.cancel(mAlarmInterval);
+            mAlarmManager.cancel(mAlarmCustom);
+        }
+        mScreenState.stop();
+        mIsStopped = true;
+        super.onDestroy();
+    }
+
+    private static PendingIntent alarmPending(Context context, int id) {
+        Intent intent = new Intent(context, UpdateService.class);
+        intent.setAction(UpdateService.ACTION_ALARM);
+        intent.putExtra(UpdateService.EXTRA_ALARM_ID, id);
+        return PendingIntent.getService(context, id, intent, PendingIntent.FLAG_MUTABLE);
+    }
+
+    public static boolean isCustomAlarm(SharedPreferences prefs) {
+        final String alarmType = prefs.getString(SettingsActivity.PREF_SCHEDULER_MODE,
+                SettingsActivity.PREF_SCHEDULER_MODE_SMART);
+        final boolean isCustomAlarm = alarmType.equals(SettingsActivity.PREF_SCHEDULER_MODE_DAILY) ||
+                alarmType.equals(SettingsActivity.PREF_SCHEDULER_MODE_WEEKLY);
+        return isCustomAlarm;
+    }
+
+    /**
+     * @return true if we passed {@link #CHECK_THRESHOLD}
+     */
+    private boolean isTimePassed() {
+        return isTimePassed(mPrefs);
+    }
+
+    /**
+     * @param prefs SharedPreferences for static ref
+     * @return true if we passed {@link #CHECK_THRESHOLD}
+     */
+    public static boolean isTimePassed(SharedPreferences prefs) {
+        return getLastAttemptTimePassed(prefs) > CHECK_THRESHOLD;
+    }
+
+    /**
+     * @return the time passed since last check attempt
+     */
+    private long getLastAttemptTimePassed() {
+        return getLastAttemptTimePassed(mPrefs);
+    }
+
+    /**
+     * @param prefs SharedPreferences for static ref
+     * @return the time passed since last check attempt
+     */
+    private static long getLastAttemptTimePassed(SharedPreferences prefs) {
+        // Using abs here in case user changes date/time
+        final long lastAttempt = prefs.getLong(
+                PREF_LAST_CHECK_ATTEMPT_TIME_NAME, PREF_LAST_CHECK_ATTEMPT_TIME_DEFAULT);
+        return Math.abs(System.currentTimeMillis() - lastAttempt);
+    }
+
+    /**
+     * Get the later time
+     * @param time the time to compare in ms - non relative
+     * @return whichever is later, 10ms after {@link #CHECK_THRESHOLD} or given time
+     *         returned value is relative
+     */
+    private long getMaxTime(long time) {
+        final long timeRemaining = CHECK_THRESHOLD - getLastAttemptTimePassed();
+        return System.currentTimeMillis() + Math.max(timeRemaining + 10, time);
     }
 
     private void setSecondaryWakeAlarm() {
-        Logger.d(
-                "Setting secondary alarm (inexact) for %s",
-                sdfLog.format(new Date(System.currentTimeMillis()
-                        + ALARM_SECONDARY_WAKEUP_TIME)));
-        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + ALARM_SECONDARY_WAKEUP_TIME,
-                alarmSecondaryWake);
+        final long time = getMaxTime(ALARM_SECONDARY);
+        Logger.d("Setting secondary alarm for %s", mSdf.format(new Date(time)));
+        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, time, mAlarmSecondaryWake);
     }
 
     private void cancelSecondaryWakeAlarm() {
         Logger.d("Cancelling secondary alarm");
-        alarmManager.cancel(alarmSecondaryWake);
+        mAlarmManager.cancel(mAlarmSecondaryWake);
     }
 
     private void setDetectSleepAlarm() {
-        Logger.i(
-                "Setting sleep detection alarm (exact) for %s",
-                sdfLog.format(new Date(System.currentTimeMillis()
-                        + ALARM_DETECT_SLEEP_TIME)));
-        alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + ALARM_DETECT_SLEEP_TIME,
-                alarmDetectSleep);
+        final long time = System.currentTimeMillis() + ALARM_DETECT_SLEEP_TIME;
+        Logger.i("Setting sleep detection alarm (exact) for %s", mSdf.format(new Date(time)));
+        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, time, mAlarmDetectSleep);
     }
 
     private void cancelDetectSleepAlarm() {
         Logger.d("Cancelling sleep detection alarm");
-        alarmManager.cancel(alarmDetectSleep);
+        mAlarmManager.cancel(mAlarmDetectSleep);
     }
 
     @Override
     public void onScreenState(boolean state) {
-        if (!stopped && !customAlarm) {
-            Logger.d("isScreenStateEnabled = " + isScreenStateEnabled(state));
-            if (!state) {
-                setDetectSleepAlarm();
-            } else {
-                cancelDetectSleepAlarm();
-            }
+        if (mIsStopped || mIsCustomAlarm) return;
+        Logger.d("onScreenState = " + state);
+        if (!state) {
+            setDetectSleepAlarm();
+            return;
         }
-    }
-
-    private boolean isScreenStateEnabled(boolean screenStateValue) {
-        boolean prefValue = prefs.getBoolean(
-                SettingsActivity.PREF_SCREEN_STATE_OFF, true);
-        if (prefValue) {
-            // only when screen off
-            return !screenStateValue;
-        }
-        return true;
+        cancelDetectSleepAlarm();
+        // we received a screen on state, do a check if we passed the threshold
+        checkForUpdates(false);
     }
 
     private void checkForUpdates(boolean force) {
-        // Using abs here in case user changes date/time
-        if (force
-                || (Math.abs(System.currentTimeMillis()
-                        - prefs.getLong(PREF_LAST_CHECK_ATTEMPT_TIME_NAME,
-                                PREF_LAST_CHECK_ATTEMPT_TIME_DEFAULT)) > CHECK_THRESHOLD_MS)) {
-            if (onWantUpdateCheckListener != null) {
-                if (onWantUpdateCheckListener.onWantUpdateCheck()) {
-                    prefs.edit()
-                            .putLong(PREF_LAST_CHECK_ATTEMPT_TIME_NAME,
-                                    System.currentTimeMillis()).commit();
-                }
+        if (!force && !isTimePassed()) {
+            Logger.i("Skip scheduler checkForUpdates");
+            return;
+        }
+        UpdateService.start(this, UpdateService.ACTION_SCHEDULER);
+    }
+
+    private void setCustomAlarmFromPrefs(final String alarmType) {
+        final String dailyAlarmTime = mPrefs.getString(
+                SettingsActivity.PREF_SCHEDULER_DAILY_TIME, "00:00");
+        final String weeklyAlarmDay = mPrefs.getString(
+                SettingsActivity.PREF_SCHEDULER_WEEK_DAY, "1");
+        final boolean dailyAlarm = alarmType.equals(SettingsActivity.PREF_SCHEDULER_MODE_DAILY);
+        final boolean weeklyAlarm = alarmType.equals(SettingsActivity.PREF_SCHEDULER_MODE_WEEKLY);
+
+        if (dailyAlarm) {
+            String[] timeParts = dailyAlarmTime.split(":");
+            int hour = Integer.parseInt(timeParts[0]);
+            int minute = Integer.parseInt(timeParts[1]);
+            final Calendar c = Calendar.getInstance();
+            c.set(Calendar.HOUR_OF_DAY, hour);
+            c.set(Calendar.MINUTE, minute);
+
+            SimpleDateFormat format = new SimpleDateFormat("HH:mm");
+            Logger.i("Setting daily alarm to %s", format.format(c.getTime()));
+            mAlarmManager.cancel(mAlarmCustom);
+            mAlarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
+                    c.getTimeInMillis(), AlarmManager.INTERVAL_DAY, mAlarmCustom);
+        } else if (weeklyAlarm) {
+            String[] timeParts = dailyAlarmTime.split(":");
+            int hour = Integer.parseInt(timeParts[0]);
+            int minute = Integer.parseInt(timeParts[1]);
+            final Calendar c = Calendar.getInstance();
+            c.set(Calendar.DAY_OF_WEEK, Integer.parseInt(weeklyAlarmDay));
+            c.set(Calendar.HOUR_OF_DAY, hour);
+            c.set(Calendar.MINUTE, minute);
+            // next week
+            if (c.getTimeInMillis() < Calendar.getInstance().getTimeInMillis()) {
+                c.set(Calendar.WEEK_OF_YEAR, Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) + 1);
             }
-        } else {
-            Logger.i("Skip checkForUpdates");
-        }
-    }
 
-    public void alarm(int id) {
-        switch (id) {
-        case 1:
-            // This is the interval alarm, called only if the device is
-            // already awake for some reason. Might as well see if
-            // conditions match to check for updates, right ?
-            Logger.i("Interval alarm fired");
-            checkForUpdates(false);
-            break;
-
-        case 2:
-            // Fallback alarm. Our interval alarm has not been called for
-            // several hours. The device might have been woken up just
-            // for us. Let's see if conditions are good to check for
-            // updates.
-            Logger.i("Secondary alarm fired");
-            checkForUpdates(false);
-            break;
-
-        case 3:
-            // The screen has been off for 5:30 hours, with luck we've
-            // caught the user asleep and we'll have a fresh build waiting
-            // when (s)he wakes!
-            Logger.i("Sleep detection alarm fired");
-            checkForUpdates(true);
-            break;
-
-        case 4:
-            // fixed daily alarm triggers
-            Logger.i("Daily alarm fired");
-            checkForUpdates(true);
-            break;
-
-        }
-
-        // Reset fallback wakeup command, we don't need to be called for another
-        // few hours
-        if (!customAlarm) {
-            cancelSecondaryWakeAlarm();
-            setSecondaryWakeAlarm();
-        }
-    }
-
-    public void stop() {
-        Logger.i("Stopping scheduler");
-        cancelSecondaryWakeAlarm();
-        cancelDetectSleepAlarm();
-        alarmManager.cancel(alarmInterval);
-        alarmManager.cancel(alarmCustom);
-        stopped = true;
-    }
-
-    public void start() {
-        Logger.i("Starting scheduler");
-        String alarmType = prefs.getString(SettingsActivity.PREF_SCHEDULER_MODE, SettingsActivity.PREF_SCHEDULER_MODE_SMART);
-        customAlarm = alarmType.equals(SettingsActivity.PREF_SCHEDULER_MODE_DAILY) || alarmType.equals(SettingsActivity.PREF_SCHEDULER_MODE_WEEKLY);
-
-        if (customAlarm) {
-            setCustomAlarmFromPrefs();
-        } else {
-            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,
-                    SystemClock.elapsedRealtime() + ALARM_INTERVAL_START,
-                    ALARM_INTERVAL_INTERVAL, alarmInterval);
-
-            setSecondaryWakeAlarm();
-        }
-        stopped = false;
-    }
-
-    private void setCustomAlarmFromPrefs() {
-        if (customAlarm) {
-            final String dailyAlarmTime = prefs.getString(
-                    SettingsActivity.PREF_SCHEDULER_DAILY_TIME, "00:00");
-            final String weeklyAlarmDay = prefs.getString(
-                    SettingsActivity.PREF_SCHEDULER_WEEK_DAY, "1");
-            final String alarmType = prefs.getString(SettingsActivity.PREF_SCHEDULER_MODE, SettingsActivity.PREF_SCHEDULER_MODE_SMART);
-            final boolean dailyAlarm = alarmType.equals(SettingsActivity.PREF_SCHEDULER_MODE_DAILY);
-            final boolean weeklyAlarm = alarmType.equals(SettingsActivity.PREF_SCHEDULER_MODE_WEEKLY);
-
-            if (dailyAlarm && dailyAlarmTime != null) {
-                try {
-                    String[] timeParts = dailyAlarmTime.split(":");
-                    int hour = Integer.parseInt(timeParts[0]);
-                    int minute = Integer.parseInt(timeParts[1]);
-                    final Calendar c = Calendar.getInstance();
-                    c.set(Calendar.HOUR_OF_DAY, hour);
-                    c.set(Calendar.MINUTE, minute);
-
-                    SimpleDateFormat format = new SimpleDateFormat("HH:mm");
-                    Logger.i("Setting daily alarm to %s", format.format(c.getTime()));
-
-                    alarmManager.cancel(alarmCustom);
-                    alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
-                            c.getTimeInMillis(), AlarmManager.INTERVAL_DAY,
-                            alarmCustom);
-                } catch (Exception ignored) {
-                }
-            }
-            if (weeklyAlarm && dailyAlarmTime != null && weeklyAlarmDay != null) {
-                try {
-                    String[] timeParts = dailyAlarmTime.split(":");
-                    int hour = Integer.parseInt(timeParts[0]);
-                    int minute = Integer.parseInt(timeParts[1]);
-                    final Calendar c = Calendar.getInstance();
-                    c.set(Calendar.DAY_OF_WEEK, Integer.parseInt(weeklyAlarmDay));
-                    c.set(Calendar.HOUR_OF_DAY, hour);
-                    c.set(Calendar.MINUTE, minute);
-                    // next week
-                    if (c.getTimeInMillis() < Calendar.getInstance().getTimeInMillis()) {
-                        c.set(Calendar.WEEK_OF_YEAR, Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) + 1);
-                    }
-
-                    SimpleDateFormat format = new SimpleDateFormat("EEEE, MMMM d, yyyy - HH:mm");
-                    Logger.i("Setting weekly alarm to %s", format.format(c.getTime()));
-
-                    alarmManager.cancel(alarmCustom);
-                    alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
-                            c.getTimeInMillis(), AlarmManager.INTERVAL_DAY * 7,
-                            alarmCustom);
-                } catch (Exception ignored) {
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
-            String key) {
-        if (key.equals(SettingsActivity.PREF_SCHEDULER_MODE)) {
-            if (!stopped) {
-                stop();
-                start();
-            }
-        }
-        if (key.equals(SettingsActivity.PREF_SCHEDULER_DAILY_TIME) || key.equals(SettingsActivity.PREF_SCHEDULER_WEEK_DAY)) {
-            setCustomAlarmFromPrefs();
+            SimpleDateFormat format = new SimpleDateFormat("EEEE, MMMM d, yyyy - HH:mm");
+            Logger.i("Setting weekly alarm to %s", format.format(c.getTime()));
+            mAlarmManager.cancel(mAlarmCustom);
+            mAlarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
+                    c.getTimeInMillis(), AlarmManager.INTERVAL_DAY * 7, mAlarmCustom);
         }
     }
 }

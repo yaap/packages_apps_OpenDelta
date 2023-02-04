@@ -589,6 +589,8 @@ public class MainActivity extends Activity {
 
     public void onButtonCheckNowClick(View v) {
         mPrefs.edit().putBoolean(SettingsActivity.PREF_START_HINT_SHOWN, true).commit();
+        mPrefs.edit().putLong(Scheduler.PREF_LAST_CHECK_ATTEMPT_TIME_NAME,
+                System.currentTimeMillis()).commit();
         startUpdateService(UpdateService.ACTION_CHECK);
     }
 

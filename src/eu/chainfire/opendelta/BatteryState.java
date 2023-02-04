@@ -36,7 +36,7 @@ public class BatteryState implements OnSharedPreferenceChangeListener {
 
     private Context context = null;
     private OnBatteryStateListener onBatteryStateListener = null;
-    private volatile Boolean stateLast = null;
+    private Boolean stateLast = null;
 
     private int minLevel = 50;
     private boolean chargeOnly = true;
@@ -45,41 +45,34 @@ public class BatteryState implements OnSharedPreferenceChangeListener {
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-            updateState(
-                    level,
-                    (status == BatteryManager.BATTERY_STATUS_CHARGING) ||
-                            (status == BatteryManager.BATTERY_STATUS_FULL)
-            );
+            final int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+            final int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+            final boolean charging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                    status == BatteryManager.BATTERY_STATUS_FULL;
+            updateState(level, charging);
         }
     };
 
     private void updateState(int level, boolean charging) {
-        if (onBatteryStateListener != null) {
-            boolean state = (
-                    (charging && chargeOnly) ||
-                    ((level >= minLevel) && (!chargeOnly))
-            );
+        final boolean state = charging && chargeOnly ||
+                level >= minLevel && !chargeOnly;
 
-            if ((stateLast == null) || (stateLast != state)) {
-                stateLast = state;
-                onBatteryStateListener.onBatteryState(state);
-            }
-        }
+        if (stateLast != null && stateLast == state) return;
+        stateLast = state;
+
+        if (onBatteryStateListener == null) return;
+        onBatteryStateListener.onBatteryState(state);
     }
 
     public boolean start(Context context, OnBatteryStateListener onBatteryStateListener,
             int minLevel, boolean chargeOnly) {
-        if (this.context == null) {
-            this.context = context;
-            this.onBatteryStateListener = onBatteryStateListener;
-            this.minLevel = minLevel;
-            this.chargeOnly = chargeOnly;
-            context.registerReceiver(receiver, filter);
-            return true;
-        }
-        return false;
+        if (this.context != null) return false;
+        this.context = context;
+        this.onBatteryStateListener = onBatteryStateListener;
+        this.minLevel = minLevel;
+        this.chargeOnly = chargeOnly;
+        context.registerReceiver(receiver, filter);
+        return true;
     }
 
     public boolean stop() {
@@ -99,8 +92,7 @@ public class BatteryState implements OnSharedPreferenceChangeListener {
     }
 
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
-            String key) {
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         chargeOnly = sharedPreferences.getBoolean(SettingsActivity.PREF_CHARGE_ONLY, true);
         minLevel = Integer.parseInt(sharedPreferences.getString(SettingsActivity.PREF_BATTERY_LEVEL, "50"));
     }

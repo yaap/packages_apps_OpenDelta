@@ -51,24 +51,19 @@ public class ScreenState {
     }
 
     private void updateState(Intent intent) {
-        if (onScreenStateListener != null) {
-            Boolean state = null;
-            if (intent != null) {
-                if (Intent.ACTION_SCREEN_ON.equals(intent.getAction()))
-                    state = true;
-                if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction()))
-                    state = false;
-            }
-            if (state == null) {
-                state = ((PowerManager) context.getSystemService(Context.POWER_SERVICE))
-                        .isInteractive();
-            }
-
-            if ((stateLast == null) || (stateLast != state)) {
-                stateLast = state;
-                onScreenStateListener.onScreenState(state);
-            }
+        boolean state;
+        if (intent != null) {
+            state = Intent.ACTION_SCREEN_ON.equals(intent.getAction());
+        } else {
+            state = ((PowerManager) context.getSystemService(
+                    Context.POWER_SERVICE)).isInteractive();
         }
+
+        if (stateLast != null && (stateLast == state)) return;
+        stateLast = state;
+
+        if (onScreenStateListener == null) return;
+        onScreenStateListener.onScreenState(state);
     }
 
     public boolean start(Context context, OnScreenStateListener onScreenStateListener) {

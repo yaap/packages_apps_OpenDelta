@@ -98,8 +98,7 @@
     <string name="select_file_activity_title">Επιλογή αρχείου ZIP</string>
     <string name="state_error_ab_flash">Δεν μπορεί να γίνει εγκατάσταση AB ενημέρωσης</string>
     <string name="state_error_flash_file">Δεν μπορεί να γίνει εγκατάσταση της ενημέρωσης</string>
-    <string name="channel_name">Διαδικασία ενημέρωσης</string>
-    <string name="channel_description"></string>
+    <string name="install_channel_name">Διαδικασία ενημέρωσης</string>
     <string name="text_update_file_flash_title">Αρχείο ενημέρωσης</string>
     <string name="state_action_flash_file_ready">Ενημέρωση έτοιμη για εγκατάσταση</string>
     <string name="button_select_file">Αρχείο</string>

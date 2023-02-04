@@ -79,7 +79,7 @@ public class SettingsFragment extends PreferenceFragment implements
         mNetworksConfig.setChecked(prefs.getBoolean(UpdateService.PREF_AUTO_UPDATE_METERED_NETWORKS, false));
 
         String autoDownload = prefs.getString(SettingsActivity.PREF_AUTO_DOWNLOAD,
-                UpdateService.PREF_AUTO_DOWNLOAD_DISABLED_STRING);
+                Integer.toString(UpdateService.PREF_AUTO_DOWNLOAD_CHECK));
         int autoDownloadValue = Integer.parseInt(autoDownload);
         mAutoDownload = findPreference(SettingsActivity.PREF_AUTO_DOWNLOAD);
         mAutoDownload.setOnPreferenceChangeListener(this);

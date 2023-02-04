@@ -3,6 +3,7 @@ android_app {
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
     defaults: [
+        "platform_app_defaults",
         "SettingsLibDefaults",
     ],
     static_libs: [
@@ -10,6 +11,7 @@ android_app {
         "androidx.cardview_cardview",
         "androidx.preference_preference",
     ],
+    certificate: "platform",
     privileged: true,
     optimize: {
         enabled: false,
