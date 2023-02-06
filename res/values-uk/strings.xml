@@ -34,8 +34,7 @@
     <string name="flash_after_update_notice_title">Зверніть увагу</string>
     <string name="button_build_delta">Завантажити</string>
     <string name="button_stop">Стоп</string>
-    <string name="state_action_build">Оновлення доступні.</string>
-    <string name="state_action_build_delta">Можливо оновлення дельта-файлом.</string>
+    <string name="state_action_available">Оновлення доступні.</string>
     <string name="state_action_build_full">Можливе оновлення повним файлом ПЗ.</string>
     <string name="state_error_download">Проблема при завантаженні.</string>
     <string name="text_current_version_header_title">Поточна версія</string>

@@ -37,8 +37,7 @@
     <string name="flash_after_update_notice_title">Avertissement</string>
     <string name="button_build_delta">Télécharger</string>
     <string name="button_stop">Arrêter</string>
-    <string name="state_action_build">Mise à jour disponible.</string>
-    <string name="state_action_build_delta">Mise à jour Delta possible.</string>
+    <string name="state_action_available">Mise à jour disponible.</string>
     <string name="state_action_build_full">Mise à jour complète possible.</string>
     <string name="state_error_download">Problème de téléchargement.</string>
     <string name="text_current_version_header_title">Version actuelle</string>

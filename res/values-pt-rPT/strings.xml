@@ -34,8 +34,7 @@
     <string name="flash_after_update_notice_title">Aviso</string>
     <string name="button_build_delta">Download</string>
     <string name="button_stop">Parar</string>
-    <string name="state_action_build">Actualização disponível.</string>
-    <string name="state_action_build_delta">Atualização Delta possível</string>
+    <string name="state_action_available">Actualização disponível.</string>
     <string name="state_action_build_full">É possível fazer uma atualização completa</string>
     <string name="state_error_download">Problema com a transferência</string>
     <string name="text_current_version_header_title">Versão atual</string>

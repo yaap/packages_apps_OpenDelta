@@ -40,8 +40,7 @@
     <string name="state_error_not_official_extra" formatted="false">Atualização do tipo %s não é possível</string>
     <string name="button_build_delta">Baixar</string>
     <string name="button_stop">Pare</string>
-    <string name="state_action_build">Atualização disponível.</string>
-    <string name="state_action_build_delta">Atualização Delta possível.</string>
+    <string name="state_action_available">Atualização disponível.</string>
     <string name="state_action_build_full">Atualização completa possível.</string>
     <string name="state_error_download">Baixe o problema.</string>
     <string name="text_current_version_header_title">Versão atual</string>

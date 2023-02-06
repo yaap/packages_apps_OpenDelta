@@ -40,8 +40,7 @@
     <string name="state_error_not_official_extra" formatted="false">Aktualizace typu %s není možná</string>
     <string name="button_build_delta">Stáhnout</string>
     <string name="button_stop">Stop</string>
-    <string name="state_action_build">Aktualizace je k dispozici.</string>
-    <string name="state_action_build_delta">Je možná rozdílová aktualizace.</string>
+    <string name="state_action_available">Aktualizace je k dispozici.</string>
     <string name="state_action_build_full">Je možná úplná aktualizace.</string>
     <string name="state_error_download">Problém při stahování.</string>
     <string name="text_current_version_header_title">Aktuální verze</string>

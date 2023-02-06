@@ -37,8 +37,7 @@
     <string name="flash_after_update_notice_title">Teade</string>
     <string name="button_build_delta">Laadi alla</string>
     <string name="button_stop">Peata</string>
-    <string name="state_action_build">Uuendus saadaval</string>
-    <string name="state_action_build_delta">Deltauuendus võimalik</string>
+    <string name="state_action_available">Uuendus saadaval</string>
     <string name="state_action_build_full">Täisuuendus võimalik</string>
     <string name="state_error_download">Allalaadimise probleem</string>
     <string name="text_current_version_header_title">Praegune versioon</string>

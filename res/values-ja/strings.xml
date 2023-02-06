@@ -38,8 +38,7 @@
     <string name="flash_after_update_notice_title">注意</string>
     <string name="button_build_delta">ダウンロード</string>
     <string name="button_stop">停止</string>
-    <string name="state_action_build">利用可能な更新があります</string>
-    <string name="state_action_build_delta">Delta の更新ができます</string>
+    <string name="state_action_available">利用可能な更新があります</string>
     <string name="state_action_build_full">全ての更新ができます</string>
     <string name="state_error_download">ダウンロードに問題</string>
     <string name="text_current_version_header_title">現行バージョン</string>

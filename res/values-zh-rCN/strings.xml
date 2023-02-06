@@ -48,8 +48,7 @@
     <string name="state_error_not_official_extra" formatted="false">更新类型 %s 不被兼容</string>
     <string name="button_build_delta">下载</string>
     <string name="button_stop">停止</string>
-    <string name="state_action_build">更新可用</string>
-    <string name="state_action_build_delta">可以进行增量更新</string>
+    <string name="state_action_available">更新可用</string>
     <string name="state_action_build_full">可以进行完整更新</string>
     <string name="state_error_download">下载错误</string>
     <string name="state_error_download_extra_sha">文件损坏</string>

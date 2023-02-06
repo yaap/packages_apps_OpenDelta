@@ -35,8 +35,7 @@
     <string name="flash_after_update_notice_title">通知</string>
     <string name="button_build_delta">下載</string>
     <string name="button_stop">停止</string>
-    <string name="state_action_build">有可用更新</string>
-    <string name="state_action_build_delta">可以進行節省流量更新</string>
+    <string name="state_action_available">有可用更新</string>
     <string name="state_action_build_full">可以進行完整更新</string>
     <string name="state_error_download">下載問題。</string>
     <string name="text_current_version_header_title">目前版本</string>

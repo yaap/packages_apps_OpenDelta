@@ -64,8 +64,7 @@
     <string name="state_error_not_official_extra" formatted="false">Update of type %s is not possible</string>
     <string name="button_build_delta">Download</string>
     <string name="button_stop">Stop</string>
-    <string name="state_action_build">Update available</string>
-    <string name="state_action_build_delta">Delta update is possible</string>
+    <string name="state_action_available">Update available</string>
     <string name="state_action_build_full">Full update is possible</string>
     <string name="state_error_download">Download problem</string>
     <string name="state_error_download_extra_1">Can\'t fetch the newest build\nCheck your network connection and DNS settings</string>

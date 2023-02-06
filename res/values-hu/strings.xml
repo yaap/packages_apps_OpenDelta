@@ -34,8 +34,7 @@
     <string name="flash_after_update_notice_title">Figyelmeztetés</string>
     <string name="button_build_delta">Letöltés</string>
     <string name="button_stop">Leállítás</string>
-    <string name="state_action_build">Frissítés érhető el.</string>
-    <string name="state_action_build_delta">Delta-frissítés lehetséges.</string>
+    <string name="state_action_available">Frissítés érhető el.</string>
     <string name="state_action_build_full">Teljes frissítés lehetséges.</string>
     <string name="state_error_download">Letöltési probléma.</string>
     <string name="text_current_version_header_title">Jelenlegi verzió</string>

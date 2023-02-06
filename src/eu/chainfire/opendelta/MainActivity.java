@@ -377,7 +377,6 @@ public class MainActivity extends Activity {
                     case State.ERROR_DISK_SPACE:
                         localCurrent /= 1024L * 1024L;
                         localTotal /= 1024L * 1024L;
-
                         extraText = getString(R.string.error_disk_space_sub,
                                 localCurrent, localTotal);
                         break;
@@ -397,7 +396,6 @@ public class MainActivity extends Activity {
                     case State.ACTION_READY:
                         enableFlash = true;
                         enableChangelog = true;
-
                         flashImage = mPrefs.getString(UpdateService.PREF_READY_FILENAME_NAME, null);
                         flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
                         if (flashImageBase != null) {
@@ -441,8 +439,7 @@ public class MainActivity extends Activity {
                         mPrefs.edit().putString(UpdateService.PREF_READY_FILENAME_NAME, null).commit();
                         mPrefs.edit().putString(UpdateService.PREF_LATEST_FULL_NAME, null).commit();
                         break;
-                    case State.ACTION_BUILD:
-
+                    case State.ACTION_AVAILABLE:
                         final String latest = mPrefs.getString(
                                 UpdateService.PREF_LATEST_FULL_NAME, null);
                         if (latest != null) {
@@ -604,7 +601,7 @@ public class MainActivity extends Activity {
     }
 
     public void onButtonBuildNowClick(View v) {
-        startUpdateService(UpdateService.ACTION_BUILD);
+        startUpdateService(UpdateService.ACTION_DOWNLOAD);
     }
 
     public void onButtonFlashNowClick(View v) {

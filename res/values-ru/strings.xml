@@ -51,8 +51,7 @@
 
     <string name="button_build_delta">Загрузить</string>
     <string name="button_stop">Остановить</string>
-    <string name="state_action_build">Доступно обновление.</string>
-    <string name="state_action_build_delta">Возможно обновление дельта-файлом.</string>
+    <string name="state_action_available">Доступно обновление.</string>
     <string name="state_action_build_full">Возможно обновление полным файлом ПО.</string>
     <string name="state_error_download">Проблема при загрузке.</string>
     <string name="state_error_download_extra_sha">файл повреждён</string>

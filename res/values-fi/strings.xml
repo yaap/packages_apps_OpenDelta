@@ -28,8 +28,7 @@
     <string name="flash_after_update_notice_title">Huomautus</string>
     <string name="button_build_delta">Lataa</string>
     <string name="button_stop">Pysäytä</string>
-    <string name="state_action_build">Päivitys saatavilla</string>
-    <string name="state_action_build_delta">Delta-päivitys mahdollista</string>
+    <string name="state_action_available">Päivitys saatavilla</string>
     <string name="state_action_build_full">Täysi päivitys mahdollista</string>
     <string name="state_error_download">Lataus ongelma</string>
     <string name="text_current_version_header_title">Nykyinen versio</string>

@@ -30,8 +30,7 @@
     <string name="flash_after_update_notice_title">Notis</string>
     <string name="button_build_delta">Muat turun</string>
     <string name="button_stop">Berhenti</string>
-    <string name="state_action_build">Kemas kini tersedia.</string>
-    <string name="state_action_build_delta">Kemas kini delta boleh dilakukan.</string>
+    <string name="state_action_available">Kemas kini tersedia.</string>
     <string name="state_action_build_full">Kemas kini penuh boleh dilakukan.</string>
     <string name="state_error_download">Masalah muat turun.</string>
     <string name="text_current_version_header_title">Versi semasa</string>

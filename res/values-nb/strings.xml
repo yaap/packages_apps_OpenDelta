@@ -34,8 +34,7 @@
     <string name="flash_after_update_notice_title">Merknad</string>
     <string name="button_build_delta">Last ned</string>
     <string name="button_stop">Stopp</string>
-    <string name="state_action_build">Oppdatering er tilgjengelig.</string>
-    <string name="state_action_build_delta">Delta oppdatering er mulig.</string>
+    <string name="state_action_available">Oppdatering er tilgjengelig.</string>
     <string name="state_action_build_full">Full oppdatering mulig.</string>
     <string name="state_error_download">Nedlastningsproblem.</string>
     <string name="text_current_version_header_title">Gjeldende versjon</string>

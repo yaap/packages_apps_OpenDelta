@@ -103,18 +103,17 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     public static final String EXTRA_FILENAME = "eu.chainfire.opendelta.extra.FILENAME";
 
     public static final String ACTION_CHECK = "eu.chainfire.opendelta.action.CHECK";
+    public static final String ACTION_DOWNLOAD = "eu.chainfire.opendelta.action.DOWNLOAD";
+    public static final String ACTION_DOWNLOAD_STOP = "eu.chainfire.opendelta.action.DOWNLOAD_STOP";
+    public static final String ACTION_DOWNLOAD_PAUSE = "eu.chainfire.opendelta.action.DOWNLOAD_PAUSE";
     public static final String ACTION_FLASH = "eu.chainfire.opendelta.action.FLASH";
     public static final String ACTION_ALARM = "eu.chainfire.opendelta.action.ALARM";
     public static final String ACTION_SCHEDULER = "eu.chainfire.opendelta.action.SCHEDULER";
     public static final String EXTRA_ALARM_ID = "eu.chainfire.opendelta.extra.ALARM_ID";
     private static final String ACTION_NOTIFICATION_DELETED = "eu.chainfire.opendelta.action.NOTIFICATION_DELETED";
-    public static final String ACTION_BUILD = "eu.chainfire.opendelta.action.BUILD";
-    private static final String ACTION_UPDATE = "eu.chainfire.opendelta.action.UPDATE";
     static final String ACTION_CLEAR_INSTALL_RUNNING =
             "eu.chainfire.opendelta.action.ACTION_CLEAR_INSTALL_RUNNING";
     public static final String ACTION_FLASH_FILE = "eu.chainfire.opendelta.action.FLASH_FILE";
-    public static final String ACTION_DOWNLOAD_STOP = "eu.chainfire.opendelta.action.DOWNLOAD_STOP";
-    public static final String ACTION_DOWNLOAD_PAUSE = "eu.chainfire.opendelta.action.DOWNLOAD_PAUSE";
 
     private static final String INSTALL_NOTIFICATION_CHANNEL_ID = "eu.chainfire.opendelta.notification.install";
     private static final String UPDATE_NOTIFICATION_CHANNEL_ID = "eu.chainfire.opendelta.notification.update";
@@ -297,42 +296,8 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         String action = intent.getAction();
         if (action == null) action = "";
         switch (action) {
-            case ACTION_CHECK:
-                if (checkPermissions())
-                    checkForUpdates(true, PREF_AUTO_DOWNLOAD_CHECK);
-                break;
-            case ACTION_FLASH:
-                if (checkPermissions()) {
-                    if (Config.isABDevice()) flashABUpdate();
-                    else flashUpdate();
-                }
-                break;
-            case ACTION_ALARM:
-                Scheduler.start(this, Scheduler.ACTION_SCHEDULER_ALARM,
-                        intent.getIntExtra(EXTRA_ALARM_ID, -1));
-                break;
-            case ACTION_SCHEDULER:
-                // see comment in ACTION_CLEAR_INSTALL_RUNNING
-                if (!onWantUpdateCheck()) stopSelf();
-                break;
-            case ACTION_NOTIFICATION_DELETED:
-                mPrefs.edit().putLong(PREF_LAST_SNOOZE_TIME_NAME,
-                        System.currentTimeMillis()).apply();
-                String lastBuild = mPrefs.getString(PREF_LATEST_FULL_NAME, null);
-                if (lastBuild != null) {
-                    // only snooze until no newer build is available
-                    Logger.i("Snoozing notification for " + lastBuild);
-                    mPrefs.edit().putString(PREF_SNOOZE_UPDATE_NAME, lastBuild).apply();
-                }
-                break;
-            case ACTION_BUILD:
-                if (checkPermissions())
-                    checkForUpdates(true, PREF_AUTO_DOWNLOAD_FULL);
-                break;
-            case ACTION_UPDATE:
-                autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
-                break;
             case ACTION_CLEAR_INSTALL_RUNNING:
+                // at boot
                 mIsUpdateRunning = false;
                 ABUpdate.setInstallingUpdate(false, this);
                 if (getAutoDownloadValue() != PREF_AUTO_DOWNLOAD_DISABLED &&
@@ -345,11 +310,13 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 // always stop after boot receiver has done its thing
                 stopSelf();
                 break;
-            case ACTION_FLASH_FILE:
-                if (intent.hasExtra(EXTRA_FILENAME)) {
-                    String flashFilename = intent.getStringExtra(EXTRA_FILENAME);
-                    setFlashFilename(flashFilename);
-                }
+            case ACTION_CHECK:
+                if (checkPermissions())
+                    checkForUpdates(true, PREF_AUTO_DOWNLOAD_CHECK);
+                break;
+            case ACTION_DOWNLOAD:
+                if (checkPermissions())
+                    checkForUpdates(true, PREF_AUTO_DOWNLOAD_FULL);
                 break;
             case ACTION_DOWNLOAD_STOP:
                 if (mDownload != null) mDownload.stop();
@@ -364,7 +331,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                         for (File file : files)
                             if (file.isFile() && file.getName().endsWith(".part"))
                                 file.delete();
-                    autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
+                    autoState(false);
                 }
                 break;
             case ACTION_DOWNLOAD_PAUSE:
@@ -377,11 +344,41 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 } else {
                     // pause
                     if (mDownload != null) mDownload.pause();
-                    autoState(true, PREF_AUTO_DOWNLOAD_CHECK, false);
+                    autoState(false);
+                }
+                break;
+            case ACTION_FLASH:
+                if (checkPermissions()) {
+                    if (Config.isABDevice()) flashABUpdate();
+                    else flashUpdate();
+                }
+                break;
+            case ACTION_FLASH_FILE:
+                if (intent.hasExtra(EXTRA_FILENAME)) {
+                    String flashFilename = intent.getStringExtra(EXTRA_FILENAME);
+                    setFlashFilename(flashFilename);
+                }
+                break;
+            case ACTION_SCHEDULER:
+                // see comment in ACTION_CLEAR_INSTALL_RUNNING
+                if (!onWantUpdateCheck()) stopSelf();
+                break;
+            case ACTION_ALARM:
+                Scheduler.start(this, Scheduler.ACTION_SCHEDULER_ALARM,
+                        intent.getIntExtra(EXTRA_ALARM_ID, -1));
+                break;
+            case ACTION_NOTIFICATION_DELETED:
+                mPrefs.edit().putLong(PREF_LAST_SNOOZE_TIME_NAME,
+                        System.currentTimeMillis()).apply();
+                String lastBuild = mPrefs.getString(PREF_LATEST_FULL_NAME, null);
+                if (lastBuild != null) {
+                    // only snooze until no newer build is available
+                    Logger.i("Snoozing notification for " + lastBuild);
+                    mPrefs.edit().putString(PREF_SNOOZE_UPDATE_NAME, lastBuild).apply();
                 }
                 break;
             default:
-                autoState(false, PREF_AUTO_DOWNLOAD_CHECK, false);
+                autoState(false);
                 break;
         }
     }
@@ -396,7 +393,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             return false;
         }
         Logger.i("Scheduler requests check for updates");
-        int autoDownload = getAutoDownloadValue();
+        final int autoDownload = getAutoDownloadValue();
         if (autoDownload != PREF_AUTO_DOWNLOAD_DISABLED) {
             return checkForUpdates(false, autoDownload);
         }
@@ -430,19 +427,21 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             mBatteryState.onSharedPreferenceChanged(sharedPreferences, key);
     }
 
-    private void autoState(boolean userInitiated, int checkOnly, boolean notify) {
-        Logger.d("autoState state = " + mState + " userInitiated = " + userInitiated + " checkOnly = " + checkOnly);
-
-        if (mState.isErrorState()) {
-            return;
-        }
+    /**
+     * Updates the current state by checking everything in shared prefs and helper classes
+     * @param notify whether to notify the user.
+     *               specific for {@link #UPDATE_NOTIFICATION_CHANNEL_ID} notifications
+     */
+    private void autoState(boolean notify) {
+        Logger.d("autoState: old state = " + mState + " notify = " + notify);
+        // approach here is to check by the reverse order of update procedure
 
         // Check if a previous update was done already
         if (checkForFinishedUpdate()) return;
 
         // Check if we're currently installing an A/B update
         if (Config.isABDevice() && ABUpdate.isInstallingUpdate(this)) {
-            // resume listening to progress
+            // resume listening to progress, will notify
             final String flashFilename = mPrefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
             if (flashFilename != null && !flashFilename.isEmpty()) {
                 final String _filename = new File(flashFilename).getName();
@@ -461,17 +460,24 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             }
         }
 
-        String filename = mPrefs.getString(PREF_READY_FILENAME_NAME, null);
-
-        if (filename != null) {
-            if (!(new File(filename)).exists()) {
-                filename = null;
-            }
+        // check if a file was already downloaded
+        String readyFilename = mPrefs.getString(PREF_READY_FILENAME_NAME, null);
+        if (readyFilename != null && (new File(readyFilename)).exists()) {
+            // file was downloaded and is still there
+            Logger.d("Update file found: %s", readyFilename);
+            readyFilename = (new File(readyFilename)).getName();
+            mState.update(State.ACTION_READY, readyFilename,
+                    mPrefs.getLong(PREF_LAST_CHECK_TIME_NAME, PREF_LAST_CHECK_TIME_DEFAULT));
+            maybeNotify(notify, null, readyFilename);
+            return;
         }
 
-        // check if we have a .part file that was saved as latest
-        String latestBuild = mPrefs.getString(PREF_LATEST_FULL_NAME, null);
-        if (latestBuild != null) {
+        // check if there was an available download
+        final String latestBuild = mPrefs.getString(PREF_LATEST_FULL_NAME, null);
+        boolean readyToDownload = latestBuild != null;
+        if (readyToDownload) {
+            // first check if we have a download that was in progress
+            // check if we have a .part file that was saved as latest
             File found = null;
             File[] files = new File(mConfig.getPathBase()).listFiles();
             if (files != null && files.length > 0) {
@@ -486,6 +492,8 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 }
             }
             if (found != null) {
+                // confirm we're not already downloading
+                if (mState.getState().equals(State.ACTION_DOWNLOADING)) return;
                 long total = mPrefs.getLong(PREF_DOWNLOAD_SIZE, 1500000000L /* 1.5 GB */);
                 final long current = found.length();
                 final long lastTime = mPrefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
@@ -497,48 +505,27 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 mNotificationManager.notify(NOTIFICATION_BUSY, mDownloadNotificationBuilder.build());
                 return;
             }
-        }
 
-        // if the file has been downloaded or creates anytime before
-        // this will always be more important
-        if (checkOnly == PREF_AUTO_DOWNLOAD_CHECK && filename == null) {
-            Logger.d("Checking step done");
-            if (!updateAvailable()) {
-                Logger.d("System up to date");
-                mState.update(State.ACTION_NONE, mPrefs.getLong(PREF_LAST_CHECK_TIME_NAME,
-                        PREF_LAST_CHECK_TIME_DEFAULT));
-            } else {
-                Logger.d("Update available");
-                mState.update(State.ACTION_BUILD, mPrefs.getLong(PREF_LAST_CHECK_TIME_NAME,
-                        PREF_LAST_CHECK_TIME_DEFAULT));
-                if (!userInitiated && notify) {
-                    if (!isSnoozeNotification()) {
-                        startNotification();
-                    } else {
-                        Logger.d("notification snoozed");
-                    }
-                }
-            }
+            Logger.d("Assuming update available");
+            mState.update(State.ACTION_AVAILABLE, mPrefs.getLong(PREF_LAST_CHECK_TIME_NAME,
+                    PREF_LAST_CHECK_TIME_DEFAULT));
+            maybeNotify(notify, latestBuild, null);
             return;
         }
 
-        if (filename == null) {
-            Logger.d("System up to date");
-            mState.update(State.ACTION_NONE, mPrefs.getLong(PREF_LAST_CHECK_TIME_NAME,
-                    PREF_LAST_CHECK_TIME_DEFAULT));
-        } else {
-            Logger.d("Update found: %s", filename);
-            mState.update(State.ACTION_READY, (new File(filename)).getName(),
-                    mPrefs.getLong(PREF_LAST_CHECK_TIME_NAME, PREF_LAST_CHECK_TIME_DEFAULT));
+        Logger.d("Assuming system up to date");
+        mState.update(State.ACTION_NONE, mPrefs.getLong(PREF_LAST_CHECK_TIME_NAME,
+                PREF_LAST_CHECK_TIME_DEFAULT));
+    }
 
-            if (!userInitiated && notify) {
-                if (!isSnoozeNotification()) {
-                    startNotification();
-                } else {
-                    Logger.d("notification snoozed");
-                }
-            }
+    // helper for autoState
+    private void maybeNotify(boolean notify, String latest, String flashFilename) {
+        if (!notify) return;
+        if (isSnoozeNotification()) {
+            Logger.d("notification snoozed");
+            return;
         }
+        startNotification(latest, flashFilename);
     }
 
     private PendingIntent getNotificationIntent(boolean delete) {
@@ -553,17 +540,15 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         }
     }
 
-    private void startNotification() {
-        final String latest = mPrefs.getString(PREF_LATEST_FULL_NAME, null);
-        if (latest == null) {
-            return;
-        }
-        String flashFilename = mPrefs.getString(PREF_READY_FILENAME_NAME, null);
+    private void startNotification(String latest, String flashFilename) {
+        final boolean available = latest != null;
         final boolean readyToFlash = flashFilename != null;
         if (readyToFlash) {
             flashFilename = new File(flashFilename).getName();
             flashFilename.substring(0, flashFilename.lastIndexOf('.'));
         }
+
+        if (!readyToFlash && !available) return;
 
         String notifyFileName = readyToFlash
                 ? flashFilename
@@ -658,7 +643,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         if (errorStateString != null) {
             mNotificationManager.notify(
                     NOTIFICATION_ERROR,
-                    (new Notification.Builder(this, INSTALL_NOTIFICATION_CHANNEL_ID))
+                    (new Notification.Builder(this, UPDATE_NOTIFICATION_CHANNEL_ID))
                     .setSmallIcon(R.drawable.stat_notify_error)
                     .setContentTitle(getString(R.string.notify_title_error))
                     .setContentText(errorStateString)
@@ -811,12 +796,8 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             return false;
         }
 
-        clearState();
         mNotificationManager.cancel(NOTIFICATION_UPDATE);
         mNotificationManager.cancel(NOTIFICATION_ERROR);
-
-        // so we have a time even in the error case
-        mPrefs.edit().putLong(PREF_LAST_CHECK_TIME_NAME, System.currentTimeMillis()).apply();
 
         if (!mNetworkState.isConnected()) {
             mState.update(State.ERROR_CONNECTION);
@@ -873,12 +854,12 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             Logger.d("success");
             mPrefs.edit().putString(PREF_READY_FILENAME_NAME, fn).commit();
             mNotificationManager.cancel(NOTIFICATION_BUSY);
-            startNotification();
+            startNotification(null, fn);
         } else {
             if (mDownload.getStatus() == Download.STATUS_DOWNLOAD_STOP) {
                 f.delete();
                 Logger.d("download stopped");
-                autoState(false, PREF_AUTO_DOWNLOAD_DISABLED, false);
+                autoState(false);
                 mNotificationManager.cancel(NOTIFICATION_BUSY);
             } else if (mDownload.getStatus() != Download.STATUS_DOWNLOAD_RESUME &&
                        !mState.equals(State.ERROR_DOWNLOAD) &&
@@ -1222,11 +1203,6 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         }
     }
 
-    private boolean updateAvailable() {
-        final String latest = mPrefs.getString(UpdateService.PREF_LATEST_FULL_NAME, null);
-        return latest != null;
-    }
-
     private String getLatestSHA256Sum(String sumUrl) {
         String urlSuffix = mConfig.getUrlSuffix();
         if (mIsUrlOverride) {
@@ -1315,7 +1291,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     }
 
     private void checkForUpdatesAsync(final boolean userInitiated, final int checkOnly) {
-        Logger.d("checkForUpdatesAsync " + getPrefs().getAll());
+        Logger.d("checkForUpdatesAsync");
 
         mState.update(State.ACTION_CHECKING);
         mWakeLock.acquire();
@@ -1424,10 +1400,11 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                     }
                 }
             } finally {
-                mPrefs.edit().putLong(PREF_LAST_CHECK_TIME_NAME,
-                        System.currentTimeMillis()).commit();
                 if (mWifiLock.isHeld()) mWifiLock.release();
                 if (mWakeLock.isHeld()) mWakeLock.release();
+
+                mPrefs.edit().putLong(PREF_LAST_CHECK_TIME_NAME,
+                        System.currentTimeMillis()).commit();
 
                 if (mState.isErrorState()) {
                     mFailedUpdateCount++;
@@ -1437,7 +1414,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                     }
                 } else {
                     mFailedUpdateCount = 0;
-                    autoState(userInitiated, checkOnly, true);
+                    autoState(!userInitiated);
                 }
                 mIsUpdateRunning = false;
                 mState.notifyCallbacks();

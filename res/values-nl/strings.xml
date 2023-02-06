@@ -34,8 +34,7 @@
     <string name="flash_after_update_notice_title">Melding</string>
     <string name="button_build_delta">Download</string>
     <string name="button_stop">Stop</string>
-    <string name="state_action_build">Update beschikbaar.</string>
-    <string name="state_action_build_delta">Delta update mogelijk.</string>
+    <string name="state_action_available">Update beschikbaar.</string>
     <string name="state_action_build_full">Volledige update mogelijk.</string>
     <string name="state_error_download">Probleem met downloaden.</string>
     <string name="text_current_version_header_title">Huidige versie</string>

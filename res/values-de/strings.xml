@@ -40,8 +40,7 @@
     <string name="state_error_not_official_extra" formatted="false">Aktualisierung von %s nicht möglich</string>
     <string name="button_build_delta">Herunterladen</string>
     <string name="button_stop">Stop</string>
-    <string name="state_action_build">Aktualisierung verfügbar.</string>
-    <string name="state_action_build_delta">Delta-Aktualisierung möglich.</string>
+    <string name="state_action_available">Aktualisierung verfügbar.</string>
     <string name="state_action_build_full">Vollständige Aktualisierung möglich.</string>
     <string name="state_error_download">Problem beim Herunterladen.</string>
     <string name="text_current_version_header_title">Aktuelle Version</string>

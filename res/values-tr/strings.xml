@@ -41,8 +41,7 @@
     <string name="state_error_not_official_extra" formatted="false">%s yazılımının güncellenmesi mümkün değildir</string>
     <string name="button_build_delta">İndir</string>
     <string name="button_stop">Durdur</string>
-    <string name="state_action_build">Güncelleme mevcut</string>
-    <string name="state_action_build_delta">Kısmî güncelleme mümkün</string>
+    <string name="state_action_available">Güncelleme mevcut</string>
     <string name="state_action_build_full">Tam güncelleme mümkün</string>
     <string name="state_error_download">İndirme hatâsı</string>
     <string name="text_current_version_header_title">Mevcut versiyon</string>
