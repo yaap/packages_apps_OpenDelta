@@ -79,20 +79,20 @@
         <TextView
             android:id="@+id/progress_percent"
             android:layout_width="wrap_content"
-            android:layout_height="15sp"
+            android:layout_height="20sp"
             android:gravity="start"
             android:singleLine="true"
             android:textAppearance="@style/OtherText" />
 
         <Space
             android:layout_width="0dp"
-            android:layout_height="15sp"
+            android:layout_height="20sp"
             android:layout_weight="1" />
 
         <TextView
             android:id="@+id/progress_text2"
             android:layout_width="wrap_content"
-            android:layout_height="15sp"
+            android:layout_height="20sp"
             android:ellipsize="marquee"
             android:gravity="end"
             android:singleLine="true"
