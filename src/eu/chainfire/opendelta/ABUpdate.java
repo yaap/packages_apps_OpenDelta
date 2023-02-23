@@ -42,6 +42,12 @@ class ABUpdate {
     private static final String PREFS_IS_INSTALLING_UPDATE = "prefs_is_installing_update";
     private static final long WAKELOCK_TIMEOUT = 60 * 60 * 1000; /* 1 hour */
 
+    // non UpdateEngine errors
+    public static final int ERROR_NOT_FOUND = 99;
+    private static final int ERROR_NOT_READY = 98;
+    private static final int ERROR_CORRUPTED = 97;
+    private static final int ERROR_INVALID = 96;
+
     private static ABUpdate mInstance;
 
     private final UpdateService mUpdateService;
@@ -103,21 +109,27 @@ class ABUpdate {
         }
     };
 
-    public boolean start(String zipPath, ProgressListener listener) {
+    public int start(String zipPath, ProgressListener listener) {
+        try (ZipFile zipFile = new ZipFile(zipPath)) {
+            if (!isABUpdate(zipFile)) return ERROR_INVALID;
+        } catch (Exception ex) {
+            Logger.ex(ex);
+            return ERROR_INVALID;
+        }
         mZipPath = zipPath;
         mProgressListener = listener;
         if (isInstallingUpdate(mUpdateService)) {
-            return true;
+            return -1;
         }
-        final boolean installing = startUpdate();
-        setInstallingUpdate(installing, mUpdateService);
+        final int installing = startUpdate();
+        setInstallingUpdate(installing < 0, mUpdateService);
         return installing;
     }
 
-    public boolean resume() {
+    public int resume() {
         final boolean installing = bindCallbacks();
         setInstallingUpdate(installing, mUpdateService);
-        return installing;
+        return installing ? -1 : ERROR_NOT_READY;
     }
 
     public void pokeStatus() {
@@ -165,17 +177,16 @@ class ABUpdate {
         return true;
     }
 
-    private boolean startUpdate() {
+    private int startUpdate() {
         File file = new File(mZipPath);
         if (!file.exists()) {
             Log.e(TAG, "The given update doesn't exist");
-            return false;
+            return ERROR_NOT_FOUND;
         }
 
         long offset;
         String[] headerKeyValuePairs;
-        try {
-            ZipFile zipFile = new ZipFile(file);
+        try (ZipFile zipFile = new ZipFile(file)) {
             offset = getZipEntryOffset(zipFile, PAYLOAD_BIN_PATH);
             ZipEntry payloadPropEntry = zipFile.getEntry(PAYLOAD_PROPERTIES_PATH);
             try (InputStream is = zipFile.getInputStream(payloadPropEntry);
@@ -188,21 +199,20 @@ class ABUpdate {
                 headerKeyValuePairs = new String[lines.size()];
                 headerKeyValuePairs = lines.toArray(headerKeyValuePairs);
             }
-            zipFile.close();
         } catch (IOException | IllegalArgumentException e) {
             Log.e(TAG, "Could not prepare " + file, e);
-            return false;
+            return ERROR_CORRUPTED;
         }
 
         mUpdateEngine.setPerformanceMode(mEnableABPerfMode);
-        if (!bindCallbacks()) return false;
+        if (!bindCallbacks()) return ERROR_NOT_READY;
         String zipFileUri = "file://" + file.getAbsolutePath();
         mUpdateEngine.applyPayload(zipFileUri, offset, 0, headerKeyValuePairs);
 
-        return true;
+        return -1;
     }
 
-    static boolean isABUpdate(ZipFile zipFile) {
+    private static boolean isABUpdate(ZipFile zipFile) {
         return zipFile.getEntry(PAYLOAD_BIN_PATH) != null &&
                 zipFile.getEntry(PAYLOAD_PROPERTIES_PATH) != null;
     }

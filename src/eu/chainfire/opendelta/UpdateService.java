@@ -449,10 +449,11 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                     mLastProgressTime = new long[] { 0, SystemClock.elapsedRealtime() };
                 mProgressListener.setStatus(_filename);
                 mState.update(State.ACTION_AB_FLASH, 0f, 0L, 100L, _filename, null);
-                mIsUpdateRunning = ABUpdate.getInstance(this).resume();
+                final int code = ABUpdate.getInstance(this).resume();
+                mIsUpdateRunning = code < 0;
                 if (!mIsUpdateRunning) {
                     mNotificationManager.cancel(NOTIFICATION_UPDATE);
-                    mState.update(State.ERROR_AB_FLASH);
+                    mState.update(State.ERROR_AB_FLASH, code);
                 } else {
                     newFlashNotification(_filename);
                 }
@@ -1045,7 +1046,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             flashFilename = handleUpdateCleanup();
         } catch (Exception ex) {
             mIsUpdateRunning = false;
-            mState.update(State.ERROR_AB_FLASH);
+            mState.update(State.ERROR_AB_FLASH, ABUpdate.ERROR_NOT_FOUND);
             Logger.ex(ex);
             return;
         }
@@ -1061,29 +1062,16 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
 
         newFlashNotification(_filename);
 
-        try {
-            ZipFile zipFile = new ZipFile(flashFilename);
-            boolean isABUpdate = ABUpdate.isABUpdate(zipFile);
-            zipFile.close();
-            if (isABUpdate) {
-                mLastProgressTime = new long[] { 0, SystemClock.elapsedRealtime() };
-                mProgressListener.setStatus(_filename);
-                mIsUpdateRunning = true;
-                if (!ABUpdate.getInstance(this).start(flashFilename, mProgressListener)) {
-                    mNotificationManager.cancel(NOTIFICATION_UPDATE);
-                    mIsUpdateRunning = false;
-                    mState.update(State.ERROR_AB_FLASH);
-                }
-            } else {
-                mNotificationManager.cancel(NOTIFICATION_UPDATE);
-                mIsUpdateRunning = false;
-                mState.update(State.ERROR_AB_FLASH);
-            }
-        } catch (Exception ex) {
-            Logger.ex(ex);
-            mIsUpdateRunning = false;
-            mState.update(State.ERROR_AB_FLASH);
+        final int code = ABUpdate.getInstance(this).start(flashFilename, mProgressListener);
+        if (code < 0) {
+            mLastProgressTime = new long[] { 0, SystemClock.elapsedRealtime() };
+            mProgressListener.setStatus(_filename);
+            mIsUpdateRunning = true;
+            return;
         }
+        mNotificationManager.cancel(NOTIFICATION_UPDATE);
+        mIsUpdateRunning = false;
+        mState.update(State.ERROR_AB_FLASH, code);
     }
 
     @SuppressLint({"SdCardPath", "SetWorldReadable"})
