@@ -24,11 +24,6 @@ package eu.chainfire.opendelta;
 
 import static android.Manifest.permission.POST_NOTIFICATIONS;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
-
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.AlertDialog;
@@ -66,6 +61,11 @@ import android.widget.Toolbar;
 
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission;
 import androidx.preference.PreferenceManager;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class MainActivity extends Activity {
     private static final int PERMISSIONS_REQUEST_MANAGE_EXTERNAL_STORAGE = 0;
@@ -287,10 +287,11 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        public void update(String state, Float progress,
+        public void update(String stateP, Float progress,
                            Long current, Long total, String filename,
                            Long ms, int errorCode) {
             mHandler.post(() -> {
+                String state = stateP;
                 String title = "";
                 String sub = "";
                 String sub2 = "";
@@ -324,41 +325,40 @@ public class MainActivity extends Activity {
                 }
 
                 // don't try this at home
-                if (state != null) {
-                    title = tryGetResourceString("state_" + state);
-                    // check for first start until check button has been pressed
-                    // use a special title then - but only once
-                    if (State.ACTION_NONE.equals(state)
-                            && !mPrefs.getBoolean(SettingsActivity.PREF_START_HINT_SHOWN, false)) {
-                        title = getString(R.string.last_checked_never_title_new);
-                    }
-                    // don't spill for progress
-                    if (!State.isProgressState(state)) {
-                        Logger.d("onReceive state = " + state);
-                    } else if (state.equals(mState)) {
-                        // same progress state as before.
-                        // save a lot of time by only updating progress
-                        disableDataSpeed = State.ACTION_AB_FLASH.equals(state);
-                        final ProgressGenerator pgen = new ProgressGenerator(
-                            localCurrent,
-                            localTotal,
-                            localMS,
-                            progress,
-                            disableDataSpeed,
-                            filename
-                        );
-                        mSub.setText(pgen.sub);
-                        mSub.setSelected(true); // allow scrolling
-                        mSub2.setText(pgen.sub2);
-                        mProgressPercent.setText(pgen.progressPercent);
-                        mProgressCurrent = Math.round(pgen.localCurrent);
-                        mProgressMax = Math.round(pgen.localTotal);
-                        mProgressEnabled = true;
-                        handleProgressBar();
-                        return;
-                    }
-                    mState = state;
+                if (state == null) state = State.ACTION_NONE;
+                title = tryGetResourceString("state_" + state);
+                // check for first start until check button has been pressed
+                // use a special title then - but only once
+                if (State.ACTION_NONE.equals(state)
+                        && !mPrefs.getBoolean(SettingsActivity.PREF_START_HINT_SHOWN, false)) {
+                    title = getString(R.string.last_checked_never_title_new);
                 }
+                // don't spill for progress
+                if (!State.isProgressState(state)) {
+                    Logger.d("onReceive state = " + state);
+                } else if (state.equals(mState)) {
+                    // same progress state as before.
+                    // save a lot of time by only updating progress
+                    disableDataSpeed = State.ACTION_AB_FLASH.equals(state);
+                    final ProgressGenerator pgen = new ProgressGenerator(
+                        localCurrent,
+                        localTotal,
+                        localMS,
+                        progress,
+                        disableDataSpeed,
+                        filename
+                    );
+                    mSub.setText(pgen.sub);
+                    mSub.setSelected(true); // allow scrolling
+                    mSub2.setText(pgen.sub2);
+                    mProgressPercent.setText(pgen.progressPercent);
+                    mProgressCurrent = Math.round(pgen.localCurrent);
+                    mProgressMax = Math.round(pgen.localTotal);
+                    mProgressEnabled = true;
+                    handleProgressBar();
+                    return;
+                }
+                mState = state;
 
                 mProgress.setIndeterminate(false);
                 String flashImage = null;

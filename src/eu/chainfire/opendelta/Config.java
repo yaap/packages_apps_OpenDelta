@@ -30,7 +30,6 @@ import android.os.SystemProperties;
 import androidx.preference.PreferenceManager;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -72,32 +71,14 @@ public class Config {
     private final String url_api_history;
     private final String android_version;
 
-    /*
-     * Using reflection voodoo instead calling the hidden class directly, to
-     * dev/test outside of AOSP tree
-     */
-    private String getProperty(Context context, String key) {
-        try {
-            Class<?> SystemProperties = context.getClassLoader().loadClass(
-                    "android.os.SystemProperties");
-            Method get = SystemProperties.getMethod("get", String.class, String.class);
-            return (String) get.invoke(null, new Object[] { key, ""});
-        } catch (Exception e) {
-            // A lot of voodoo could go wrong here, return failure instead of
-            // crash
-            Logger.ex(e);
-        }
-        return null;
-    }
-
     private Config(Context context) {
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         Resources res = context.getResources();
 
-        property_version = getProperty(context,
+        property_version = SystemProperties.get(
                 res.getString(R.string.property_version));
-        property_device = getProperty(context,
+        property_device = SystemProperties.get(
                 res.getString(R.string.property_device));
         filename_base = String.format(Locale.ENGLISH,
                 res.getString(R.string.filename_base), property_version);
@@ -124,7 +105,7 @@ public class Config {
         url_api_history = String.format(
                 res.getString(R.string.url_api_history),
                 url_branch_name, property_device, property_device);
-        android_version = getProperty(context,
+        android_version = SystemProperties.get(
                 res.getString(R.string.android_version));
         filename_base_prefix = String.format(Locale.ENGLISH,
                 res.getString(R.string.filename_base), android_version);
