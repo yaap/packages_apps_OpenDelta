@@ -17,20 +17,10 @@
  */
 package eu.chainfire.opendelta;
 
-import java.io.File;
-import java.text.DateFormatSymbols;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Locale;
-
-import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.app.TimePickerDialog.OnTimeSetListener;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.Html;
 import android.text.format.DateFormat;
 import android.view.MenuItem;
 import android.widget.TimePicker;
@@ -43,6 +33,14 @@ import androidx.preference.Preference.OnPreferenceChangeListener;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragment;
 import androidx.preference.PreferenceManager;
+
+import java.io.File;
+import java.text.DateFormatSymbols;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
 
 public class SettingsFragment extends PreferenceFragment implements
         OnPreferenceChangeListener, OnTimeSetListener {
@@ -80,17 +78,17 @@ public class SettingsFragment extends PreferenceFragment implements
 
         final String autoDownload = prefs.getString(SettingsActivity.PREF_AUTO_DOWNLOAD,
                 Integer.toString(UpdateService.PREF_AUTO_DOWNLOAD_CHECK));
-        final int autoDownloadValue = Integer.parseInt(autoDownload);
         mAutoDownload = findPreference(SettingsActivity.PREF_AUTO_DOWNLOAD);
         mAutoDownload.setOnPreferenceChangeListener(this);
         mAutoDownload.setValue(autoDownload);
         mAutoDownload.setSummary(mAutoDownload.getEntry());
+        mAutoDownloadCategory = findPreference(KEY_CATEGORY_DOWNLOAD);
 
+        mChargeOnly = findPreference(SettingsActivity.PREF_CHARGE_ONLY);
         mBatteryLevel = findPreference(SettingsActivity.PREF_BATTERY_LEVEL);
         mBatteryLevel.setOnPreferenceChangeListener(this);
         mBatteryLevel.setSummary(mBatteryLevel.getEntry());
-        mChargeOnly = findPreference(SettingsActivity.PREF_CHARGE_ONLY);
-        mBatteryLevel.setEnabled(!prefs.getBoolean(SettingsActivity.PREF_CHARGE_ONLY, true));
+
         mShowInfo = findPreference(KEY_SHOW_INFO);
         mShowInfo.setChecked(mConfig.getShowInfo());
 
@@ -110,20 +108,13 @@ public class SettingsFragment extends PreferenceFragment implements
             mABWakeLock.setOnPreferenceChangeListener(this);
         }
 
-        mAutoDownloadCategory = findPreference(KEY_CATEGORY_DOWNLOAD);
-        mAutoDownloadCategory.setEnabled(
-                autoDownloadValue > UpdateService.PREF_AUTO_DOWNLOAD_CHECK);
-
-        final boolean schedulerEnabled = autoDownloadValue > UpdateService.PREF_AUTO_DOWNLOAD_DISABLED;
         mSchedulerMode = findPreference(SettingsActivity.PREF_SCHEDULER_MODE);
         mSchedulerMode.setOnPreferenceChangeListener(this);
         mSchedulerMode.setSummary(mSchedulerMode.getEntry());
-        mSchedulerMode.setEnabled(schedulerEnabled);
 
         final String schedulerMode = prefs.getString(SettingsActivity.PREF_SCHEDULER_MODE,
                 SettingsActivity.PREF_SCHEDULER_MODE_SMART);
         mSchedulerDailyTime = findPreference(SettingsActivity.PREF_SCHEDULER_DAILY_TIME);
-        mSchedulerDailyTime.setEnabled(!schedulerMode.equals(SettingsActivity.PREF_SCHEDULER_MODE_SMART));
         mSchedulerDailyTime.setSummary(prefs.getString(
                 SettingsActivity.PREF_SCHEDULER_DAILY_TIME, "00:00"));
         
@@ -131,8 +122,6 @@ public class SettingsFragment extends PreferenceFragment implements
         mSchedulerSleep = findPreference(SettingsActivity.PREF_SCHEDULER_SLEEP);
         mSchedulerSleep.setChecked(sleepEnabled);
         mSchedulerSleep.setOnPreferenceChangeListener(this);
-        mSchedulerSleep.setEnabled(schedulerEnabled &&
-                schedulerMode.equals(SettingsActivity.PREF_SCHEDULER_MODE_SMART));
 
         mCleanFiles = findPreference(PREF_CLEAN_FILES);
 
@@ -140,7 +129,8 @@ public class SettingsFragment extends PreferenceFragment implements
         mScheduleWeekDay.setEntries(getWeekdays());
         mScheduleWeekDay.setSummary(mScheduleWeekDay.getEntry());
         mScheduleWeekDay.setOnPreferenceChangeListener(this);
-        mScheduleWeekDay.setEnabled(schedulerMode.equals(SettingsActivity.PREF_SCHEDULER_MODE_WEEKLY));
+
+        updateEnablement(autoDownload, mSchedulerMode.getEntry().toString());
     }
 
     @Override
@@ -177,12 +167,7 @@ public class SettingsFragment extends PreferenceFragment implements
             int idx = mAutoDownload.findIndexOfValue(value);
             mAutoDownload.setSummary(mAutoDownload.getEntries()[idx]);
             mAutoDownload.setValueIndex(idx);
-            int autoDownloadValue = Integer.parseInt(value);
-            mAutoDownloadCategory.setEnabled(
-                    autoDownloadValue > UpdateService.PREF_AUTO_DOWNLOAD_CHECK);
-            mSchedulerMode.setEnabled(
-                    autoDownloadValue > UpdateService.PREF_AUTO_DOWNLOAD_DISABLED);
-            updateSleepEnablement();
+            updateEnablement(value, null);
             return true;
         } else if (preference == mBatteryLevel) {
             String value = (String) newValue;
@@ -195,9 +180,7 @@ public class SettingsFragment extends PreferenceFragment implements
             int idx = mSchedulerMode.findIndexOfValue(value);
             mSchedulerMode.setSummary(mSchedulerMode.getEntries()[idx]);
             mSchedulerMode.setValueIndex(idx);
-            mSchedulerDailyTime.setEnabled(!value.equals(SettingsActivity.PREF_SCHEDULER_MODE_SMART));
-            mScheduleWeekDay.setEnabled(value.equals(SettingsActivity.PREF_SCHEDULER_MODE_WEEKLY));
-            updateSleepEnablement();
+            updateEnablement(null, value);
             return true;
         } else if (preference == mSchedulerSleep) {
             mConfig.setSchedulerSleepEnabled((boolean) newValue);
@@ -238,16 +221,32 @@ public class SettingsFragment extends PreferenceFragment implements
         mSchedulerDailyTime.setSummary(prefValue);
     }
 
-    private void updateSleepEnablement() {
+    private void updateEnablement(String autoDownload, String schedulerMode) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-        final String autoDownload = prefs.getString(SettingsActivity.PREF_AUTO_DOWNLOAD,
-                Integer.toString(UpdateService.PREF_AUTO_DOWNLOAD_CHECK));
+        if (autoDownload == null) {
+            autoDownload = prefs.getString(SettingsActivity.PREF_AUTO_DOWNLOAD,
+                    Integer.toString(UpdateService.PREF_AUTO_DOWNLOAD_CHECK));
+        }
+        if (schedulerMode == null) {
+            schedulerMode = prefs.getString(SettingsActivity.PREF_SCHEDULER_MODE,
+                    SettingsActivity.PREF_SCHEDULER_MODE_SMART);
+        }
+
         final int autoDownloadValue = Integer.parseInt(autoDownload);
-        final String schedulerMode = prefs.getString(SettingsActivity.PREF_SCHEDULER_MODE,
-                SettingsActivity.PREF_SCHEDULER_MODE_SMART);
-        mSchedulerSleep.setEnabled(
-                autoDownloadValue > UpdateService.PREF_AUTO_DOWNLOAD_DISABLED &&
-                schedulerMode.equals(SettingsActivity.PREF_SCHEDULER_MODE_SMART));
+        final boolean isEnabled = autoDownloadValue > UpdateService.PREF_AUTO_DOWNLOAD_DISABLED;
+        final boolean isSmart = isEnabled &&
+                schedulerMode.equals(SettingsActivity.PREF_SCHEDULER_MODE_SMART);
+        final boolean isWeekly = isEnabled && !isSmart &&
+                schedulerMode.equals(SettingsActivity.PREF_SCHEDULER_MODE_WEEKLY);
+        final boolean isDownload = isEnabled &&
+                autoDownloadValue > UpdateService.PREF_AUTO_DOWNLOAD_CHECK;
+
+        mSchedulerMode.setEnabled(isEnabled);
+        mSchedulerSleep.setEnabled(isEnabled && isSmart);
+        mScheduleWeekDay.setEnabled(isEnabled && isWeekly);
+        mSchedulerDailyTime.setEnabled(isEnabled && !isSmart);
+        mBatteryLevel.setEnabled(isDownload && !mChargeOnly.isChecked());
+        mAutoDownloadCategory.setEnabled(isDownload);
     }
 
     private void showTimePicker() {
