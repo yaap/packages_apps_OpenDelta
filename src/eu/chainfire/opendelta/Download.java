@@ -225,23 +225,17 @@ public class Download {
                             recv, len);
                 }
 
-                StringBuilder SUM;
+                String sumStr;
                 if (offset > 0) {
-                    SUM = new StringBuilder(
-                            mUpdateService.getFileSHA256(mFile,
-                            mUpdateService.getSUMProgress(
-                            State.ACTION_CHECKING_SUM, mFile.getName())));
+                    final ProgressListener listener = mUpdateService.getSUMProgress(
+                            State.ACTION_CHECKING_SUM, mFile.getName());
+                    sumStr = UpdateService.getFileSHA256(mFile, listener);
                 } else {
                     if (digest == null) return false;
-                    SUM = new StringBuilder(new BigInteger(1, digest.digest())
-                            .toString(16).toLowerCase(Locale.ENGLISH));
+                    sumStr = digestToHexString(digest);
                 }
-                while (SUM.length() < 64)
-                    SUM.insert(0, "0");
-                boolean sumCheck = SUM.toString().equals(mMatchSUM);
-                Logger.d("SUM=" + SUM + " matchSUM=" + mMatchSUM);
-                Logger.d("SUM.length=" + SUM.length() +
-                        " matchSUM.length=" + mMatchSUM.length());
+                boolean sumCheck = sumStr.equals(mMatchSUM);
+                Logger.d("sumStr=" + sumStr + " matchSUM=" + mMatchSUM);
                 if (!sumCheck) {
                     mIsRunning = false;
                     Logger.i("SUM check failed for " + mURL);
@@ -328,5 +322,14 @@ public class Download {
             Logger.ex(e);
             return null;
         }
+    }
+
+    public static String digestToHexString(MessageDigest digest) {
+        final BigInteger bi = new BigInteger(1, digest.digest());
+        final StringBuilder sb = new StringBuilder(
+                bi.toString(16).toLowerCase(Locale.ENGLISH));
+        while (sb.length() < digest.getDigestLength() * 2)
+            sb.insert(0, "0");
+        return sb.toString();
     }
 }

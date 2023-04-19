@@ -58,7 +58,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.StringBuilder;
-import java.math.BigInteger;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -897,14 +896,10 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         final File file = new File(fn);
         if (latestSUM != null){
             try {
-                String fileSUM = getFileSHA256(
-                        file,
-                        getSUMProgress(State.ACTION_CHECKING_SUM,
-                        file.getName()));
+                String fileSUM = getFileSHA256(file,
+                        getSUMProgress(State.ACTION_CHECKING_SUM, file.getName()));
                 boolean sumCheck = fileSUM.equals(latestSUM);
                 Logger.d("fileSUM=" + fileSUM + " latestSUM=" + latestSUM);
-                Logger.d("fileSUM.length=" + fileSUM.length() +
-                        " latestSUM.length=" + latestSUM.length());
                 if (sumCheck) return true;
                 Logger.i("fileSUM check failed for " + url);
             } catch(Exception e) {
@@ -914,7 +909,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         return false;
     }
 
-    public String getFileSHA256(File file, ProgressListener progressListener) {
+    public static String getFileSHA256(File file, ProgressListener progressListener) {
         String ret = null;
         int count = 0;
 
@@ -935,8 +930,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                         progressListener.onProgress(getProgress(count, total), count, total);
                 }
 
-                ret = new BigInteger(1, digest.digest())
-                        .toString(16).toLowerCase(Locale.ENGLISH);
+                ret = Download.digestToHexString(digest);
             }
         } catch (IOException | NoSuchAlgorithmException e) {
             // No SHA256 support (returns null)
@@ -951,7 +945,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         return ret;
     }
 
-    private void writeString(OutputStream os, String s)
+    private static void writeString(OutputStream os, String s)
             throws IOException {
         os.write((s + "\n").getBytes(StandardCharsets.UTF_8));
     }
@@ -1207,7 +1201,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         return null;
     }
 
-    private float getProgress(long current, long total) {
+    private static float getProgress(long current, long total) {
         if (total == 0)
             return 0f;
         return ((float) current / (float) total) * 100f;
@@ -1516,8 +1510,9 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 mState.update(State.ACTION_FLASH_FILE_INVALID_SUM, fn.getName());
                 return;
             }
-            final String fileSha = getFileSHA256(fn,
-                    getSUMProgress(State.ACTION_CHECKING_SUM, flashFilename));
+            final ProgressListener listener = getSUMProgress(
+                    State.ACTION_CHECKING_SUM, flashFilename);
+            final String fileSha = getFileSHA256(fn, listener);
             if (fileSha == null || sha == null || !fileSha.equals(sha)) {
                 mState.update(State.ACTION_FLASH_FILE_INVALID_SUM, fn.getName());
                 return;
