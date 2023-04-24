@@ -40,6 +40,7 @@ class ABUpdate {
     private static final String PAYLOAD_BIN_PATH = "payload.bin";
     private static final String PAYLOAD_PROPERTIES_PATH = "payload_properties.txt";
     private static final String PREFS_IS_INSTALLING_UPDATE = "prefs_is_installing_update";
+    private static final String PREFS_IS_SUSPENDED = "prefs_is_suspended";
     private static final long WAKELOCK_TIMEOUT = 60 * 60 * 1000; /* 1 hour */
 
     // non UpdateEngine errors
@@ -126,10 +127,38 @@ class ABUpdate {
         return installing;
     }
 
+    public void suspend() { // actually toggles suspend!
+        if (!isInstallingUpdate(mUpdateService))
+            return;
+        if (!isSuspended(mUpdateService)) {
+            mUpdateEngine.unbind();
+            mBound = false;
+            mUpdateEngine.suspend();
+            final WakeLock wakeLock = mUpdateService.getWakeLock();
+            if (wakeLock.isHeld())
+                wakeLock.release();
+            setIsSuspended(true, mUpdateService);
+            return;
+        }
+        mUpdateEngine.resume();
+        resume();
+    }
+
     public int resume() {
         final boolean installing = bindCallbacks();
         setInstallingUpdate(installing, mUpdateService);
         return installing ? -1 : ERROR_NOT_READY;
+    }
+
+    public void stop(boolean pendingReboot) {
+        mUpdateEngine.unbind();
+        mBound = false;
+        if (pendingReboot) {
+            mUpdateEngine.resetStatus();
+        } else {
+            mUpdateEngine.cancel();
+        }
+        setInstallingUpdate(false, mUpdateService);
     }
 
     public void pokeStatus() {
@@ -149,8 +178,17 @@ class ABUpdate {
         else if (wakeLock.isHeld())
             wakeLock.release();
 
+        setIsSuspended(false, us);
         us.getPrefs().edit()
                 .putBoolean(PREFS_IS_INSTALLING_UPDATE, installing).commit();
+    }
+
+    static synchronized boolean isSuspended(UpdateService us) {
+        return us.getPrefs().getBoolean(PREFS_IS_SUSPENDED, false);
+    }
+
+    static synchronized void setIsSuspended(boolean suspended, UpdateService us) {
+        us.getPrefs().edit().putBoolean(PREFS_IS_SUSPENDED, suspended).commit();
     }
 
     private ABUpdate(UpdateService service) {

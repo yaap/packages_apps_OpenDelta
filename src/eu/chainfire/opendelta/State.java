@@ -36,6 +36,7 @@ public class State {
     public static final String ACTION_APPLYING_SUM = "action_applying_sum";
     public static final String ACTION_READY = "action_ready";
     public static final String ACTION_AB_FLASH = "action_ab_flash";
+    public static final String ACTION_AB_PAUSED = "action_ab_paused";
     public static final String ACTION_AB_FINISHED = "action_ab_finished";
     public static final String ACTION_AVAILABLE = "action_available";
     public static final String ACTION_FLASH_FILE_NO_SUM = "action_flash_file_no_sum";

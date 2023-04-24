@@ -306,6 +306,7 @@ public class MainActivity extends Activity {
                 boolean enableBuild = false;
                 boolean enableDownload = false;
                 boolean enableResume = false;
+                boolean enableCancel = false;
                 boolean enableReboot = false;
                 boolean enableProgress = false;
                 boolean disableCheck = false;
@@ -365,10 +366,10 @@ public class MainActivity extends Activity {
                 String flashImageBase = null;
                 long downloadSize = 0L;
                 switch (state) {
+                    case State.ACTION_NONE:
                     case State.ERROR_UNKNOWN:
                     case State.ERROR_CONNECTION:
                     case State.ERROR_PERMISSIONS:
-                    case State.ACTION_NONE:
                         break;
                     case State.ERROR_FLASH:
                     case State.ERROR_FLASH_FILE:
@@ -424,8 +425,14 @@ public class MainActivity extends Activity {
                         }
                         mUpdateVersionTitle.setText(R.string.text_update_file_flash_title);
                         break;
+                    case State.ACTION_AB_PAUSED:
+                        enableDownload = true;
+                        enableResume = true;
+                        hideCheck = true;
+                        break;
                     case State.ACTION_AB_FINISHED:
                         enableReboot = true;
+                        enableCancel = true;
                         hideCheck = true;
                         enableChangelog = !mPrefs.getBoolean(UpdateService.PREF_FILE_FLASH, false);
 
@@ -474,6 +481,8 @@ public class MainActivity extends Activity {
                         switch (state) {
                             case State.ACTION_AB_FLASH:
                                 disableDataSpeed = true;
+                                enableDownload = true;
+                                hideCheck = true;
                                 break;
                             case State.ACTION_DOWNLOADING:
                                 hideCheck = true;
@@ -569,7 +578,7 @@ public class MainActivity extends Activity {
 
                 // download buttons
                 final int vis = enableDownload ? View.VISIBLE : View.GONE;
-                mStopBtn.setVisibility(vis);
+                mStopBtn.setVisibility(enableCancel ? View.VISIBLE : vis);
                 mPauseBtn.setVisibility(vis);
                 mPauseBtn.setText(getString(enableResume ? R.string.button_resume_text
                         : R.string.button_pause_text));
@@ -613,11 +622,29 @@ public class MainActivity extends Activity {
     }
 
     public void onButtonStopClick(View v) {
-        startUpdateService(UpdateService.ACTION_DOWNLOAD_STOP);
+        showAreYouSureDialog(() -> {
+            startUpdateService(UpdateService.ACTION_DOWNLOAD_STOP);
+        });
     }
 
     public void onButtonPauseClick(View v) {
         startUpdateService(UpdateService.ACTION_DOWNLOAD_PAUSE);
+    }
+
+    private void showAreYouSureDialog(Runnable run) {
+        final String msg = getString(R.string.sure_dialog_msg);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(msg)
+            .setPositiveButton(getString(R.string.button_yes_text),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        run.run();
+                    }
+                }
+            )
+            .setNegativeButton(getString(R.string.button_no_text), null);
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     private void showLocalSumWarnDialog(String state) {

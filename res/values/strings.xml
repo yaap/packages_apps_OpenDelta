@@ -43,8 +43,11 @@
     <string name="button_resume_text">Resume</string>
     <string name="button_stop_text">Cancel</string>
     <string name="button_ignore_text">Ignore</string>
+    <string name="button_yes_text">Yes</string>
+    <string name="button_no_text">No</string>
     <string name="state_action_ab_flash">Installing AB Update &#8230;</string>
-    <string name="state_action_ab_finished">Done Installing. Reboot Now &#8230;</string>
+    <string name="state_action_ab_paused">AB Update paused</string>
+    <string name="state_action_ab_finished">Done Installing. Reboot Now</string>
     <string name="button_reboot_short">Reboot</string>
     <string name="state_action_flash_file_ready">Update ready to flash</string>
     <string name="state_action_flash_file_no_sum">No local sum file found</string>
@@ -141,6 +144,7 @@
     <string name="state_error_flash_file">Couldn\'t flash update</string>
     <string name="no_sum_dialog_msg">No local sum file (.sha256sum) was found.\nPlease place the file at the same path of the file to flash.\nPress ignore to proceed without sum check (dangerous!)</string>
     <string name="invalid_sum_dialog_msg">File sum mismatched with local sum file.\nThis file is probably corrupted, please download it again.\nPress ignore to proceed.\nDo note this will probably fail later on anyways</string>
+    <string name="sure_dialog_msg">This action cannot be undone.\nAre you sure?</string>
     <string name="install_channel_name">Update progress</string>
     <string name="update_channel_name">Update notifications</string>
     <string name="install_channel_description">Flashing and downloading progress</string>

@@ -295,6 +295,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         switch (action) {
             case ACTION_CLEAR_INSTALL_RUNNING:
                 // at boot
+                clearState();
                 mIsUpdateRunning = false;
                 ABUpdate.setInstallingUpdate(false, this);
                 if (getAutoDownloadValue() != PREF_AUTO_DOWNLOAD_DISABLED &&
@@ -316,6 +317,16 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                     checkForUpdates(true, PREF_AUTO_DOWNLOAD_FULL);
                 break;
             case ACTION_DOWNLOAD_STOP:
+                final boolean pendingReboot = mPrefs.getBoolean(PREF_PENDING_REBOOT, false);
+                if (pendingReboot || ABUpdate.isInstallingUpdate(this)) {
+                    ABUpdate.getInstance(this).stop(pendingReboot);
+                    mNotificationManager.cancelAll();
+                    mIsUpdateRunning = false;
+                    clearState();
+                    autoState(false);
+                    break;
+                }
+
                 if (mDownload != null) mDownload.stop();
                 if (mNotificationManager != null)
                     mNotificationManager.cancel(NOTIFICATION_BUSY);
@@ -332,6 +343,17 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 }
                 break;
             case ACTION_DOWNLOAD_PAUSE:
+                if (ABUpdate.isInstallingUpdate(this)) {
+                    ABUpdate.getInstance(this).suspend();
+                    if (ABUpdate.isSuspended(this)) {
+                        mNotificationManager.cancelAll();
+                        mState.update(State.ACTION_AB_PAUSED);
+                    } else {
+                        autoState(false);
+                    }
+                    break;
+                }
+
                 final boolean isPaused = mState.equals(State.ACTION_DOWNLOADING_PAUSED) ||
                         mState.equals(State.ERROR_DOWNLOAD_RESUME);
                 if (isPaused) {
@@ -438,6 +460,11 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
 
         // Check if we're currently installing an A/B update
         if (Config.isABDevice() && ABUpdate.isInstallingUpdate(this)) {
+            // first check if we're suspended
+            if (ABUpdate.isSuspended(this)) {
+                mState.update(State.ACTION_AB_PAUSED);
+                return;
+            }
             // resume listening to progress, will notify
             final String flashFilename = mPrefs.getString(PREF_CURRENT_AB_FILENAME_NAME, null);
             if (flashFilename != null && !flashFilename.isEmpty()) {
@@ -772,6 +799,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
          * if user has enabled checking only we only check the screen state
          * cause the amount of data transferred for checking is not very large
          */
+        if (userInitiated) clearState();
 
         if ((mNetworkState == null) || (mBatteryState == null)
                 || (mScreenState == null))
