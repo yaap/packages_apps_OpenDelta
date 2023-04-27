@@ -22,7 +22,22 @@
     <string name="last_checked" formatted="false">%s в %s</string>
     <string name="last_checked_never">Пошук оновлень ще не виконувався. Можливо, варто спробувати?</string>
     <string name="button_check_short">Перевірити</string>
+    <string name="button_check_now">Перевірити оновлення &#8230;</string>
     <string name="button_flash_now">Встановити</string>
+    <string name="button_pause_text">Пауза</string>
+    <string name="button_resume_text">Відновити</string>
+    <string name="button_stop_text">Відміна</string>
+    <string name="button_ignore_text">Ігнорувати</string>
+    <string name="button_yes_text">Так</string>
+    <string name="button_no_text">Ні</string>
+    <string name="state_action_ab_flash">Встановлення оновлення &#8230;</string>
+    <string name="state_action_ab_paused">Оновлення призупинено</string>
+    <string name="state_action_ab_finished">Оновлення встановлено, перезавантажте пристрій</string>
+    <string name="button_reboot_short">Перезавантаження</string>
+    <string name="state_action_flash_file_ready">Оновлення готове до встановлення</string>
+    <string name="state_action_flash_file_no_sum">Не знайдено локального файлу суми оновлення</string>
+    <string name="state_action_flash_file_invalid_sum">Невідповідність файлу суми</string>
+
     <!-- updates from 2013/12/18 -->
     <string name="action_secure_mode">Безпечний режим</string>
     <string name="secure_mode_enabled_title">Безпечний режим: увімкнено</string>
@@ -68,9 +83,61 @@
     <string name="category_flashing">Встановлення</string>
     <string name="state_error_connection">Підключення до інтернету відсутнє.</string>
     <string name="category_admin">Підтримка</string>
+    <string name="show_info_title">Показати інформацію</string>
+    <string name="show_info_summary">Показати текст пояснення / інформації на головній сторінці</string>
     <string name="clear_files_title">Очистити файли оновлень</string>
     <string name="clear_files_summary">Видалити існуючі файли оновлень, щоб примусово завантажити повне оновлення</string>
     <string name="clean_files_feedback" formatted="false">Видалено %d файлів. Тепер натисніть \'Перевірити оновлення\'</string>
     <string name="state_error_permissions">Немає дозволів на зберігання.</string>
     <string name="state_error_flash">Не вдалося налаштувати встановлення. Очиститіть/кеш і повторіть спробу.</string>
+    <string name="progress_status_0">Бездіяльність &#8230;</string>
+    <string name="progress_status_1">Перевірка оновлень &#8230;</string>
+    <string name="progress_status_2">Доступне оновлення &#8230;</string>
+    <string name="progress_status_3">Встановлення &#8230;</string>
+    <string name="progress_status_4">Перевірка &#8230;</string>
+    <string name="progress_status_5">Фініш &#8230;</string>
+    <string name="progress_status_6">Оновлення завершено. Очікується перезавантаження &#8230;</string>
+    <string name="progress_status_7">Повідомлення про помилку &#8230;</string>
+    <string name="progress_status_8">Спроба відкоту &#8230;</string>
+    <string name="progress_status_9">Відключено</string>
+    <string name="ab_perf_mode_title">Режим виконання АВ</string>
+    <string name="ab_perf_mode_summary_new">Підвищити пріоритет процесу оновлення. Може впливати на нормальне використання під час оновлення.</string>
+    <string name="ab_wake_lock_title">AB wake lock</string>
+    <string name="ab_wake_lock_summary">Під час інсталяції оновлення ЦП не активний. Швидке оновлення, навіть якщо екран вимкнено</string>
+    <string name="state_error_flash_file_title">Не вдалося прошити цей файл</string>
+    <string name="select_file_activity_title">Виберіть ZIP файл</string>
+    <string name="button_select_file">Файл</string>
+    <string name="state_error_ab_flash">Не вдалося встановити AB оновлення</string>
+    <string name="state_error_flash_file">Не вдалося встановити оновлення</string>
+    <string name="no_sum_dialog_msg">Локальний файл суми (.sha256sum) не знайдено.\nБудь ласка, розмістіть файл по тому самому шляху, що й файл для прошивки.\nНатисніть «Ігнорувати», щоб продовжити без перевірки суми (небезпечно!)</string>
+    <string name="invalid_sum_dialog_msg">Сума файлу не відповідає локальному файлу суми.\nЙмовірно, цей файл пошкоджено, завантажте його ще раз.\nНатисніть ігнорувати, щоб продовжити.\nЗауважте, що пізніше це, ймовірно, не вдасться</string>
+    <string name="sure_dialog_msg">Цю дію не можна скасувати.\nВи впевнені?</string>
+    <string name="install_channel_name">Прогрес оновлення</string>
+    <string name="update_channel_name">Сповіщення про оновлення</string>
+    <string name="install_channel_description">Хід перепрошивки та завантаження</string>
+    <string name="update_channel_description">Доступні нові оновлення</string>
+    <string name="text_update_file_flash_title">Файл оновлення:</string>
+    <string name="text_info_section">Натисніть «Перевірити», щоб перевірити, чи доступне оновлення. Після встановлення оновлення вам буде запропоновано перезавантажитися. Пристрої з традиційним оновленням на основі відновлення ввійдуть у режим відновлення (recovery) після перезавантаження, щоб виконати процес прошивки. Якщо ваш пристрій підтримує безперебійне оновлення (A/B), перезавантаження активує оновлення.</string>
+    <string name="error_ab_1">Загальна помилка</string>
+    <string name="error_ab_4">Помилка копіювання</string>
+    <string name="error_ab_5">Помилка після встановлення</string>
+    <string name="error_ab_6">Невідповідність\nЙмовірно, цей файл для іншого пристрою</string>
+    <string name="error_ab_7">Не вдалося відкрити пристрій</string>
+    <string name="error_ab_8">Не вдалося відкрити ядро</string>
+    <string name="error_ab_9">Помилка завантаження\nПеревірте підключення до Інтернету</string>
+    <string name="error_ab_10">Файл оновлення пошкоджено (невідпорвідність хеш)\nЗавантажте ще раз</string>
+    <string name="error_ab_11">Файл оновлення пошкоджено (невідпорвідність розміру)\nЗавантажте ще раз</string>
+    <string name="error_ab_12">Невідповідність підпису файлу оновлення</string>
+    <string name="error_ab_51">Поточна версія є новішою за оновлення</string>
+    <string name="error_ab_52">Оновлення вже встановлено, потрібне перезавантаження</string>
+    <!-- Above string is WRONG. Keeping for historical reasons. This error cannot be reached unless we call applyPayload with SWITCH_SLOT_ON_REBOOT=0 -->
+    <string name="error_ab_60">Недостатньо вільного місця</string>
+    <string name="error_ab_61">Пошкодження пристрою\nРекомендується чиста інсталяція через режим відновлення</string>
+    <!-- non UpdateEngine errors -->
+    <string name="error_ab_99">Файл оновлення не знайдено\nБудь ласка перевірте / оберіть ще раз</string>
+    <string name="error_ab_98">Система оновлення не готова\nПерезавантажте пристрій і спробуйте ще раз</string>
+    <string name="error_ab_97">Файл оновлення пошкоджено\nЗавантажте файл ще раз</string>
+    <string name="error_ab_96">Не є файлом оновлення\nЗавантажте файл ще раз</string>
+    <string name="long_press_info_toast">Довге натискання для детальної інформації</string>
+    <string name="hide_info_toast">Інформація прихована. Скасувати в налаштуваннях</string>
 </resources>
