@@ -566,12 +566,19 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     }
 
     private void startNotification(String latest, String flashFilename) {
+        final SharedPreferences.Editor editor = mPrefs.edit();
         final boolean available = latest != null;
         final boolean readyToFlash = flashFilename != null;
         if (readyToFlash) {
             flashFilename = new File(flashFilename).getName();
             flashFilename.substring(0, flashFilename.lastIndexOf('.'));
+            editor.putString(PREF_SNOOZE_UPDATE_NAME, flashFilename);
+            editor.putLong(PREF_LAST_SNOOZE_TIME_NAME, System.currentTimeMillis());
+        } else if (available) {
+            editor.putString(PREF_SNOOZE_UPDATE_NAME, latest.substring(0, latest.lastIndexOf('.')));
+            editor.putLong(PREF_LAST_SNOOZE_TIME_NAME, System.currentTimeMillis());
         }
+        editor.commit();
 
         if (!readyToFlash && !available) return;
 
@@ -587,6 +594,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                         ? getString(R.string.notify_title_flash)
                         : getString(R.string.notify_title_download))
                 .setShowWhen(true)
+                .setOnlyAlertOnce(true)
                 .setContentIntent(getNotificationIntent(false))
                 .setDeleteIntent(getNotificationIntent(true))
                 .setContentText(notifyFileName).build());
@@ -649,8 +657,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 .setSmallIcon(R.drawable.stat_notify_update)
                 .setContentTitle(getString(R.string.state_action_ab_finished))
                 .setShowWhen(true)
-                .setContentIntent(getNotificationIntent(false))
-                .setDeleteIntent(getNotificationIntent(true));
+                .setContentIntent(getNotificationIntent(false));
         if (hasName) builder.setContentText(flashFilename);
 
         mNotificationManager.notify(NOTIFICATION_UPDATE, builder.build());
