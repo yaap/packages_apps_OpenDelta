@@ -15,10 +15,13 @@
  */
 package eu.chainfire.opendelta;
 
+import android.content.Context;
 import android.os.PowerManager.WakeLock;
+import android.os.ServiceSpecificException;
 import android.os.UpdateEngine;
 import android.os.UpdateEngineCallback;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
@@ -242,7 +245,20 @@ class ABUpdate {
             return ERROR_CORRUPTED;
         }
 
-        mUpdateEngine.setPerformanceMode(mEnableABPerfMode);
+        try {
+            mUpdateEngine.setPerformanceMode(mEnableABPerfMode);
+        } catch (ServiceSpecificException e) {
+            Log.e(TAG, "Could not set performance mode, Earlier logs should point the reason. Trace:");
+            e.printStackTrace();
+            final Context context = mUpdateService.getApplicationContext();
+            if (context != null) {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.ab_perf_mode_error),
+                    Toast.LENGTH_LONG
+                ).show();
+            }
+        }
         if (!bindCallbacks()) return ERROR_NOT_READY;
         String zipFileUri = "file://" + file.getAbsolutePath();
         mUpdateEngine.applyPayload(zipFileUri, offset, 0, headerKeyValuePairs);

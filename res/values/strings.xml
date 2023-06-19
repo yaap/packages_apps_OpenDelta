@@ -135,6 +135,7 @@
     <string name="progress_status_9">Disabled.</string>
     <string name="ab_perf_mode_title">AB performance mode</string>
     <string name="ab_perf_mode_summary_new">Increase priority of the update process. Might influence normal usage when an update is in progress.</string>
+    <string name="ab_perf_mode_error">Error setting performance mode\nCheck the logs</string>
     <string name="ab_wake_lock_title">AB wake lock</string>
     <string name="ab_wake_lock_summary">Keep the CPU awake when installing an update. Makes updating fast even if the screen is off</string>
     <string name="state_error_flash_file_title">Couldn\'t flash that file</string>
