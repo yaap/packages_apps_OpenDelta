@@ -4,7 +4,7 @@
     <string name="app_name">OpenDelta</string>
     <string name="title">系统更新</string>
     <string name="action_about">关于</string>
-    <string name="state_action_none">已是最新版本</string>
+    <string name="state_action_none">您的系统已是最新</string>
     <string name="state_action_checking">检查更新中 &#8230;</string>
     <string name="state_action_checking_sum">校验文件中 &#8230;</string>
     <string name="state_action_searching">寻找文件中 &#8230;</string>
@@ -61,15 +61,15 @@
     <string name="text_download_size_header_title">下载大小</string>
     <string name="text_download_size_unknown">未知</string>
     <string name="auto_download">计划任务</string>
-    <string name="auto_download_title">计划任务内容</string>
+    <string name="auto_download_title">计划任务方式</string>
     <string name="download_disabled">关闭</string>
     <string name="text_changelog_header_title">更新日志</string>
     <string name="check_only">检查并提醒</string>
-    <string name="download_full">自动下载完整包</string>
+    <string name="download_full">自动下载更新</string>
     <string name="menu_settings">设置</string>
     <string name="menu_changelog">更新日志</string>
     <string name="category_download">自动下载</string>
-    <string name="charge_only_title">仅在充电时</string>
+    <string name="charge_only_title">充电时下载</string>
     <string name="charge_only_message">仅当在充电时才开始下载</string>
     <string name="battery_level_title">最小电量百分比</string>
     <string name="notify_title_error">检查更新时出错</string>
@@ -85,7 +85,7 @@
     <string name="scheduler_daily">每日</string>
     <string name="scheduler_weekly">每周</string>
     <string name="scheduler_daily_time">时间</string>
-    <string name="scheduler_week_day">天</string>
+    <string name="scheduler_week_day">星期</string>
     <string name="scheduler_sleep_enabled_title">睡眠检测</string>
     <string name="scheduler_sleep_enabled_summary">当屏幕连续关闭 5 小时后尝试检查更新</string>
     <string name="metered_networks_title">计费网络</string>
@@ -94,7 +94,7 @@
     <string name="state_error_connection">没有数据连接</string>
     <string name="category_admin">维护</string>
     <string name="show_info_title">显示信息</string>
-    <string name="show_info_summary">在主页上显示说明 / 信息文本</string>
+    <string name="show_info_summary">在主页上显示说明或信息文本</string>
     <string name="clear_files_title">清除下载文件</string>
     <string name="clear_files_summary">删除已下载的更新文件以强制重新下载完整包</string>
     <string name="clean_files_feedback" formatted="false">删除了 %d 文件。现在点击检查更新</string>
@@ -111,9 +111,9 @@
     <string name="progress_status_8">尝试回滚 &#8230;</string>
     <string name="progress_status_9">关闭</string>
     <string name="ab_perf_mode_title">性能模式</string>
-    <string name="ab_perf_mode_summary_new">增加更新过程的优先级,可能会影响更新期间的正常使用</string>
+    <string name="ab_perf_mode_summary_new">增加更新进程优先级\n可能会导致手机卡顿</string>
     <string name="ab_wake_lock_title">唤醒锁</string>
-    <string name="ab_wake_lock_summary">安装更新时保持 CPU 处于唤醒状态。即使屏幕关闭也能快速更新</string>
+    <string name="ab_wake_lock_summary">安装更新时保持 CPU 处于唤醒状态\n即使屏幕关闭也能快速更新</string>
     <string name="state_error_flash_file_title">无法刷入该文件</string>
     <string name="select_file_activity_title">选择 ZIP 文件</string>
     <string name="button_select_file">选择文件</string>
@@ -129,4 +129,11 @@
     <!-- Above string is WRONG. Keeping for historical reasons. This error cannot be reached unless we call applyPayload with SWITCH_SLOT_ON_REBOOT=0 -->
     <string name="error_ab_60">可用空间不足</string>
     <string name="error_ab_61">设备损坏\n建议通过恢复模式进行全新安装</string>
+    <!-- non UpdateEngine errors -->
+    <string name="error_ab_99">更新文件未找到\n按下检查更新或选择文件以重试</string>
+    <string name="error_ab_98">更新未准备好\n重启后再试</string>
+    <string name="error_ab_97">更新文件已损坏\n请重新下载更新</string>
+    <string name="error_ab_96">不是一个 AB 更新文件\n请重新下载更新</string>
+    <string name="long_press_info_toast">长按隐藏</string>
+    <string name="hide_info_toast">信息已隐藏，可在设置内重新开启</string>
 </resources>
