@@ -447,12 +447,14 @@ public class MainActivity extends Activity {
                         mPrefs.edit().putString(UpdateService.PREF_LATEST_FULL_NAME, null).commit();
                         break;
                     case State.ACTION_AVAILABLE:
+                    case State.ACTION_AVAILABLE_STREAM:
                         final String latest = mPrefs.getString(
                                 UpdateService.PREF_LATEST_FULL_NAME, null);
                         if (latest != null) {
                             String latestBase = latest.substring(0,
                                     latest.lastIndexOf('.'));
                             enableBuild = true;
+                            enableFlash = mState.equals(State.ACTION_AVAILABLE_STREAM);
                             enableChangelog = true;
                             updateVersion = latestBase;
                             title = getString(R.string.state_action_build_full);
@@ -562,7 +564,7 @@ public class MainActivity extends Activity {
                 mFileFlashButton.setEnabled(mPermOk && !disableCheck);
                 mCheckBtn.setVisibility(hideCheck ? View.GONE : View.VISIBLE);
                 mFlashBtn.setVisibility(enableFlash ? View.VISIBLE : View.GONE);
-                mBuildBtn.setVisibility(!enableBuild || enableFlash ? View.GONE : View.VISIBLE);
+                mBuildBtn.setVisibility(enableBuild ? View.VISIBLE : View.GONE);
                 mRebootBtn.setVisibility(enableReboot ? View.VISIBLE : View.GONE);
                 mFileFlashButton.setVisibility(hideCheck ? View.GONE : View.VISIBLE);
 
@@ -615,10 +617,14 @@ public class MainActivity extends Activity {
 
     public void onButtonFlashNowClick(View v) {
         if (Config.isABDevice()) {
+            if (mState.equals(State.ACTION_AVAILABLE_STREAM)) {
+                streamStart.run();
+                return;
+            }
             flashStart.run();
-        } else {
-            flashRecoveryWarning.run();
+            return;
         }
+        flashRecoveryWarning.run();
     }
 
     public void onButtonStopClick(View v) {
@@ -720,6 +726,13 @@ public class MainActivity extends Activity {
         mFlashBtn.setEnabled(false);
         mBuildBtn.setEnabled(false);
         startUpdateService(UpdateService.ACTION_FLASH);
+    };
+
+    private final Runnable streamStart = () -> {
+        mCheckBtn.setEnabled(false);
+        mFlashBtn.setEnabled(false);
+        mBuildBtn.setEnabled(false);
+        startUpdateService(UpdateService.ACTION_STREAM);
     };
 
     private void requestPermissions() {

@@ -63,8 +63,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -104,6 +107,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     public static final String ACTION_DOWNLOAD_STOP = "eu.chainfire.opendelta.action.DOWNLOAD_STOP";
     public static final String ACTION_DOWNLOAD_PAUSE = "eu.chainfire.opendelta.action.DOWNLOAD_PAUSE";
     public static final String ACTION_FLASH = "eu.chainfire.opendelta.action.FLASH";
+    public static final String ACTION_STREAM = "eu.chainfire.opendelta.action.STREAM";
     public static final String ACTION_ALARM = "eu.chainfire.opendelta.action.ALARM";
     public static final String ACTION_SCHEDULER = "eu.chainfire.opendelta.action.SCHEDULER";
     public static final String EXTRA_ALARM_ID = "eu.chainfire.opendelta.extra.ALARM_ID";
@@ -117,6 +121,9 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     public static final int NOTIFICATION_BUSY = 1;
     public static final int NOTIFICATION_UPDATE = 2;
     public static final int NOTIFICATION_ERROR = 3;
+
+    private static final String PAYLOAD_PROP_OFFSET = "offset=";
+    private static final String PAYLOAD_PROP_SIZE = "FILE_SIZE=";
 
     public static final String PREF_READY_FILENAME_NAME = "ready_filename";
     public static final String PREF_LATEST_CHANGELOG = "latest_changelog";
@@ -141,6 +148,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     public static final String PREF_AUTO_UPDATE_METERED_NETWORKS = "auto_update_metered_networks";
 
     public static final String PREF_LATEST_FULL_NAME = "latest_full_name";
+    public static final String PREF_LATEST_PAYLOAD_PROPS = "latest_payload_props";
     public static final String PREF_DOWNLOAD_SIZE = "download_size_long";
 
     public static final int PREF_AUTO_DOWNLOAD_DISABLED = 0;
@@ -372,6 +380,9 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                     else flashUpdate();
                 }
                 break;
+            case ACTION_STREAM:
+                if (checkPermissions()) flashABUpdate(true);
+                break;
             case ACTION_FLASH_FILE:
                 if (intent.hasExtra(EXTRA_FILENAME)) {
                     String flashFilename = intent.getStringExtra(EXTRA_FILENAME);
@@ -532,8 +543,10 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             }
 
             Logger.d("Assuming update available");
-            mState.update(State.ACTION_AVAILABLE, mPrefs.getLong(PREF_LAST_CHECK_TIME_NAME,
-                    PREF_LAST_CHECK_TIME_DEFAULT));
+            final Set<String> propSet = mPrefs.getStringSet(PREF_LATEST_PAYLOAD_PROPS, null);
+            final String state = (propSet != null && propSet.size() > 0)
+                    ? State.ACTION_AVAILABLE_STREAM : State.ACTION_AVAILABLE;
+            mState.update(state, mPrefs.getLong(PREF_LAST_CHECK_TIME_NAME, PREF_LAST_CHECK_TIME_DEFAULT));
             maybeNotify(notify, latestBuild, null);
             return;
         }
@@ -704,75 +717,6 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             Logger.ex(e);
         }
         return false;
-    }
-
-    private List<String> getNewestBuild() {
-        Logger.d("Checking for latest build");
-
-        String url = mConfig.getUrlBaseJson();
-
-        String buildData = Download.asString(url);
-        if (buildData == null || buildData.length() == 0) {
-            mState.update(State.ERROR_DOWNLOAD, url, Download.ERROR_CODE_NEWEST_BUILD);
-            mNotificationManager.cancel(NOTIFICATION_BUSY);
-            return null;
-        }
-        JSONObject object;
-        try {
-            object = new JSONObject(buildData);
-            JSONArray updatesList = object.getJSONArray("response");
-            String latestBuild = null;
-            String urlOverride = null;
-            String sumOverride = null;
-            for (int i = 0; i < updatesList.length(); i++) {
-                if (updatesList.isNull(i)) {
-                    continue;
-                }
-                try {
-                    JSONObject build = updatesList.getJSONObject(i);
-                    String fileName = new File(build.getString("filename")).getName();
-                    String urlOvr = null;
-                    String sumOvr = null;
-                    if (build.has("url"))
-                        urlOvr = build.getString("url");
-                    if (build.has("sha256url"))
-                        sumOvr = build.getString("sha256url");
-                    Logger.d("parsed from json:");
-                    Logger.d("fileName= " + fileName);
-                    if (isMatchingImage(fileName))
-                        latestBuild = fileName;
-                    if (urlOvr != null && !urlOvr.equals("")) {
-                        urlOverride = urlOvr;
-                        Logger.d("url= " + urlOverride);
-                    }
-                    if (sumOvr != null && !sumOvr.equals("")) {
-                        sumOverride = sumOvr;
-                        Logger.d("sha256 url= " + sumOverride);
-                    }
-                } catch (JSONException e) {
-                    Logger.ex(e);
-                }
-            }
-
-            List<String> ret = new ArrayList<>();
-            if (latestBuild != null) {
-                ret.add(latestBuild);
-                if (urlOverride != null) {
-                    ret.add(urlOverride);
-                    if (sumOverride != null) {
-                        ret.add(sumOverride);
-                        mIsUrlOverride = true;
-                        mSumUrlOvr = sumOverride;
-                    }
-                }
-            }
-            return ret;
-
-        } catch (Exception e) {
-            Logger.ex(e);
-        }
-        mState.update(State.ERROR_UNOFFICIAL, mConfig.getVersion());
-        return null;
     }
 
     public ProgressListener getSUMProgress(String state, String filename) {
@@ -1067,10 +1011,16 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     }
 
     private void flashABUpdate() {
-        Logger.d("flashABUpdate");
+        flashABUpdate(false);
+    }
+
+    private void flashABUpdate(final boolean isStream) {
+        Logger.d("flashABUpdate. isStream=" + isStream);
         String flashFilename;
         try {
-            flashFilename = handleUpdateCleanup();
+            flashFilename = isStream
+                    ? mPrefs.getString(PREF_READY_FILENAME_NAME, null)
+                    : handleUpdateCleanup();
         } catch (Exception ex) {
             mIsUpdateRunning = false;
             mState.update(State.ERROR_AB_FLASH, ABUpdate.ERROR_NOT_FOUND);
@@ -1084,12 +1034,41 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         // Clear the Download size to hide while flashing
         mPrefs.edit().putLong(PREF_DOWNLOAD_SIZE, -1).commit();
 
-        final String _filename = new File(flashFilename).getName();
+        String _filename = null;
+        if (isStream) {
+            final int eIndex = flashFilename.lastIndexOf('.');
+            final int sIndex = flashFilename.lastIndexOf('/', eIndex);
+            _filename = flashFilename.substring(sIndex + 1, eIndex);
+        } else {
+            _filename = new File(flashFilename).getName();
+        }
         mState.update(State.ACTION_AB_FLASH, 0f, 0L, 100L, _filename, null);
 
         newFlashNotification(_filename);
 
-        final int code = ABUpdate.getInstance(this).start(flashFilename, mProgressListener);
+        int code = -1;
+        if (isStream) {
+            Set<String> payloadSet = mPrefs.getStringSet(PREF_LATEST_PAYLOAD_PROPS, null);
+            List<String> payloadProps = new ArrayList<>();
+            long offset = 0;
+            long size = 0;
+            for (String str : payloadSet) {
+                if (offset == 0 && str.startsWith(PAYLOAD_PROP_OFFSET)) {
+                    offset = Long.parseLong(str.substring(PAYLOAD_PROP_OFFSET.length(), str.length()));
+                    continue;
+                }
+                if (size == 0 && str.startsWith(PAYLOAD_PROP_SIZE))
+                    size = Long.parseLong(str.substring(PAYLOAD_PROP_SIZE.length(), str.length()));
+                payloadProps.add(str);
+            }
+            String[] headerKeyValuePairs = new String[payloadProps.size()];
+            for (int i = 0; i < payloadProps.size(); i++)
+                headerKeyValuePairs[i] = payloadProps.get(i);
+            code = ABUpdate.getInstance(this).start(flashFilename, headerKeyValuePairs,
+                    offset, size, mProgressListener);
+        } else {
+            code = ABUpdate.getInstance(this).start(flashFilename, mProgressListener);
+        }
         if (code < 0) {
             mLastProgressTime = new long[] { 0, SystemClock.elapsedRealtime() };
             mProgressListener.setStatus(_filename);
@@ -1284,6 +1263,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     private void clearState() {
         SharedPreferences.Editor editor = mPrefs.edit();
         editor.putString(PREF_LATEST_FULL_NAME, null);
+        editor.putString(PREF_LATEST_PAYLOAD_PROPS, null);
         editor.putString(PREF_READY_FILENAME_NAME, null);
         editor.putString(PREF_LATEST_CHANGELOG, null);
         editor.putLong(PREF_DOWNLOAD_SIZE, -1);
@@ -1329,26 +1309,88 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 (new File(mConfig.getPathBase())).mkdir();
                 (new File(mConfig.getPathFlashAfterUpdate())).mkdir();
 
-                List<String> latestBuildWithUrl = getNewestBuild();
-                String latestBuild;
+                Logger.d("Checking for latest build");
+
+                String url = mConfig.getUrlBaseJson();
+                String latestBuild = null;
+                String urlOverride = null;
+                String sumOverride = null;
+                List<String> payloadProps = null;
+
+                String buildData = Download.asString(url);
+                if (buildData == null || buildData.length() == 0) {
+                    mState.update(State.ERROR_DOWNLOAD, url, Download.ERROR_CODE_NEWEST_BUILD);
+                    mNotificationManager.cancel(NOTIFICATION_BUSY);
+                }
+                JSONObject object;
+                try {
+                    object = new JSONObject(buildData);
+                    JSONArray updatesList = object.getJSONArray("response");
+                    for (int i = 0; i < updatesList.length(); i++) {
+                        if (updatesList.isNull(i)) {
+                            continue;
+                        }
+                        try {
+                            JSONObject build = updatesList.getJSONObject(i);
+                            String fileName = new File(build.getString("filename")).getName();
+                            if (build.has("url"))
+                                urlOverride = build.getString("url");
+                            if (build.has("sha256url"))
+                                sumOverride = build.getString("sha256url");
+                            if (build.has("payload")) {
+                                payloadProps = new ArrayList<>();
+                                JSONArray payloadList = build.getJSONArray("payload");
+                                for (int j = 0; j < payloadList.length(); j++) {
+                                    if (payloadList.isNull(j)) continue;
+                                    JSONObject prop = payloadList.getJSONObject(j);
+                                    Iterator<String> keys = prop.keys();
+                                    while (keys.hasNext()) {
+                                        final String key = keys.next();
+                                        payloadProps.add(key + "=" + prop.get(key));
+                                    }
+                                }
+                            }
+                            Logger.d("parsed from json:");
+                            Logger.d("fileName= " + fileName);
+                            if (isMatchingImage(fileName))
+                                latestBuild = fileName;
+                            if (urlOverride != null && !urlOverride.equals(""))
+                                Logger.d("url= " + urlOverride);
+                            if (sumOverride != null && !sumOverride.equals("")) {
+                                Logger.d("sha256 url= " + sumOverride);
+                            }
+                            if (payloadProps != null) {
+                                for (String str : payloadProps) {
+                                    Logger.d(str);
+                                }
+                            }
+                        } catch (JSONException e) {
+                            Logger.ex(e);
+                        }
+                    }
+                } catch (Exception e) {
+                    Logger.ex(e);
+                    mState.update(State.ERROR_UNOFFICIAL, mConfig.getVersion());
+                    return;
+                }
+
                 // if we don't even find a build on dl no sense to continue
-                if (latestBuildWithUrl == null || latestBuildWithUrl.size() == 0) {
+                if (latestBuild == null || latestBuild.length() == 0) {
                     Logger.d("no latest build found at " + mConfig.getUrlBaseJson() +
                             " for " + mConfig.getDevice());
                     return;
                 }
-                latestBuild = latestBuildWithUrl.get(0);
 
                 String latestFetch;
                 String latestFetchSUM;
-                if (latestBuildWithUrl.size() < 3) {
+                if (urlOverride == null || sumOverride == null) {
                     latestFetch = mConfig.getUrlBase() +
                             latestBuild + mConfig.getUrlSuffix();
                     latestFetchSUM = mConfig.getUrlBaseSum() +
                             latestBuild + ".sha256sum" + mConfig.getUrlSuffix();
                 } else {
-                    latestFetch = latestBuildWithUrl.get(1);
-                    latestFetchSUM = latestBuildWithUrl.get(2);
+                    latestFetch = urlOverride;
+                    latestFetchSUM = sumOverride;
                 }
                 Logger.d("latest build for device " + mConfig.getDevice() + " is " + latestFetch);
 
@@ -1374,10 +1416,19 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                         updateAvailable ? latestBuild : null).commit();
                 if (!updateAvailable) return;
 
+                if (payloadProps != null) {
+                    mPrefs.edit().putStringSet(PREF_LATEST_PAYLOAD_PROPS,
+                            payloadProps.stream().collect(Collectors.toSet())).commit();
+                    mPrefs.edit().putString(PREF_READY_FILENAME_NAME, latestFetch).commit();
+                    Logger.d("update supports streaming");
+                } else {
+                    mPrefs.edit().remove(PREF_LATEST_PAYLOAD_PROPS).commit();
+                }
+
                 final String changelog = getChangelogString();
                 mPrefs.edit().putString(PREF_LATEST_CHANGELOG, changelog).commit();
 
-                if (checkExistingBuild(latestBuildWithUrl, latestFetchSUM)) return;
+                if (checkExistingBuild(latestBuild, latestFetchSUM)) return;
                 
                 final long size = Download.getSize(latestFetch);
                 mPrefs.edit().putLong(PREF_DOWNLOAD_SIZE, size).commit();
@@ -1437,8 +1488,8 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         });
     }
 
-    private boolean checkExistingBuild(List<String> latestBuildWithUrl, String latestFetchSUM) {
-        String fn = mConfig.getPathBase() + latestBuildWithUrl.get(0);
+    private boolean checkExistingBuild(String latestBuild, String latestFetchSUM) {
+        String fn = mConfig.getPathBase() + latestBuild;
         File file = new File(fn);
         if (file.exists()) {
             if (checkBuildSHA256Sum(latestFetchSUM, fn)) {

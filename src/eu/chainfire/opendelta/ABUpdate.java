@@ -44,6 +44,7 @@ class ABUpdate {
     private static final String PAYLOAD_PROPERTIES_PATH = "payload_properties.txt";
     private static final String PREFS_IS_INSTALLING_UPDATE = "prefs_is_installing_update";
     private static final String PREFS_IS_SUSPENDED = "prefs_is_suspended";
+    private static final String FILE_PREFIX = "file://";
     private static final long WAKELOCK_TIMEOUT = 60 * 60 * 1000; /* 1 hour */
 
     // non UpdateEngine errors
@@ -61,14 +62,16 @@ class ABUpdate {
     private String mZipPath;
     private ProgressListener mProgressListener;
     private boolean mBound;
+    private boolean mIsStream;
 
     private final UpdateEngineCallback mUpdateEngineCallback = new UpdateEngineCallback() {
         @Override
         public void onStatusUpdate(int status, float percent) {
             Logger.d("onStatusUpdate = " + status + " " + percent + "%%");
             // downloading stage: 0% - 30%
+            // when streaming: 0% - 50%
             int offset = 0;
-            int weight = 30;
+            int weight = mIsStream ? 50 : 30;
 
             switch (status) {
                 case UpdateEngine.UpdateStatusConstants.UPDATED_NEED_REBOOT:
@@ -81,13 +84,15 @@ class ABUpdate {
                     return;
                 case UpdateEngine.UpdateStatusConstants.VERIFYING:
                     // verifying stage: 30% - 35%
-                    offset = 30;
+                    // when streaming: 50% - 55%
+                    offset = mIsStream ? 50 : 30;
                     weight = 5;
                     break;
                 case UpdateEngine.UpdateStatusConstants.FINALIZING:
                     // finalizing stage: 35% - 100%
-                    offset = 35;
-                    weight = 65;
+                    // when streaming: 55% - 100%
+                    offset = mIsStream ? 55 : 35;
+                    weight = mIsStream ? 45 : 65;
                     break;
             }
 
@@ -120,12 +125,18 @@ class ABUpdate {
             Logger.ex(ex);
             return ERROR_INVALID;
         }
-        mZipPath = zipPath;
+        return start(zipPath, null, 0, 0, listener);
+    }
+
+    public int start(String url, String[] headerKeyValuePairs,
+                     long offset, long size, ProgressListener listener) {
+        mIsStream = headerKeyValuePairs != null;
+        mZipPath = url;
         mProgressListener = listener;
         if (isInstallingUpdate(mUpdateService)) {
             return -1;
         }
-        final int installing = startUpdate();
+        final int installing = startUpdate(headerKeyValuePairs, offset, size);
         setInstallingUpdate(installing < 0, mUpdateService);
         return installing;
     }
@@ -218,31 +229,32 @@ class ABUpdate {
         return true;
     }
 
-    private int startUpdate() {
+    private int startUpdate(String[] headerKeyValuePairs, long offset, long size) {
+        Logger.d("startUpdate. mIsStream=" + mIsStream);
         File file = new File(mZipPath);
-        if (!file.exists()) {
-            Log.e(TAG, "The given update doesn't exist");
-            return ERROR_NOT_FOUND;
-        }
-
-        long offset;
-        String[] headerKeyValuePairs;
-        try (ZipFile zipFile = new ZipFile(file)) {
-            offset = getZipEntryOffset(zipFile, PAYLOAD_BIN_PATH);
-            ZipEntry payloadPropEntry = zipFile.getEntry(PAYLOAD_PROPERTIES_PATH);
-            try (InputStream is = zipFile.getInputStream(payloadPropEntry);
-                InputStreamReader isr = new InputStreamReader(is);
-                BufferedReader br = new BufferedReader(isr)) {
-                List<String> lines = new ArrayList<>();
-                for (String line; (line = br.readLine()) != null;) {
-                    lines.add(line);
-                }
-                headerKeyValuePairs = new String[lines.size()];
-                headerKeyValuePairs = lines.toArray(headerKeyValuePairs);
+        if (!mIsStream) {
+            if (!file.exists()) {
+                Log.e(TAG, "The given update doesn't exist");
+                return ERROR_NOT_FOUND;
             }
-        } catch (IOException | IllegalArgumentException e) {
-            Log.e(TAG, "Could not prepare " + file, e);
-            return ERROR_CORRUPTED;
+            try (ZipFile zipFile = new ZipFile(file)) {
+                offset = getZipEntryOffset(zipFile, PAYLOAD_BIN_PATH);
+                ZipEntry payloadPropEntry = zipFile.getEntry(PAYLOAD_PROPERTIES_PATH);
+                try (InputStream is = zipFile.getInputStream(payloadPropEntry);
+                    InputStreamReader isr = new InputStreamReader(is);
+                    BufferedReader br = new BufferedReader(isr)) {
+                    List<String> lines = new ArrayList<>();
+                    for (String line; (line = br.readLine()) != null;) {
+                        lines.add(line);
+                    }
+                    headerKeyValuePairs = new String[lines.size()];
+                    headerKeyValuePairs = lines.toArray(headerKeyValuePairs);
+                }
+                Logger.d("payload offset=" + offset);
+            } catch (IOException | IllegalArgumentException e) {
+                Log.e(TAG, "Could not prepare " + file, e);
+                return ERROR_CORRUPTED;
+            }
         }
 
         try {
@@ -260,8 +272,17 @@ class ABUpdate {
             }
         }
         if (!bindCallbacks()) return ERROR_NOT_READY;
-        String zipFileUri = "file://" + file.getAbsolutePath();
-        mUpdateEngine.applyPayload(zipFileUri, offset, 0, headerKeyValuePairs);
+        String zipFileUri = mIsStream ? mZipPath : FILE_PREFIX + file.getAbsolutePath();
+
+        Logger.d("Applying payload with params:");
+        Logger.d("URI: " + zipFileUri);
+        Logger.d("offset: " + offset);
+        Logger.d("size: " + size);
+        Logger.d("headerKeyValuePairs:");
+        for (int i = 0; i < headerKeyValuePairs.length; i++)
+            Logger.d(headerKeyValuePairs[i]);
+
+        mUpdateEngine.applyPayload(zipFileUri, offset, size, headerKeyValuePairs);
 
         return -1;
     }

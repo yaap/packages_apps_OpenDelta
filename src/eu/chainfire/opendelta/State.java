@@ -39,6 +39,7 @@ public class State {
     public static final String ACTION_AB_PAUSED = "action_ab_paused";
     public static final String ACTION_AB_FINISHED = "action_ab_finished";
     public static final String ACTION_AVAILABLE = "action_available";
+    public static final String ACTION_AVAILABLE_STREAM = "action_available_stream";
     public static final String ACTION_FLASH_FILE_NO_SUM = "action_flash_file_no_sum";
     public static final String ACTION_FLASH_FILE_INVALID_SUM = "action_flash_file_invalid_sum";
     public static final String ACTION_FLASH_FILE_READY = "action_flash_file_ready";
