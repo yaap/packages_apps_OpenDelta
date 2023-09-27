@@ -47,6 +47,7 @@ public class SettingsFragment extends PreferenceFragment implements
     private static final String KEY_NETWORKS = "metered_networks_config";
     private static final String KEY_AB_PERF_MODE = "ab_perf_mode";
     private static final String KEY_AB_WAKE_LOCK = "ab_wake_lock";
+    private static final String KEY_AB_STREAM = "ab_stream_flashing";
     private static final String KEY_CATEGORY_DOWNLOAD = "category_download";
     private static final String KEY_CATEGORY_FLASHING = "category_flashing";
     private static final String KEY_SHOW_INFO = "show_info";
@@ -58,6 +59,7 @@ public class SettingsFragment extends PreferenceFragment implements
     private SwitchPreference mChargeOnly;
     private SwitchPreference mABPerfMode;
     private SwitchPreference mABWakeLock;
+    private SwitchPreference mABStream;
     private Config mConfig;
     private PreferenceCategory mAutoDownloadCategory;
     private ListPreference mSchedulerMode;
@@ -106,6 +108,9 @@ public class SettingsFragment extends PreferenceFragment implements
             mABWakeLock = findPreference(KEY_AB_WAKE_LOCK);
             mABWakeLock.setChecked(mConfig.getABWakeLockCurrent());
             mABWakeLock.setOnPreferenceChangeListener(this);
+            mABStream = findPreference(KEY_AB_STREAM);
+            mABStream.setChecked(mConfig.getABStreamCurrent());
+            mABStream.setOnPreferenceChangeListener(this);
         }
 
         mSchedulerMode = findPreference(SettingsActivity.PREF_SCHEDULER_MODE);
@@ -194,6 +199,9 @@ public class SettingsFragment extends PreferenceFragment implements
             return true;
         } else if (preference.equals(mABWakeLock)) {
             mConfig.setABWakeLockCurrent((boolean) newValue);
+            return true;
+        } else if (preference.equals(mABStream)) {
+            mConfig.setABStreamCurrent((boolean) newValue);
             return true;
         } else if (preference.equals(mShowInfo)) {
             mConfig.setShowInfo((boolean) newValue);

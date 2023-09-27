@@ -451,10 +451,11 @@ public class MainActivity extends Activity {
                         final String latest = mPrefs.getString(
                                 UpdateService.PREF_LATEST_FULL_NAME, null);
                         if (latest != null) {
+                            final boolean isStream = mState.equals(State.ACTION_AVAILABLE_STREAM);
                             String latestBase = latest.substring(0,
                                     latest.lastIndexOf('.'));
-                            enableBuild = true;
-                            enableFlash = mState.equals(State.ACTION_AVAILABLE_STREAM);
+                            enableBuild = !isStream;
+                            enableFlash = isStream;
                             enableChangelog = true;
                             updateVersion = latestBase;
                             title = getString(R.string.state_action_build_full);

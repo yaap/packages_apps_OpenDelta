@@ -138,6 +138,8 @@
     <string name="ab_perf_mode_error">Error setting performance mode\nCheck the logs</string>
     <string name="ab_wake_lock_title">AB wake lock</string>
     <string name="ab_wake_lock_summary">Keep the CPU awake when installing an update. Makes updating fast even if the screen is off</string>
+    <string name="ab_stream_flashing_title">AB stream flashing</string>
+    <string name="ab_stream_flashing_summary">Download and flash at the same time\nDisable on unreliable connection</string>
     <string name="state_error_flash_file_title">Couldn\'t flash that file</string>
     <string name="select_file_activity_title">Select ZIP file</string>
     <string name="button_select_file">File</string>

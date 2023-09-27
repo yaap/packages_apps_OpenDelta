@@ -543,7 +543,9 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             }
 
             Logger.d("Assuming update available");
-            final Set<String> propSet = mPrefs.getStringSet(PREF_LATEST_PAYLOAD_PROPS, null);
+            Set<String> propSet = null;
+            if (mConfig.getABStreamCurrent())
+                propSet = mPrefs.getStringSet(PREF_LATEST_PAYLOAD_PROPS, null);
             final String state = (propSet != null && propSet.size() > 0)
                     ? State.ACTION_AVAILABLE_STREAM : State.ACTION_AVAILABLE;
             mState.update(state, mPrefs.getLong(PREF_LAST_CHECK_TIME_NAME, PREF_LAST_CHECK_TIME_DEFAULT));

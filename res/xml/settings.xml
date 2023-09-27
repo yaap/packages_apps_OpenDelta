@@ -32,6 +32,12 @@
 			android:persistent="false"
 			android:title="@string/ab_wake_lock_title"
 			android:summary="@string/ab_wake_lock_summary" />
+		<SwitchPreference
+			android:defaultValue="true"
+			android:key="ab_stream_flashing"
+			android:persistent="false"
+			android:title="@string/ab_stream_flashing_title"
+			android:summary="@string/ab_stream_flashing_summary" />
 	</PreferenceCategory>
 	<PreferenceCategory
 		android:key="category_scheduler"

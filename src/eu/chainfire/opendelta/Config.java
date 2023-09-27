@@ -45,12 +45,11 @@ public class Config {
         return instance;
     }
 
-    private final static String PREF_SECURE_MODE_NAME = "secure_mode";
     private final static String PREF_SHOW_INFO_NAME = "show_info";
     private final static String PREF_AB_PERF_MODE_NAME = "ab_perf_mode";
     private final static String PREF_AB_WAKE_LOCK_NAME = "ab_wake_lock";
-    private final static boolean PREF_AB_PERF_MODE_DEFAULT = true;
-    private static final String PROP_AB_DEVICE = "ro.build.ab_update";
+    private final static String PREF_AB_STREAM_NAME = "ab_stream_flashing";
+    private final static String PROP_AB_DEVICE = "ro.build.ab_update";
 
     private final SharedPreferences prefs;
 
@@ -162,8 +161,7 @@ public class Config {
     }
 
     public boolean getABPerfModeCurrent() {
-        return getABPerfModeSupport() && prefs.getBoolean(
-                PREF_AB_PERF_MODE_NAME, PREF_AB_PERF_MODE_DEFAULT);
+        return getABPerfModeSupport() && prefs.getBoolean(PREF_AB_PERF_MODE_NAME, true);
     }
 
     public void setABPerfModeCurrent(boolean enable) {
@@ -171,12 +169,19 @@ public class Config {
     }
 
     public boolean getABWakeLockCurrent() {
-        return getABPerfModeSupport() && prefs.getBoolean(
-                PREF_AB_WAKE_LOCK_NAME, true);
+        return getABPerfModeSupport() && prefs.getBoolean(PREF_AB_WAKE_LOCK_NAME, true);
     }
 
     public void setABWakeLockCurrent(boolean enable) {
         prefs.edit().putBoolean(PREF_AB_WAKE_LOCK_NAME, enable).commit();
+    }
+
+    public boolean getABStreamCurrent() {
+        return prefs.getBoolean(PREF_AB_STREAM_NAME, true);
+    }
+
+    public void setABStreamCurrent(boolean enable) {
+        prefs.edit().putBoolean(PREF_AB_STREAM_NAME, enable).commit();
     }
 
     public boolean getShowInfo() {
