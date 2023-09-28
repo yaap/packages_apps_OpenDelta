@@ -10,6 +10,7 @@
     <string name="state_action_searching">寻找文件中 &#8230;</string>
     <string name="state_action_searching_sum">校验文件中 &#8230;</string>
     <string name="state_action_downloading">下载中 &#8230;</string>
+    <string name="state_action_downloading_paused">下载已暂停</string> 
     <string name="state_action_applying">修补中 &#8230;</string>
     <string name="state_action_applying_patch">修补中 &#8230;</string>
     <string name="state_action_applying_sum">检验文件中 &#8230;</string>
@@ -29,14 +30,16 @@
     <string name="button_resume_text">继续</string>
     <string name="button_stop_text">取消</string>
     <string name="button_ignore_text">忽略</string>
+    <string name="button_yes_text">好的</string>
+    <string name="button_no_text">不要</string>
     <string name="state_action_ab_flash">正在安装更新 &#8230;</string>
+    <string name="state_action_ab_paused">更新已暂停</string>
     <string name="state_action_ab_finished">安装完成，等待重启 &#8230;</string>
     <string name="button_reboot_short">重启</string>
     <string name="state_action_flash_file_ready">已准备好更新</string>
     <string name="state_action_flash_file_no_sum">未找到本地校验文件</string>
     <string name="state_action_flash_file_invalid_sum">与本地校验文件不匹配</string>
 
-    <!-- updates from 2013/12/18 -->
     <string name="action_secure_mode">安全</string>
     <string name="secure_mode_enabled_title">安全模式：已启用</string>
     <string name="secure_mode_enabled_description"><![CDATA[在刷入前会验证更新的签名从而确认它的来源，并且不会刷入附加更新。这个模式仅兼容 <b>TWRP</b> 。]]></string>
@@ -94,6 +97,9 @@
     <string name="state_error_connection">没有数据连接</string>
     <string name="category_admin">维护</string>
     <string name="show_info_title">显示信息</string>
+    <string name="force_reflash_title">重新刷入已安装更新</string>
+    <string name="force_reflash_summary">若没有更新，则显示当前版本并安装</string>
+    <string name="force_flash_feedback">现在返回下载并安装，点击 检查更新 取消</string>
     <string name="show_info_summary">在主页上显示说明或信息文本</string>
     <string name="clear_files_title">清除下载文件</string>
     <string name="clear_files_summary">删除已下载的更新文件以强制重新下载完整包</string>
@@ -114,6 +120,8 @@
     <string name="ab_perf_mode_summary_new">增加更新进程优先级\n可能会导致手机卡顿</string>
     <string name="ab_wake_lock_title">唤醒锁</string>
     <string name="ab_wake_lock_summary">安装更新时保持 CPU 处于唤醒状态\n即使屏幕关闭也能快速更新</string>
+    <string name="ab_stream_flashing_title">流式系统更新</string>
+    <string name="ab_stream_flashing_summary">下载时同时进行安装\n网络不稳定时请禁用</string>
     <string name="state_error_flash_file_title">无法刷入该文件</string>
     <string name="select_file_activity_title">选择 ZIP 文件</string>
     <string name="button_select_file">选择文件</string>
