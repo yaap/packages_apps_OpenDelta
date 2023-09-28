@@ -51,6 +51,7 @@ public class SettingsFragment extends PreferenceFragment implements
     private static final String KEY_CATEGORY_DOWNLOAD = "category_download";
     private static final String KEY_CATEGORY_FLASHING = "category_flashing";
     private static final String KEY_SHOW_INFO = "show_info";
+    private static final String PREF_FORCE_REFLASH = "force_reflash";
     private static final String PREF_CLEAN_FILES = "clear_files";
 
     private SwitchPreference mNetworksConfig;
@@ -65,6 +66,7 @@ public class SettingsFragment extends PreferenceFragment implements
     private ListPreference mSchedulerMode;
     private SwitchPreference mSchedulerSleep;
     private Preference mSchedulerDailyTime;
+    private Preference mForceReflash;
     private Preference mCleanFiles;
     private ListPreference mScheduleWeekDay;
     private SwitchPreference mShowInfo;
@@ -128,6 +130,7 @@ public class SettingsFragment extends PreferenceFragment implements
         mSchedulerSleep.setChecked(sleepEnabled);
         mSchedulerSleep.setOnPreferenceChangeListener(this);
 
+        mForceReflash = findPreference(PREF_FORCE_REFLASH);
         mCleanFiles = findPreference(PREF_CLEAN_FILES);
 
         mScheduleWeekDay = findPreference(SettingsActivity.PREF_SCHEDULER_WEEK_DAY);
@@ -160,6 +163,11 @@ public class SettingsFragment extends PreferenceFragment implements
             Toast.makeText(getContext(), String.format(getString(R.string.clean_files_feedback),
                     numDeletedFiles), Toast.LENGTH_LONG).show();
             State.getInstance().update(State.ACTION_NONE);
+            return true;
+        } else if (preference == mForceReflash) {
+            UpdateService.start(getContext(), UpdateService.ACTION_FORCE_FLASH);
+            Toast.makeText(getContext(), getString(R.string.force_flash_feedback),
+                    Toast.LENGTH_LONG).show();
             return true;
         }
         return false;

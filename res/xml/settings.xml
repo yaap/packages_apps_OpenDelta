@@ -107,6 +107,11 @@
 			android:summary="@string/show_info_summary"
 			android:defaultValue="true" />
 		<Preference
+			android:key="force_reflash"
+			android:persistent="false"
+			android:summary="@string/force_reflash_summary"
+			android:title="@string/force_reflash_title" />
+		<Preference
 			android:key="clear_files"
 			android:persistent="false"
 			android:summary="@string/clear_files_summary"

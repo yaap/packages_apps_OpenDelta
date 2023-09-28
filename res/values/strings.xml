@@ -118,6 +118,9 @@
     <string name="category_admin">Maintenance</string>
     <string name="show_info_title">Show info</string>
     <string name="show_info_summary">Show explanation / info text in main page</string>
+    <string name="force_reflash_title">Force Reflash</string>
+    <string name="force_reflash_summary">Show latest update as available again\nEven if it\'s not newer</string>
+    <string name="force_flash_feedback">Now go back and download/install\nPress check to cancel this action</string>
     <string name="clear_files_title">Clean update files</string>
     <string name="clear_files_summary">Delete existing update files to force downloading full update</string>
     <string name="clean_files_feedback" formatted="false">Deleted %d files. Now press \'Check for updates\'</string>

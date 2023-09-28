@@ -103,6 +103,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     public static final String EXTRA_FILENAME = "eu.chainfire.opendelta.extra.FILENAME";
 
     public static final String ACTION_CHECK = "eu.chainfire.opendelta.action.CHECK";
+    public static final String ACTION_FORCE_FLASH = "eu.chainfire.opendelta.action.FORCE_FLASH";
     public static final String ACTION_DOWNLOAD = "eu.chainfire.opendelta.action.DOWNLOAD";
     public static final String ACTION_DOWNLOAD_STOP = "eu.chainfire.opendelta.action.DOWNLOAD_STOP";
     public static final String ACTION_DOWNLOAD_PAUSE = "eu.chainfire.opendelta.action.DOWNLOAD_PAUSE";
@@ -319,6 +320,10 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             case ACTION_CHECK:
                 if (checkPermissions())
                     checkForUpdates(true, PREF_AUTO_DOWNLOAD_CHECK);
+                break;
+            case ACTION_FORCE_FLASH:
+                if (checkPermissions())
+                    checkForUpdates(true, PREF_AUTO_DOWNLOAD_CHECK, true);
                 break;
             case ACTION_DOWNLOAD:
                 if (checkPermissions())
@@ -743,6 +748,10 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     }
 
     private boolean checkForUpdates(boolean userInitiated, int checkOnly) {
+        return checkForUpdates(userInitiated, checkOnly, false);
+    }
+
+    private boolean checkForUpdates(boolean userInitiated, int checkOnly, boolean forceFlash) {
         /*
          * Unless the user is specifically asking to check for updates, we only
          * check for them if we have a connection matching the user's set
@@ -765,6 +774,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             "checkForUpdates checkOnly = " + checkOnly +
             " mIsUpdateRunning = " + mIsUpdateRunning +
             " userInitiated = " + userInitiated +
+            " forceFlash = " + forceFlash +
             " mNetworkState.getState() = " + mNetworkState.getState() +
             " mBatteryState.getState() = " + mBatteryState.getState() +
             " mScreenState.getState() = " + mScreenState.getState()
@@ -803,7 +813,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
 
         if (userInitiated || updateAllowed) {
             Logger.i("Starting check for updates");
-            checkForUpdatesAsync(userInitiated, checkOnly);
+            checkForUpdatesAsync(userInitiated, checkOnly, forceFlash);
             return true;
         } else {
             Logger.i("Ignoring request to check for updates");
@@ -1287,7 +1297,8 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         }
     }
 
-    private void checkForUpdatesAsync(final boolean userInitiated, final int checkOnly) {
+    private void checkForUpdatesAsync(final boolean userInitiated, final int checkOnly,
+            final boolean forceFlash) {
         Logger.d("checkForUpdatesAsync");
 
         mState.update(State.ACTION_CHECKING);
@@ -1397,14 +1408,12 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 Logger.d("latest build for device " + mConfig.getDevice() + " is " + latestFetch);
 
                 String currentVersionZip = mConfig.getFilenameBase() + ".zip";
-                long currFileDate; // will store current build date as YYYYMMDD
-                long latestFileDate; // will store the latest build date as YYYYMMDD
-                boolean updateAvailable = false;
-                if (latestBuild != null) {
+                boolean updateAvailable = latestBuild != null && forceFlash;
+                if (latestBuild != null && !forceFlash) {
                     try {
-                        currFileDate = Long.parseLong(currentVersionZip
+                        final long currFileDate = Long.parseLong(currentVersionZip
                                 .split("-")[4].substring(0, 8));
-                        latestFileDate = Long.parseLong(latestBuild
+                        final long latestFileDate = Long.parseLong(latestBuild
                                 .split("-")[4].substring(0, 8));
                         updateAvailable = latestFileDate > currFileDate;
                     } catch (NumberFormatException exception) {
