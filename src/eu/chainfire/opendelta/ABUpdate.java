@@ -68,10 +68,10 @@ class ABUpdate {
         @Override
         public void onStatusUpdate(int status, float percent) {
             Logger.d("onStatusUpdate = " + status + " " + percent + "%%");
-            // downloading stage: 0% - 30%
-            // when streaming: 0% - 50%
+            // downloading stage: 0% - 40%
+            // when streaming: 0% - 60%
             int offset = 0;
-            int weight = mIsStream ? 50 : 30;
+            int weight = mIsStream ? 60 : 40;
 
             switch (status) {
                 case UpdateEngine.UpdateStatusConstants.UPDATED_NEED_REBOOT:
@@ -83,16 +83,16 @@ class ABUpdate {
                     mUpdateService.onUpdateCompleted(UpdateEngine.ErrorCodeConstants.ERROR, -1);
                     return;
                 case UpdateEngine.UpdateStatusConstants.VERIFYING:
-                    // verifying stage: 30% - 35%
-                    // when streaming: 50% - 55%
-                    offset = mIsStream ? 50 : 30;
+                    // verifying stage: 40% - 45%
+                    // when streaming: 60% - 65%
+                    offset = mIsStream ? 60 : 40;
                     weight = 5;
                     break;
                 case UpdateEngine.UpdateStatusConstants.FINALIZING:
-                    // finalizing stage: 35% - 100%
-                    // when streaming: 55% - 100%
-                    offset = mIsStream ? 55 : 35;
-                    weight = mIsStream ? 45 : 65;
+                    // finalizing stage: 45% - 100%
+                    // when streaming: 65% - 100%
+                    offset = mIsStream ? 65 : 45;
+                    weight = mIsStream ? 35 : 55;
                     break;
             }
 
