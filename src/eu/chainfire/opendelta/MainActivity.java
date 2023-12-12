@@ -938,21 +938,25 @@ public class MainActivity extends Activity {
                 if (progressInK) kibps *= 1024f;
                 int sec = (int) (((((float) localTotal / (float) localCurrent) *
                         (float) localMS) - localMS) / 1000f);
-                if (disableDataSpeed) {
-                    sub2 = String.format(Locale.ENGLISH,
+                String timeStr = Character.toString('\u221E'); // infinity symbol unicode
+                if (sec < 3600) { // consider anything >= 60m infinity
+                    timeStr = String.format(Locale.ENGLISH,
                             "%02d:%02d",
                             sec / 60, sec % 60);
+                }
+                if (disableDataSpeed) {
+                    sub2 = timeStr;
                     return;
                 }
                 if (kibps < 1024) {
                     sub2 = String.format(Locale.ENGLISH,
-                            "%.0f KiB/s, %02d:%02d",
-                            kibps, sec / 60, sec % 60);
+                            "%.0f KiB/s, %s",
+                            kibps, timeStr);
                     return;
                 }
                 sub2 = String.format(Locale.ENGLISH,
-                        "%.0f MiB/s, %02d:%02d",
-                        kibps / 1024f, sec / 60, sec % 60);
+                        "%.0f MiB/s, %s",
+                        kibps / 1024f, timeStr);
             }
         }
     }
