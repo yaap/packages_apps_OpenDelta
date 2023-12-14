@@ -766,7 +766,8 @@ public class MainActivity extends Activity {
         mProgress.setVisibility(mProgressEnabled ? View.VISIBLE : View.INVISIBLE);
         if (!mProgressEnabled) return;
         mProgress.setMax(mProgressMax);
-        mProgress.setProgress(mProgressCurrent);
+        mProgress.setProgress(mProgressCurrent,
+                mProgressCurrent > mProgress.getProgress());
     }
 
     private void updateInfoVisibility() {
