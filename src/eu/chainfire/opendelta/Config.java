@@ -169,7 +169,7 @@ public class Config {
     }
 
     public boolean getABWakeLockCurrent() {
-        return getABPerfModeSupport() && prefs.getBoolean(PREF_AB_WAKE_LOCK_NAME, true);
+        return prefs.getBoolean(PREF_AB_WAKE_LOCK_NAME, true);
     }
 
     public void setABWakeLockCurrent(boolean enable) {
