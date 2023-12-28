@@ -45,7 +45,7 @@ public class Config {
         return instance;
     }
 
-    private final static String PREF_SHOW_INFO_NAME = "show_info";
+    private final static String PREF_INFO_DISPLAYED = "info_displayed";
     private final static String PREF_AB_PERF_MODE_NAME = "ab_perf_mode";
     private final static String PREF_AB_WAKE_LOCK_NAME = "ab_wake_lock";
     private final static String PREF_AB_STREAM_NAME = "ab_stream_flashing";
@@ -156,6 +156,15 @@ public class Config {
         return use_twrp;
     }
 
+    public boolean getInfoDisplayed() {
+        return prefs.getBoolean(PREF_INFO_DISPLAYED, false);
+    }
+
+    public void setInfoDisplayed() {
+        // only need to set to true - once
+        prefs.edit().putBoolean(PREF_INFO_DISPLAYED, true).apply();
+    }
+
     public boolean getABPerfModeSupport() {
         return support_ab_perf_mode;
     }
@@ -182,14 +191,6 @@ public class Config {
 
     public void setABStreamCurrent(boolean enable) {
         prefs.edit().putBoolean(PREF_AB_STREAM_NAME, enable).commit();
-    }
-
-    public boolean getShowInfo() {
-        return prefs.getBoolean(PREF_SHOW_INFO_NAME, true);
-    }
-
-    public void setShowInfo(boolean enable) {
-        prefs.edit().putBoolean(PREF_SHOW_INFO_NAME, enable).commit();
     }
 
     public boolean getSchedulerSleepEnabled() {

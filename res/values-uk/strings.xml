@@ -138,6 +138,4 @@
     <string name="error_ab_98">Система оновлення не готова\nПерезавантажте пристрій і спробуйте ще раз</string>
     <string name="error_ab_97">Файл оновлення пошкоджено\nЗавантажте файл ще раз</string>
     <string name="error_ab_96">Не є файлом оновлення\nЗавантажте файл ще раз</string>
-    <string name="long_press_info_toast">Довге натискання для детальної інформації</string>
-    <string name="hide_info_toast">Інформація прихована. Скасувати в налаштуваннях</string>
 </resources>

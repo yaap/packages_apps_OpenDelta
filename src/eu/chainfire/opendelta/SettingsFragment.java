@@ -50,7 +50,6 @@ public class SettingsFragment extends PreferenceFragment implements
     private static final String KEY_AB_STREAM = "ab_stream_flashing";
     private static final String KEY_CATEGORY_DOWNLOAD = "category_download";
     private static final String KEY_CATEGORY_FLASHING = "category_flashing";
-    private static final String KEY_SHOW_INFO = "show_info";
     private static final String PREF_FORCE_REFLASH = "force_reflash";
     private static final String PREF_CLEAN_FILES = "clear_files";
 
@@ -69,7 +68,6 @@ public class SettingsFragment extends PreferenceFragment implements
     private Preference mForceReflash;
     private Preference mCleanFiles;
     private ListPreference mScheduleWeekDay;
-    private SwitchPreference mShowInfo;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -92,9 +90,6 @@ public class SettingsFragment extends PreferenceFragment implements
         mBatteryLevel = findPreference(SettingsActivity.PREF_BATTERY_LEVEL);
         mBatteryLevel.setOnPreferenceChangeListener(this);
         mBatteryLevel.setSummary(mBatteryLevel.getEntry());
-
-        mShowInfo = findPreference(KEY_SHOW_INFO);
-        mShowInfo.setChecked(mConfig.getShowInfo());
 
         if (!Config.isABDevice() || !mConfig.getABPerfModeSupport()) {
             getPreferenceScreen().removePreference(findPreference(KEY_AB_PERF_MODE));
@@ -210,9 +205,6 @@ public class SettingsFragment extends PreferenceFragment implements
             return true;
         } else if (preference.equals(mABStream)) {
             mConfig.setABStreamCurrent((boolean) newValue);
-            return true;
-        } else if (preference.equals(mShowInfo)) {
-            mConfig.setShowInfo((boolean) newValue);
             return true;
         }
         return false;

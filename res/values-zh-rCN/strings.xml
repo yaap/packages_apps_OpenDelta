@@ -142,6 +142,4 @@
     <string name="error_ab_98">更新未准备好\n重启后再试</string>
     <string name="error_ab_97">更新文件已损坏\n请重新下载更新</string>
     <string name="error_ab_96">不是一个 AB 更新文件\n请重新下载更新</string>
-    <string name="long_press_info_toast">长按隐藏</string>
-    <string name="hide_info_toast">信息已隐藏，可在设置内重新开启</string>
 </resources>

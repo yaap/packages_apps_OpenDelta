@@ -99,8 +99,6 @@ public class MainActivity extends Activity {
     private SharedPreferences mPrefs;
     private TextView mUpdateVersionTitle;
     private TextView mExtraText;
-    private TextView mInfoText;
-    private ImageView mInfoImage;
     private TextView mProgressPercent;
     private int mProgressCurrent = 0;
     private int mProgressMax = 1;
@@ -149,32 +147,18 @@ public class MainActivity extends Activity {
         mFileFlashButton = findViewById(R.id.button_select_file);
         mUpdateVersionTitle = findViewById(R.id.text_update_version_header);
         mExtraText = findViewById(R.id.extra_text);
-        mInfoText = findViewById(R.id.info_text);
-        mInfoImage = findViewById(R.id.info_image);
 
         mChangelog.setMovementMethod(new ScrollingMovementMethod());
 
         mConfig = Config.getInstance(this);
         mPermOk = false;
         requestPermissions();
-        updateInfoVisibility();
 
-        final View.OnLongClickListener infoLongClickListener =
-                new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                mConfig.setShowInfo(false);
-                updateInfoVisibility(false);
-                Toast.makeText(
-                    getApplicationContext(),
-                    getString(R.string.hide_info_toast),
-                    Toast.LENGTH_LONG
-                ).show();
-                return true;
-            }
-        };
-        mInfoImage.setOnLongClickListener(infoLongClickListener);
-        mInfoText.setOnLongClickListener(infoLongClickListener);
+        // show info dialog once
+        if (!mConfig.getInfoDisplayed()) {
+            showInfo();
+            mConfig.setInfoDisplayed();
+        }
 
         if (mUpdateService == null) {
             startUpdateService(State.ACTION_NONE);
@@ -185,6 +169,18 @@ public class MainActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    private void showInfo() {
+        AlertDialog dialog = (new AlertDialog.Builder(this))
+                .setTitle(R.string.menu_info)
+                .setMessage(getString(R.string.text_info_section))
+                .setNeutralButton(android.R.string.ok, null)
+                .setCancelable(true).show();
+        TextView textView = dialog
+                .findViewById(android.R.id.message);
+        if (textView != null)
+            textView.setTypeface(mTitle.getTypeface());
     }
 
     private void showAbout() {
@@ -226,6 +222,10 @@ public class MainActivity extends Activity {
                     Uri.parse(mConfig.getUrlBaseJson().replace(
                             mConfig.getDevice() + ".json", "Changelog.txt")));
             startActivity(changelogActivity);
+            return true;
+        }
+        if (id == R.id.info) {
+            showInfo();
             return true;
         }
         if (id == R.id.action_about) {
@@ -593,7 +593,6 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         handleProgressBar();
-        updateInfoVisibility();
     }
 
     public void onButtonCheckNowClick(View v) {
@@ -770,17 +769,6 @@ public class MainActivity extends Activity {
                 mProgressCurrent > mProgress.getProgress());
     }
 
-    private void updateInfoVisibility() {
-        updateInfoVisibility(mConfig.getShowInfo());
-    }
-
-    private void updateInfoVisibility(boolean show) {
-        if (mInfoImage != null && mInfoText != null) {
-            mInfoImage.setVisibility(show ? View.VISIBLE : View.GONE);
-            mInfoText.setVisibility(show ? View.VISIBLE : View.GONE);
-        }
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == ACTIVITY_SELECT_FLASH_FILE && resultCode == Activity.RESULT_OK) {
@@ -881,14 +869,6 @@ public class MainActivity extends Activity {
             i.putExtra(UpdateService.EXTRA_STATE, State.ERROR_FLASH_FILE);
             sendBroadcast(i);
         }
-    }
-
-    public void onInfoClick(View v) {
-        Toast.makeText(
-            getApplicationContext(),
-            getString(R.string.long_press_info_toast),
-            Toast.LENGTH_LONG
-        ).show();
     }
 
     private String getUpdateVersionString() {
