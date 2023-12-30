@@ -911,7 +911,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         try {
             try (FileInputStream is = new FileInputStream(file)) {
                 MessageDigest digest = MessageDigest.getInstance("SHA-256");
-                byte[] buffer = new byte[1024];
+                byte[] buffer = new byte[8192];
                 int r;
 
                 while ((r = is.read(buffer)) > 0) {
