@@ -25,7 +25,7 @@
     <string name="last_checked_never">从未检查过，也许就现在？</string>
     <string name="button_check_short">检查更新</string>
     <string name="button_check_now">检查更新中  &#8230;</string>
-    <string name="button_flash_now">刷入</string>
+    <string name="button_flash_now">安装更新</string>
     <string name="button_pause_text">暂停</string>
     <string name="button_resume_text">继续</string>
     <string name="button_stop_text">取消</string>
@@ -70,18 +70,19 @@
     <string name="check_only">检查并提醒</string>
     <string name="download_full">自动下载更新</string>
     <string name="menu_settings">设置</string>
+    <string name="menu_info">信息</string>
     <string name="menu_changelog">更新日志</string>
     <string name="category_download">自动下载</string>
     <string name="charge_only_title">充电时下载</string>
-    <string name="charge_only_message">仅当在充电时才开始下载</string>
+    <string name="charge_only_message">仅当在充电时开始下载</string>
     <string name="battery_level_title">最小电量百分比</string>
     <string name="notify_title_error">检查更新时出错</string>
-    <string name="notify_title_flash">更新已准备好刷入</string>
+    <string name="notify_title_flash">更新已准备好</string>
     <string name="notify_title_download">更新已准备好下载</string>
     <string name="notify_eta_remaining"  formatted="false">剩余 %2d%% · %02d:%02d </string>
     <string name="last_checked_never_title_new">按下 检查 开始</string>
     <string name="screen_state_title">关闭屏幕</string>
-    <string name="screen_state_message">仅当屏幕关闭时才进行下载</string>
+    <string name="screen_state_message">仅当屏幕关闭时进行下载</string>
     <string name="category_scheduler">自动更新</string>
     <string name="scheduler_mode_title">计划任务模式</string>
     <string name="scheduler_smart">智能</string>
@@ -118,9 +119,9 @@
     <string name="progress_status_9">关闭</string>
     <string name="ab_perf_mode_title">性能模式</string>
     <string name="ab_perf_mode_summary_new">增加更新进程优先级\n可能会导致手机卡顿</string>
-    <string name="ab_wake_lock_title">唤醒锁</string>
+    <string name="ab_wake_lock_title">保持唤醒</string>
     <string name="ab_wake_lock_summary">安装更新时保持 CPU 处于唤醒状态\n即使屏幕关闭也能快速更新</string>
-    <string name="ab_stream_flashing_title">流式系统更新</string>
+    <string name="ab_stream_flashing_title">流式更新</string>
     <string name="ab_stream_flashing_summary">下载时同时进行安装\n网络不稳定时请禁用</string>
     <string name="state_error_flash_file_title">无法刷入该文件</string>
     <string name="select_file_activity_title">选择 ZIP 文件</string>
@@ -131,7 +132,7 @@
     <string name="invalid_sum_dialog_msg">校验文件与本地文件不匹配\n此文件可能已损坏，请重新下载\n按下忽略继续安装\n请注意，可能会安装失败</string>
     <string name="install_channel_name">更新进度</string>
     <string name="text_update_file_flash_title">更新文件</string>
-    <string name="text_info_section">点击以检查是否有更新可用。在更新完成后你需要重启设备。A only 的设备将在重新启动后进入恢复模式以进行更新。如果你的设备支持无缝更新 (A/B)，重新启动后将自动完成更新。</string>
+    <string name="text_info_section">按下 检查更新 后将检查是否有更新可用。在更新完成后你需要重启设备。如果你的设备支持无缝更新 (A/B)，重新启动后将自动完成更新，否则将在重新启动后进入恢复模式以应用更新。</string>
     <string name="error_ab_51">当前版本高于将更新的版本</string>
     <string name="error_ab_52">更新已安装，需要重新启动</string>
     <!-- Above string is WRONG. Keeping for historical reasons. This error cannot be reached unless we call applyPayload with SWITCH_SLOT_ON_REBOOT=0 -->
