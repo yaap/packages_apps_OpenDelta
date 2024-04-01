@@ -1178,22 +1178,19 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                         .rebootCustom(PowerManager.REBOOT_RECOVERY);
             } else {
                 // AOSP recovery and derivatives
-                // First copy the file to cache and decrypt it
+                // First copy the file to cache
                 // Finally tell RecoverySystem to flash it via recovery
-                File dst = new File(path_sd + "ota_package.zip.uncrypt");
-                dst.setReadable(true, false);
-                dst.setWritable(true, false);
-                dst.setExecutable(true, false);
-                try {
-                    Logger.d("flashUpdate - copying A-only OTA package: "
-                            + dst.getAbsolutePath());
-                    File src = new File(path_sd + flashFilename);
-                    try (FileChannel srcCh = new FileInputStream(src).getChannel();
-                         FileChannel dstCh = new FileOutputStream(dst, false).getChannel()) {
-                        dstCh.transferFrom(srcCh, 0, srcCh.size());
-                        Logger.d("flashUpdate - installing A-only OTA package");
-                        RecoverySystem.installPackage(this, dst);
-                    }
+                Logger.d("flashUpdate - installing A-only OTA package");
+                File src = new File(path_sd + flashFilename);
+                File dst = new File("/cache/recovery/ota_package.zip");
+                try (FileChannel srcCh = new FileInputStream(src).getChannel();
+                     FileChannel dstCh = new FileOutputStream(dst, false).getChannel()) {
+                    if (dst.exists()) dst.delete();
+                    dstCh.transferFrom(srcCh, 0, srcCh.size());
+                    dst.setReadable(true, false);
+                    dst.setWritable(true, false);
+                    dst.setExecutable(true, false);
+                    RecoverySystem.installPackage(getApplicationContext(), dst);
                 } catch (Exception e) {
                     dst.delete();
                     Logger.d("flashUpdate - Could not install OTA package:");
