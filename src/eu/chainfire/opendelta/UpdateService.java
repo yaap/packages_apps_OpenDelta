@@ -60,6 +60,8 @@ import java.io.OutputStream;
 import java.lang.StringBuilder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -1185,11 +1187,26 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 File dst = new File("/cache/recovery/ota_package.zip");
                 try (FileChannel srcCh = new FileInputStream(src).getChannel();
                      FileChannel dstCh = new FileOutputStream(dst, false).getChannel()) {
-                    if (dst.exists()) dst.delete();
                     dstCh.transferFrom(srcCh, 0, srcCh.size());
                     dst.setReadable(true, false);
                     dst.setWritable(true, false);
                     dst.setExecutable(true, false);
+                } catch (Exception e) {
+                    dst.delete();
+                    Logger.d("flashUpdate - Could not install OTA package:");
+                    Logger.ex(e);
+                    mState.update(State.ERROR_FLASH);
+                    return;
+                }
+
+                try {
+                    Set<PosixFilePermission> perms = Set.of(
+                        PosixFilePermission.OWNER_READ,
+                        PosixFilePermission.OWNER_WRITE,
+                        PosixFilePermission.OTHERS_READ,
+                        PosixFilePermission.GROUP_READ
+                    );
+                    Files.setPosixFilePermissions(dst.toPath(), perms);
                     RecoverySystem.installPackage(getApplicationContext(), dst);
                 } catch (Exception e) {
                     dst.delete();
