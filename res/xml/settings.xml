@@ -20,19 +20,19 @@
 	<PreferenceCategory
 		android:key="category_flashing"
 		android:title="@string/category_flashing" >
-		<SwitchPreference
+		<SwitchPreferenceCompat
 			android:defaultValue="true"
 			android:key="ab_perf_mode"
 			android:persistent="false"
 			android:title="@string/ab_perf_mode_title"
 			android:summary="@string/ab_perf_mode_summary_new" />
-		<SwitchPreference
+		<SwitchPreferenceCompat
 			android:defaultValue="true"
 			android:key="ab_wake_lock"
 			android:persistent="false"
 			android:title="@string/ab_wake_lock_title"
 			android:summary="@string/ab_wake_lock_summary" />
-		<SwitchPreference
+		<SwitchPreferenceCompat
 			android:defaultValue="true"
 			android:key="ab_stream_flashing"
 			android:persistent="false"
@@ -53,7 +53,7 @@
 			android:entryValues="@array/scheduler_mode_values"
 			android:key="scheduler_mode"
 			android:title="@string/scheduler_mode_title" />
-		<SwitchPreference
+		<SwitchPreferenceCompat
 			android:defaultValue="true"
 			android:key="scheduler_sleep_enabled"
 			android:summary="@string/scheduler_sleep_enabled_summary"
@@ -73,19 +73,19 @@
 	<PreferenceCategory
 		android:key="category_download"
 		android:title="@string/category_download" >
-		<SwitchPreference
+		<SwitchPreferenceCompat
 			android:defaultValue="false"
 			android:key="metered_networks_config"
 			android:persistent="false"
 			android:summary="@string/metered_networks_message"
 			android:title="@string/metered_networks_title" />
 
-		<SwitchPreference
+		<SwitchPreferenceCompat
 			android:defaultValue="true"
 			android:key="screen_state_off"
 			android:summary="@string/screen_state_message"
 			android:title="@string/screen_state_title" />
-		<SwitchPreference
+		<SwitchPreferenceCompat
 			android:defaultValue="true"
 			android:key="charge_only"
 			android:summary="@string/charge_only_message"
