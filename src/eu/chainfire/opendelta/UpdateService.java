@@ -96,6 +96,10 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         void setStatus(String status);
     }
 
+    public interface CheckForUpdateListener {
+        void onCheckDone(State state);
+    }
+
     public static final String ACTION_SYSTEM_UPDATE_SETTINGS = "android.settings.SYSTEM_UPDATE_SETTINGS";
     public static final String PERMISSION_ACCESS_CACHE_FILESYSTEM = "android.permission.ACCESS_CACHE_FILESYSTEM";
     public static final String PERMISSION_REBOOT = "android.permission.REBOOT";
@@ -179,6 +183,8 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     private SharedPreferences mPrefs;
     private Notification.Builder mFlashNotificationBuilder;
     private Notification.Builder mDownloadNotificationBuilder;
+
+    private List<CheckForUpdateListener> mCheckForUpdateListeners = new ArrayList<>();
 
     // url override
     private boolean mIsUrlOverride;
@@ -424,17 +430,35 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         return mState;
     }
 
-    private boolean onWantUpdateCheck() {
+    public boolean onWantUpdateCheck() {
+        return onWantUpdateCheck(false);
+    }
+
+    public boolean onWantUpdateCheck(boolean qs) {
         if (mState.isProgressState()) {
             Logger.i("Blocked scheduler requests while running in state " + mState);
             return false;
         }
-        Logger.i("Scheduler requests check for updates");
-        final int autoDownload = getAutoDownloadValue();
+        if (qs) {
+            Logger.i("QS tile requests check for updates");
+        } else {
+            Logger.i("Scheduler requests check for updates");
+        }
+        final int autoDownload = qs ? PREF_AUTO_DOWNLOAD_CHECK : getAutoDownloadValue();
         if (autoDownload != PREF_AUTO_DOWNLOAD_DISABLED) {
             return checkForUpdates(false, autoDownload);
         }
         return false;
+    }
+
+    public void addCheckForUpdateListener(CheckForUpdateListener listener) {
+        if (mCheckForUpdateListeners.contains(listener)) return;
+        mCheckForUpdateListeners.add(listener);
+    }
+
+    public void removeCheckForUpdateListener(CheckForUpdateListener listener) {
+        if (!mCheckForUpdateListeners.contains(listener)) return;
+        mCheckForUpdateListeners.remove(listener);
     }
 
     @Override
@@ -1509,6 +1533,9 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 }
                 mIsUpdateRunning = false;
                 mState.notifyCallbacks();
+
+                for (CheckForUpdateListener listener : mCheckForUpdateListeners)
+                    listener.onCheckDone(mState);
             }
         });
     }

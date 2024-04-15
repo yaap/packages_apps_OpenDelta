@@ -46,6 +46,9 @@
             <intent-filter android:priority="2147483647" >
                 <action android:name="android.settings.SYSTEM_UPDATE_SETTINGS" />
             </intent-filter>
+            <intent-filter android:priority="69">
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
+            </intent-filter>
         </activity>
         <activity
             android:name="eu.chainfire.opendelta.Shortcut"
@@ -75,5 +78,18 @@
         <service
             android:name="eu.chainfire.opendelta.Scheduler"
             android:exported="false" />
+
+        <!-- Quick Settings Tiles -->
+        <service
+            android:name="eu.chainfire.opendelta.CheckTileService"
+            android:icon="@drawable/ic_system_update"
+            android:label="@string/qs_check_title"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            android:exported="true">
+            <intent-filter>
+                <action
+                    android:name="android.service.quicksettings.action.QS_TILE"/>
+            </intent-filter>
+        </service>
     </application>
 </manifest>

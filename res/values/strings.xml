@@ -53,6 +53,12 @@
     <string name="state_action_flash_file_no_sum">No local sum file found</string>
     <string name="state_action_flash_file_invalid_sum">Mismatch with local sum file</string>
 
+    <!-- QS Tile -->
+    <string name="qs_check_title">Check for updates</string>
+    <string name="qs_check_checking">Checking...</string>
+    <string name="qs_check_error">Error</string>
+    <string name="qs_check_uptodate">Up to date</string>
+
     <!-- updates from 2013/12/18 -->
 
     <string name="action_secure_mode">Secure</string>

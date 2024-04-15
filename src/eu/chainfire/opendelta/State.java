@@ -80,6 +80,11 @@ public class State {
         ERROR_FLASH
     );
 
+    private static final Set<String> mAvailableStates = Set.of(
+        ACTION_AVAILABLE,
+        ACTION_AVAILABLE_STREAM
+    );
+
     private static State mState;
     private String mStateStr = ACTION_NONE;
     private Float mProgress = null;
@@ -174,12 +179,20 @@ public class State {
         return isErrorState(mStateStr);
     }
 
+    public synchronized boolean isAvailableState() {
+        return isAvailableState(mStateStr);
+    }
+
     public static boolean isProgressState(String state) {
         return mProgressStates.contains(state);
     }
 
     public static boolean isErrorState(String state) {
         return mErrorStates.contains(state);
+    }
+
+    public static boolean isAvailableState(String state) {
+        return mAvailableStates.contains(state);
     }
 
     public boolean equals(String state) {
