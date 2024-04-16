@@ -40,6 +40,14 @@
     <string name="state_action_flash_file_no_sum">未找到本地校验文件</string>
     <string name="state_action_flash_file_invalid_sum">与本地校验文件不匹配</string>
 
+    <!-- QS Tile -->
+    <string name="qs_check_title">检查更新</string>
+    <string name="qs_check_checking">检查中...</string>
+    <string name="qs_check_error">发生错误</string>
+    <string name="qs_check_uptodate">已是最新</string>
+
+    <!-- updates from 2013/12/18 -->
+
     <string name="action_secure_mode">安全</string>
     <string name="secure_mode_enabled_title">安全模式：已启用</string>
     <string name="secure_mode_enabled_description"><![CDATA[在刷入前会验证更新的签名从而确认它的来源，并且不会刷入附加更新。这个模式仅兼容 <b>TWRP</b> 。]]></string>
