@@ -49,6 +49,8 @@ import android.os.SystemClock;
 import android.os.UpdateEngine;
 import android.preference.PreferenceManager;
 
+import eu.chainfire.opendelta.State.StateInt;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -214,7 +216,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     private final State.StateCallback mStopWhenDoneCallback =
             new State.StateCallback() {
         @Override
-        public void update(String state, Float progress,
+        public void update(@StateInt int state, Float progress,
                 Long current, Long total, String filename,
                 Long ms, int errorCode) {
             if (State.isProgressState(state) || mIsUpdateRunning)
@@ -560,7 +562,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             }
             if (found != null) {
                 // confirm we're not already downloading
-                if (mState.getState().equals(State.ACTION_DOWNLOADING)) return;
+                if (mState.getState() == State.ACTION_DOWNLOADING) return;
                 long total = mPrefs.getLong(PREF_DOWNLOAD_SIZE, 1500000000L /* 1.5 GB */);
                 final long current = found.length();
                 final long lastTime = mPrefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
@@ -577,7 +579,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             Set<String> propSet = null;
             if (mConfig.getABStreamCurrent())
                 propSet = mPrefs.getStringSet(PREF_LATEST_PAYLOAD_PROPS, null);
-            final String state = (propSet != null && propSet.size() > 0)
+            final int state = (propSet != null && propSet.size() > 0)
                     ? State.ACTION_AVAILABLE_STREAM : State.ACTION_AVAILABLE;
             mState.update(state, mPrefs.getLong(PREF_LAST_CHECK_TIME_NAME, PREF_LAST_CHECK_TIME_DEFAULT));
             maybeNotify(notify, latestBuild, null);
@@ -752,9 +754,9 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         return false;
     }
 
-    public ProgressListener getSUMProgress(String state, String filename) {
+    public ProgressListener getSUMProgress(@StateInt int state, String filename) {
         final long[] last = new long[] { 0, SystemClock.elapsedRealtime() };
-        final String _state = state;
+        final @StateInt int _state = state;
         final String _filename = filename;
 
         return new ProgressListener() {
@@ -885,8 +887,8 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 final Long lastTime = mPrefs.getLong(PREF_LAST_DOWNLOAD_TIME, 0);
                 final float progress = ((float) current / (float) total) * 100f;
                 final boolean isPause = mDownload.getStatus() == Download.STATUS_DOWNLOAD_PAUSE;
-                final String newState = isPause ? State.ACTION_DOWNLOADING_PAUSED
-                                                : State.ERROR_DOWNLOAD_RESUME;
+                final @StateInt int newState = isPause ? State.ACTION_DOWNLOADING_PAUSED
+                                                       : State.ERROR_DOWNLOAD_RESUME;
                 Logger.d("download " + (isPause ? "paused" : "error"));
                 mState.update(newState, progress, current, total, imageName, lastTime);
                 // display paused notification with the proper title

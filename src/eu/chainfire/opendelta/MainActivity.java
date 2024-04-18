@@ -62,20 +62,86 @@ import android.widget.Toolbar;
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission;
 import androidx.preference.PreferenceManager;
 
+import eu.chainfire.opendelta.State.StateInt;
+
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.HashSet;
 
 public class MainActivity extends Activity {
     private static final int PERMISSIONS_REQUEST_MANAGE_EXTERNAL_STORAGE = 0;
     private static final int PERMISSIONS_REQUEST_NOTIFICATION = 1;
     private static final int ACTIVITY_SELECT_FLASH_FILE = 2;
 
+    // states that flash button should be visible for
+    private static final HashSet<Integer> FLASH_STATES = new HashSet<>(Arrays.asList(
+        State.ACTION_READY,
+        State.ACTION_FLASH_FILE_READY,
+        State.ACTION_AVAILABLE_STREAM,
+        State.ERROR_FLASH,
+        State.ERROR_FLASH_FILE
+    ));
+
+    // states that download buttons (controls) should be visible for
+    private static final HashSet<Integer> DOWNLOAD_STATES = new HashSet<>(Arrays.asList(
+        State.ACTION_AB_PAUSED,
+        State.ACTION_AB_FLASH,
+        State.ACTION_DOWNLOADING,
+        State.ACTION_DOWNLOADING_PAUSED,
+        State.ERROR_DOWNLOAD_RESUME
+    ));
+
+    // states that resume button should be visible for
+    private static final HashSet<Integer> RESUME_STATES = new HashSet<>(Arrays.asList(
+        State.ACTION_AB_PAUSED,
+        State.ACTION_DOWNLOADING_PAUSED,
+        State.ERROR_DOWNLOAD_RESUME
+    ));
+
+    // states that check button should not be visible for
+    private static final HashSet<Integer> NO_CHECK_STATES = new HashSet<>(Arrays.asList(
+        State.ACTION_AB_PAUSED,
+        State.ACTION_AB_FINISHED,
+        State.ACTION_AB_FLASH,
+        State.ACTION_DOWNLOADING,
+        State.ACTION_DOWNLOADING_PAUSED,
+        State.ERROR_DOWNLOAD_RESUME
+    ));
+
+    // states that changelog should be visible for
+    private static final HashSet<Integer> CHANGELOG_STATES = new HashSet<>(Arrays.asList(
+        State.ACTION_READY,
+        State.ACTION_AB_FINISHED,
+        State.ACTION_AVAILABLE,
+        State.ACTION_AVAILABLE_STREAM
+    ));
+
+    // also states that changelog should not be visible for
+    // (should be visible for all progress states but these)
+    private static final HashSet<Integer> INTERMEDIATE_STATES = new HashSet<>(Arrays.asList(
+        State.ACTION_SEARCHING,
+        State.ACTION_CHECKING
+    ));
+
+    // states that update version text should be visible for
+    // (apart from [progress - INTERMEDIATE_STATES])
+    private static final HashSet<Integer> VERSION_STATES = new HashSet<>(Arrays.asList(
+        State.ACTION_READY,
+        State.ACTION_FLASH_FILE_NO_SUM,
+        State.ACTION_FLASH_FILE_INVALID_SUM,
+        State.ACTION_FLASH_FILE_READY,
+        State.ACTION_AB_FINISHED,
+        State.ACTION_AVAILABLE,
+        State.ACTION_AVAILABLE_STREAM
+    ));
+
     private UpdateService mUpdateService;
     private Config mConfig;
     private Handler mHandler;
-    private String mState;
+    private @StateInt int mState;
     private TextView mTitle;
     private TextView mSub;
     private ProgressBar mProgress;
@@ -102,7 +168,6 @@ public class MainActivity extends Activity {
     private TextView mProgressPercent;
     private int mProgressCurrent = 0;
     private int mProgressMax = 1;
-    private boolean mProgressEnabled;
     private boolean mPermOk;
 
     @Override
@@ -161,7 +226,7 @@ public class MainActivity extends Activity {
         }
 
         if (mUpdateService == null) {
-            startUpdateService(State.ACTION_NONE);
+            startUpdateService(State.getStateString(State.ACTION_NONE));
         }
     }
 
@@ -287,60 +352,52 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        public void update(String stateP, Float progress,
+        public void update(@StateInt int state, Float progress,
                            Long current, Long total, String filename,
                            Long ms, int errorCode) {
             mHandler.post(() -> {
-                String state = stateP;
-                String title = "";
-                String sub = "";
-                String sub2 = "";
-                String progressPercent = "";
-                String updateVersion = "";
-                String extraText = "";
-                String downloadSizeText = "";
+                final boolean hintShown = mPrefs.getBoolean(
+                        SettingsActivity.PREF_START_HINT_SHOWN, false);
+                final boolean isFile = mPrefs.getBoolean(
+                        UpdateService.PREF_FILE_FLASH, false);
+                final boolean isProgress = State.isProgressState(state);
+                final boolean isIntermediate = INTERMEDIATE_STATES.contains(state);
+                final boolean isProgressOngoing = isProgress && !isIntermediate;
+                final long lastCheckedSaved = mPrefs.getLong(
+                        UpdateService.PREF_LAST_CHECK_TIME_NAME,
+                        UpdateService.PREF_LAST_CHECK_TIME_DEFAULT);
                 long localTotal = total != null ? total : 0L;
                 long localCurrent = current != null ? current : 1L;
                 long localMS = ms != null ? ms : 0L;
-                boolean enableFlash = false;
-                boolean enableBuild = false;
-                boolean enableDownload = false;
-                boolean enableResume = false;
-                boolean enableCancel = false;
-                boolean enableReboot = false;
-                boolean enableProgress = false;
-                boolean disableCheck = false;
-                boolean hideCheck = false;
-                boolean disableDataSpeed = false;
-                boolean enableChangelog = false;
-                long lastCheckedSaved = mPrefs.getLong(UpdateService.PREF_LAST_CHECK_TIME_NAME,
-                        UpdateService.PREF_LAST_CHECK_TIME_DEFAULT);
-                String lastCheckedText = lastCheckedSaved != UpdateService.PREF_LAST_CHECK_TIME_DEFAULT ?
-                        formatLastChecked(lastCheckedSaved) : getString(R.string.last_checked_never_title_new);
-                String fullVersion = mConfig.getVersion();
-                String[] versionParts = fullVersion.split("-");
-                String versionType = "";
-                try {
-                    versionType = versionParts[3];
-                } catch (Exception ignored) {
-                }
 
-                // don't try this at home
-                if (state == null) state = State.ACTION_NONE;
-                title = tryGetResourceString("state_" + state);
-                // check for first start until check button has been pressed
-                // use a special title then - but only once
-                if (State.ACTION_NONE.equals(state)
-                        && !mPrefs.getBoolean(SettingsActivity.PREF_START_HINT_SHOWN, false)) {
-                    title = getString(R.string.last_checked_never_title_new);
-                }
-                // don't spill for progress
-                if (!State.isProgressState(state)) {
-                    Logger.d("onReceive state = " + state);
-                } else if (state.equals(mState)) {
+                String stateStr = State.getStateString(state);
+                String title = getTitleForState(state, stateStr, hintShown);
+                String sub = "";
+                String sub2 = "";
+                String progressPercent = "";
+                String updateVersion = getVersionForState(state, filename, isProgressOngoing, isFile);
+                String updateVersionTitle = getVersionTitleForState(state);
+                String extraText = getExtraForState(state, localCurrent, localTotal, errorCode);
+                String downloadSizeText = getSizeForState(state, isProgressOngoing);
+                String lastCheckedText = lastCheckedSaved != UpdateService.PREF_LAST_CHECK_TIME_DEFAULT
+                        ? formatLastChecked(lastCheckedSaved)
+                        : getString(R.string.last_checked_never_title_new);
+                boolean enableFlash = FLASH_STATES.contains(state);
+                boolean enableBuild = state == State.ACTION_AVAILABLE;
+                boolean enableDownload = DOWNLOAD_STATES.contains(state);
+                boolean enableResume = RESUME_STATES.contains(state);
+                boolean enableReboot = state == State.ACTION_AB_FINISHED;
+                boolean hideCheck = NO_CHECK_STATES.contains(state);
+                boolean disableDataSpeed = state == State.ACTION_AB_FLASH;
+                boolean enableChangelog = !isFile && CHANGELOG_STATES.contains(state) ||
+                        !isFile && isProgressOngoing;
+
+                // don't spam for progress
+                if (!isProgress || !State.isProgressState(mState)) {
+                    Logger.d("onReceive state = " + State.getStateString(state));
+                } else if (isProgress && state == mState) {
                     // same progress state as before.
                     // save a lot of time by only updating progress
-                    disableDataSpeed = State.ACTION_AB_FLASH.equals(state);
                     final ProgressGenerator pgen = new ProgressGenerator(
                         localCurrent,
                         localTotal,
@@ -355,194 +412,48 @@ public class MainActivity extends Activity {
                     mProgressPercent.setText(pgen.progressPercent);
                     mProgressCurrent = Math.round(pgen.localCurrent);
                     mProgressMax = Math.round(pgen.localTotal);
-                    mProgressEnabled = true;
                     handleProgressBar();
                     return;
                 }
                 mState = state;
 
-                mProgress.setIndeterminate(false);
-                String flashImage = null;
-                String flashImageBase = null;
-                long downloadSize = 0L;
-                switch (state) {
-                    case State.ACTION_NONE:
-                    case State.ERROR_UNKNOWN:
-                    case State.ERROR_CONNECTION:
-                    case State.ERROR_PERMISSIONS:
-                        break;
-                    case State.ERROR_FLASH:
-                    case State.ERROR_FLASH_FILE:
-                        enableFlash = true;
-                        break;
-                    case State.ERROR_DISK_SPACE:
-                        localCurrent /= 1024L * 1024L;
-                        localTotal /= 1024L * 1024L;
-                        extraText = getString(R.string.error_disk_space_sub,
-                                localCurrent, localTotal);
-                        break;
-                    case State.ERROR_UNOFFICIAL:
-                        extraText = getString(R.string.state_error_not_official_extra, versionType);
-                        break;
-                    case State.ERROR_DOWNLOAD:
-                        extraText = tryGetResourceString("state_error_download_extra_" + errorCode);
-                        break;
-                    case State.ERROR_DOWNLOAD_SHA:
-                        title = getString(R.string.state_error_download);
-                        extraText = getString(R.string.state_error_download_extra_sha);
-                        break;
-                    case State.ERROR_AB_FLASH:
-                        extraText = tryGetResourceString("error_ab_" + errorCode);
-                        break;
-                    case State.ACTION_READY:
-                        enableFlash = true;
-                        enableChangelog = true;
-                        flashImage = mPrefs.getString(UpdateService.PREF_READY_FILENAME_NAME, null);
-                        flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
-                        if (flashImageBase != null) {
-                            updateVersion = flashImageBase.substring(0,
-                                    flashImageBase.lastIndexOf('.'));
-                        }
-                        mUpdateVersionTitle.setText(R.string.text_update_version_title);
-                        break;
-                    case State.ACTION_FLASH_FILE_NO_SUM:
-                    case State.ACTION_FLASH_FILE_INVALID_SUM:
-                        // warn the user once
-                        showLocalSumWarnDialog(state);
-                        flashImage = filename;
-                        flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
-                        if (flashImageBase != null) {
-                            updateVersion = flashImageBase;
-                        }
-                        mUpdateVersionTitle.setText(R.string.text_update_file_flash_title);
-                        break;
-                    case State.ACTION_FLASH_FILE_READY:
-                        enableFlash = true;
-                        flashImage = filename;
-                        flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
-                        if (flashImageBase != null) {
-                            updateVersion = flashImageBase;
-                        }
-                        mUpdateVersionTitle.setText(R.string.text_update_file_flash_title);
-                        break;
-                    case State.ACTION_AB_PAUSED:
-                        enableDownload = true;
-                        enableResume = true;
-                        hideCheck = true;
-                        break;
-                    case State.ACTION_AB_FINISHED:
-                        enableReboot = true;
-                        enableCancel = true;
-                        hideCheck = true;
-                        enableChangelog = !mPrefs.getBoolean(UpdateService.PREF_FILE_FLASH, false);
-
-                        flashImage = mPrefs.getString(UpdateService.PREF_READY_FILENAME_NAME, null);
-                        flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
-                        if (flashImageBase != null) {
-                            updateVersion = flashImageBase.substring(0,
-                                    flashImageBase.lastIndexOf('.'));
-                        }
-
-                        mPrefs.edit().putString(UpdateService.PREF_READY_FILENAME_NAME, null).commit();
-                        mPrefs.edit().putString(UpdateService.PREF_LATEST_FULL_NAME, null).commit();
-                        break;
-                    case State.ACTION_AVAILABLE:
-                    case State.ACTION_AVAILABLE_STREAM:
-                        final String latest = mPrefs.getString(
-                                UpdateService.PREF_LATEST_FULL_NAME, null);
-                        if (latest != null) {
-                            final boolean isStream = mState.equals(State.ACTION_AVAILABLE_STREAM);
-                            String latestBase = latest.substring(0,
-                                    latest.lastIndexOf('.'));
-                            enableBuild = !isStream;
-                            enableFlash = isStream;
-                            enableChangelog = true;
-                            updateVersion = latestBase;
-                            title = getString(R.string.state_action_build_full);
-                        }
-                        downloadSize = mPrefs.getLong(
-                                UpdateService.PREF_DOWNLOAD_SIZE, -1);
-                        if (downloadSize == -1) {
-                            downloadSizeText = "";
-                        } else if (downloadSize == 0) {
-                            downloadSizeText = getString(R.string.text_download_size_unknown);
-                        } else {
-                            downloadSizeText = Formatter.formatFileSize(getApplicationContext(), downloadSize);
-                        }
-                        break;
-                    case State.ACTION_SEARCHING:
-                    case State.ACTION_CHECKING:
-                        disableCheck = true;
-                        enableProgress = true;
-                        mProgress.setIndeterminate(true);
-                        localCurrent = 1L;
-                        break;
-                    default:
-                        disableCheck = true;
-                        enableChangelog = !mPrefs.getBoolean(UpdateService.PREF_FILE_FLASH, false);
-                        enableProgress = true;
-                        switch (state) {
-                            case State.ACTION_AB_FLASH:
-                                disableDataSpeed = true;
-                                enableDownload = true;
-                                hideCheck = true;
-                                break;
-                            case State.ACTION_DOWNLOADING:
-                                hideCheck = true;
-                                enableDownload = true;
-                                break;
-                            case State.ERROR_DOWNLOAD_RESUME:
-                                title = getString(R.string.state_error_download);
-                                extraText = getString(R.string.state_error_download_extra_resume);
-                            case State.ACTION_DOWNLOADING_PAUSED:
-                                hideCheck = true;
-                                enableDownload = true;
-                                enableResume = true;
-                                break;
-                        }
-
-                        downloadSize = mPrefs.getLong(
-                                UpdateService.PREF_DOWNLOAD_SIZE, -1);
-                        if (downloadSize == -1) {
-                            downloadSizeText = "";
-                        } else if (downloadSize == 0) {
-                            downloadSizeText = getString(R.string.text_download_size_unknown);
-                        } else {
-                            downloadSizeText = Formatter.formatFileSize(getApplicationContext(), downloadSize);
-                        }
-
-                        updateVersion = getUpdateVersionString();
-
-                        flashImage = mPrefs.getString(UpdateService.PREF_READY_FILENAME_NAME, null);
-                        flashImageBase = flashImage != null ? new File(flashImage).getName() : null;
-                        if (flashImageBase != null) {
-                            updateVersion = flashImageBase.substring(0, flashImageBase.lastIndexOf('.'));
-                        }
-
-                        final ProgressGenerator pgen = new ProgressGenerator(
-                            localCurrent,
-                            localTotal,
-                            localMS,
-                            progress,
-                            disableDataSpeed,
-                            filename
-                        );
-                        sub = pgen.sub;
-                        sub2 = pgen.sub2;
-                        progressPercent = pgen.progressPercent;
-                        localCurrent = pgen.localCurrent;
-                        localTotal = pgen.localTotal;
-                        break;
+                if (state == State.ACTION_FLASH_FILE_NO_SUM ||
+                        state == State.ACTION_FLASH_FILE_INVALID_SUM) {
+                    // warn the user once
+                    showLocalSumWarnDialog(state);
+                } else if (state == State.ACTION_AB_FINISHED) {
+                    mPrefs.edit().putString(UpdateService.PREF_READY_FILENAME_NAME, null).commit();
+                    mPrefs.edit().putString(UpdateService.PREF_LATEST_FULL_NAME, null).commit();
+                } else if (isProgressOngoing) {
+                    // handle progress
+                    final ProgressGenerator pgen = new ProgressGenerator(
+                        localCurrent,
+                        localTotal,
+                        localMS,
+                        progress,
+                        disableDataSpeed,
+                        filename
+                    );
+                    sub = pgen.sub;
+                    sub2 = pgen.sub2;
+                    progressPercent = pgen.progressPercent;
+                    localCurrent = pgen.localCurrent;
+                    localTotal = pgen.localTotal;
                 }
+
+                // update the views
                 mTitle.setText(title);
                 mSub.setText(sub);
                 mSub.setSelected(true); // allow scrolling
                 mSub2.setText(sub2);
+                mProgress.setIndeterminate(isIntermediate);
                 mProgressPercent.setText(progressPercent);
                 final boolean hideVersion = TextUtils.isEmpty(updateVersion);
                 if (!hideVersion) mUpdateVersion.setText(updateVersion);
                 mUpdateVersion.setVisibility(hideVersion ? View.GONE : View.VISIBLE);
                 mUpdateVersionTitle.setVisibility(hideVersion ? View.GONE : View.VISIBLE);
+                final boolean setVersionTitle = !hideVersion && !TextUtils.isEmpty(updateVersionTitle);
+                if (setVersionTitle) mUpdateVersionTitle.setText(updateVersionTitle);
                 mCurrentVersion.setText(mConfig.getFilenameBase());
                 mLastChecked.setText(lastCheckedText);
                 mExtraText.setText(extraText);
@@ -552,17 +463,15 @@ public class MainActivity extends Activity {
                 mDownloadSizeHeader.setVisibility(hideSize ? View.GONE : View.VISIBLE);
                 mDownloadSizeSpacer.setVisibility(hideSize ? View.GONE : View.VISIBLE);
 
-                mProgressCurrent = Math.round(localCurrent);
+                mProgressCurrent = Math.round(isIntermediate ? 1L : localCurrent);
                 mProgressMax = Math.round(localTotal);
-                mProgressEnabled = enableProgress;
-
                 handleProgressBar();
 
-                mCheckBtn.setEnabled(mPermOk && !disableCheck);
+                mCheckBtn.setEnabled(mPermOk && !isProgress);
                 mBuildBtn.setEnabled(mPermOk && enableBuild);
                 mFlashBtn.setEnabled(mPermOk && enableFlash);
                 mRebootBtn.setEnabled(enableReboot);
-                mFileFlashButton.setEnabled(mPermOk && !disableCheck);
+                mFileFlashButton.setEnabled(mPermOk && !isProgress);
                 mCheckBtn.setVisibility(hideCheck ? View.GONE : View.VISIBLE);
                 mFlashBtn.setVisibility(enableFlash ? View.VISIBLE : View.GONE);
                 mBuildBtn.setVisibility(enableBuild ? View.VISIBLE : View.GONE);
@@ -572,7 +481,7 @@ public class MainActivity extends Activity {
                 // handle changelog
                 if (enableChangelog) {
                     final String cl = mPrefs.getString(UpdateService.PREF_LATEST_CHANGELOG, null);
-                    if (cl != null) mChangelog.setText(cl);
+                    if (cl != null && !cl.isEmpty()) mChangelog.setText(cl);
                     else enableChangelog = false;
                 }
                 mChangelog.setVisibility(enableChangelog ? View.VISIBLE : View.GONE);
@@ -581,13 +490,103 @@ public class MainActivity extends Activity {
 
                 // download buttons
                 final int vis = enableDownload ? View.VISIBLE : View.GONE;
-                mStopBtn.setVisibility(enableCancel ? View.VISIBLE : vis);
+                mStopBtn.setVisibility(enableReboot ? View.VISIBLE : vis);
                 mPauseBtn.setVisibility(vis);
                 mPauseBtn.setText(getString(enableResume ? R.string.button_resume_text
                         : R.string.button_pause_text));
             });
         }
     };
+
+    private String getTitleForState(@StateInt int state, String stateStr, boolean hintShown) {
+        switch (state) {
+            case State.ACTION_NONE:
+                if (!hintShown)
+                    return getString(R.string.last_checked_never_title_new);
+                break;
+            case State.ERROR_DOWNLOAD_SHA:
+            case State.ERROR_DOWNLOAD_RESUME:
+                return getString(R.string.state_error_download);
+            case State.ACTION_AVAILABLE:
+            case State.ACTION_AVAILABLE_STREAM:
+                return getString(R.string.state_action_build_full);
+        }
+        return tryGetResourceString("state_" + stateStr);
+    }
+
+    private String getVersionTitleForState(@StateInt int state) {
+        switch (state) {
+            case State.ACTION_READY:
+                return getString(R.string.text_update_version_title);
+            case State.ACTION_FLASH_FILE_READY:
+            case State.ACTION_FLASH_FILE_NO_SUM:
+            case State.ACTION_FLASH_FILE_INVALID_SUM:
+                return getString(R.string.text_update_file_flash_title);
+        }
+        return "";
+    }
+
+    private String getVersionForState(@StateInt int state, String filename,
+            boolean isOngoing, boolean isFile) {
+        if (!VERSION_STATES.contains(state) && !isOngoing)
+            return "";
+
+        String flashImage = filename;
+        if (state == State.ACTION_READY || state == State.ACTION_AB_FINISHED || isOngoing)
+            flashImage = mPrefs.getString(UpdateService.PREF_READY_FILENAME_NAME, null);
+        else if (state == State.ACTION_AVAILABLE || state == State.ACTION_AVAILABLE_STREAM)
+            flashImage = mPrefs.getString(UpdateService.PREF_LATEST_FULL_NAME, null);
+        if (flashImage == null)
+            return "";
+
+        String flashImageBase = new File(flashImage).getName();
+        if (flashImageBase == null)
+            return "";
+
+        if (isFile)
+            return flashImageBase;
+
+        return flashImageBase.substring(0, flashImageBase.lastIndexOf('.'));
+    }
+
+    private String getExtraForState(@StateInt int state, long localCurrent,
+            long localTotal, int errorCode) {
+        switch (state) {
+            case State.ERROR_DISK_SPACE:
+                localCurrent /= 1024L * 1024L;
+                localTotal /= 1024L * 1024L;
+                return getString(R.string.error_disk_space_sub, localCurrent, localTotal);
+            case State.ERROR_UNOFFICIAL:
+                String[] versionParts = mConfig.getVersion().split("-");
+                String versionType = "";
+                try { versionType = versionParts[3]; } catch (Exception ignored) {}
+                return getString(R.string.state_error_not_official_extra, versionType);
+            case State.ERROR_DOWNLOAD:
+                return tryGetResourceString("state_error_download_extra_" + errorCode);
+            case State.ERROR_DOWNLOAD_SHA:
+                return getString(R.string.state_error_download_extra_sha);
+            case State.ERROR_AB_FLASH:
+                return tryGetResourceString("error_ab_" + errorCode);
+            case State.ERROR_DOWNLOAD_RESUME:
+                return getString(R.string.state_error_download_extra_resume);
+        }
+        return "";
+    }
+
+    private String getSizeForState(@StateInt int state, boolean isOngoing) {
+        if (!isOngoing &&
+                state != State.ACTION_AVAILABLE &&
+                state != State.ACTION_AVAILABLE_STREAM) {
+            return "";
+        }
+
+        long downloadSize = mPrefs.getLong(UpdateService.PREF_DOWNLOAD_SIZE, -1);
+        if (downloadSize == -1)
+            return "";
+        if (downloadSize == 0)
+            return getString(R.string.text_download_size_unknown);
+        return Formatter.formatFileSize(getApplicationContext(), downloadSize);
+    }
 
     @Override
     protected void onResume() {
@@ -617,7 +616,7 @@ public class MainActivity extends Activity {
 
     public void onButtonFlashNowClick(View v) {
         if (Config.isABDevice()) {
-            if (mState.equals(State.ACTION_AVAILABLE_STREAM)) {
+            if (mState == State.ACTION_AVAILABLE_STREAM) {
                 streamStart.run();
                 return;
             }
@@ -653,8 +652,8 @@ public class MainActivity extends Activity {
         alert.show();
     }
 
-    private void showLocalSumWarnDialog(String state) {
-        final String msg = state.equals(State.ACTION_FLASH_FILE_NO_SUM)
+    private void showLocalSumWarnDialog(int state) {
+        final String msg = state == State.ACTION_FLASH_FILE_NO_SUM
                 ? getString(R.string.no_sum_dialog_msg)
                 : getString(R.string.invalid_sum_dialog_msg);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -762,8 +761,9 @@ public class MainActivity extends Activity {
     }
 
     private void handleProgressBar() {
-        mProgress.setVisibility(mProgressEnabled ? View.VISIBLE : View.INVISIBLE);
-        if (!mProgressEnabled) return;
+        final boolean enabled = State.isProgressState(mState);
+        mProgress.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
+        if (!enabled) return;
         mProgress.setMax(mProgressMax);
         mProgress.setProgress(mProgressCurrent,
                 mProgressCurrent > mProgress.getProgress());
@@ -869,16 +869,6 @@ public class MainActivity extends Activity {
             i.putExtra(UpdateService.EXTRA_STATE, State.ERROR_FLASH_FILE);
             sendBroadcast(i);
         }
-    }
-
-    private String getUpdateVersionString() {
-        final String latest = mPrefs.getString(
-                UpdateService.PREF_LATEST_FULL_NAME, null);
-        if (latest != null) {
-            return latest.substring(0,
-                    latest.lastIndexOf('.'));
-        }
-        return "";
     }
 
     private class ProgressGenerator {
