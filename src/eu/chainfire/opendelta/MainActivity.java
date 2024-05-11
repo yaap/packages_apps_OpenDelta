@@ -848,8 +848,7 @@ public class MainActivity extends Activity {
             return getString(getResources().getIdentifier(
                     str, "string", getPackageName()));
         } catch (Exception e) {
-            // String for this state could not be found (returns an empty string)
-            // Logger.ex(e);
+            Logger.w("Couldn't find a string for " + str);
         }
         return "";
     }

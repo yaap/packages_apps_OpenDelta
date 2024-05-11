@@ -198,6 +198,8 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
 
         @Override
         public void onProgress(float progress, long current, long total) {
+            if (mLastProgressTime == null)
+                mLastProgressTime = mLastProgressTime = new long[] { 0, SystemClock.elapsedRealtime() };
             long now = SystemClock.elapsedRealtime();
             if (now >= mLastProgressTime[0] + 250L) {
                 long ms = SystemClock.elapsedRealtime() - mLastProgressTime[1];
@@ -718,7 +720,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                     "state_" + mState, "string", getPackageName()));
         } catch (Exception e) {
             // String for this state could not be found (displays empty string)
-            Logger.ex(e);
+            Logger.w("Couldn't find string for state " + mState);
         }
         if (errorStateString != null) {
             mNotificationManager.notify(

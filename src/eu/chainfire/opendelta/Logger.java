@@ -37,6 +37,10 @@ public class Logger {
             android.util.Log.d(LOG_TAG, String.format(Locale.ENGLISH, message, args));
     }
 
+    public static void w(String message, Object... args) {
+        android.util.Log.w(LOG_TAG, String.format(Locale.ENGLISH, message, args));
+    }
+
     public static void ex(Exception e) {
         if (log)
             e.printStackTrace();

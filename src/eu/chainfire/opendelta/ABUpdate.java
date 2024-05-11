@@ -16,6 +16,7 @@
 package eu.chainfire.opendelta;
 
 import android.content.Context;
+import android.content.res.Resources.NotFoundException;
 import android.os.PowerManager.WakeLock;
 import android.os.ServiceSpecificException;
 import android.os.UpdateEngine;
@@ -97,8 +98,12 @@ class ABUpdate {
             }
 
             if (mProgressListener != null) {
-                mProgressListener.setStatus(mUpdateService.getString(mUpdateService.getResources().getIdentifier(
-                    "progress_status_" + status, "string", mUpdateService.getPackageName())));
+                try {
+                    mProgressListener.setStatus(mUpdateService.getString(mUpdateService.getResources().getIdentifier(
+                        "progress_status_" + status, "string", mUpdateService.getPackageName())));
+                } catch (NotFoundException e) {
+                    Logger.i("Couldn't find status string for status " + status);
+                }
                 mProgressListener.onProgress(percent * (float) weight + (float) offset,
                     (long) Math.round(percent * weight) + (long) offset, 100L);
             }
@@ -176,6 +181,10 @@ class ABUpdate {
     }
 
     public void pokeStatus() {
+        if (mBound) {
+            mUpdateEngine.unbind();
+            mBound = false;
+        }
         bindCallbacks();
     }
 
