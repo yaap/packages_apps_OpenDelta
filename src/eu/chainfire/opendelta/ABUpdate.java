@@ -18,6 +18,8 @@ package eu.chainfire.opendelta;
 import android.content.Context;
 import android.content.res.Resources.NotFoundException;
 import android.os.PowerManager.WakeLock;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ServiceSpecificException;
 import android.os.UpdateEngine;
 import android.os.UpdateEngineCallback;
@@ -152,7 +154,9 @@ class ABUpdate {
         if (!isSuspended(mUpdateService)) {
             mUpdateEngine.unbind();
             mBound = false;
-            mUpdateEngine.suspend();
+            // the user can fast click suspend when an update was about to fail / be done
+            // just early return in this case.
+            try { mUpdateEngine.suspend(); } catch (Exception e) { return; }
             final WakeLock wakeLock = mUpdateService.getWakeLock();
             if (wakeLock.isHeld())
                 wakeLock.release();
@@ -291,7 +295,14 @@ class ABUpdate {
         for (int i = 0; i < headerKeyValuePairs.length; i++)
             Logger.d(headerKeyValuePairs[i]);
 
-        mUpdateEngine.applyPayload(zipFileUri, offset, size, headerKeyValuePairs);
+        try {
+            mUpdateEngine.applyPayload(zipFileUri, offset, size, headerKeyValuePairs);
+        } catch (Exception e) {
+            // if we're here it probably means an update is still processing...
+            // Just poke status later
+            new Handler(Looper.getMainLooper()).postDelayed(() -> pokeStatus(), 200);
+            return ERROR_NOT_READY;
+        }
 
         return -1;
     }

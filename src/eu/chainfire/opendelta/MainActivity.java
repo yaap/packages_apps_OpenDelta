@@ -227,7 +227,10 @@ public class MainActivity extends Activity {
 
         if (mUpdateService == null) {
             startUpdateService(State.getStateString(State.ACTION_NONE));
+            return;
         }
+        // incase we crashed but the service is already connected
+        State.getInstance().notifyCallbacks();
     }
 
     @Override
