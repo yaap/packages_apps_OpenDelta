@@ -569,7 +569,7 @@ public class MainActivity extends Activity {
             case State.ERROR_DOWNLOAD_SHA:
                 return getString(R.string.state_error_download_extra_sha);
             case State.ERROR_AB_FLASH:
-                return tryGetResourceString("error_ab_" + errorCode);
+                return tryGetResourceString("error_ab_" + errorCode, true);
             case State.ERROR_DOWNLOAD_RESUME:
                 return getString(R.string.state_error_download_extra_resume);
         }
@@ -847,11 +847,17 @@ public class MainActivity extends Activity {
     }
 
     private String tryGetResourceString(String str) {
+        return tryGetResourceString(str, false);
+    }
+
+    private String tryGetResourceString(String str, boolean isAB) {
         try {
             return getString(getResources().getIdentifier(
                     str, "string", getPackageName()));
         } catch (Exception e) {
             Logger.w("Couldn't find a string for " + str);
+            // unknown AB error
+            if (isAB) return getString(R.string.error_ab_unknown);
         }
         return "";
     }

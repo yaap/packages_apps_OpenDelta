@@ -180,6 +180,7 @@
     <string name="error_ab_60">Not enough free space</string>
     <string name="error_ab_61">Device corruption\nA clean install through recovery is advised</string>
     <!-- non UpdateEngine errors -->
+    <string name="error_ab_unknown">Unknown error\nView the log</string>
     <string name="error_ab_99">Update file not found\nPress check / select it again</string>
     <string name="error_ab_98">Update engine isn\'t ready\nReboot and try again</string>
     <string name="error_ab_97">Update file corrupted\nDownload the file again</string>

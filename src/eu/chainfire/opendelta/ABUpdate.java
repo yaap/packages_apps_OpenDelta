@@ -104,7 +104,7 @@ class ABUpdate {
                     mProgressListener.setStatus(mUpdateService.getString(mUpdateService.getResources().getIdentifier(
                         "progress_status_" + status, "string", mUpdateService.getPackageName())));
                 } catch (NotFoundException e) {
-                    Logger.i("Couldn't find status string for status " + status);
+                    Logger.w("Couldn't find status string for status " + status);
                 }
                 mProgressListener.onProgress(percent * (float) weight + (float) offset,
                     (long) Math.round(percent * weight) + (long) offset, 100L);
