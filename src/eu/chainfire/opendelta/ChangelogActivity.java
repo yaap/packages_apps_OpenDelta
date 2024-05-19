@@ -40,7 +40,7 @@ import org.json.JSONObject;
 
 public class ChangelogActivity extends Activity {
 
-    private LinearLayout mMainLayout;
+    private LinearLayout mChangelogLayout;
     private TextView mLoadingText;
     private int mMarginPx;
 
@@ -51,7 +51,7 @@ public class ChangelogActivity extends Activity {
 
         mMarginPx = Math.round(TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics()));
-        mMainLayout = findViewById(R.id.main_layout);
+        mChangelogLayout = findViewById(R.id.changelog_layout);
         mLoadingText = findViewById(R.id.loading_text);
 
         Config config = Config.getInstance(this);
@@ -63,6 +63,7 @@ public class ChangelogActivity extends Activity {
             final Long currDate = Long.parseLong(
                     config.getFilenameBase().split("-")[4].substring(0, 8));
             final String jsURL = config.getUrlBaseJson();
+            boolean error = false;
             try {
                 boolean reached = false;
                 final JSONArray jArr = new JSONArray(Download.asString(config.getUrlAPIHistory()));
@@ -88,11 +89,15 @@ public class ChangelogActivity extends Activity {
                         addText(currChangelog);
                     } catch (JSONException e) {
                         Logger.ex(e);
+                        error = true;
                     }
                 }
             } catch (Exception e) {
                 Logger.ex(e);
+                error = true;
             } finally {
+                final boolean isError = error;
+                mChangelogLayout.post(() -> { handleLoadingText(isError); } );
                 ht.quitSafely();
             }
         });
@@ -109,11 +114,7 @@ public class ChangelogActivity extends Activity {
         view.setText(title);
         view.setTextAppearance(R.style.HeaderText);
         view.setTextSize(14);
-        mMainLayout.post(() -> {
-            if (mLoadingText.getVisibility() == View.VISIBLE)
-                mLoadingText.setVisibility(View.GONE);
-            addView(view);
-        });
+        mChangelogLayout.post(() -> { addView(view); });
     }
 
     private void addText(String text) {
@@ -122,10 +123,18 @@ public class ChangelogActivity extends Activity {
         view.setText(text);
         view.setTextAppearance(R.style.ValueText);
         view.setTextSize(14);
-        mMainLayout.post(() -> { addView(view); });
+        mChangelogLayout.post(() -> { addView(view); });
     }
 
     private synchronized void addView(View view) {
-        mMainLayout.addView(view);
+        mChangelogLayout.addView(view);
+    }
+
+    private synchronized void handleLoadingText(boolean isError) {
+        if (isError) {
+            mLoadingText.setText(R.string.qs_check_error);
+            return;
+        }
+        mLoadingText.setVisibility(View.GONE);
     }
 }

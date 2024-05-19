@@ -16,21 +16,33 @@
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="30dp" />
+            android:layout_height="30dp"
+            android:layout_weight="0" />
+
+        <LinearLayout
+            android:id="@+id/changelog_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- views are added here for changelog -->
+            <!-- loading_text below is set to gone when they all are -->
+            <!-- text is set to error on error -->
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/loading_text"
             android:layout_width="match_parent"
             android:layout_height="30sp"
             android:layout_gravity="center_horizontal"
+            android:layout_weight="0"
             android:ellipsize="end"
             android:maxLines="1"
             android:gravity="center_horizontal"
             android:text="@string/loading"
             android:textAppearance="@style/TitleText" />
 
-        <!-- views are added here for changelog -->
-        <!-- loading_text above is set to gone when they are -->
     </LinearLayout>
-
 </ScrollView>
