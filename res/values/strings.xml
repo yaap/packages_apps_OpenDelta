@@ -59,6 +59,10 @@
     <string name="qs_check_error">Error</string>
     <string name="qs_check_uptodate">Up to date</string>
 
+    <!-- General -->
+    <string name="loading">Loading...</string>
+    <string name="current">current</string>
+
     <!-- updates from 2013/12/18 -->
 
     <string name="action_secure_mode">Secure</string>

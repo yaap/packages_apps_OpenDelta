@@ -286,9 +286,7 @@ public class MainActivity extends Activity {
             return true;
         }
         if (id == R.id.changelog) {
-            Intent changelogActivity = new Intent(Intent.ACTION_VIEW,
-                    Uri.parse(mConfig.getUrlBaseJson().replace(
-                            mConfig.getDevice() + ".json", "Changelog.txt")));
+            Intent changelogActivity = new Intent(this, ChangelogActivity.class);
             startActivity(changelogActivity);
             return true;
         }
