@@ -1360,6 +1360,16 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 String sumOverride = null;
                 List<String> payloadProps = null;
 
+                // manipulate url to point to the HEAD sha instead of branch
+                // this guarantees up to date raw overriding the 5m cache time github uses
+                try {
+                    final JSONArray jArr = new JSONArray(Download.asString(mConfig.getUrlAPIHistory()));
+                    final String headSha = jArr.getJSONObject(0).getString("sha");
+                    url = url.replace(mConfig.getUrlBranchName(), headSha);
+                } catch (Exception e) {
+                    // do nothing. old url should still work for fetching
+                }
+
                 String buildData = Download.asString(url);
                 if (buildData == null || buildData.length() == 0) {
                     mState.update(State.ERROR_DOWNLOAD, url, Download.ERROR_CODE_NEWEST_BUILD);
@@ -1419,7 +1429,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
 
                 // if we don't even find a build on dl no sense to continue
                 if (latestBuild == null || latestBuild.length() == 0) {
-                    Logger.d("no latest build found at " + mConfig.getUrlBaseJson() +
+                    Logger.d("no latest build found at " + url +
                             " for " + mConfig.getDevice());
                     return;
                 }
