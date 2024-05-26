@@ -34,6 +34,8 @@ import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,34 +64,44 @@ public class ChangelogActivity extends Activity {
         new Handler(ht.getLooper()).post(() -> {
             final Long currDate = Long.parseLong(
                     config.getFilenameBase().split("-")[4].substring(0, 8));
-            final String jsURL = config.getUrlBaseJson();
+            // unformatted device.json URL 
+            final String jsURL = config.getUrlBaseJson().replace(
+                    config.getUrlBranchName(), "%s");
+            // unformatted changelog.txt URL
+            final String clURL = jsURL.replace(
+                    config.getDevice() + ".json",
+                    "Changelog.txt");
             boolean error = false;
             try {
                 boolean reached = false;
+                int reachedI = 0;
                 final JSONArray jArr = new JSONArray(Download.asString(config.getUrlAPIHistory()));
                 for (int i = 0; i < jArr.length() && (i < 20 || !reached); i++) {
                     try {
                         // figure out the title and date
-                        final String otaJsonURL = jsURL.replace(
-                                config.getUrlBranchName(),
-                                jArr.getJSONObject(i).getString("sha"));
+                        final String currSha = jArr.getJSONObject(i).getString("sha");
+                        final String otaJsonURL = String.format(Locale.ENGLISH, jsURL, currSha);
                         final JSONObject otaJson = new JSONObject(Download.asString(otaJsonURL));
                         final String filename = otaJson.getJSONArray("response")
                                 .getJSONObject(0).getString("filename");
                         final Long fileDate = Long.parseLong(
                                 filename.split("-")[4].substring(0, 8));
                         // fetch and add the changelog of that commit sha
-                        final String currChangelog = Download.asString(
-                                otaJsonURL.replace(config.getDevice() + ".json", "Changelog.txt"));
+                        final String changelogURL = String.format(Locale.ENGLISH, clURL, currSha);
+                        final String currChangelog = Download.asString(changelogURL);
                         // we could be on a testing build with no matching changelog date
                         // count as reached and mark newest as current
-                        if (!reached) reached = fileDate <= currDate;
-                        final boolean isCurrent = fileDate == currDate || reached && i == 0;
+                        if (!reached) {
+                            reached = fileDate <= currDate;
+                            reachedI = i;
+                        }
+                        final boolean isCurrent = fileDate == currDate || reached && i == reachedI;
                         addTitle(fileDate.toString(), isCurrent);
                         addText(currChangelog);
                     } catch (JSONException e) {
                         Logger.ex(e);
                         error = true;
+                        break;
                     }
                 }
             } catch (Exception e) {

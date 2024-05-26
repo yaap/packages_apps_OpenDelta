@@ -1699,32 +1699,37 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     }
 
     private String getChangelogString() {
-        final String jsURL = mConfig.getUrlBaseJson();
-        StringBuilder changelog = new StringBuilder(
-                Download.asString(jsURL.replace(
+        // unformatted device.json URL
+        final String jsURL = mConfig.getUrlBaseJson()
+                .replace(mConfig.getUrlBranchName(), "%s");
+        // unformatted changelog.txt URL
+        final String clURL = jsURL.replace(
                 mConfig.getDevice() + ".json",
-                "Changelog.txt")));
-        // currently changelog only contains the latest info
-        // let us check if we have any builds the user skipped and add em
+                "Changelog.txt");
+        final Long currDate = Long.parseLong(
+                mConfig.getFilenameBase().split("-")[4].substring(0, 8));
+        StringBuilder changelog = new StringBuilder();
         try {
             final JSONArray jArr = new JSONArray(Download.asString(mConfig.getUrlAPIHistory()));
+            if (jArr == null || jArr.isNull(0)) return "";
+            String clURLF = String.format(Locale.ENGLISH,
+                    clURL, jArr.getJSONObject(0).getString("sha"));
+            changelog.append(Download.asString(clURLF));
+            // currently changelog only contains the latest info
+            // let us check if we have any builds the user skipped and add em
             for (int i = 1; i < jArr.length() && i < 10; i++) {
                 try {
-                    final String otaJsonURL = jsURL.replace(
-                            mConfig.getUrlBranchName(),
-                            jArr.getJSONObject(i).getString("sha"));
+                    final String currSha = jArr.getJSONObject(i).getString("sha");
+                    final String otaJsonURL = String.format(Locale.ENGLISH, jsURL, currSha);
                     final JSONObject otaJson = new JSONObject(Download.asString(otaJsonURL));
                     final String filename = otaJson.getJSONArray("response")
                             .getJSONObject(0).getString("filename");
                     final Long fileDate = Long.parseLong(
                             filename.split("-")[4].substring(0, 8));
-                    final Long currDate = Long.parseLong(
-                            mConfig.getFilenameBase().split("-")[4].substring(0, 8));
                     if (fileDate <= currDate) break; // reached an older/same build
-
                     // fetch and add the changelog of that commit sha, titled by the date
-                    final String currChangelog = Download.asString(
-                            otaJsonURL.replace(mConfig.getDevice() + ".json", "Changelog.txt"));
+                    final String otaChangelogURL = String.format(Locale.ENGLISH, clURL, currSha);
+                    final String currChangelog = Download.asString(otaChangelogURL);
                     changelog.append("\n" + fileDate + ":\n\n" + currChangelog);
                 } catch (JSONException e) {
                     Logger.ex(e);
