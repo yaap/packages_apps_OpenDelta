@@ -30,7 +30,7 @@
     <string name="state_action_ready">Update ready to flash</string>
     <string name="state_error_disk_space">Not enough disk space</string>
     <string name="state_error_unknown">Unknown error</string>
-    <string name="state_error_unofficial">Update disabled</string>
+    <string name="state_error_unofficial">Update aborted</string>
     <string name="error_disk_space_sub" formatted="false">%d MiB available, %d MiB required</string>
     <string name="notify_update_available">An update is available</string>
     <string name="notify_checking">Checking for update &#8230;</string>
@@ -74,7 +74,7 @@
     <string name="recovery_notice_description_not_secure"><![CDATA[Flashing updates in the current mode is only officially supported on <b>TWRP</b> recoveries. <i>Official</i> <b>CWM</b> builds are <i>not</i> supported, though some <i>community-built</i> versions of <b>CWM</b> <i>may</i> still work. Please make sure you are running a compatible recovery before continuing.]]></string>
     <string name="recovery_notice_description_reboot"><![CDATA[The device will now reboot to AOSP recovery to install the update]]></string>
     <string name="flash_after_update_notice_title">Notice</string>
-    <string name="state_error_not_official_extra" formatted="false">Update of type %s is not possible</string>
+    <string name="state_error_not_official_extra" formatted="false">Update to version %s is not possible</string>
     <string name="button_build_delta">Download</string>
     <string name="button_stop">Stop</string>
     <string name="state_action_available">Update available</string>
@@ -83,6 +83,7 @@
     <string name="state_error_download_extra_1">Can\'t fetch the newest build\nCheck your network connection and DNS settings</string>
     <string name="state_error_download_extra_2">No sum file was found on the server\nTalk with your maintainer</string>
     <string name="state_error_download_extra_3">@string/state_error_connection</string>
+    <string name="state_error_download_extra_4">Server response malformed\nTalk with your maintainer</string>
     <string name="state_error_download_extra_sha">corrupted file</string>
     <string name="state_error_download_extra_resume">resume-able</string>
     <string name="text_current_version_header_title">Current version:</string>

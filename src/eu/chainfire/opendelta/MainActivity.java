@@ -560,7 +560,7 @@ public class MainActivity extends Activity {
             case State.ERROR_UNOFFICIAL:
                 String[] versionParts = mConfig.getVersion().split("-");
                 String versionType = "";
-                try { versionType = versionParts[3]; } catch (Exception ignored) {}
+                try { versionType = versionParts[1]; } catch (Exception ignored) {}
                 return getString(R.string.state_error_not_official_extra, versionType);
             case State.ERROR_DOWNLOAD:
                 return tryGetResourceString("state_error_download_extra_" + errorCode);

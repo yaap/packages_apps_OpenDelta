@@ -53,6 +53,7 @@ public class Download {
     public static final int ERROR_CODE_NEWEST_BUILD = 1;
     public static final int ERROR_CODE_NO_SUM_FILE = 2;
     public static final int ERROR_CODE_NO_CONNECTION = 3;
+    public static final int ERROR_CODE_JSON_MALFORMED = 4;
 
     private final String mURL;
     private final File mFile;
