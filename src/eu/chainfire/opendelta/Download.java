@@ -23,7 +23,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.StatFs;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
+
+import androidx.preference.PreferenceManager;
 
 import eu.chainfire.opendelta.UpdateService.ProgressListener;
 

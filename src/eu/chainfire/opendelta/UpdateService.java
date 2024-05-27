@@ -47,7 +47,8 @@ import android.os.RecoverySystem;
 import android.os.StatFs;
 import android.os.SystemClock;
 import android.os.UpdateEngine;
-import android.preference.PreferenceManager;
+
+import androidx.preference.PreferenceManager;
 
 import eu.chainfire.opendelta.State.StateInt;
 
