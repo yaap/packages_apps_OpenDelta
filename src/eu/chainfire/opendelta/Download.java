@@ -121,7 +121,7 @@ public class Download {
             urlConnection = setupHttpsRequest(url);
             if (urlConnection == null) return 0;
 
-            return urlConnection.getContentLength();
+            return getSize(urlConnection);
         } catch (Exception e) {
             // Download failed for any number of reasons, timeouts, connection
             // drops, etc. Just log it in debugging mode.
@@ -131,6 +131,24 @@ public class Download {
             if (urlConnection != null)
                 urlConnection.disconnect();
         }
+    }
+
+    private static long getSize(HttpsURLConnection urlConnection) throws Exception {
+        long contentLen = urlConnection.getContentLengthLong();
+        if (contentLen >= 0) {
+            return contentLen;
+        }
+        // the server doesn't provide Content-Length
+        // get the size via Content-Range
+        Logger.d("getSize failed getting via Content-Length attempting via Content-Range");
+        String range = urlConnection.getHeaderField("Content-Range");
+        if (range == null || range.isEmpty())
+            return 0;
+        String[] parts = range.split("/", 3);
+        if (parts.length < 1)
+            return 0;
+        contentLen = Long.parseLong(parts[1]);
+        return contentLen;
     }
 
     public boolean start() {
@@ -161,7 +179,7 @@ public class Download {
             urlConnection = setupHttpsRequest(mURL);
             if (urlConnection == null) return false;
 
-            len = urlConnection.getContentLength();
+            len = getSize(urlConnection);
             mPrefs.edit().putLong(UpdateService.PREF_DOWNLOAD_SIZE, len).apply();
             if (offset > 0 && offset < len) {
                 urlConnection.disconnect();

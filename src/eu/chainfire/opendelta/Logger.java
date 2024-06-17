@@ -21,6 +21,8 @@
 
 package eu.chainfire.opendelta;
 
+import android.util.Log;
+
 import java.util.Locale;
 
 public class Logger {
@@ -33,20 +35,19 @@ public class Logger {
     }
 
     public static void d(String message, Object... args) {
-        if (log)
-            android.util.Log.d(LOG_TAG, String.format(Locale.ENGLISH, message, args));
+        if (!log) return;
+        Log.d(LOG_TAG, String.format(Locale.ENGLISH, message, args));
     }
 
     public static void w(String message, Object... args) {
-        android.util.Log.w(LOG_TAG, String.format(Locale.ENGLISH, message, args));
+        Log.w(LOG_TAG, String.format(Locale.ENGLISH, message, args));
     }
 
     public static void ex(Exception e) {
-        if (log)
-            e.printStackTrace();
+        Log.e(LOG_TAG, "Exception trace:", e);
     }
 
     public static void i(String message, Object... args) {
-        android.util.Log.i(LOG_TAG, String.format(Locale.ENGLISH, message, args));
+        Log.i(LOG_TAG, String.format(Locale.ENGLISH, message, args));
     }
 }
