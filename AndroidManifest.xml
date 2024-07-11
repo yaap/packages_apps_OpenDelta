@@ -70,7 +70,7 @@
             android:name="eu.chainfire.opendelta.ChangelogActivity"
             android:label="@string/menu_changelog"
             android:theme="@style/Theme.SubSettingsBase"
-            android:exported="false" >
+            android:exported="true" >
         </activity>
         <receiver android:name="eu.chainfire.opendelta.BootCompleteReceiver"
                   android:exported="true" >
