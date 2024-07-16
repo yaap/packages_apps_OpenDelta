@@ -131,6 +131,7 @@ public class CheckTileService extends TileService {
         if (mService == null) {
             // bind it now. check right after
             mIsCheckPending = true;
+            mChecking = false;
             Intent i = new Intent(this, UpdateService.class);
             startService(i);
             bindService(i, mConnection, Context.BIND_AUTO_CREATE);
