@@ -135,7 +135,7 @@ public class Download {
 
     private static long getSize(HttpsURLConnection urlConnection) throws Exception {
         long contentLen = urlConnection.getContentLengthLong();
-        if (contentLen >= 0) {
+        if (contentLen > 0) {
             return contentLen;
         }
         // the server doesn't provide Content-Length

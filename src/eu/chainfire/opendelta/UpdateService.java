@@ -338,7 +338,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 break;
             case ACTION_DOWNLOAD:
                 if (checkPermissions())
-                    checkForUpdates(true, PREF_AUTO_DOWNLOAD_FULL);
+                    checkForUpdates(true, PREF_AUTO_DOWNLOAD_FULL, true);
                 break;
             case ACTION_DOWNLOAD_STOP:
                 final boolean pendingReboot = mPrefs.getBoolean(PREF_PENDING_REBOOT, false);
