@@ -106,6 +106,9 @@ public class MainActivity extends Activity {
         State.ACTION_AB_PAUSED,
         State.ACTION_AB_FINISHED,
         State.ACTION_AB_FLASH,
+        State.ACTION_A_FLASH_VERIFY,
+        State.ACTION_A_FLASH_PREP,
+        State.ACTION_A_FLASH_INSTALL,
         State.ACTION_DOWNLOADING,
         State.ACTION_DOWNLOADING_PAUSED,
         State.ERROR_DOWNLOAD_RESUME
@@ -123,7 +126,8 @@ public class MainActivity extends Activity {
     // (should be visible for all progress states but these)
     private static final HashSet<Integer> INTERMEDIATE_STATES = new HashSet<>(Arrays.asList(
         State.ACTION_SEARCHING,
-        State.ACTION_CHECKING
+        State.ACTION_CHECKING,
+        State.ACTION_A_FLASH_INSTALL
     ));
 
     // states that update version text should be visible for
@@ -570,6 +574,8 @@ public class MainActivity extends Activity {
                 return tryGetResourceString("error_ab_" + errorCode, true);
             case State.ERROR_DOWNLOAD_RESUME:
                 return getString(R.string.state_error_download_extra_resume);
+            case State.ERROR_FLASH:
+                return tryGetResourceString("error_flash_" + errorCode);
         }
         return "";
     }
@@ -765,9 +771,9 @@ public class MainActivity extends Activity {
         final boolean enabled = State.isProgressState(mState);
         mProgress.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
         if (!enabled) return;
+        final int diff = mProgressCurrent - mProgress.getProgress();
         mProgress.setMax(mProgressMax);
-        mProgress.setProgress(mProgressCurrent,
-                mProgressCurrent > mProgress.getProgress());
+        mProgress.setProgress(mProgressCurrent, diff >= 3);
     }
 
     @Override

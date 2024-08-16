@@ -65,6 +65,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.Files;
+import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -72,6 +73,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import org.json.JSONArray;
@@ -160,6 +162,9 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     public static final String PREF_LATEST_FULL_NAME = "latest_full_name";
     public static final String PREF_LATEST_PAYLOAD_PROPS = "latest_payload_props";
     public static final String PREF_DOWNLOAD_SIZE = "download_size_long";
+
+    public static final int ERROR_FLASH_VERIFY = 1;
+    public static final int ERROR_FLASH_IO = 2;
 
     public static final int PREF_AUTO_DOWNLOAD_DISABLED = 0;
     public static final int PREF_AUTO_DOWNLOAD_CHECK = 1;
@@ -1139,7 +1144,6 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             return;
         }
 
-        deleteOldFlashFile(flashFilename);
         mPrefs.edit().putString(PREF_CURRENT_FILENAME_NAME, flashFilename).commit();
         clearState();
 
@@ -1201,38 +1205,81 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 // AOSP recovery and derivatives
                 // First copy the file to cache
                 // Finally tell RecoverySystem to flash it via recovery
-                Logger.d("flashUpdate - installing A-only OTA package");
-                File src = new File(path_sd + flashFilename);
-                File dst = new File("/cache/recovery/ota_package.zip");
-                try (FileChannel srcCh = new FileInputStream(src).getChannel();
-                     FileChannel dstCh = new FileOutputStream(dst, false).getChannel()) {
-                    dstCh.transferFrom(srcCh, 0, srcCh.size());
-                    dst.setReadable(true, false);
-                    dst.setWritable(true, false);
-                    dst.setExecutable(true, false);
-                } catch (Exception e) {
-                    dst.delete();
-                    Logger.d("flashUpdate - Could not install OTA package:");
-                    Logger.ex(e);
-                    mState.update(State.ERROR_FLASH);
-                    return;
-                }
+                final File flashFile = new File(path_sd + flashFilename);
+                final String fileName = flashFile.getName();
+                final File uncryptFile = new File("/data/yaap-ota/" + fileName + ".uncrypt");
+                mHandler.post(() -> {
+                    Logger.d("flashUpdate - installing A-only OTA package");
+                    try {
+                        // verifying
+                        RecoverySystem.ProgressListener pListener =
+                                new RecoverySystem.ProgressListener() {
+                            long last = SystemClock.elapsedRealtime();
+                            @Override
+                            public void onProgress(int progress) {
+                                mState.update(State.ACTION_A_FLASH_VERIFY,
+                                        getProgress(progress, 100L),
+                                        new Long(progress), 100L, fileName,
+                                        SystemClock.elapsedRealtime() - last);
+                                last = SystemClock.elapsedRealtime();
+                            }
+                        };
+                        RecoverySystem.verifyPackage(flashFile, pListener, null);
+                        mState.update(State.ACTION_A_FLASH_VERIFY,
+                                100f, 100L, 100L, fileName, null);
 
-                try {
-                    Set<PosixFilePermission> perms = Set.of(
-                        PosixFilePermission.OWNER_READ,
-                        PosixFilePermission.OWNER_WRITE,
-                        PosixFilePermission.OTHERS_READ,
-                        PosixFilePermission.GROUP_READ
-                    );
-                    Files.setPosixFilePermissions(dst.toPath(), perms);
-                    RecoverySystem.installPackage(getApplicationContext(), dst);
-                } catch (Exception e) {
-                    dst.delete();
-                    Logger.d("flashUpdate - Could not install OTA package:");
-                    Logger.ex(e);
-                    mState.update(State.ERROR_FLASH);
-                }
+                        // preparing
+                        if (uncryptFile.exists()) {
+                            uncryptFile.delete();
+                        }
+                        final long length = flashFile.length();
+                        FileUtils.ProgressListener fpListener = new FileUtils.ProgressListener() {
+                            long last = SystemClock.elapsedRealtime();
+                            @Override
+                            public void onProgress(long progress) {
+                                mState.update(State.ACTION_A_FLASH_PREP,
+                                        getProgress(progress, length),
+                                        progress, length, fileName,
+                                        SystemClock.elapsedRealtime() - last);
+                                last = SystemClock.elapsedRealtime();
+                            }
+                        };
+                        try (FileInputStream is = new FileInputStream(flashFile);
+                            FileOutputStream os = new FileOutputStream(uncryptFile, false)) {
+                            FileUtils.copy(is, os, null, getMainExecutor(), fpListener);
+                        } catch (Exception e) {
+                            uncryptFile.delete();
+                            Logger.d("flashUpdate - Could not copy OTA package:");
+                            Logger.ex(e);
+                            mState.update(State.ERROR_FLASH, ERROR_FLASH_IO);
+                            return;
+                        }
+                        mState.update(State.ACTION_A_FLASH_PREP,
+                                100f, length, length, fileName, null);
+                        mState.update(State.ACTION_A_FLASH_INSTALL);
+                        uncryptFile.setReadable(true, false);
+                        uncryptFile.setWritable(true, false);
+                        uncryptFile.setExecutable(true, false);
+                        Set<PosixFilePermission> perms = Set.of(
+                            PosixFilePermission.OWNER_READ,
+                            PosixFilePermission.OWNER_WRITE,
+                            PosixFilePermission.OTHERS_READ,
+                            PosixFilePermission.GROUP_READ
+                        );
+                        Files.setPosixFilePermissions(uncryptFile.toPath(), perms);
+
+                        // flash
+                        RecoverySystem.installPackage(getApplicationContext(), uncryptFile);
+                    } catch (Exception e) {
+                        uncryptFile.delete();
+                        Logger.d("flashUpdate - Could not install OTA package:");
+                        Logger.ex(e);
+                        int errorCode = ERROR_FLASH_IO;
+                        if (e instanceof GeneralSecurityException)
+                            errorCode = ERROR_FLASH_VERIFY;
+                        mState.update(State.ERROR_FLASH, errorCode);
+                    }
+                });
             }
         } catch (Exception e) {
             // We have failed to write something. There's not really anything
@@ -1263,7 +1310,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     private static float getProgress(long current, long total) {
         if (total == 0)
             return 0f;
-        return ((float) current / (float) total) * 100f;
+        return Math.abs((float) current / (float) total) * 100f;
     }
 
     private int getAutoDownloadValue() {

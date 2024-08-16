@@ -45,6 +45,9 @@
     <string name="button_ignore_text">Ignore</string>
     <string name="button_yes_text">Yes</string>
     <string name="button_no_text">No</string>
+    <string name="state_action_a_flash_verify">Verifying A-only Update &#8230;</string>
+    <string name="state_action_a_flash_prep">Preparing A-only Update &#8230;</string>
+    <string name="state_action_a_flash_install">Rebooting to install &#8230;</string>
     <string name="state_action_ab_flash">Installing AB Update &#8230;</string>
     <string name="state_action_ab_paused">AB Update paused</string>
     <string name="state_action_ab_finished">Done Installing. Reboot Now</string>
@@ -137,7 +140,7 @@
     <string name="clear_files_summary">Delete existing update files to force downloading full update</string>
     <string name="clean_files_feedback" formatted="false">Deleted %d files. Now press \'Check for updates\'</string>
     <string name="state_error_permissions">No storage permissions</string>
-    <string name="state_error_flash">Failed to setup flash. Clean /cache and try again.</string>
+    <string name="state_error_flash">Failed preparing for A-only flash</string>
     <string name="progress_status_0">Idle &#8230;</string>
     <string name="progress_status_1">Checking for Updates &#8230;</string>
     <string name="progress_status_2">Update available &#8230;</string>
@@ -190,4 +193,6 @@
     <string name="error_ab_98">Update engine isn\'t ready\nReboot and try again</string>
     <string name="error_ab_97">Update file corrupted\nDownload the file again</string>
     <string name="error_ab_96">Not an AB update file\nDownload the file again</string>
+    <string name="error_flash_1">Mismatched signature\nPlease use an official signed build</string>
+    <string name="error_flash_2">Ensure storage permissions are correctly granted</string>
 </resources>

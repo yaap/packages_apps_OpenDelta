@@ -44,6 +44,8 @@ public class State {
         ACTION_APPLYING_PATCH,
         ACTION_APPLYING_SUM,
         ACTION_READY,
+        ACTION_A_FLASH_VERIFY,
+        ACTION_A_FLASH_PREP,
         ACTION_AB_FLASH,
         ACTION_AB_PAUSED,
         ACTION_AB_FINISHED,
@@ -77,25 +79,28 @@ public class State {
     public static final int ACTION_APPLYING_PATCH = 8;
     public static final int ACTION_APPLYING_SUM = 9;
     public static final int ACTION_READY = 10;
-    public static final int ACTION_AB_FLASH = 11;
-    public static final int ACTION_AB_PAUSED = 12;
-    public static final int ACTION_AB_FINISHED = 13;
-    public static final int ACTION_AVAILABLE = 14;
-    public static final int ACTION_AVAILABLE_STREAM = 15;
-    public static final int ACTION_FLASH_FILE_NO_SUM = 16;
-    public static final int ACTION_FLASH_FILE_INVALID_SUM = 17;
-    public static final int ACTION_FLASH_FILE_READY = 18;
-    public static final int ERROR_DISK_SPACE = 19;
-    public static final int ERROR_UNKNOWN = 20;
-    public static final int ERROR_UNOFFICIAL = 21;
-    public static final int ERROR_DOWNLOAD = 22;
-    public static final int ERROR_DOWNLOAD_SHA = 23;
-    public static final int ERROR_DOWNLOAD_RESUME = 24;
-    public static final int ERROR_CONNECTION = 25;
-    public static final int ERROR_PERMISSIONS = 26;
-    public static final int ERROR_FLASH = 27;
-    public static final int ERROR_AB_FLASH = 28;
-    public static final int ERROR_FLASH_FILE = 29;
+    public static final int ACTION_A_FLASH_VERIFY = 11;
+    public static final int ACTION_A_FLASH_PREP = 12;
+    public static final int ACTION_A_FLASH_INSTALL = 13;
+    public static final int ACTION_AB_FLASH = 14;
+    public static final int ACTION_AB_PAUSED = 15;
+    public static final int ACTION_AB_FINISHED = 16;
+    public static final int ACTION_AVAILABLE = 17;
+    public static final int ACTION_AVAILABLE_STREAM = 18;
+    public static final int ACTION_FLASH_FILE_NO_SUM = 19;
+    public static final int ACTION_FLASH_FILE_INVALID_SUM = 20;
+    public static final int ACTION_FLASH_FILE_READY = 21;
+    public static final int ERROR_DISK_SPACE = 22;
+    public static final int ERROR_UNKNOWN = 23;
+    public static final int ERROR_UNOFFICIAL = 24;
+    public static final int ERROR_DOWNLOAD = 25;
+    public static final int ERROR_DOWNLOAD_SHA = 26;
+    public static final int ERROR_DOWNLOAD_RESUME = 27;
+    public static final int ERROR_CONNECTION = 28;
+    public static final int ERROR_PERMISSIONS = 29;
+    public static final int ERROR_FLASH = 30;
+    public static final int ERROR_AB_FLASH = 31;
+    public static final int ERROR_FLASH_FILE = 32;
 
     private static final HashMap<Integer, String> STATE_STRING_MAP;
     static {
@@ -111,6 +116,9 @@ public class State {
         tMap.put(ACTION_APPLYING_PATCH, "action_applying_patch");
         tMap.put(ACTION_APPLYING_SUM, "action_applying_sum");
         tMap.put(ACTION_READY, "action_ready");
+        tMap.put(ACTION_A_FLASH_VERIFY, "action_a_flash_verify");
+        tMap.put(ACTION_A_FLASH_PREP, "action_a_flash_prep");
+        tMap.put(ACTION_A_FLASH_INSTALL, "action_a_flash_install");
         tMap.put(ACTION_AB_FLASH, "action_ab_flash");
         tMap.put(ACTION_AB_PAUSED, "action_ab_paused");
         tMap.put(ACTION_AB_FINISHED, "action_ab_finished");
@@ -142,7 +150,10 @@ public class State {
         ACTION_APPLYING,
         ACTION_APPLYING_SUM,
         ACTION_APPLYING_PATCH,
-        ACTION_AB_FLASH
+        ACTION_AB_FLASH,
+        ACTION_A_FLASH_VERIFY,
+        ACTION_A_FLASH_PREP,
+        ACTION_A_FLASH_INSTALL
     ));
 
     private static final HashSet<Integer> mErrorStates = new HashSet<>(Arrays.asList(
