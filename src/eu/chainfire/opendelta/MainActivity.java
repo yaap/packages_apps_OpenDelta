@@ -781,6 +781,8 @@ public class MainActivity extends Activity {
         if (requestCode == ACTIVITY_SELECT_FLASH_FILE && resultCode == Activity.RESULT_OK) {
             Uri uri = data.getData();
             Logger.d("Try flash file: %s", uri.getPath());
+            Logger.d("File URI: %s", uri.toString());
+            Logger.d("File authority: %s", uri.getAuthority());
             String flashFilename = getPath(uri);
             if (flashFilename != null) {
                 startUpdateServiceFile(flashFilename);
@@ -811,6 +813,14 @@ public class MainActivity extends Activity {
     }
 
     private String getPath(Uri uri) {
+        final String extPath = Environment.getExternalStorageDirectory().toString();
+        final String uriPath = uri.getPath();
+        if (uriPath != null) {
+            final int startIndex = uriPath.indexOf(extPath);
+            if (startIndex != -1) {
+                return uriPath.substring(startIndex);
+            }
+        }
         if (DocumentsContract.isDocumentUri(this, uri)) {
             final String docId = DocumentsContract.getDocumentId(uri);
             // ExternalStorageProvider
@@ -820,10 +830,11 @@ public class MainActivity extends Activity {
                 final String type = split[0];
 
                 if ("primary".equalsIgnoreCase(type)) {
-                    return Environment.getExternalStorageDirectory() + "/" + split[1];
+                    return extPath + "/" + split[1];
                 }
                 if ("home".equalsIgnoreCase(type)) {
-                    return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/" + split[1];
+                    return Environment.getExternalStoragePublicDirectory(
+                            Environment.DIRECTORY_DOCUMENTS) + "/" + split[1];
                 }
             }
             // DownloadsProvider
@@ -831,7 +842,8 @@ public class MainActivity extends Activity {
                 Logger.d("isDownloadsDocument: %s", uri.getPath());
                 String fileName = getFileNameColumn(uri);
                 if (fileName != null) {
-                    return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + fileName;
+                    return Environment.getExternalStoragePublicDirectory(
+                            Environment.DIRECTORY_DOWNLOADS) + "/" + fileName;
                 }
             }
         }
