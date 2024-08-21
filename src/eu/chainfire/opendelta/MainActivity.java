@@ -576,6 +576,8 @@ public class MainActivity extends Activity {
                 return getString(R.string.state_error_download_extra_resume);
             case State.ERROR_FLASH:
                 return tryGetResourceString("error_flash_" + errorCode);
+            case State.ERROR_FLASH_FILE:
+                return tryGetResourceString("error_flash_file_" + errorCode);
         }
         return "";
     }
@@ -783,14 +785,7 @@ public class MainActivity extends Activity {
             Logger.d("Try flash file: %s", uri.getPath());
             Logger.d("File URI: %s", uri.toString());
             Logger.d("File authority: %s", uri.getAuthority());
-            String flashFilename = getPath(uri);
-            if (flashFilename != null) {
-                startUpdateServiceFile(flashFilename);
-            } else {
-                Intent i = new Intent(UpdateService.BROADCAST_INTENT);
-                i.putExtra(UpdateService.EXTRA_STATE, State.ERROR_FLASH_FILE);
-                sendBroadcast(i);
-            }
+            startUpdateServiceFile(getPath(uri));
         } else if (requestCode == PERMISSIONS_REQUEST_MANAGE_EXTERNAL_STORAGE
                 && resultCode == Activity.RESULT_OK) {
             mPermOk = Environment.isExternalStorageManager();
@@ -889,9 +884,10 @@ public class MainActivity extends Activity {
                     getResources().getString(R.string.select_file_activity_title)),
                     ACTIVITY_SELECT_FLASH_FILE);
         } catch (android.content.ActivityNotFoundException ex) {
-            Intent i = new Intent(UpdateService.BROADCAST_INTENT);
-            i.putExtra(UpdateService.EXTRA_STATE, State.ERROR_FLASH_FILE);
-            sendBroadcast(i);
+            Toast.makeText(this,
+                    getResources().getString(R.string.select_file_activity_error_toast),
+                    Toast.LENGTH_LONG).show();
+            Logger.ex(ex);
         }
     }
 

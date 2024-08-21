@@ -109,7 +109,6 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     public static final String PERMISSION_ACCESS_CACHE_FILESYSTEM = "android.permission.ACCESS_CACHE_FILESYSTEM";
     public static final String PERMISSION_REBOOT = "android.permission.REBOOT";
 
-    public static final String BROADCAST_INTENT = "eu.chainfire.opendelta.intent.BROADCAST_STATE";
     public static final String EXTRA_STATE = "eu.chainfire.opendelta.extra.ACTION_STATE";
     public static final String EXTRA_FILENAME = "eu.chainfire.opendelta.extra.FILENAME";
 
@@ -1675,16 +1674,16 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     public void setFlashFilename(String flashFilename, boolean forceFlash) {
         Logger.d("Flash file set: %s", flashFilename);
         if (flashFilename == null) {
-            mState.update(State.ERROR_FLASH_FILE);
+            mState.update(State.ERROR_FLASH_FILE, 1);
             return; 
         }
         File fn = new File(flashFilename);
         if (!fn.exists()) {
-            mState.update(State.ERROR_FLASH_FILE);
+            mState.update(State.ERROR_FLASH_FILE, 2);
             return;
         }
         if (!fn.getName().endsWith(".zip")) {
-            mState.update(State.ERROR_FLASH_FILE);
+            mState.update(State.ERROR_FLASH_FILE, 3);
             return;
         }
         mHandler.post(() -> {

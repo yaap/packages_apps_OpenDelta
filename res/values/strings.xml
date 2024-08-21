@@ -160,6 +160,7 @@
     <string name="ab_stream_flashing_summary">Download and flash at the same time\nDisable on unreliable connection</string>
     <string name="state_error_flash_file_title">Couldn\'t flash that file</string>
     <string name="select_file_activity_title">Select ZIP file</string>
+    <string name="select_file_activity_error_toast">No file picker activity was found</string>
     <string name="button_select_file">File</string>
     <string name="state_error_ab_flash">Couldn\'t flash AB update</string>
     <string name="state_error_flash_file">Couldn\'t flash update</string>
@@ -195,4 +196,7 @@
     <string name="error_ab_96">Not an AB update file\nDownload the file again</string>
     <string name="error_flash_1">Mismatched signature\nPlease use an official signed build</string>
     <string name="error_flash_2">Ensure storage permissions are correctly granted</string>
+    <string name="error_flash_file_1">Error parsing file path from picker</string>
+    <string name="error_flash_file_2">File no longer exists</string>
+    <string name="error_flash_file_3">File is not a zip</string>
 </resources>
