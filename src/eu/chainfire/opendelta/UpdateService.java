@@ -135,6 +135,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
 
     private static final String PAYLOAD_PROP_OFFSET = "offset=";
     private static final String PAYLOAD_PROP_SIZE = "FILE_SIZE=";
+    private static final String UNCRYPT_PATH = "/data/yaap-ota/ota.zip.uncrypt";
 
     public static final String PREF_READY_FILENAME_NAME = "ready_filename";
     public static final String PREF_LATEST_CHANGELOG = "latest_changelog";
@@ -328,6 +329,10 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                     // scheduler check interval time passed after boot
                     // checkForUpdatesAsync will stopSelf for us
                     break;
+                }
+                File uncrypt = new File(UNCRYPT_PATH);
+                if (uncrypt.exists()) {
+                    uncrypt.delete();
                 }
                 // always stop after boot receiver has done its thing
                 stopSelf();
@@ -1205,8 +1210,8 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 // First copy the file to cache
                 // Finally tell RecoverySystem to flash it via recovery
                 final File flashFile = new File(path_sd + flashFilename);
+                final File uncryptFile = new File(UNCRYPT_PATH);
                 final String fileName = flashFile.getName();
-                final File uncryptFile = new File("/data/yaap-ota/" + fileName + ".uncrypt");
                 mHandler.post(() -> {
                     Logger.d("flashUpdate - installing A-only OTA package");
                     try {
@@ -1228,6 +1233,12 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                                 100f, 100L, 100L, fileName, null);
 
                         // preparing
+                        for (File file : new File("/data/yaap-ota/").listFiles()) {
+                            // empty the OTA folder
+                            if (file.exists() && !file.isDirectory()) {
+                                file.delete();
+                            }
+                        }
                         if (uncryptFile.exists()) {
                             uncryptFile.delete();
                         }
