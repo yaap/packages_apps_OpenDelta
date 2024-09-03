@@ -139,6 +139,9 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
 
     public static final String PREF_READY_FILENAME_NAME = "ready_filename";
     public static final String PREF_LATEST_CHANGELOG = "latest_changelog";
+    private static final String PREF_SAVED_CHANGELOG = "saved_changelog";
+    private static final String PREF_SAVED_CHANGELOG_SHA = "saved_changelog_sha";
+    private static final String PREF_SAVED_CHANGELOG_VER = "saved_changelog_ver";
 
     public static final String PREF_LAST_CHECK_TIME_NAME = "last_check_time";
     public static final long PREF_LAST_CHECK_TIME_DEFAULT = 0L;
@@ -1767,11 +1770,20 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         final Long currDate = Long.parseLong(
                 mConfig.getFilenameBase().split("-")[4].substring(0, 8));
         StringBuilder changelog = new StringBuilder();
+        String clSHA = "";
         try {
             final JSONArray jArr = new JSONArray(Download.asString(mConfig.getUrlAPIHistory()));
             if (jArr == null || jArr.isNull(0)) return "";
-            String clURLF = String.format(Locale.ENGLISH,
-                    clURL, jArr.getJSONObject(0).getString("sha"));
+            clSHA = jArr.getJSONObject(0).getString("sha");
+            String savedSHA = mPrefs.getString(PREF_SAVED_CHANGELOG_SHA, "");
+            String savedVer = mPrefs.getString(PREF_SAVED_CHANGELOG_VER, "");
+            if (!savedSHA.equals("") && clSHA.equals(savedSHA) &&
+                !savedVer.equals("") && savedVer.equals(mConfig.getVersion())) {
+                // we have a relevant cached changelog
+                // show that instead of fetching again
+                return mPrefs.getString(PREF_SAVED_CHANGELOG, "");
+            }
+            String clURLF = String.format(Locale.ENGLISH, clURL, clSHA);
             changelog.append(Download.asString(clURLF));
             // currently changelog only contains the latest info
             // let us check if we have any builds the user skipped and add em
@@ -1795,6 +1807,13 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             }
         } catch (Exception e) {
             Logger.ex(e);
+        }
+        if (!clSHA.equals("")) {
+            SharedPreferences.Editor editor = mPrefs.edit();
+            editor.putString(PREF_SAVED_CHANGELOG_SHA, clSHA);
+            editor.putString(PREF_SAVED_CHANGELOG_VER, mConfig.getVersion());
+            editor.putString(PREF_SAVED_CHANGELOG, changelog.toString());
+            editor.commit();
         }
         return changelog.toString();
     }
