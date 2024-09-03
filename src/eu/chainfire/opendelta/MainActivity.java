@@ -173,6 +173,7 @@ public class MainActivity extends Activity {
     private int mProgressCurrent = 0;
     private int mProgressMax = 1;
     private boolean mPermOk;
+    private boolean mStateSet = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -244,6 +245,7 @@ public class MainActivity extends Activity {
     }
 
     private void showInfo() {
+        if (isFinishing()) return;
         AlertDialog dialog = (new AlertDialog.Builder(this))
                 .setTitle(R.string.menu_info)
                 .setMessage(getString(R.string.text_info_section))
@@ -499,6 +501,7 @@ public class MainActivity extends Activity {
                 mPauseBtn.setVisibility(vis);
                 mPauseBtn.setText(getString(enableResume ? R.string.button_resume_text
                         : R.string.button_pause_text));
+                mStateSet = true;
             });
         }
     };
@@ -600,6 +603,15 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (!mStateSet) {
+            if (mUpdateService == null) {
+                startUpdateService(State.getStateString(State.ACTION_NONE));
+                return;
+            }
+            // incase we crashed but the service is already connected
+            State.getInstance().notifyCallbacks();
+            return;
+        }
         handleProgressBar();
     }
 
@@ -646,6 +658,7 @@ public class MainActivity extends Activity {
     }
 
     private void showAreYouSureDialog(Runnable run) {
+        if (isFinishing()) return;
         final String msg = getString(R.string.sure_dialog_msg);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(msg)
@@ -662,6 +675,7 @@ public class MainActivity extends Activity {
     }
 
     private void showLocalSumWarnDialog(int state) {
+        if (isFinishing()) return;
         final String msg = state == State.ACTION_FLASH_FILE_NO_SUM
                 ? getString(R.string.no_sum_dialog_msg)
                 : getString(R.string.invalid_sum_dialog_msg);
@@ -716,6 +730,7 @@ public class MainActivity extends Activity {
             }
 
             if (message != null) {
+                if (isFinishing()) return;
                 (new AlertDialog.Builder(MainActivity.this))
                         .setTitle(R.string.recovery_notice_title)
                         .setMessage(message)
