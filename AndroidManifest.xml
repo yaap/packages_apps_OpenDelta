@@ -78,9 +78,11 @@
         </receiver>
         <service
             android:name="eu.chainfire.opendelta.UpdateService"
+            android:foregroundServiceType="specialUse"
             android:exported="false" />
         <service
             android:name="eu.chainfire.opendelta.Scheduler"
+            android:foregroundServiceType="specialUse"
             android:exported="false" />
 
         <!-- Quick Settings Tiles -->
