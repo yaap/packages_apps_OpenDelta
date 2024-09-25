@@ -71,7 +71,7 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.HashSet;
 
-public class MainActivity extends Activity {
+public class MainActivity extends BaseActivity {
     private static final int PERMISSIONS_REQUEST_MANAGE_EXTERNAL_STORAGE = 0;
     private static final int PERMISSIONS_REQUEST_NOTIFICATION = 1;
     private static final int ACTIVITY_SELECT_FLASH_FILE = 2;
@@ -190,6 +190,8 @@ public class MainActivity extends Activity {
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayShowTitleEnabled(false);
         }
+
+        setupInsets(findViewById(R.id.main_layout));
 
         mHandler = new Handler(getMainLooper());
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);

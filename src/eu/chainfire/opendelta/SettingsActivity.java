@@ -19,6 +19,10 @@ package eu.chainfire.opendelta;
 
 import android.os.Bundle;
 
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.graphics.Insets;
+
 import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity;
 import com.android.settingslib.collapsingtoolbar.R;
 
@@ -46,5 +50,18 @@ public class SettingsActivity extends CollapsingToolbarBaseActivity {
         getFragmentManager().beginTransaction()
                 .add(R.id.content_frame, new SettingsFragment())
                 .commit();
+
+        // Handle window insets for padding adjustments
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.content_frame), (view, insets) -> {
+            Insets systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+
+            view.setPadding(
+                view.getPaddingLeft(),
+                view.getPaddingTop(),
+                view.getPaddingRight(),
+                systemInsets.bottom
+            );
+            return insets;
+        });
     }
 }

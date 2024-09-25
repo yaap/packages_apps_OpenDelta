@@ -22,7 +22,6 @@ package eu.chainfire.opendelta;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -44,7 +43,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ChangelogActivity extends Activity {
+public class ChangelogActivity extends BaseActivity {
 
     private static final String CACHE_SHAS_KEY = "changelog_cache_shas";
     private static final String CACHE_DATES_KEY = "changelog_cache_dates_";
@@ -58,6 +57,8 @@ public class ChangelogActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_changelog);
+
+        setupInsets(findViewById(R.id.main_layout));
 
         mMarginPx = Math.round(TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics()));
