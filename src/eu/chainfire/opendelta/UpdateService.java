@@ -1435,6 +1435,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 if (buildData == null || buildData.length() == 0) {
                     mState.update(State.ERROR_DOWNLOAD, url, Download.ERROR_CODE_NEWEST_BUILD);
                     mNotificationManager.cancel(NOTIFICATION_BUSY);
+                    return;
                 }
                 JSONObject object;
                 try {
