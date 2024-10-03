@@ -49,16 +49,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="eu.chainfire.opendelta.Shortcut"
-            android:label="@string/title"
-            android:theme="@style/Theme.SubSettingsBase"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="android.intent.action.CREATE_SHORTCUT" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
             android:name="eu.chainfire.opendelta.SettingsActivity"
             android:label="@string/menu_settings"
             android:theme="@style/Theme.SubSettingsBase"
