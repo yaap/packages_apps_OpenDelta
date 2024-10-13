@@ -158,6 +158,15 @@
     <string name="ab_wake_lock_summary">Keep the CPU awake when installing an update. Makes updating fast even if the screen is off</string>
     <string name="ab_stream_flashing_title">AB stream flashing</string>
     <string name="ab_stream_flashing_summary">Download and flash at the same time\nDisable on unreliable connection</string>
+    <string name="category_cert">Certified Props</string>
+    <string name="cert_check_title">Props update</string>
+    <string name="cert_check_summary">Press to check for a prop update</string>
+    <string name="cert_status_title">Props status</string>
+    <string name="cert_status_version" formatted="false">Installed version: %s\n</string>
+    <string name="cert_status_remote" formatted="false">Server version: %s</string>
+    <string name="cert_status_available">Press to download and install</string>
+    <string name="cert_fetch_fail">Could not fetch a cert from the server</string>
+    <string name="cert_reboot_notice">Reboot to apply changes</string>
     <string name="state_error_flash_file_title">Couldn\'t flash that file</string>
     <string name="select_file_activity_title">Select ZIP file</string>
     <string name="select_file_activity_error_toast">No file picker activity was found</string>

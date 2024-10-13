@@ -37,6 +37,9 @@
 	<!-- github API url, pointing to the OTA json repo. %s formatted as described above -->
 	<string name="url_api_history" formatted="false">https://api.github.com/repos/yaap/ota-info/commits?sha=%s&amp;path=%s/%s.json</string>
 
+	<!-- URL base to fetch cert jsons. first %s is replaced by branch name second by property_device -->
+	<string name="url_cert_json" formatted="false">https://raw.githubusercontent.com/yaap/ota-info/%s/%s/cert.json</string>
+
 	<!-- Whether device supports A/B performance flashing -->
 	<item name="support_ab_perf_mode" type="bool">false</item>
 

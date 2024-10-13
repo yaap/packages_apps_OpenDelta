@@ -99,6 +99,20 @@
 			android:title="@string/battery_level_title" />
 	</PreferenceCategory>
 	<PreferenceCategory
+		android:key="category_cert"
+		android:title="@string/category_cert" >
+		<Preference
+			android:key="cert_check"
+			android:persistent="false"
+			android:title="@string/cert_check_title"
+			android:summary="@string/cert_check_summary" />
+		<Preference
+			android:key="cert_status"
+			android:persistent="false"
+			android:enabled="false"
+			android:title="@string/cert_status_title" />
+	</PreferenceCategory>
+	<PreferenceCategory
 		android:key="category_admin"
 		android:title="@string/category_admin" >
 		<Preference

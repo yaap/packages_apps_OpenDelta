@@ -19,13 +19,22 @@ package eu.chainfire.opendelta;
 
 import android.app.TimePickerDialog;
 import android.app.TimePickerDialog.OnTimeSetListener;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.text.format.DateFormat;
 import android.view.MenuItem;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import androidx.core.content.FileProvider;
 import androidx.preference.SwitchPreferenceCompat;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
@@ -42,6 +51,10 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class SettingsFragment extends PreferenceFragment implements
         OnPreferenceChangeListener, OnTimeSetListener {
     private static final String KEY_NETWORKS = "metered_networks_config";
@@ -50,8 +63,11 @@ public class SettingsFragment extends PreferenceFragment implements
     private static final String KEY_AB_STREAM = "ab_stream_flashing";
     private static final String KEY_CATEGORY_DOWNLOAD = "category_download";
     private static final String KEY_CATEGORY_FLASHING = "category_flashing";
+    private static final String KEY_CERT_CHECK = "cert_check";
+    private static final String KEY_CERT_STATUS = "cert_status";
     private static final String PREF_FORCE_REFLASH = "force_reflash";
     private static final String PREF_CLEAN_FILES = "clear_files";
+    private static final String CERT_OVERLAY_PKG_NAME = "android.yaap.certifiedprops.overlay";
 
     private SwitchPreferenceCompat mNetworksConfig;
     private ListPreference mAutoDownload;
@@ -68,6 +84,12 @@ public class SettingsFragment extends PreferenceFragment implements
     private Preference mForceReflash;
     private Preference mCleanFiles;
     private ListPreference mScheduleWeekDay;
+    private Preference mCertCheck;
+    private Preference mCertStatus;
+
+    private final HandlerThread mHandlerThread = new HandlerThread("OpenDelta: Cert handler thread");
+    private final Handler mMainHandler = new Handler(Looper.getMainLooper());
+    private Handler mHandler = null;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -134,6 +156,11 @@ public class SettingsFragment extends PreferenceFragment implements
         mScheduleWeekDay.setOnPreferenceChangeListener(this);
 
         updateEnablement(autoDownload, mSchedulerMode.getEntry().toString());
+
+        mCertCheck = findPreference(KEY_CERT_CHECK);
+        mCertStatus = findPreference(KEY_CERT_STATUS);
+
+        updateCertStatus(-1);
     }
 
     @Override
@@ -164,6 +191,16 @@ public class SettingsFragment extends PreferenceFragment implements
             Toast.makeText(getContext(), getString(R.string.force_flash_feedback),
                     Toast.LENGTH_LONG).show();
             return true;
+        } else if (preference == mCertCheck) {
+            mCertCheck.setEnabled(false);
+            mCertCheck.setSummary(R.string.state_action_checking);
+            checkForCerts();
+            return true;
+        } else if (preference == mCertStatus) {
+            mCertStatus.setEnabled(false);
+            mCertCheck.setEnabled(false);
+            mCertCheck.setSummary(R.string.state_action_downloading);
+            updateCerts();
         }
         return false;
     }
@@ -229,6 +266,22 @@ public class SettingsFragment extends PreferenceFragment implements
         mSchedulerDailyTime.setSummary(prefValue);
     }
 
+    @Override
+    public void onStop() {
+        if (mHandler != null) {
+            mHandlerThread.quitSafely();
+        }
+        super.onStop();
+    }
+
+    private Handler getHandler() {
+        if (mHandler == null) {
+            mHandlerThread.start();
+            mHandler = new Handler(mHandlerThread.getLooper());
+        }
+        return mHandler;
+    }
+
     private void updateEnablement(String autoDownload, String schedulerMode) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
         if (autoDownload == null) {
@@ -255,6 +308,100 @@ public class SettingsFragment extends PreferenceFragment implements
         mSchedulerDailyTime.setEnabled(isEnabled && !isSmart);
         mBatteryLevel.setEnabled(isDownload && !mChargeOnly.isChecked());
         mAutoDownloadCategory.setEnabled(isDownload);
+    }
+
+    private void checkForCerts() {
+        getHandler().post(() -> {
+            String jsonStr = Download.asString(mConfig.getUrlCertJson());
+            if (jsonStr == null || jsonStr.length() == 0) {
+                Toast.makeText(getContext(), R.string.cert_fetch_fail,
+                        Toast.LENGTH_LONG).show();
+                mMainHandler.post(() -> {
+                    mCertCheck.setEnabled(true);
+                    mCertCheck.setSummary(R.string.cert_check_summary);
+                });
+                return;
+            }
+            try {
+                JSONObject object = new JSONObject(jsonStr);
+                if (object.has("version")) {
+                    int version = object.getInt("version");
+                    mMainHandler.post(() -> { updateCertStatus(version); });
+                }
+            } catch (Exception e) {
+                Logger.ex(e);
+            } finally {
+                mMainHandler.post(() -> {
+                    mCertCheck.setEnabled(true);
+                    mCertCheck.setSummary(R.string.cert_check_summary);
+                });
+            }
+        });
+    }
+
+    private void updateCerts() {
+        final String path = mConfig.getPathBase() + "cert.apk";
+        final String url = mConfig.getUrlCertJson().replace(".json", ".apk");
+        Download.ApkDownloadListener listener = new Download.ApkDownloadListener() {
+            @Override
+            public void onFinish(boolean success) {
+                if (!success) {
+                    Toast.makeText(getContext(), R.string.state_error_download,
+                            Toast.LENGTH_LONG).show();
+                } else {
+                    final Uri uri = FileProvider.getUriForFile(getContext(),
+                            getContext().getApplicationContext().getPackageName() + ".provider",
+                            new File(path));
+                    Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE, uri);
+                    intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    getContext().startActivity(intent);
+                    Toast.makeText(getContext(), R.string.cert_reboot_notice,
+                            Toast.LENGTH_LONG).show();
+                }
+                mCertCheck.setEnabled(true);
+                mCertCheck.setSummary(R.string.cert_check_summary);
+                mCertStatus.setEnabled(!success);
+            }
+        };
+        getHandler().post(() -> {
+            Download.downloadApk(path, url, listener, mMainHandler);
+        });
+    }
+
+    private long getLocalVersion() {
+        PackageManager pm = getContext().getPackageManager();
+        long version = -1;
+        try {
+            PackageInfo pi = pm.getPackageInfo(CERT_OVERLAY_PKG_NAME,
+                    PackageManager.MATCH_SYSTEM_ONLY);
+            if (pi != null) {
+                version = pi.getLongVersionCode();
+            }
+        } catch (PackageManager.NameNotFoundException ignored) {
+            // do nothing
+        }
+        return version;
+    }
+
+    private void updateCertStatus(long remoteVersion) {
+        Resources res = getContext().getResources();
+        long version = getLocalVersion();
+
+        final String unknownStr = res.getString(R.string.text_download_size_unknown);
+        StringBuilder status = new StringBuilder();
+        final String versionStr = String.format(res.getString(R.string.cert_status_version),
+                version != -1 ? String.valueOf(version) : unknownStr, Locale.getDefault());
+        final String remoteStr = String.format(res.getString(R.string.cert_status_remote),
+                remoteVersion != -1 ? String.valueOf(remoteVersion) : unknownStr, Locale.getDefault());
+        status.append(versionStr);
+        status.append(remoteStr);
+        final boolean available = remoteVersion > version;
+        if (available) {
+            status.append("\n");
+            status.append(res.getString(R.string.cert_status_available));
+        }
+        mCertStatus.setSummary(status.toString());
+        mCertStatus.setEnabled(available);
     }
 
     private void showTimePicker() {

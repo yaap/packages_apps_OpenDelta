@@ -21,6 +21,7 @@ package eu.chainfire.opendelta;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.os.StatFs;
 import android.os.SystemClock;
 
@@ -66,6 +67,10 @@ public class Download {
     private final State mState;
     private final SharedPreferences mPrefs;
 
+    public interface ApkDownloadListener {
+        default void onFinish(boolean success) {};
+    }
+
     public Download(String url, File file, String matchSUM, UpdateService us) {
         mURL = url;
         mFile = file;
@@ -83,15 +88,17 @@ public class Download {
         Logger.d("download as string: %s", url);
 
         HttpsURLConnection urlConnection = null;
+        InputStream is = null;
+        ByteArrayOutputStream byteArray = null;
         try {
             urlConnection = setupHttpsRequest(url);
             if (urlConnection == null) return null;
 
-            InputStream is = urlConnection.getInputStream();
-            ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+            is = urlConnection.getInputStream();
+            byteArray = new ByteArrayOutputStream();
             int byteInt;
 
-            while((byteInt = is.read()) >= 0)
+            while ((byteInt = is.read()) >= 0)
                 byteArray.write(byteInt);
 
             byte[] bytes = byteArray.toByteArray();
@@ -106,6 +113,48 @@ public class Download {
         } finally {
             if (urlConnection != null)
                 urlConnection.disconnect();
+            try { if (is != null) is.close(); } catch (IOException ignored) {}
+            try { if (byteArray != null) byteArray.close(); } catch (IOException ignored) {}
+        }
+    }
+
+    public static void downloadApk(String path, String url,
+            ApkDownloadListener listener, Handler handler) {
+        Logger.d("download apk: %s", url);
+
+        HttpsURLConnection urlConnection = null;
+        InputStream is = null;
+        FileOutputStream os = null;
+        File file = null;
+        boolean success = false;
+        try {
+            file = new File(path);
+            if (file.exists()) file.delete();
+            urlConnection = setupHttpsRequest(url);
+            if (urlConnection == null) return;
+
+            is = urlConnection.getInputStream();
+            os = new FileOutputStream(file, false);
+            byte[] buffer = new byte[262144];
+            int r;
+
+            while ((r = is.read(buffer)) >= 0)
+                os.write(buffer, 0, r);
+
+            success = true;
+        } catch (Exception e) {
+            // Download failed for any number of reasons, timeouts, connection
+            // drops, etc. Just log it in debugging mode.
+            Logger.ex(e);
+            if (file != null)
+                file.delete();
+        } finally {
+            if (urlConnection != null)
+                urlConnection.disconnect();
+            try { if (is != null) is.close(); } catch (IOException ignored) { success = false; }
+            try { if (os != null) os.close(); } catch (IOException ignored) { success = false; }
+            final boolean result = success;
+            handler.post(() -> { listener.onFinish(result); } );
         }
     }
 
