@@ -1420,6 +1420,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 String urlOverride = null;
                 String sumOverride = null;
                 List<String> payloadProps = null;
+                Long buildDateTime = null;
 
                 // manipulate url to point to the HEAD sha instead of branch
                 // this guarantees up to date raw overriding the 5m cache time github uses
@@ -1452,6 +1453,8 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                                 urlOverride = build.getString("url");
                             if (build.has("sha256url"))
                                 sumOverride = build.getString("sha256url");
+                            if (build.has("datetime"))
+                                buildDateTime = build.getLong("datetime");
                             if (build.has("payload")) {
                                 payloadProps = new ArrayList<>();
                                 JSONArray payloadList = build.getJSONArray("payload");
@@ -1479,6 +1482,9 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                                 Logger.d("url= " + urlOverride);
                             if (sumOverride != null && !sumOverride.equals("")) {
                                 Logger.d("sha256 url= " + sumOverride);
+                            }
+                            if (buildDateTime != null) {
+                                Logger.d("datetime= " + sumOverride);
                             }
                             if (payloadProps != null) {
                                 for (String str : payloadProps) {
@@ -1517,20 +1523,28 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 }
                 Logger.d("latest build for device " + mConfig.getDevice() + " is " + latestFetch);
 
-                String currentVersionZip = mConfig.getFilenameBase() + ".zip";
                 boolean updateAvailable = latestBuild != null && forceFlash;
                 if (latestBuild != null && !forceFlash) {
-                    try {
-                        final long currFileDate = Long.parseLong(currentVersionZip
-                                .split("-")[4].substring(0, 8));
-                        final long latestFileDate = Long.parseLong(latestBuild
-                                .split("-")[4].substring(0, 8));
-                        updateAvailable = latestFileDate > currFileDate;
-                    } catch (NumberFormatException exception) {
-                        // Just incase someone decides to 
-                        // make up his own zip / build name and F's this up
-                        Logger.d("Build name malformed");
-                        Logger.ex(exception);
+                    if (buildDateTime != null) {
+                        // judge by build time instead of filename date when available
+                        final long currBuildTime = mConfig.getBuildTime();
+                        updateAvailable = buildDateTime > currBuildTime;
+                        Logger.d("Current build time = " + currBuildTime);
+                        Logger.d("Latest build time  = " + buildDateTime);
+                    } else {
+                        String currentVersionZip = mConfig.getFilenameBase() + ".zip";
+                        try {
+                            final long currFileDate = Long.parseLong(currentVersionZip
+                                    .split("-")[4].substring(0, 8));
+                            final long latestFileDate = Long.parseLong(latestBuild
+                                    .split("-")[4].substring(0, 8));
+                            updateAvailable = latestFileDate > currFileDate;
+                        } catch (NumberFormatException exception) {
+                            // Just incase someone decides to
+                            // make up his own zip / build name and F's this up
+                            Logger.d("Build name malformed");
+                            Logger.ex(exception);
+                        }
                     }
                 }
                 mPrefs.edit().putString(PREF_LATEST_FULL_NAME,

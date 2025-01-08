@@ -24,6 +24,7 @@ package eu.chainfire.opendelta;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Environment;
 import android.os.SystemProperties;
 
@@ -70,6 +71,7 @@ public class Config {
     private final String url_api_history;
     private final String url_cert_json;
     private final String android_version;
+    private final long build_time;
 
     private Config(Context context) {
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -108,10 +110,10 @@ public class Config {
         url_cert_json = String.format(
                 res.getString(R.string.url_cert_json),
                 url_branch_name, property_device);
-        android_version = SystemProperties.get(
-                res.getString(R.string.android_version));
+        android_version = Build.VERSION.RELEASE;
         filename_base_prefix = String.format(Locale.ENGLISH,
                 res.getString(R.string.filename_base), android_version);
+        build_time = Build.TIME / 1000;
 
         Logger.d("property_version: %s", property_version);
         Logger.d("property_device: %s", property_device);
@@ -127,6 +129,7 @@ public class Config {
         Logger.d("url_api_history: %s", url_api_history);
         Logger.d("url_cert_json: %s", url_cert_json);
         Logger.d("use_twrp: %d", use_twrp ? 1 : 0);
+        Logger.d("build_time: %d", build_time);
     }
 
     public String getFilenameBase() {
@@ -255,6 +258,10 @@ public class Config {
 
     public String getAndroidVersion() {
         return android_version;
+    }
+
+    public long getBuildTime() {
+        return build_time;
     }
 
     public static boolean isABDevice() {

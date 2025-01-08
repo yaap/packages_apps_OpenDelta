@@ -45,6 +45,4 @@
 
 	<!-- Applies to A-only devices only, should be overlayed from DT -->
 	<item name="use_twrp" type="bool">false</item>
-
-	<string name="android_version">ro.build.version.release</string>
 </resources>
