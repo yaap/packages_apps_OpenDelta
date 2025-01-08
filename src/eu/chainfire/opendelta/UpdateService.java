@@ -142,6 +142,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     private static final String PREF_SAVED_CHANGELOG = "saved_changelog";
     private static final String PREF_SAVED_CHANGELOG_SHA = "saved_changelog_sha";
     private static final String PREF_SAVED_CHANGELOG_VER = "saved_changelog_ver";
+    private static final String PREF_SAVED_CHANGELOG_TIME = "saved_changelog_time";
 
     public static final String PREF_LAST_CHECK_TIME_NAME = "last_check_time";
     public static final long PREF_LAST_CHECK_TIME_DEFAULT = 0L;
@@ -1782,8 +1783,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         final String clURL = jsURL.replace(
                 mConfig.getDevice() + ".json",
                 "Changelog.txt");
-        final Long currDate = Long.parseLong(
-                mConfig.getFilenameBase().split("-")[4].substring(0, 8));
+        final Long currBuildTime = mConfig.getBuildTime();
         StringBuilder changelog = new StringBuilder();
         String clSHA = "";
         try {
@@ -1792,8 +1792,10 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             clSHA = jArr.getJSONObject(0).getString("sha");
             String savedSHA = mPrefs.getString(PREF_SAVED_CHANGELOG_SHA, "");
             String savedVer = mPrefs.getString(PREF_SAVED_CHANGELOG_VER, "");
+            Long savedTime = mPrefs.getLong(PREF_SAVED_CHANGELOG_TIME, Long.MAX_VALUE);
             if (!savedSHA.equals("") && clSHA.equals(savedSHA) &&
-                !savedVer.equals("") && savedVer.equals(mConfig.getVersion())) {
+                !savedVer.equals("") && savedVer.equals(mConfig.getVersion()) &&
+                savedTime == currBuildTime) {
                 // we have a relevant cached changelog
                 // show that instead of fetching again
                 return mPrefs.getString(PREF_SAVED_CHANGELOG, "");
@@ -1811,7 +1813,9 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                             .getJSONObject(0).getString("filename");
                     final Long fileDate = Long.parseLong(
                             filename.split("-")[4].substring(0, 8));
-                    if (fileDate <= currDate) break; // reached an older/same build
+                    final Long buildTime = otaJson.getJSONArray("response")
+                            .getJSONObject(0).getLong("datetime");
+                    if (buildTime <= currBuildTime) break; // reached an older/same build
                     // fetch and add the changelog of that commit sha, titled by the date
                     final String otaChangelogURL = String.format(Locale.ENGLISH, clURL, currSha);
                     final String currChangelog = Download.asString(otaChangelogURL);
@@ -1828,6 +1832,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             editor.putString(PREF_SAVED_CHANGELOG_SHA, clSHA);
             editor.putString(PREF_SAVED_CHANGELOG_VER, mConfig.getVersion());
             editor.putString(PREF_SAVED_CHANGELOG, changelog.toString());
+            editor.putLong(PREF_SAVED_CHANGELOG_TIME, currBuildTime);
             editor.commit();
         }
         return changelog.toString();

@@ -45,9 +45,10 @@ import org.json.JSONObject;
 
 public class ChangelogActivity extends BaseActivity {
 
-    private static final String CACHE_SHAS_KEY = "changelog_cache_shas";
-    private static final String CACHE_DATES_KEY = "changelog_cache_dates_";
-    private static final String CACHE_LOGS_KEY = "changelog_cache_texts_";
+    private static final String CACHE_SHAS_KEY = "v2_changelog_cache_shas";
+    private static final String CACHE_DATES_KEY = "v2_changelog_cache_dates_";
+    private static final String CACHE_LOGS_KEY = "v2_changelog_cache_texts_";
+    private static final String CACHE_BUILD_TIMES_KEY = "v2_changelog_cache_build_times_";
 
     private LinearLayout mChangelogLayout;
     private TextView mLoadingText;
@@ -72,8 +73,7 @@ public class ChangelogActivity extends BaseActivity {
 
         // fetch last 20 changelogs / until we reach current and display
         new Handler(ht.getLooper()).post(() -> {
-            final Long currDate = Long.parseLong(
-                    config.getFilenameBase().split("-")[4].substring(0, 8));
+            final Long currBuildTime = config.getBuildTime();
             // unformatted device.json URL 
             final String jsURL = config.getUrlBaseJson().replace(
                     config.getUrlBranchName(), "%s");
@@ -87,10 +87,12 @@ public class ChangelogActivity extends BaseActivity {
                 ArrayList<String> shas = new ArrayList<>();
                 ArrayList<String> dates = new ArrayList<>();
                 ArrayList<String> logs = new ArrayList<>();
+                ArrayList<Long> buildTimes = new ArrayList<>();
                 for (int i = 0; i < prefShas.length; i++) {
                     shas.add(prefShas[i]);
                     dates.add(prefs.getString(CACHE_DATES_KEY + i, ""));
                     logs.add(prefs.getString(CACHE_LOGS_KEY + i, ""));
+                    buildTimes.add(prefs.getLong(CACHE_BUILD_TIMES_KEY + i, Long.MAX_VALUE));
                 }
                 boolean reached = false;
                 int reachedI = 0;
@@ -107,13 +109,15 @@ public class ChangelogActivity extends BaseActivity {
                         error = true;
                         return;
                     }
-                    if (dates.size() != logs.size() || dates.size() != shas.size()) {
+                    if (dates.size() != logs.size() || dates.size() != shas.size() ||
+                            dates.size() != buildTimes.size()) {
                         // invalidate damaged cache
                         Logger.d("Damaged changelog cache");
                         SharedPreferences.Editor editor = prefs.edit();
                         for (int i = 0; i < prefShas.length; i++) {
                             editor.remove(CACHE_DATES_KEY + i);
                             editor.remove(CACHE_LOGS_KEY + i);
+                            editor.remove(CACHE_BUILD_TIMES_KEY + i);
                         }
                         editor.remove(CACHE_SHAS_KEY);
                         editor.apply();
@@ -122,12 +126,12 @@ public class ChangelogActivity extends BaseActivity {
                     }
                     // cache seems valid. display
                     for (int i = 0; i < dates.size(); i++) {
-                        final Long fileDate = Long.parseLong(dates.get(i));
+                        final Long buildTime = buildTimes.get(i);
                         if (!reached) {
-                            reached = fileDate <= currDate;
+                            reached = buildTime <= currBuildTime;
                             reachedI = i;
                         }
-                        final boolean isCurrent = fileDate == currDate || reached && i == reachedI;
+                        final boolean isCurrent = buildTime == currBuildTime || reached && i == reachedI;
                         addTitle(dates.get(i), isCurrent);
                         addText(logs.get(i));
                     }
@@ -143,12 +147,12 @@ public class ChangelogActivity extends BaseActivity {
                         final int cachedIndex = shas.indexOf(currSha);
                         if (cachedIndex >= 0) {
                             // value exists in cache
-                            final Long fileDate = Long.parseLong(dates.get(cachedIndex));
+                            final Long buildTime = buildTimes.get(cachedIndex);
                             if (!reached) {
-                                reached = fileDate <= currDate;
+                                reached = buildTime <= currBuildTime;
                                 reachedI = i;
                             }
-                            final boolean isCurrent = fileDate == currDate || reached && i == reachedI;
+                            final boolean isCurrent = buildTime == currBuildTime || reached && i == reachedI;
                             addTitle(dates.get(cachedIndex), isCurrent);
                             addText(logs.get(cachedIndex));
                             continue;
@@ -159,16 +163,18 @@ public class ChangelogActivity extends BaseActivity {
                                 .getJSONObject(0).getString("filename");
                         final Long fileDate = Long.parseLong(
                                 filename.split("-")[4].substring(0, 8));
+                        final Long buildTime = otaJson.getJSONArray("response")
+                                .getJSONObject(0).getLong("datetime");
                         // fetch and add the changelog of that commit sha
                         final String changelogURL = String.format(Locale.ENGLISH, clURL, currSha);
                         final String currChangelog = Download.asString(changelogURL);
                         // we could be on a testing build with no matching changelog date
                         // count as reached and mark newest as current
                         if (!reached) {
-                            reached = fileDate <= currDate;
+                            reached = buildTime <= currBuildTime;
                             reachedI = i;
                         }
-                        final boolean isCurrent = fileDate == currDate || reached && i == reachedI;
+                        final boolean isCurrent = buildTime == currBuildTime || reached && i == reachedI;
                         final String fileDateStr = fileDate.toString();
                         addTitle(fileDateStr, isCurrent);
                         addText(currChangelog);
@@ -176,6 +182,7 @@ public class ChangelogActivity extends BaseActivity {
                         shas.add(i, currSha);
                         dates.add(i, fileDateStr);
                         logs.add(i, currChangelog);
+                        buildTimes.add(i, buildTime);
                     } catch (JSONException e) {
                         Logger.ex(e);
                         error = true;
@@ -191,16 +198,19 @@ public class ChangelogActivity extends BaseActivity {
                     shas.remove(i);
                     dates.remove(i);
                     logs.remove(i);
+                    buildTimes.remove(i);
                 }
                 // saving the still valid shas
                 StringBuilder shaSB = new StringBuilder(shas.get(0));
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putString(CACHE_DATES_KEY + "0", dates.get(0));
                 editor.putString(CACHE_LOGS_KEY + "0", logs.get(0));
+                editor.putLong(CACHE_BUILD_TIMES_KEY + "0", buildTimes.get(0));
                 for (int i = 1; i < shas.size(); i++) {
                     shaSB.append(";" + shas.get(i));
                     editor.putString(CACHE_DATES_KEY + i, dates.get(i));
                     editor.putString(CACHE_LOGS_KEY + i, logs.get(i));
+                    editor.putLong(CACHE_BUILD_TIMES_KEY + i, buildTimes.get(i));
                 }
                 editor.putString(CACHE_SHAS_KEY, shaSB.toString());
                 editor.apply();
