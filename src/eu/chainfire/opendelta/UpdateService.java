@@ -1304,11 +1304,8 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     }
 
     private String getLatestSHA256Sum(String sumUrl) {
-        String urlSuffix = mConfig.getUrlSuffix();
         if (mIsUrlOverride) {
             sumUrl = mSumUrlOvr;
-        } else if (urlSuffix.length() > 0) {
-            sumUrl += mConfig.getUrlSuffix();
         }
         String latestSum = Download.asString(sumUrl);
         if (latestSum != null) {
