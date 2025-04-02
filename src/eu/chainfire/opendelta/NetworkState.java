@@ -53,6 +53,7 @@ public class NetworkState {
     };
 
     private void updateState() {
+        if (mConnectivityManager == null) return;
         mIsMetered = mConnectivityManager.isActiveNetworkMetered();
         boolean state = (!mIsMetered || mIsMeteredAllowed) && mIsConnected;
 
