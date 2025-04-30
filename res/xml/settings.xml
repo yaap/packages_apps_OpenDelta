@@ -64,6 +64,13 @@
 			android:persistent="false"
 			android:title="@string/scheduler_daily_time" />
 
+		<SeekBarPreference
+			android:key="scheduler_hourly_time"
+			android:title="@string/scheduler_hourly_time_title"
+			android:max="12"
+			android:min="1"
+			android:defaultValue="6" />
+
 		<ListPreference
 			android:defaultValue="1"
 			android:entryValues="@array/week_start_values"

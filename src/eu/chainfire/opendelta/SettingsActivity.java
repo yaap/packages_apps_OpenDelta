@@ -38,8 +38,10 @@ public class SettingsActivity extends CollapsingToolbarBaseActivity {
     public static final String PREF_SCHEDULER_MODE_SMART = String.valueOf(0);
     public static final String PREF_SCHEDULER_MODE_DAILY = String.valueOf(1);
     public static final String PREF_SCHEDULER_MODE_WEEKLY = String.valueOf(2);
+    public static final String PREF_SCHEDULER_MODE_HOURLY = String.valueOf(3);
 
     public static final String PREF_SCHEDULER_DAILY_TIME = "scheduler_daily_time";
+    public static final String PREF_SCHEDULER_HOURLY_TIME = "scheduler_hourly_time";
     public static final String PREF_SCHEDULER_WEEK_DAY = "scheduler_week_day";
     public static final String PREF_SCHEDULER_SLEEP = "scheduler_sleep_enabled";
 

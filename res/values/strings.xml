@@ -122,8 +122,12 @@
     <string name="scheduler_smart">Smart</string>
     <string name="scheduler_daily">Daily</string>
     <string name="scheduler_weekly">Weekly</string>
+    <string name="scheduler_hourly">Hourly</string>
     <string name="scheduler_daily_time">Time</string>
     <string name="scheduler_week_day">Day</string>
+    <string name="scheduler_hourly_time_title">Check every</string>
+    <string name="unit_hour">1 hour</string>
+    <string name="unit_hours" formatted="false">%d hours</string>
     <string name="scheduler_sleep_enabled_title">Sleep detection</string>
     <string name="scheduler_sleep_enabled_summary">Attempt to check for updates when the screen is off for 5 hours straight</string>
     <string name="metered_networks_title">Metered networks</string>
