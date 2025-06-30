@@ -59,7 +59,6 @@ public class Config {
     private final String filename_base;
     private final String path_base;
     private final String path_flash_after_update;
-    private final String url_base_update;
     private final String url_base;
     private final String url_base_sum;
     private final String url_base_suffix;
@@ -91,8 +90,6 @@ public class Config {
                 File.separator);
         path_flash_after_update = String.format(Locale.ENGLISH, "%s%s%s",
                 path_base, "FlashAfterUpdate", File.separator);
-        url_base_update = String.format(Locale.ENGLISH,
-                res.getString(R.string.url_base_update), property_device);
         url_base = String.format(
                 res.getString(R.string.url_base_full), property_device);
         url_base_sum = String.format(
@@ -121,7 +118,6 @@ public class Config {
         Logger.d("filename_base_prefix: %s", filename_base_prefix);
         Logger.d("path_base: %s", path_base);
         Logger.d("path_flash_after_update: %s", path_flash_after_update);
-        Logger.d("url_base_update: %s", url_base_update);
         Logger.d("url_base: %s", url_base);
         Logger.d("url_base_sum: %s", url_base_sum);
         Logger.d("url_branch_name: %s", url_branch_name);
@@ -142,10 +138,6 @@ public class Config {
 
     public String getPathFlashAfterUpdate() {
         return path_flash_after_update;
-    }
-
-    public String getUrlBaseUpdate() {
-        return url_base_update;
     }
 
     public String getUrlBase() {
