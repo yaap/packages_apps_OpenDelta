@@ -1,76 +1,212 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">OpenDelta</string>
     <string name="title">Rendszerfrissítések</string>
     <string name="action_about">Névjegy</string>
-    <string name="state_action_none">A rendszer naprakész.</string>
+    <string name="about_content" translatable="false" >
+<![CDATA[
+        Minden jog fenntartva &copy; _COPYRIGHT_OPENDELTA_ <b>Jorrit \'Chainfire\' Jongma</b><br>
+        <br>
+        Eredetileg a <b>The OmniROM Project-hez</b> készült<br>
+        <br>
+        Ezt a javított forkot a <b>Yet Another AOSP Project (YAAP)</b> készítette<br>
+        <br>
+		Licenszelve a <b>GNU General Public License 3.0 (GPLv3) feltételei szerint</b><br>
+        <br>
+        Delta dekódolás az <b>xdelta</b> alapján, minden jog fenntartva &copy; _COPYRIGHT_XDELTA_ <b>Joshua MacDonald</b><br>
+    ]]>
+    </string>
+    <string name="state_action_none">A rendszer naprakész</string>
     <string name="state_action_checking">Frissítések keresése &#8230;</string>
     <string name="state_action_checking_sum">Fájl ellenőrzése &#8230;</string>
-    <string name="state_action_searching">Keresés a fájlok után &#8230;</string>
+    <string name="state_action_searching">Fájlok keresése &#8230;</string>
     <string name="state_action_searching_sum">Fájl ellenőrzése &#8230;</string>
     <string name="state_action_downloading">Letöltés &#8230;</string>
+    <string name="state_action_downloading_paused">Letöltés szüneteltetve</string> 
     <string name="state_action_applying">Patchelés &#8230;</string>
     <string name="state_action_applying_patch">Patchelés &#8230;</string>
     <string name="state_action_applying_sum">Fájl ellenőrzése &#8230;</string>
-    <string name="state_action_ready">Frissítés flashelésre kész.</string>
-    <string name="state_error_disk_space">Nincs elég tárhely!</string>
-    <string name="state_error_unknown">Ismeretlen hiba.</string>
-    <string name="state_error_unofficial">Frissítés letiltva</string>
+    <string name="state_action_ready">A frissítés készen áll a telepítésre</string>
+    <string name="state_error_disk_space">Nincs elegendő tárhely</string>
+    <string name="state_error_unknown">Ismeretlen hiba</string>
+    <string name="state_error_unofficial">Frissítés megszakítva</string>
     <string name="error_disk_space_sub" formatted="false">%d MiB elérhető, %d MiB szükséges</string>
-    <string name="notify_update_available">Egy frissítés elérhető</string>
+    <string name="notify_update_available">Új verzió elérhető</string>
     <string name="notify_checking">Frissítések keresése &#8230;</string>
     <string name="last_checked" formatted="false">%s ekkor: %s</string>
-    <string name="last_checked_never">Mi soha nem ellenőriztük, talán szeretné most megtenni?</string>
+    <string name="last_checked_never">Mi nem ellenőriztük, esetleg szeretné Ön?</string>
     <string name="button_check_short">Ellenőrzés</string>
-    <string name="button_flash_now">Flash</string>
-    <!-- updates from 2013/12/18 -->
-    <string name="action_secure_mode">Biztonságos</string>
-    <string name="secure_mode_enabled_title">Biztonságos üzemmód: engedélyezve</string>
-    <string name="secure_mode_enabled_description"><![CDATA[A frissítés kriptográfiai aláírása ellenőrzésre kerül a telepítés előtt az eredetiség megerősítéséhez, további frissítés nem került telepítésre. Ez az üzemmód csak <b>TWRP</b> kompatibilis.]]></string>
-    <string name="secure_mode_disabled_title">Biztonságos üzemmód: letiltva</string>
-    <string name="secure_mode_disabled_description"><![CDATA[További frissítések is telepítésre kerülnek, ha elérhetőek. Ne feledje, hogy minden (rosszindulatú) szoftvercsomag elhelyezheti ezeket a frissítéseket, és átveheti a teljes rendszer hozzáférést. Óvatosság javasolt.]]></string>
+    <string name="button_check_now">Frissítések keresése &#8230;</string>
+    <string name="button_flash_now">Telepítés</string>
+    <string name="button_pause_text">Szüneteltetés</string>
+    <string name="button_resume_text">Folytatás</string>
+    <string name="button_stop_text">Mégse</string>
+    <string name="button_ignore_text">Figyelmen kívül hagy</string>
+    <string name="button_yes_text">Igen</string>
+    <string name="button_no_text">Nem</string>
+    <string name="state_action_a_flash_verify">A-only frissítés ellenőrzése &#8230;</string>
+    <string name="state_action_a_flash_prep">A-only frissítés előkészítése &#8230;</string>
+    <string name="state_action_a_flash_install">Újraindítás a telepítéshez &#8230;</string>
+    <string name="state_action_ab_flash">AB frissítés telepítése &#8230;</string>
+    <string name="state_action_ab_paused">AB frissítés szüneteltetve</string>
+    <string name="state_action_ab_finished">Frissítés telepíte. Indítsa újra a készüléket.</string>
+    <string name="button_reboot_short">Újraindítás</string>
+    <string name="state_action_flash_file_ready">A frissítés készen áll a telepítésre</string>
+    <string name="state_action_flash_file_no_sum">Nem található helyi összegfájl</string>
+    <string name="state_action_flash_file_invalid_sum">Eltérés a helyi összegfájllal</string>
+
+    <!-- Gyorselérési csempe -->
+    <string name="qs_check_title">Frissítések keresése</string>
+    <string name="qs_check_checking">Ellenőrzés...</string>
+    <string name="qs_check_error">Hiba</string>
+    <string name="qs_check_uptodate">Naprakész</string>
+
+    <!-- Általános -->
+    <string name="loading">Betöltés...</string>
+    <string name="current">jelenlegi</string>
+
+    <!-- frissítések 2013/12/18 -tól -->
+
+    <string name="action_secure_mode">Biztonság</string>
+    <string name="secure_mode_enabled_title">Biztonságos mód: bekapcsolva</string>
+    <string name="secure_mode_enabled_description"><![CDATA[A frissítés kriptográfiai aláírását a flashelés előtt ellenőrizzük, hogy megerősítsük a frissítés eredetét, és további frissítések nem kerülnek flashelésre. Ez a mód csak <b>TWRP</b>-vel kompatibilis.]]></string>
+    <string name="secure_mode_disabled_title">Biztonságos mód: kikapcsolva</string>
+    <string name="secure_mode_disabled_description"><![CDATA[További frissítések települhetnek, ha vannak. Vegye figyelembe, hogy bármely (rosszindulatú) szoftvercsomag elhelyezheti ezeket a frissítéseket, ezzel teljes rendszerelérést szerezve. Legyen óvatos.]]></string>
     <string name="recovery_notice_title">Figyelmeztetés</string>
-    <string name="recovery_notice_description_not_secure"><![CDATA[Frissítések telepítése az aktuális módban csak a <b>TWRP</b> recovery által támogatott. <i>Hivatalos</i> <b>CWM</b> kiadások <i>nem</i> támogatottak, bár néhány <i>közösségi kiadású</i> verziója a <b>CWM</b>-nak <i>talán</i> mégis működhet. Kérjük, a folytatás előtt győződjön meg róla, hogy egy kompatibilis recovery-t használ.]]></string>
+    <string name="recovery_notice_description_not_secure"><![CDATA[A frissítések jelenlegi üzemmódban történő telepítése hivatalosan csak a <b>TWRP</b> recoveryk esetén támogatott. A <i>hivatalos</i> <b>CWM</b> recoveryk <i>nem</i> támogatottak, bár egyes <i>közösségi fejlesztésű</i> változatai még <i>talán</i> működhetnek. Kérjük, győződjön meg róla, hogy kompatibilis recoveryt futtat, mielőtt folytatná.]]></string>
+    <string name="recovery_notice_description_reboot"><![CDATA[A készülék most újraindul az AOSP recoverybe, hogy telepítse a frissítést.]]></string>
     <string name="flash_after_update_notice_title">Figyelmeztetés</string>
+    <string name="state_error_not_official_extra" formatted="false">A(z) %s verzióra frissítés nem lehetséges</string>
     <string name="button_build_delta">Letöltés</string>
     <string name="button_stop">Leállítás</string>
-    <string name="state_action_available">Frissítés érhető el.</string>
-    <string name="state_action_build_full">Teljes frissítés lehetséges.</string>
-    <string name="state_error_download">Letöltési probléma.</string>
-    <string name="text_current_version_header_title">Jelenlegi verzió</string>
-    <string name="text_last_checked_header_title">Utoljára ellenőrizve</string>
-    <string name="text_update_version_title">Verziófrissítés</string>
-    <string name="text_download_size_header_title">Letöltés mérete</string>
+    <string name="state_action_available">Frissítés elérhető</string>
+    <string name="state_action_build_full">Teljes frissítés lehetséges</string>
+    <string name="state_error_download">Letöltési probléma</string>
+    <string name="state_error_download_extra_1">Nem sikerült lekérni a legújabb buildet.\nEllenőrizze a hálózati kapcsolatot és a DNS-beállításokat</string>
+    <string name="state_error_download_extra_2">Nem találtunk összegfájlt a szerveren.\nBeszéljen a fejlesztővel</string>
+    <string name="state_error_download_extra_3">@string/state_error_connection</string>
+    <string name="state_error_download_extra_4">A kiszolgáló válasza hibás.\nBeszéljen a fejlesztővel</string>
+    <string name="state_error_download_extra_sha">korrupt fájl</string>
+    <string name="state_error_download_extra_resume">folytatható</string>
+    <string name="text_current_version_header_title">Jelenlegi verzió:</string>
+    <string name="text_last_checked_header_title">Legutóbb ellenőrizve:</string>
+    <string name="text_update_version_title">Frissítés verziója:</string>
+    <string name="text_download_size_header_title">Letöltés mérete:</string>
     <string name="text_download_size_unknown">Ismeretlen</string>
     <string name="auto_download">Ütemezés</string>
     <string name="auto_download_title">Tervezett művelet</string>
     <string name="download_disabled">Kikapcsolva</string>
-    <string name="check_only">Ellenőriz és értesít</string>
-    <string name="download_full">Teljes automatikus letöltése</string>
+    <string name="text_changelog_header_title">Változásnapló:</string>
+    <string name="check_only">Ellenőrzés és értesítés</string>
+    <string name="download_full">Teljes frissítés automatikus letöltése</string>
     <string name="menu_settings">Beállítások</string>
+    <string name="menu_info">Infó</string>
+    <string name="menu_changelog">Változásnapló</string>
     <string name="category_download">Automatikus letöltés</string>
     <string name="charge_only_title">Csak töltőn</string>
-    <string name="charge_only_message">Csak akkor töltse le, ha töltőn van</string>
-    <string name="battery_level_title">Min akkumulátor százalék</string>
-    <string name="notify_title_error">Frissítés ellenőrzési probléma</string>
-    <string name="notify_title_flash">Frissítés flashelésre kész</string>
-    <string name="notify_title_download">Frissítés letöltésre kész</string>
-    <string name="last_checked_never_title_new">Indításhoz nyomja meg: \"Ellenőrzés\"</string>
-    <string name="screen_state_title">Képernyő ki</string>
-    <string name="screen_state_message">Csak kikapcsolt képernyőnél töltse le</string>
+    <string name="charge_only_message">Csak akkor töltsön le frissítést, ha az eszköz töltőn van</string>
+    <string name="battery_level_title">Minimum akkumulátor töltöttség</string>
+    <string name="notify_title_error">Probléma a frissítés ellenőrzése során</string>
+    <string name="notify_title_flash">A frissítés készen áll a telepítésre</string>
+    <string name="notify_title_download">A frissítés készen áll a letöltésre</string>
+    <string name="notify_eta_remaining"  formatted="false">%2d%% · %02d:%02d van hátra</string>
+    <string name="last_checked_never_title_new">Nyomja meg az \'Ellenőrzés\' gombot az indításhoz</string>
+    <string name="screen_state_title">Kikapcsolt képernyő</string>
+    <string name="screen_state_message">Csak akkor töltse le a frissítést, ha a kijelző ki van kapcsolva</string>
     <string name="category_scheduler">Automatikus frissítés</string>
-    <string name="scheduler_mode_title">Ütemezés módja</string>
-    <string name="scheduler_smart">Intelligens</string>
+    <string name="scheduler_mode_title">Ütemezett mód</string>
+    <string name="scheduler_smart">Okos</string>
     <string name="scheduler_daily">Napi</string>
     <string name="scheduler_weekly">Heti</string>
+    <string name="scheduler_hourly">Óránként</string>
     <string name="scheduler_daily_time">Idő</string>
     <string name="scheduler_week_day">Nap</string>
-    <string name="category_flashing">Flashelés</string>
-    <string name="state_error_connection">Nincs adatkapcsolat.</string>
+    <string name="scheduler_hourly_time_title">Ellenőrzés minden</string>
+    <string name="unit_hour">1. órában</string>
+    <string name="unit_hours" formatted="false">%d. órában</string>
+    <string name="scheduler_sleep_enabled_title">Alvás érzékelés</string>
+    <string name="scheduler_sleep_enabled_summary">Megkísérli ellenőrizni a frissítéseket, ha a képernyő 5 órán keresztül folyamatosan ki van kapcsolva</string>
+    <string name="metered_networks_title">Mért hálózatok</string>
+    <string name="metered_networks_message">Automatikus letöltés engedélyezése mért hálózatokon</string>
+    <string name="category_flashing">Telepítés</string>
+    <string name="state_error_connection">Nincs hálózati kapcsolat</string>
     <string name="category_admin">Karbantartás</string>
+    <string name="show_info_title">Infó megjelenítése</string>
+    <string name="show_info_summary">Magyarázat / információs szöveg megjelenítése a főoldalon</string>
+    <string name="force_reflash_title">Erőltetett újratelepítés</string>
+    <string name="force_reflash_summary">A legújabb frissítés újra elérhetővé válik\nMég akkor is, ha nem újabb</string>
+    <string name="force_flash_feedback">Most menjen vissza és töltse le/telepítse\nNyomja meg az ellenőrzést hogy semlegesítse ezt a műveletet</string>
     <string name="clear_files_title">Frissítési fájlok törlése</string>
     <string name="clear_files_summary">Meglévő frissítési fájlok törlése a teljes frissítés letöltésének kényszerítésére</string>
-    <string name="clean_files_feedback" formatted="false">%d fájl törölve. Most nyomjon a \"Frissítések keresése\" gombra</string>
-    <string name="state_error_permissions">Nincs tárhely engedély.</string>
-    <string name="state_error_flash">Zseblámpa beállítása sikertelen. Törölje a /cache-t és próbálja újra.</string>
+    <string name="clean_files_feedback" formatted="false">%d fájl törölve. Most nyomjon a  \'Frissítések keresése\' gombra</string>
+    <string name="state_error_permissions">Nincs tárhely engedély</string>
+    <string name="state_error_flash">Sikertelen felkészülés az A-only telepítésre</string>
+    <string name="progress_status_0">Tétlen &#8230;</string>
+    <string name="progress_status_1">Frissítések ellenőrzése &#8230;</string>
+    <string name="progress_status_2">Új verzió elérhető &#8230;</string>
+    <string name="progress_status_3">Telepítés &#8230;</string>
+    <string name="progress_status_4">Ellenőrzés &#8230;</string>
+    <string name="progress_status_5">Véglegesítés &#8230;</string>
+    <string name="progress_status_6">A frissítés befejeződött. Újraindítás folyamatban &#8230;</string>
+    <string name="progress_status_7">Hibaesemény jelentése &#8230;</string>
+    <string name="progress_status_8">Visszaállás megkísérlése &#8230;</string>
+    <string name="progress_status_9">Kikapcsolva.</string>
+    <string name="ab_perf_mode_title">AB teljesítmény mód</string>
+    <string name="ab_perf_mode_summary_new">A frissítési folyamat prioritásának növelése. Befolyásolhatja a normál használatot, amikor a frissítés folyamatban van.</string>
+    <string name="ab_perf_mode_error">Hiba történt a teljesítmény mód állításakor\nEllenőrizze a logokat</string>
+    <string name="ab_wake_lock_title">AB ébresztőzár</string>
+    <string name="ab_wake_lock_summary">Frissítés telepítésekor tartsa ébren a CPU-t. Gyorsabbá teszi a frissítést akkor is, ha a képernyő ki van kapcsolva.</string>
+    <string name="ab_stream_flashing_title">AB stream telepítés</string>
+    <string name="ab_stream_flashing_summary">Letöltés és telepítés egyszerre\nKapcsolja ki nem megbízható kapcsolat esetén</string>
+    <string name="category_cert">Tanusítvány paraméterek</string>
+    <string name="cert_check_title">Paraméter frissítése</string>
+    <string name="cert_check_summary">Nyomjon rá a paraméterek frissítésének ellenőrzéséhez</string>
+    <string name="cert_status_title">Paraméter státusz</string>
+    <string name="cert_status_version" formatted="false">Telepített verzió: %s\n</string>
+    <string name="cert_status_remote" formatted="false">Szerveren lévő verzió: %s</string>
+    <string name="cert_status_available">Nyomja meg a letöltéshez és telepítéshez</string>
+    <string name="cert_fetch_fail">Nem sikerült lekérni a tanusítványt a szerverről</string>
+    <string name="cert_reboot_notice">Indítsa újra a készüléket a változások érvényesítéséhez</string>
+    <string name="state_error_flash_file_title">Nem sikerült telepíteni a fájlt</string>
+    <string name="select_file_activity_title">ZIP fájl kiválasztása</string>
+    <string name="select_file_activity_error_toast">Nincs elérhető fájlkezelő activity.</string>
+    <string name="button_select_file">Fájl</string>
+    <string name="state_error_ab_flash">Az AB frissítést nem sikerült telepíteni</string>
+    <string name="state_error_flash_file">A frissítést nem sikerült telepíteni</string>
+    <string name="no_sum_dialog_msg">Nem találtunk helyi összegfájlt (.sha256sum).\nKérjük, helyezze a fájlt a flashelni kívánt fájl elérési útvonalára.\nAz összegellenőrzés nélküli folytatáshoz nyomja meg a figyelmen kívül hagyás gombot (veszélyes!)</string>
+    <string name="invalid_sum_dialog_msg">A fájl összegfájlja nem egyezik a helyi összegfájlal.\nEz a fájl valószínűleg sérült, kérjük, töltse le újra.\nA folytatáshoz nyomja meg a figyelmen kívül hagyás gombot.\nVegye figyelembe, hogy a sérült fájl telepítése később valószínűleg úgyis sikertelen lesz.</string>
+    <string name="sure_dialog_msg">A művelet nem vonható vissza.\nBiztosan folytatja?</string>
+    <string name="install_channel_name">Frissítés előrehaladása</string>
+    <string name="update_channel_name">Frissítési értesítések</string>
+    <string name="install_channel_description">Telepítés és letöltés előrehaladása</string>
+    <string name="update_channel_description">Új frissítések elérhetőek</string>
+    <string name="text_update_file_flash_title">Frissítési fájl:</string>
+    <string name="text_info_section">Nyomja meg az Ellenőrzés gombot, hogy megnézze, van-e elérhető frissítés. A frissítés telepítése után a rendszer megkéri, hogy indítsa újra az eszközt. A hagyományos recovery frissítéssel rendelkező készülékek újraindításkor a telepítési folyamat végrehajtásához a recoverybe lépnek. Ha a készülék támogatja a zökkenőmentes A/B frissítéseket, az újraindítás aktiválja a frissítést.</string>
+    <string name="error_ab_1">Általános hiba</string>
+    <string name="error_ab_4">Fájlrendszer másolási hiba</string>
+    <string name="error_ab_5">Telepítés utáni hiba</string>
+    <string name="error_ab_6">A payload nem megfelelő\nEz a fájl valószínűleg egy másik eszközhöz tartozik</string>
+    <string name="error_ab_7">Hiba az eszköz megnyitása során</string>
+    <string name="error_ab_8">Hiba a kernel megnyitása során</string>
+    <string name="error_ab_9">Payload letöltési hiba\nEllenőrizze az internetkapcsolatát</string>
+    <string name="error_ab_10">A payload sérült (hash eltérés)\nTöltse le újra a fájlt</string>
+    <string name="error_ab_11">A payload sérült (méret eltérés)\nTöltse le újra a fájlt</string>
+    <string name="error_ab_12">A payload aláírása nem egyezik</string>
+    <string name="error_ab_51">A jelenlegi verzió újabb, mint a frissítés</string>
+    <string name="error_ab_52">A frissítés már telepítve van, újraindítás szükséges</string>
+    <!-- A fenti karakterlánc ROSSZ. Visszakövetési okokból tartjuk meg. Ez a hiba csak akkor érhető el, ha az applyPayload-ot SWITCH_SLOT_ON_REBOOT=0-val hívjuk -->
+    <string name="error_ab_60">Nincs elég szabad tárhely</string>
+    <string name="error_ab_61">Az eszköz korruptálódott.\nTiszta telepítés javasolt recoveryn keresztül</string>
+    <!-- nem UpdateEngine hibák -->
+    <string name="error_ab_unknown">Ismeretlen hiba\nNézze meg a logokat</string>
+    <string name="error_ab_99">A frissítési fájl nem található\nKérjük ellenőrizze és válassza ki újra</string>
+    <string name="error_ab_98">A frissítő nem áll készen.\nIndítsa újra a készüléket és próbálja újra</string>
+    <string name="error_ab_97">A frissítési fájl sérült.\nTöltse le újra a fájlt</string>
+    <string name="error_ab_96">Nem AB frissítési fájl\nTöltse le újra a fájlt</string>
+    <string name="error_flash_1">Eltérő aláírás\nKérünk, használjon hivatalos aláírt buildet</string>
+    <string name="error_flash_2">Biztosítsa, hogy a tárhely engedélyek helyesen meg legyenek adva</string>
+    <string name="error_flash_file_1">Hiba a fájl elérési útjának feldolgozásakor</string>
+    <string name="error_flash_file_2">A fájl már nem létezik</string>
+    <string name="error_flash_file_3">A fájl nem zip fájl</string>
 </resources>
