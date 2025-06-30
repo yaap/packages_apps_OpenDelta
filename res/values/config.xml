@@ -11,19 +11,16 @@
 	<string name="property_device">ro.yaap.device</string>
 
 	<!-- %s is expanded to property_version value. .zip, .delta, .update, .sign extensions added when needed -->
-	<string name="filename_base">YAAP-%s</string>
+	<string name="filename_base" formatted="false">YAAP-%s</string>
 
 	<!-- Path deltas are stored, relative to sdcard root -->
 	<string name="path_base">OpenDelta</string>
 
-	<!-- URL base to find .update and .sign files, %s is expanded to property_device value. Path is suffixed by (expanded) filename_base -->
-	<string name="url_base_update">https://mirror.codebucket.de/yaap/%s/</string>
-
 	<!-- URL base to find the full zip files, %s is replaced to be property_device value. -->
-	<string name="url_base_full">https://mirror.codebucket.de/yaap/%s/</string>
+	<string name="url_base_full" formatted="false">https://mirror.codebucket.de/yaap/%s/</string>
 
 	<!-- URL base to find the full zip sha256sum files, %s is replaced to be property_device value. -->
-	<string name="url_base_full_sum">https://mirror.codebucket.de/yaap/%s/</string>
+	<string name="url_base_full_sum" formatted="false">@string/url_base_full</string>
 
 	<!-- URL base suffix - Used only for download -->
 	<string name="url_base_suffix"></string>
