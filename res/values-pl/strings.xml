@@ -51,6 +51,17 @@
 
     <!-- aktualizacje od 2013/12/18 -->
 
+    <string name="scheduler_hourly_time_title">Sprawdzaj co</string>
+    <string name="cert_check_title">Aktualizacja certyfikatów</string>
+    <string name="cert_check_summary">Naciśnij aby sprawdzić zaktualizacje certyfikatów</string>
+    <string name="cert_status_title">Status certifikatów</string>
+    <string name="cert_status_version" formatted="false">Zainstalowana wersja: %s\n</string>
+    <string name="cert_status_remote" formatted="false">Wersja najnowsza: %s</string>
+    <string name="cert_status_available">Wciśnij aby pobrać i zainstalować</string>
+    <string name="cert_fetch_fail">Nie można pobrać certyfikatu z serwera</string>
+    <string name="cert_reboot_notice">Zrestartuj aby zastosować</string>
+    <string name="unit_hour">1 godzine</string>
+    <string name="unit_hours" formatted="false">%d godzin</string>
     <string name="action_secure_mode">Bezpieczny</string>
     <string name="secure_mode_enabled_title">Tryb bezpieczny: włączony</string>
     <string name="secure_mode_enabled_description"><![CDATA[Przed flashowaniem zostanie zweryfikowany kryptograficzny podpis aktualizacji w celu potwierdzenia jej pochodzenia, a dodatkowe aktualizacje nie będą flashowane. Tryb ten jest zgodny tylko z <b>TWRP</b>.]]></string>
