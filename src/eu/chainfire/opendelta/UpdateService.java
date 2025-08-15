@@ -135,7 +135,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
 
     private static final String PAYLOAD_PROP_OFFSET = "offset=";
     private static final String PAYLOAD_PROP_SIZE = "FILE_SIZE=";
-    private static final String UNCRYPT_PATH = "/data/yaap-ota/ota.zip.uncrypt";
+    private static final String UNCRYPT_PATH = "/data/ota_package/ota.zip.uncrypt";
 
     public static final String PREF_READY_FILENAME_NAME = "ready_filename";
     public static final String PREF_LATEST_CHANGELOG = "latest_changelog";
@@ -1237,7 +1237,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                                 100f, 100L, 100L, fileName, null);
 
                         // preparing
-                        for (File file : new File("/data/yaap-ota/").listFiles()) {
+                        for (File file : new File(uncryptFile.getParent()).listFiles()) {
                             // empty the OTA folder
                             if (file.exists() && !file.isDirectory()) {
                                 file.delete();
