@@ -34,7 +34,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -75,6 +74,8 @@ public class MainActivity extends BaseActivity {
     private static final int PERMISSIONS_REQUEST_MANAGE_EXTERNAL_STORAGE = 0;
     private static final int PERMISSIONS_REQUEST_NOTIFICATION = 1;
     private static final int ACTIVITY_SELECT_FLASH_FILE = 2;
+
+    private static final String MEDIA_PROVIDER_EXTERNAL = "com.android.externalstorage.documents";
 
     // states that flash button should be visible for
     private static final HashSet<Integer> FLASH_STATES = new HashSet<>(Arrays.asList(
@@ -821,64 +822,59 @@ public class MainActivity extends BaseActivity {
         super.onDestroy();
     }
 
-    private boolean isExternalStorageDocument(Uri uri) {
-        return "com.android.externalstorage.documents".equals(uri.getAuthority());
-    }
-
-    private boolean isDownloadsDocument(Uri uri) {
-        return "com.android.providers.downloads.documents".equals(uri.getAuthority());
+    private static boolean isExternalStorageDocument(Uri uri) {
+        return MEDIA_PROVIDER_EXTERNAL.equals(uri.getAuthority());
     }
 
     private String getPath(Uri uri) {
         final String extPath = Environment.getExternalStorageDirectory().toString();
-        final String uriPath = uri.getPath();
+        String uriPath = uri.getPath();
+
         if (uriPath != null) {
             final int startIndex = uriPath.indexOf(extPath);
             if (startIndex != -1) {
+                Logger.d("Uri contains path: %s", uriPath);
                 return uriPath.substring(startIndex);
             }
+        } else {
+            uriPath = "";
         }
-        if (DocumentsContract.isDocumentUri(this, uri)) {
-            final String docId = DocumentsContract.getDocumentId(uri);
-            // ExternalStorageProvider
-            if (isExternalStorageDocument(uri)) {
-                Logger.d("isExternalStorageDocument: %s", uri.getPath());
-                final String[] split = docId.split(":");
-                final String type = split[0];
 
-                if ("primary".equalsIgnoreCase(type)) {
-                    return extPath + "/" + split[1];
-                }
-                if ("home".equalsIgnoreCase(type)) {
-                    return Environment.getExternalStoragePublicDirectory(
-                            Environment.DIRECTORY_DOCUMENTS) + "/" + split[1];
-                }
-                // assume externally user mounted storage
-                return "/storage/" + type + "/" + split[1];
-            }
-            // DownloadsProvider
-            else if (isDownloadsDocument(uri)) {
-                Logger.d("isDownloadsDocument: %s", uri.getPath());
-                String fileName = getFileNameColumn(uri);
-                if (fileName != null) {
-                    return Environment.getExternalStoragePublicDirectory(
-                            Environment.DIRECTORY_DOWNLOADS) + "/" + fileName;
-                }
-            }
+        if (!DocumentsContract.isDocumentUri(this, uri)) {
+            Logger.d("Uri is not a DocumentUri: %s", uriPath);
+            Toast.makeText(this,
+                    getResources().getString(R.string.select_file_full_path_error_toast),
+                    Toast.LENGTH_LONG).show();
+            return null;
         }
-        return null;
-    }
 
-    private String getFileNameColumn(Uri uri) {
-        try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
-            if (cursor.moveToNext()) {
-                int index = cursor.getColumnIndexOrThrow("_display_name");
-                return cursor.getString(index);
-            }
-        } catch (Exception e) {
-            Logger.d("Failed to resolve file name", e);
+        // DownloadsProvider and others
+        // We can't support this, impossible to reliably get full path
+        if (!isExternalStorageDocument(uri)) {
+            Logger.d("Uri is not an ExternalStorageDocument: %s", uriPath);
+            Toast.makeText(this,
+                    getResources().getString(R.string.select_file_full_path_error_toast),
+                    Toast.LENGTH_LONG).show();
+            return null;
         }
-        return null;
+
+        // ExternalStorageProvider
+        Logger.d("isExternalStorageDocument: %s", uriPath);
+        final String docId = DocumentsContract.getDocumentId(uri);
+        final String[] split = docId.split(":");
+        final String type = split[0];
+
+        // assume externally user mounted storage
+        String fullPath = "/storage/" + type + "/" + split[1];
+        if ("primary".equalsIgnoreCase(type)) {
+            fullPath = extPath + "/" + split[1];
+        } else if ("home".equalsIgnoreCase(type)) {
+            fullPath = Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOCUMENTS) + "/" + split[1];
+        }
+
+        Logger.d("Full path found: %s", fullPath);
+        return fullPath;
     }
 
     private String tryGetResourceString(String str) {
