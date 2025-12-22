@@ -40,9 +40,10 @@ import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.Preference.OnPreferenceChangeListener;
 import androidx.preference.PreferenceCategory;
-import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 import androidx.preference.SeekBarPreference;
+
+import com.android.settingslib.widget.SettingsBasePreferenceFragment;
 
 import java.io.File;
 import java.text.DateFormatSymbols;
@@ -56,7 +57,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class SettingsFragment extends PreferenceFragmentCompat implements
+public class SettingsFragment extends SettingsBasePreferenceFragment implements
         OnPreferenceChangeListener, OnTimeSetListener {
     private static final String KEY_NETWORKS = "metered_networks_config";
     private static final String KEY_AB_PERF_MODE = "ab_perf_mode";
