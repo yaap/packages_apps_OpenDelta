@@ -59,17 +59,19 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <ProgressBar
+        <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/progress_bar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:progressTint="?android:attr/colorAccent"
-            android:indeterminateTint="?android:attr/colorAccent"
+            android:theme="@style/Theme.Material3.DynamicColors.DayNight"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
-            android:max="1"
-            android:progress="0" />
+            android:indeterminate="true"
+            app:trackCornerRadius="8dp"
+            app:trackThickness="16dp"
+            app:indicatorColor="?attr/colorAccent"
+            app:trackColor="?attr/colorSurfaceVariant"
+            style="@style/SettingsLibProgressBarStyle.Linear.Expressive" />
 
     </LinearLayout>
 

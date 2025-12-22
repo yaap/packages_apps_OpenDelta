@@ -52,7 +52,6 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,6 +59,8 @@ import android.widget.Toolbar;
 
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission;
 import androidx.preference.PreferenceManager;
+
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import eu.chainfire.opendelta.State.StateInt;
 
@@ -149,7 +150,7 @@ public class MainActivity extends BaseActivity {
     private @StateInt int mState;
     private TextView mTitle;
     private TextView mSub;
-    private ProgressBar mProgress;
+    private LinearProgressIndicator mProgress;
     private Button mCheckBtn;
     private Button mFlashBtn;
     private TextView mUpdateVersion;
