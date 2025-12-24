@@ -192,6 +192,10 @@ class ABUpdate {
         bindCallbacks();
     }
 
+    public boolean getIsStream() {
+        return mIsStream;
+    }
+
     static synchronized boolean isInstallingUpdate(UpdateService us) {
         return us.getPrefs()
                 .getBoolean(PREFS_IS_INSTALLING_UPDATE, false);

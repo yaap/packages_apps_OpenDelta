@@ -69,6 +69,7 @@ import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -127,7 +128,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             "eu.chainfire.opendelta.action.ACTION_CLEAR_INSTALL_RUNNING";
     public static final String ACTION_FLASH_FILE = "eu.chainfire.opendelta.action.FLASH_FILE";
 
-    private static final String INSTALL_NOTIFICATION_CHANNEL_ID = "eu.chainfire.opendelta.notification.install";
+    private static final String INSTALL_NOTIFICATION_CHANNEL_ID = "eu.chainfire.opendelta.notification.install_new";
     private static final String UPDATE_NOTIFICATION_CHANNEL_ID = "eu.chainfire.opendelta.notification.update";
     public static final int NOTIFICATION_BUSY = 1;
     public static final int NOTIFICATION_UPDATE = 2;
@@ -672,7 +673,8 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
                 .setContentIntent(getNotificationIntent(false))
-                .setContentText(filename);
+                .setContentText(filename)
+                .setRequestPromotedOngoing(true);
         setFlashNotificationProgress(0, 0);
     }
 
@@ -703,7 +705,8 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 .setShowWhen(false)
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
-                .setContentIntent(getNotificationIntent(false));
+                .setContentIntent(getNotificationIntent(false))
+                .setRequestPromotedOngoing(true);
         for (Notification.Action action : actions)
             mDownloadNotificationBuilder.addAction(action);
     }
@@ -1012,14 +1015,32 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
 
     private synchronized void setFlashNotificationProgress(int percent, int sec) {
         // max progress is 100%
+        final boolean isStream = ABUpdate.getInstance(this).getIsStream();
+        Notification.ProgressStyle style = new Notification.ProgressStyle()
+                .setStyledByProgress(true)
+                .setProgress(percent)
+                .setProgressSegments(Arrays.asList(
+                    new Notification.ProgressStyle.Segment(isStream ? 60 : 40),
+                    new Notification.ProgressStyle.Segment(5),
+                    new Notification.ProgressStyle.Segment(isStream ? 35 : 55)
+                ));
         mFlashNotificationBuilder.setProgress(100, percent, false);
+        mFlashNotificationBuilder.setStyle(style);
         String sub = "0%";
+        String subShort = "";
         if (percent > 0) {
             sub = String.format(Locale.ENGLISH,
-                                    getString(R.string.notify_eta_remaining),
-                                    percent, sec / 60, sec % 60);
+                    getString(R.string.notify_eta_remaining), percent, sec / 60, sec % 60);
+            if (sec >= 60) {
+                subShort = String.format(Locale.ENGLISH,
+                        getString(R.string.notify_eta_remaining_short), sec / 60, sec % 60);
+            } else {
+                subShort = String.format(Locale.ENGLISH,
+                        getString(R.string.notify_eta_remaining_short_sec), sec);
+            }
         }
         mFlashNotificationBuilder.setSubText(sub);
+        mFlashNotificationBuilder.setShortCriticalText(subShort);
         mNotificationManager.notify(
                     NOTIFICATION_UPDATE, mFlashNotificationBuilder.build());
     }
@@ -1027,7 +1048,11 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     public synchronized void setDownloadNotificationProgress(float progress, long current, long total, long ms) {
         // max progress is 100%
         int percent = Math.round(progress);
+        Notification.ProgressStyle style = new Notification.ProgressStyle()
+                .setStyledByProgress(true)
+                .setProgress(percent);
         mDownloadNotificationBuilder.setProgress(100, percent, false);
+        mDownloadNotificationBuilder.setStyle(style);
         // long --> int overflows FTL (progress.setXXX)
         boolean progressInK = false;
         if (total > 1024L * 1024L * 1024L) {
@@ -1036,6 +1061,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             total /= 1024L;
         }
         String sub = "";
+        String subShort = "";
         if ((ms > 500) && (current > 0) && (total > 0)) {
             float kibps = ((float) current / 1024f)
                     / ((float) ms / 1000f);
@@ -1044,17 +1070,25 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             int sec = (int) (((((float) total / (float) current) * (float) ms) - ms) / 1000f);
             if (kibps < 1024) {
                 sub = String.format(Locale.ENGLISH,
-                        "%2d%% · %.0f KiB/s · %02d:%02d",
+                        getString(R.string.notify_download_remaining_kib),
                         percent, kibps, sec / 60, sec % 60);
             } else {
                 sub = String.format(Locale.ENGLISH,
-                        "%2d%% · %.0f MiB/s · %02d:%02d",
+                        getString(R.string.notify_download_remaining_mib),
                         percent, kibps / 1024f, sec / 60, sec % 60);
+            }
+            if (sec >= 60) {
+                subShort = String.format(Locale.ENGLISH,
+                        getString(R.string.notify_eta_remaining_short), sec / 60, sec % 60);
+            } else {
+                subShort = String.format(Locale.ENGLISH,
+                        getString(R.string.notify_eta_remaining_short_sec), sec);
             }
         }
         if (sub.isEmpty()) sub = String.format(Locale.ENGLISH,
                 "%2d%%", percent);
         mDownloadNotificationBuilder.setSubText(sub);
+        mDownloadNotificationBuilder.setShortCriticalText(subShort);
         mNotificationManager.notify(
                 NOTIFICATION_BUSY, mDownloadNotificationBuilder.build());
     }
@@ -1754,7 +1788,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     private void createInstallNotificationChannel() {
         final CharSequence name = getString(R.string.install_channel_name);
         final String description = getString(R.string.install_channel_description);
-        final int importance = NotificationManager.IMPORTANCE_LOW;
+        final int importance = NotificationManager.IMPORTANCE_HIGH;
         final NotificationChannel channel = new NotificationChannel(
                 INSTALL_NOTIFICATION_CHANNEL_ID, name, importance);
         channel.setDescription(description);
