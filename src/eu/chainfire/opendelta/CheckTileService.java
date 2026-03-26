@@ -31,6 +31,7 @@ import android.service.quicksettings.TileService;
 public class CheckTileService extends TileService {
 
     private UpdateService mService;
+    private boolean mBound = false;
 
     private boolean mChecking = false;
     private boolean mIsDoneCheck = false;
@@ -48,6 +49,9 @@ public class CheckTileService extends TileService {
             } else if (state.isAvailableState()) {
                 mIsAvailable = true;
                 mIsError = false;
+            } else {
+                mIsAvailable = false;
+                mIsError = false;
             }
             mChecking = false;
             mIsDoneCheck = true;
@@ -61,10 +65,11 @@ public class CheckTileService extends TileService {
             Logger.d("Service connected");
             UpdateService.LocalBinder binder = (UpdateService.LocalBinder) iBinder;
             mService = binder.getService();
+            mBound = true;
             mService.addCheckForUpdateListener(mListener);
             if (mIsCheckPending) {
                 mIsCheckPending = false;
-                onClick();
+                onWantUpdateCheck();
                 return;
             }
             refreshState();
@@ -73,13 +78,17 @@ public class CheckTileService extends TileService {
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
             Logger.d("Service disconnected");
-            mService.removeCheckForUpdateListener(mListener);
+            if (mService != null) {
+                mService.removeCheckForUpdateListener(mListener);
+            }
             mService = null;
+            mBound = false;
         }
     };
 
     @Override
     public void onDestroy() {
+        cleanupServiceConnection();
         super.onDestroy();
     }
 
@@ -91,30 +100,26 @@ public class CheckTileService extends TileService {
     }
 
     @Override
-    public void onTileRemoved() {
-        super.onTileRemoved();
-    }
-
-    @Override
     public synchronized void onStartListening() {
         super.onStartListening();
         refreshState();
 
-        if (mService == null) {
+        if (mService == null && !mBound) {
             // bind the update service - calls refreshState() when connected
             Intent i = new Intent(this, UpdateService.class);
             startService(i);
-            bindService(i, mConnection, Context.BIND_AUTO_CREATE);
+            mBound = bindService(i, mConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
     @Override
     public synchronized void onStopListening() {
-        unbindService(mConnection);
+        cleanupServiceConnection();
         mChecking = false;
         mIsDoneCheck = false;
         mIsAvailable = false;
         mIsError = false;
+        mIsCheckPending = false;
         super.onStopListening();
     }
 
@@ -131,26 +136,51 @@ public class CheckTileService extends TileService {
         if (mService == null) {
             // bind it now. check right after
             mIsCheckPending = true;
-            mChecking = false;
             Intent i = new Intent(this, UpdateService.class);
             startService(i);
-            bindService(i, mConnection, Context.BIND_AUTO_CREATE);
+            if (!mBound) {
+                mBound = bindService(i, mConnection, Context.BIND_AUTO_CREATE);
+            }
+            if (!mBound) {
+                mIsCheckPending = false;
+                mIsError = true;
+                mIsDoneCheck = true;
+                mChecking = false;
+                refreshState();
+            }
             return;
         }
-        if (!mService.onWantUpdateCheck(true)) {
-            // no network connection - show as error
-            // we won't receive a callback if reached here
-            mIsError = true;
-            mIsDoneCheck = true;
-            mChecking = false;
-            refreshState();
+        onWantUpdateCheck();
+    }
+
+    private void onWantUpdateCheck() {
+        if (mService != null && mService.onWantUpdateCheck(true))
+            return;
+        // no network connection - show as error
+        // we won't receive a callback if reached here
+        mIsError = true;
+        mIsDoneCheck = true;
+        mChecking = false;
+        refreshState();
+    }
+
+    private void cleanupServiceConnection() {
+        if (mService != null) {
+            mService.removeCheckForUpdateListener(mListener);
+            mService = null;
+        }
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
         }
     }
 
     private synchronized void refreshState() {
         final boolean isActive = mChecking || mIsDoneCheck;
         String subtitle = "";
-        if (mIsAvailable) {
+        if (mChecking) {
+            subtitle = getString(R.string.qs_check_checking);
+        } else if (mIsAvailable) {
             subtitle = getString(R.string.state_action_available);
         } else if (mIsError) {
             subtitle = getString(R.string.qs_check_error);
