@@ -154,7 +154,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
     // we only snooze until a new build
     private static final String PREF_SNOOZE_UPDATE_NAME = "last_snooze_update";
 
-    public static final String PREF_PENDING_REBOOT = "pending_reboot";
+    public static final String PREF_LAST_BOOT_COUNT = "last_boot_count";
 
     private static final String PREF_CURRENT_AB_FILENAME_NAME = "current_ab_filename";
     public static final String PREF_CURRENT_FILENAME_NAME = "current_filename";
@@ -355,11 +355,12 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                     checkForUpdates(true, PREF_AUTO_DOWNLOAD_FULL, true);
                 break;
             case ACTION_DOWNLOAD_STOP:
-                final boolean pendingReboot = mPrefs.getBoolean(PREF_PENDING_REBOOT, false);
+                final boolean pendingReboot = checkIsBootPending();
                 if (pendingReboot || ABUpdate.isInstallingUpdate(this)) {
                     ABUpdate.getInstance(this).stop(pendingReboot);
                     mNotificationManager.cancelAll();
                     clearState();
+                    mPrefs.edit().remove(PREF_LAST_BOOT_COUNT).commit();
                     autoState(false);
                     break;
                 }
@@ -998,9 +999,16 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
 
     protected void onUpdateCompleted(int status, int errorCode) {
         Logger.d("onUpdateCompleted status = " + status);
+        final int lastCount = mPrefs.getInt(PREF_LAST_BOOT_COUNT, -1);
+        final int currentCount = mConfig.getCurrentBootCount();
+        if (lastCount == currentCount - 1) {
+            // we probably got this at the post boot callback - ignoring it
+            Logger.d("onUpdateCompleted ignoring post boot callback");
+            return;
+        }
         mNotificationManager.cancel(NOTIFICATION_UPDATE);
         if (status == UpdateEngine.ErrorCodeConstants.SUCCESS) {
-            mPrefs.edit().putBoolean(PREF_PENDING_REBOOT, true).commit();
+            mPrefs.edit().putInt(PREF_LAST_BOOT_COUNT, mConfig.getCurrentBootCount()).commit();
             String flashFilename = mPrefs.getString(PREF_READY_FILENAME_NAME, null);
             if (flashFilename != null) {
                 deleteOldFlashFile(flashFilename);
@@ -1011,6 +1019,12 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         } else {
             mState.update(State.ERROR_AB_FLASH, errorCode);
         }
+    }
+
+    private boolean checkIsBootPending() {
+        final int lastCount = mPrefs.getInt(PREF_LAST_BOOT_COUNT, -1);
+        final int currentCount = mConfig.getCurrentBootCount();
+        return currentCount <= lastCount;
     }
 
     private synchronized void setFlashNotificationProgress(int percent, int sec) {
@@ -1115,6 +1129,9 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
 
         // Clear the Download size to hide while flashing
         mPrefs.edit().putLong(PREF_DOWNLOAD_SIZE, -1).commit();
+
+        // Set boot count back to default for callback handling
+        mPrefs.edit().remove(PREF_LAST_BOOT_COUNT).commit();
 
         String _filename = null;
         if (isStream) {
@@ -1679,11 +1696,11 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         if (mState.isProgressState() || mState.isErrorState())
             return false;
         boolean finished =
-                mPrefs.getBoolean(PREF_PENDING_REBOOT, false) ||
+                checkIsBootPending() ||
                 ABUpdate.isInstallingUpdate(this) && !ABUpdate.isSuspended(this);
         if (finished) {
             @StateInt int pState = mState.getState();
-            mPrefs.edit().putBoolean(PREF_PENDING_REBOOT, false).commit();
+            mPrefs.edit().putInt(PREF_LAST_BOOT_COUNT, mConfig.getCurrentBootCount()).commit();
             ABUpdate.setInstallingUpdate(false, this);
             ABUpdate.getInstance(this).pokeStatus();
             // wait up to 5s for a callback. if there's none nothing changed

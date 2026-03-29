@@ -27,6 +27,7 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.os.Environment;
 import android.os.SystemProperties;
+import android.provider.Settings;
 
 import androidx.preference.PreferenceManager;
 
@@ -71,6 +72,7 @@ public class Config {
     private final String url_cert_json;
     private final String android_version;
     private final long build_time;
+    private final int boot_count;
 
     private Config(Context context) {
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -111,6 +113,8 @@ public class Config {
         filename_base_prefix = String.format(Locale.ENGLISH,
                 res.getString(R.string.filename_base), android_version);
         build_time = Build.TIME / 1000;
+        boot_count = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.BOOT_COUNT, 0);
 
         Logger.d("property_version: %s", property_version);
         Logger.d("property_device: %s", property_device);
@@ -126,6 +130,7 @@ public class Config {
         Logger.d("url_cert_json: %s", url_cert_json);
         Logger.d("use_twrp: %d", use_twrp ? 1 : 0);
         Logger.d("build_time: %d", build_time);
+        Logger.d("boot_count: %d", boot_count);
     }
 
     public String getFilenameBase() {
@@ -199,6 +204,10 @@ public class Config {
 
     public void setSchedulerSleepEnabled(boolean enable) {
         prefs.edit().putBoolean(SettingsActivity.PREF_SCHEDULER_SLEEP, enable).commit();
+    }
+
+    public int getCurrentBootCount() {
+        return boot_count;
     }
 
     public List<String> getFlashAfterUpdateZIPs() {

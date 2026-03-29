@@ -33,7 +33,6 @@ public class BootCompleteReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit().remove(UpdateService.PREF_PENDING_REBOOT).commit();
         UserManager um = UserManager.get(context);
         if (um.isAdminUser()) {
             UpdateService.startClearRunningInstall(context);
