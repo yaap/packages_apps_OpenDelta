@@ -117,7 +117,7 @@ public class SettingsFragment extends SettingsBasePreferenceFragment implements
         mBatteryLevel.setSummary(mBatteryLevel.getEntry());
 
         if (!Config.isABDevice() || !mConfig.getABPerfModeSupport()) {
-            getPreferenceScreen().removePreference(findPreference(KEY_AB_PERF_MODE));
+            getPreferenceScreen().removePreferenceRecursively(KEY_AB_PERF_MODE);
         } else {
             mABPerfMode = findPreference(KEY_AB_PERF_MODE);
             mABPerfMode.setChecked(mConfig.getABPerfModeCurrent());
