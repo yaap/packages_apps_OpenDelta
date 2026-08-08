@@ -422,8 +422,8 @@ public class MainActivity extends BaseActivity {
                     mSub.setSelected(true); // allow scrolling
                     mSub2.setText(pgen.sub2);
                     mProgressPercent.setText(pgen.progressPercent);
-                    mProgressCurrent = Math.round(pgen.localCurrent);
-                    mProgressMax = Math.round(pgen.localTotal);
+                    mProgressCurrent = Math.round((float) pgen.localCurrent);
+                    mProgressMax = Math.round((float) pgen.localTotal);
                     handleProgressBar();
                     return;
                 }
@@ -475,8 +475,8 @@ public class MainActivity extends BaseActivity {
                 mDownloadSizeHeader.setVisibility(hideSize ? View.GONE : View.VISIBLE);
                 mDownloadSizeSpacer.setVisibility(hideSize ? View.GONE : View.VISIBLE);
 
-                mProgressCurrent = Math.round(isIntermediate ? 1L : localCurrent);
-                mProgressMax = Math.round(localTotal);
+                mProgressCurrent = Math.round((float) (isIntermediate ? 1L : localCurrent));
+                mProgressMax = Math.round((float) localTotal);
                 handleProgressBar();
 
                 mCheckBtn.setEnabled(mPermOk && !isProgress);

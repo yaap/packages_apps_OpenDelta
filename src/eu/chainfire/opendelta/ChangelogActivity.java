@@ -131,7 +131,7 @@ public class ChangelogActivity extends BaseActivity {
                             reached = buildTime <= currBuildTime;
                             reachedI = i;
                         }
-                        final boolean isCurrent = buildTime == currBuildTime || reached && i == reachedI;
+                        final boolean isCurrent = buildTime.equals(currBuildTime) || (reached && i == reachedI);
                         addTitle(dates.get(i), isCurrent);
                         addText(logs.get(i));
                     }
@@ -152,7 +152,7 @@ public class ChangelogActivity extends BaseActivity {
                                 reached = buildTime <= currBuildTime;
                                 reachedI = i;
                             }
-                            final boolean isCurrent = buildTime == currBuildTime || reached && i == reachedI;
+                            final boolean isCurrent = buildTime.equals(currBuildTime) || (reached && i == reachedI);
                             addTitle(dates.get(cachedIndex), isCurrent);
                             addText(logs.get(cachedIndex));
                             continue;
@@ -174,7 +174,7 @@ public class ChangelogActivity extends BaseActivity {
                             reached = buildTime <= currBuildTime;
                             reachedI = i;
                         }
-                        final boolean isCurrent = buildTime == currBuildTime || reached && i == reachedI;
+                        final boolean isCurrent = buildTime.equals(currBuildTime) || (reached && i == reachedI);
                         final String fileDateStr = fileDate.toString();
                         addTitle(fileDateStr, isCurrent);
                         addText(currChangelog);

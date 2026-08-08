@@ -637,7 +637,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         final boolean readyToFlash = flashFilename != null;
         if (readyToFlash) {
             flashFilename = new File(flashFilename).getName();
-            flashFilename.substring(0, flashFilename.lastIndexOf('.'));
+            flashFilename = flashFilename.substring(0, flashFilename.lastIndexOf('.'));
             editor.putString(PREF_SNOOZE_UPDATE_NAME, flashFilename);
             editor.putLong(PREF_LAST_SNOOZE_TIME_NAME, System.currentTimeMillis());
         } else if (available) {
@@ -717,7 +717,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
         final boolean hasName = flashFilename != null && !flashFilename.isEmpty();
         if (hasName) {
             flashFilename = new File(flashFilename).getName();
-            flashFilename.substring(0, flashFilename.lastIndexOf('.'));
+            flashFilename = flashFilename.substring(0, flashFilename.lastIndexOf('.'));
         }
 
         Notification.Builder builder =
@@ -1843,7 +1843,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
             Long savedTime = mPrefs.getLong(PREF_SAVED_CHANGELOG_TIME, Long.MAX_VALUE);
             if (!savedSHA.equals("") && clSHA.equals(savedSHA) &&
                 !savedVer.equals("") && savedVer.equals(mConfig.getVersion()) &&
-                savedTime == currBuildTime) {
+                savedTime.equals(currBuildTime)) {
                 // we have a relevant cached changelog
                 // show that instead of fetching again
                 return mPrefs.getString(PREF_SAVED_CHANGELOG, "");
