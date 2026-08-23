@@ -389,7 +389,7 @@ public class MainActivity extends BaseActivity {
                 String progressPercent = "";
                 String updateVersion = getVersionForState(state, filename, isProgressOngoing, isFile);
                 String updateVersionTitle = getVersionTitleForState(state);
-                String extraText = getExtraForState(state, localCurrent, localTotal, errorCode);
+                String extraText = getExtraForState(state, localCurrent, localTotal, errorCode, filename);
                 String downloadSizeText = getSizeForState(state, isProgressOngoing);
                 String lastCheckedText = lastCheckedSaved != UpdateService.PREF_LAST_CHECK_TIME_DEFAULT
                         ? formatLastChecked(lastCheckedSaved)
@@ -567,17 +567,14 @@ public class MainActivity extends BaseActivity {
     }
 
     private String getExtraForState(@StateInt int state, long localCurrent,
-            long localTotal, int errorCode) {
+            long localTotal, int errorCode, String filename) {
         switch (state) {
             case State.ERROR_DISK_SPACE:
                 localCurrent /= 1024L * 1024L;
                 localTotal /= 1024L * 1024L;
                 return getString(R.string.error_disk_space_sub, localCurrent, localTotal);
             case State.ERROR_UNOFFICIAL:
-                String[] versionParts = mConfig.getVersion().split("-");
-                String versionType = "";
-                try { versionType = versionParts[0]; } catch (Exception ignored) {}
-                return getString(R.string.state_error_not_official_extra, versionType);
+                return getString(R.string.state_error_not_official_extra, filename);
             case State.ERROR_DOWNLOAD:
                 return tryGetResourceString("state_error_download_extra_" + errorCode);
             case State.ERROR_DOWNLOAD_SHA:
