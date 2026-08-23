@@ -1519,13 +1519,6 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                             }
                             Logger.d("parsed from json:");
                             Logger.d("fileName= " + fileName);
-                            if (!isMatchingImage(fileName)) {
-                                String[] parts = fileName.split("-", 3);
-                                String ver = mConfig.getAndroidVersion();
-                                if (parts.length > 1) ver = parts[1];
-                                mState.update(State.ERROR_UNOFFICIAL, ver);
-                                return;
-                            }
                             latestBuild = fileName;
                             if (urlOverride != null && !urlOverride.equals(""))
                                 Logger.d("url= " + urlOverride);
@@ -1599,6 +1592,15 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                 mPrefs.edit().putString(PREF_LATEST_FULL_NAME,
                         updateAvailable ? latestBuild : null).commit();
                 if (!updateAvailable) return;
+
+                // downgrade version extra safeguard
+                if (!isMatchingImage(latestBuild)) {
+                    String[] parts = latestBuild.split("-", 3);
+                    String ver = mConfig.getAndroidVersion();
+                    if (parts.length > 1) ver = parts[1];
+                    mState.update(State.ERROR_UNOFFICIAL, ver);
+                    return;
+                }
 
                 if (payloadProps != null) {
                     mPrefs.edit().putStringSet(PREF_LATEST_PAYLOAD_PROPS,
