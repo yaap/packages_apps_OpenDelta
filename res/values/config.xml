@@ -17,7 +17,7 @@
 	<string name="path_base">OpenDelta</string>
 
 	<!-- URL base to find the full zip files, %s is replaced to be property_device value. -->
-	<string name="url_base_full" formatted="false">https://mirror.codebucket.de/yaap/%s/</string>
+	<string name="url_base_full" formatted="false">https://downloads.yaaprom.org/%s/</string>
 
 	<!-- URL base to find the full zip sha256sum files, %s is replaced to be property_device value. -->
 	<string name="url_base_full_sum" formatted="false">@string/url_base_full</string>

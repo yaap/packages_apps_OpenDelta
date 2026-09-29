@@ -1526,7 +1526,7 @@ public class UpdateService extends Service implements OnSharedPreferenceChangeLi
                                 Logger.d("sha256 url= " + sumOverride);
                             }
                             if (buildDateTime != null) {
-                                Logger.d("datetime= " + sumOverride);
+                                Logger.d("datetime= " + buildDateTime);
                             }
                             if (payloadProps != null) {
                                 for (String str : payloadProps) {
